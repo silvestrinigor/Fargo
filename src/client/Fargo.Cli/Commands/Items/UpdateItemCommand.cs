@@ -49,7 +49,7 @@ public sealed class UpdateItemCommand : Command
         Add(addPartitionsOption);
         Add(removePartitionsOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
             var container = parseResult.GetValue(containerOption);
@@ -65,7 +65,7 @@ public sealed class UpdateItemCommand : Command
                 PartitionsToRemove = removePartitions?.Select(g => (Guid?)g).ToList()
             };
 
-            await client.Items[guid].PatchAsync(dto);
+            await client.Items[guid].PatchAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("Item updated.", ("GUID", guid.ToString()));
 

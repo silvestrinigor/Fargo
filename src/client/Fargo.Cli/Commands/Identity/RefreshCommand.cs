@@ -16,9 +16,9 @@ public sealed class RefreshCommand : Command
               fargo identity refresh
             """)
     {
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
-            var tokens = await tokenStore.GetAsync();
+            var tokens = await tokenStore.GetAsync(cancellationToken);
 
             if (tokens is null)
             {
@@ -29,7 +29,7 @@ public sealed class RefreshCommand : Command
             var result = await client.Identity.Refresh.PostAsync(new IdentityRefreshDto
             {
                 RefreshToken = tokens.RefreshToken
-            });
+            }, cancellationToken: cancellationToken);
 
             if (result is null)
             {
@@ -40,7 +40,7 @@ public sealed class RefreshCommand : Command
             await tokenStore.SetAsync(new AuthTokens(
                 result.AccessToken!,
                 result.RefreshToken!,
-                result.ExpiresAt!.Value));
+                result.ExpiresAt!.Value), cancellationToken);
 
             StatusWriter.Success(
                 "Token refreshed.",

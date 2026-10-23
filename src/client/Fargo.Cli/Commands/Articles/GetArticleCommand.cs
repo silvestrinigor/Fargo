@@ -21,11 +21,11 @@ public sealed class GetArticleCommand : Command
 
         Add(guidArgument);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            var article = await client.Articles[guid.ToString()].GetAsync();
+            var article = await client.Articles[guid.ToString()].GetAsync(cancellationToken: cancellationToken);
 
             if (article is null)
             {

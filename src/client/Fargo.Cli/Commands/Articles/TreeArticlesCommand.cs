@@ -42,9 +42,9 @@ public sealed class TreeArticlesCommand : Command
               fargo article tree
             """)
     {
-        SetAction(async _ =>
+        SetAction(async (_, cancellationToken) =>
         {
-            var articles = (await client.Articles.GetAsync())?.Items ?? [];
+            var articles = (await client.Articles.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
 
             // Index articles by GUID so source-article links can be resolved.
             var articlesByGuid = new Dictionary<Guid, ArticleDto>();

@@ -40,7 +40,7 @@ public sealed class ChangePasswordCommand : Command
         Add(currentPasswordOption);
         Add(newPasswordOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var nameid = parseResult.GetValue(nameidOption)!;
             var currentPassword = parseResult.GetValue(currentPasswordOption);
@@ -67,7 +67,7 @@ public sealed class ChangePasswordCommand : Command
                 Nameid = nameid,
                 CurrentPassword = currentPassword,
                 NewPassword = newPassword
-            });
+            }, cancellationToken: cancellationToken);
 
             StatusWriter.Success("Password changed successfully.", ("User", nameid));
 

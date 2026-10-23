@@ -47,7 +47,7 @@ public sealed class UpdateUserCommand : Command
         Add(lastNameOption);
         Add(isActiveOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
             var username = parseResult.GetValue(usernameOption);
@@ -77,7 +77,7 @@ public sealed class UpdateUserCommand : Command
                 dto.IsActive = isActive;
             }
 
-            await client.Users[guid].PutAsync(dto);
+            await client.Users[guid].PutAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("User updated.", ("GUID", guid.ToString()));
 

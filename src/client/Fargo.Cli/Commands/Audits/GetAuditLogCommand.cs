@@ -25,11 +25,11 @@ public sealed class GetAuditLogCommand : Command
 
         Add(guidArgument);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            var auditLog = await client.AuditLogs[guid].GetAsync();
+            var auditLog = await client.AuditLogs[guid].GetAsync(cancellationToken: cancellationToken);
 
             if (auditLog is null)
             {

@@ -38,6 +38,22 @@ serviceCollection.AddSingleton<ITokenStore>(
 
 var serviceProvider = serviceCollection.BuildServiceProvider();
 
+// Cancellation source for the work that runs before parseResult.InvokeAsync
+// (ad-hoc login and the up-front token refresh). InvokeAsync installs its own
+// Ctrl+C handler for the command itself; this one covers the earlier network
+// calls so they are cancellable too.
+using var startupCancellation = new CancellationTokenSource();
+
+ConsoleCancelEventHandler startupCancelHandler = (_, eventArgs) =>
+{
+    // Request cancellation and let the in-flight operation unwind gracefully
+    // instead of terminating the process immediately.
+    eventArgs.Cancel = true;
+    startupCancellation.Cancel();
+};
+
+Console.CancelKeyPress += startupCancelHandler;
+
 var globalOptions = new GlobalOptions();
 
 // Resolve --verbose first so error diagnostics can be enabled even for failures
@@ -96,7 +112,12 @@ if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password)
         {
             Nameid = username,
             Password = password
-        });
+        }, cancellationToken: startupCancellation.Token);
+    }
+    catch (OperationCanceledException)
+    {
+        Console.Error.WriteLine("Cancelled.");
+        return 130;
     }
     catch (Exception ex) when (ApiErrorReporter.CanReport(ex))
     {
@@ -129,13 +150,23 @@ else if (!skipAuthentication && !IsIdentityCommand(parseResult))
 
     try
     {
-        await TokenRefresher.EnsureValidAsync(client, tokenStore);
+        await TokenRefresher.EnsureValidAsync(client, tokenStore, startupCancellation.Token);
+    }
+    catch (OperationCanceledException)
+    {
+        Console.Error.WriteLine("Cancelled.");
+        return 130;
     }
     catch (Exception ex) when (ApiErrorReporter.CanReport(ex))
     {
         return ApiErrorReporter.Report(ex);
     }
 }
+
+// Hand Ctrl+C handling over to System.CommandLine for the command invocation
+// itself: it installs its own handler and surfaces the token to the command's
+// action. Detach the startup handler so the two do not both fire.
+Console.CancelKeyPress -= startupCancelHandler;
 
 // Disable the built-in exception handler so API errors (401/403, etc.) can be
 // rendered as concise messages instead of stack traces.
@@ -147,6 +178,13 @@ var invocationConfiguration = new InvocationConfiguration
 try
 {
     return await parseResult.InvokeAsync(invocationConfiguration);
+}
+catch (OperationCanceledException)
+{
+    // The command was cancelled (Ctrl+C). Report it concisely with the
+    // conventional 130 exit code rather than a stack trace.
+    Console.Error.WriteLine("Cancelled.");
+    return 130;
 }
 catch (Exception ex) when (ApiErrorReporter.CanReport(ex))
 {

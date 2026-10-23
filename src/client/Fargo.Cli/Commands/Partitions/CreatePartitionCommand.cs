@@ -34,7 +34,7 @@ public sealed class CreatePartitionCommand : Command
         Add(nameOption);
         Add(parentOption);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var name = parseResult.GetValue(nameOption)!;
             var parent = parseResult.GetValue(parentOption);
@@ -45,7 +45,7 @@ public sealed class CreatePartitionCommand : Command
                 ParentPartitionGuid = parent
             };
 
-            var guid = await client.Partitions.PostAsync(dto);
+            var guid = await client.Partitions.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "Partition created.",

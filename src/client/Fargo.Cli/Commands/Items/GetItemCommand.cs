@@ -21,11 +21,11 @@ public sealed class GetItemCommand : Command
 
         Add(guidArgument);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            var item = await client.Items[guid].GetAsync();
+            var item = await client.Items[guid].GetAsync(cancellationToken: cancellationToken);
 
             if (item is null)
             {

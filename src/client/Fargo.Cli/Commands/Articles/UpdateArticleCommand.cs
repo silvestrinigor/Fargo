@@ -31,7 +31,7 @@ public sealed class UpdateArticleCommand : Command
         Add(guidArgument);
         options.AddTo(this);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
@@ -46,7 +46,7 @@ public sealed class UpdateArticleCommand : Command
                 return 1;
             }
 
-            await client.Articles[guid.ToString()].PatchAsync(dto);
+            await client.Articles[guid.ToString()].PatchAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("Article updated.", ("GUID", guid.ToString()));
 

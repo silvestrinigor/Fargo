@@ -21,11 +21,11 @@ public sealed class DeleteUserCommand : Command
 
         Add(guidArgument);
 
-        SetAction(async parseResult =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            await client.Users[guid].DeleteAsync();
+            await client.Users[guid].DeleteAsync(cancellationToken: cancellationToken);
 
             StatusWriter.Success("User deleted.", ("GUID", guid.ToString()));
 
