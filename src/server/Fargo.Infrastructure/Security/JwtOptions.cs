@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Fargo.Infrastructure.Security;
 
 /// <summary>
@@ -25,7 +27,13 @@ public sealed class JwtOptions
     /// This key is used to create the cryptographic signature of the token.
     /// It should be kept secure and must be sufficiently long to ensure
     /// strong security for the chosen signing algorithm.
+    ///
+    /// For HMAC-SHA256 the key must be at least 256 bits (32 bytes); a minimum
+    /// of 32 characters is enforced so a missing or weak key fails validation at
+    /// startup rather than producing insecure tokens.
     /// </remarks>
+    [Required(AllowEmptyStrings = false)]
+    [MinLength(32, ErrorMessage = "Jwt:Key must be at least 32 characters (256 bits) for HMAC-SHA256.")]
     public required string Key { get; init; }
 
     /// <summary>
@@ -36,6 +44,7 @@ public sealed class JwtOptions
     /// and is typically validated by the resource server when
     /// processing authenticated requests.
     /// </remarks>
+    [Required(AllowEmptyStrings = false)]
     public required string Issuer { get; init; }
 
     /// <summary>
@@ -46,6 +55,7 @@ public sealed class JwtOptions
     /// APIs validating the token should ensure the audience matches
     /// their expected value.
     /// </remarks>
+    [Required(AllowEmptyStrings = false)]
     public required string Audience { get; init; }
 
     /// <summary>

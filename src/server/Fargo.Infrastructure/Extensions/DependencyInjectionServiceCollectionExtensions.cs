@@ -53,6 +53,12 @@ public static class DependencyInjectionServiceCollectionExtensions
 
         private IServiceCollection AddFargoJwtOptions(IConfiguration configuration)
         {
+            // ValidateDataAnnotations enforces the Key/Issuer/Audience rules on
+            // first resolution at runtime (during authentication setup at
+            // startup), so a missing or weak secret fails fast. ValidateOnStart
+            // is intentionally not used: it would force validation during
+            // build-time OpenAPI generation and design-time tooling, which run
+            // without the Development/secret configuration loaded.
             services
             .AddOptions<JwtOptions>()
             .Bind(configuration.GetSection(JwtOptions.SectionName))

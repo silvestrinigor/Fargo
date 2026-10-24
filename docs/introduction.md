@@ -44,6 +44,7 @@ through a REST API and a command-line client.
 ## Where to go next
 
 - [Getting Started](getting-started.md) — run Fargo locally.
+- [Concepts](concepts/overview.md) — the system model explained: articles and items, partitions, users and groups, permissions, and audit logs.
 - [Server](server/overview.md) — how the server is built: architecture, domain model, persistence, and security.
 - [CLI](cli/overview.md) — the command-line client.
 - [Web API Overview](web-api/overview.md) — the REST API surface.

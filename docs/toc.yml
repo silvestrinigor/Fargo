@@ -2,6 +2,21 @@
   href: introduction.md
 - name: Getting Started
   href: getting-started.md
+- name: Concepts
+  href: concepts/overview.md
+  items:
+    - name: Overview
+      href: concepts/overview.md
+    - name: Articles and Items
+      href: concepts/articles-and-items.md
+    - name: Partitions
+      href: concepts/partitions.md
+    - name: Users and User Groups
+      href: concepts/users-and-groups.md
+    - name: Permissions
+      href: concepts/permissions.md
+    - name: Audit Logs
+      href: concepts/audit-logs.md
 - name: Server
   href: server/overview.md
   items:

@@ -111,19 +111,25 @@ public static class FargoServiceDefaultsExtensions
 
     public static WebApplication MapFargoDefaultEndpoints(this WebApplication app)
     {
-        // Adding health checks endpoints to applications in non-development environments has security implications.
-        // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
-        if (app.Environment.IsDevelopment())
-        {
-            // All health checks must pass for app to be considered ready to accept traffic after starting
-            app.MapHealthChecks(HealthEndpointPath);
+        // Health endpoints are mapped in every environment so that orchestrators
+        // (Kubernetes liveness/readiness), load balancers, and the Aspire host's
+        // configured /health probe work in production as well as development.
+        //
+        // These endpoints return only the overall status (Healthy/Unhealthy) with
+        // no detailed component payload, so they do not leak internal diagnostics.
+        // If exposed publicly behind a proxy, restrict them at the ingress/network
+        // layer or move them to a separate internal port.
 
-            // Only health checks tagged with the "live" tag must pass for app to be considered alive
-            app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("live")
-            });
-        }
+        // Readiness: all checks (including database connectivity) must pass before
+        // the app is considered ready to accept traffic.
+        app.MapHealthChecks(HealthEndpointPath);
+
+        // Liveness: only checks tagged "live" must pass; keeps the probe cheap and
+        // avoids restarting a pod for a transient dependency outage.
+        app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+        {
+            Predicate = r => r.Tags.Contains("live")
+        });
 
         return app;
     }
