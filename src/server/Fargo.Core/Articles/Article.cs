@@ -42,7 +42,10 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// <summary>
     /// Gets the type of the article.
     /// </summary>
-    public ArticleType ArticleType { get; private set; }
+    public ArticleType ArticleType { get; private init; } = ArticleType.Default;
+
+    // TODO: Doc
+    public ArticleTrackingMode TrackingMode { get; private init; } = ArticleTrackingMode.Entity;
 
     /// <summary>
     /// Gets or sets the shelf life of the article.
@@ -180,12 +183,13 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// <returns>
     /// A new <see cref="Article"/> instance.
     /// </returns>
-    public static Article NewArticle(Name name)
+    public static Article NewArticle(Name name, ArticleTrackingMode trackingMode = ArticleTrackingMode.Entity)
     {
         var article = new Article
         {
             Name = name,
-            ArticleType = ArticleType.Default
+            ArticleType = ArticleType.Default,
+            TrackingMode = trackingMode,
         };
 
         return article;
@@ -199,11 +203,12 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// <returns>
     /// A new <see cref="Article"/> instance.
     /// </returns>
-    public static Article NewArticleVariation(Name name, Article fromArticle)
+    public static Article NewArticleVariation(Name name, Article fromArticle, ArticleTrackingMode trackingMode = ArticleTrackingMode.Entity)
     {
         var articleVariation = new Article(fromArticle)
         {
             Name = name,
+            TrackingMode = trackingMode
         };
 
         return articleVariation;
@@ -218,11 +223,12 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// <returns>
     /// A new <see cref="Article"/> instance.
     /// </returns>
-    public static Article NewArticlePack(Name name, Article fromArticle, Scalar quantity)
+    public static Article NewArticlePack(Name name, Article fromArticle, Scalar quantity, ArticleTrackingMode trackingMode = ArticleTrackingMode.Entity)
     {
         var articlePack = new Article(fromArticle, quantity)
         {
             Name = name,
+            TrackingMode = trackingMode,
         };
 
         return articlePack;
@@ -236,11 +242,12 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// <returns>
     /// A new <see cref="Article"/> instance.
     /// </returns>
-    public static Article NewArticleKit(Name name, IReadOnlyCollection<(Article, Scalar)> kitComponents)
+    public static Article NewArticleKit(Name name, IReadOnlyCollection<(Article, Scalar)> kitComponents, ArticleTrackingMode trackingMode = ArticleTrackingMode.Entity)
     {
         var articleKit = new Article(kitComponents)
         {
-            Name = name
+            Name = name,
+            TrackingMode = trackingMode
         };
 
         return articleKit;

@@ -4,12 +4,12 @@ using Fargo.Core.Barcodes;
 using Fargo.Core.Identity;
 using Fargo.Core.Informations;
 using Fargo.Core.Items;
+using Fargo.Core.Items.Events;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Configurations;
-using Fargo.Infrastructure.Entities;
 using Fargo.Infrastructure.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
@@ -23,7 +23,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     public DbSet<Item> Items { get; set; }
 
-    public DbSet<ItemParentContainerHistoryPostgresTemporal> ItemParentContainerHistories { get; set; }
+    public DbSet<ItemMovimentEvent> ItemMovimentEvents { get; set; }
 
     public DbSet<User> Users { get; set; }
 
@@ -127,6 +127,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new PartitionConfiguration())
         .ApplyConfiguration(new AuditLogConfiguration())
         .ApplyConfiguration(new AuditLogPartitionConfiguration())
-        .ApplyConfiguration(new AuthenticationAttemptConfiguration());
+        .ApplyConfiguration(new AuthenticationAttemptConfiguration())
+        .ApplyConfiguration(new ItemEventConfiguration())
+        .ApplyConfiguration(new ItemMovimentEventConfiguration());
     }
 }

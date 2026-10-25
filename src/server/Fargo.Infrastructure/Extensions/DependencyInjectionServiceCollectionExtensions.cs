@@ -10,6 +10,7 @@ using Fargo.Core.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Identity;
 using Fargo.Core.Items;
+using Fargo.Core.Items.Events;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 using Fargo.Core.UserGroups;
@@ -87,6 +88,7 @@ public static class DependencyInjectionServiceCollectionExtensions
         .AddScoped<IArticleQueryRepository, ArticleRepository>()
         .AddScoped<IItemRepository, ItemRepository>()
         .AddScoped<IItemQueryRepository, ItemRepository>()
+        .AddScoped<IItemEventRepository, ItemEventRepository>()
         .AddScoped<IUserRepository, UserRepository>()
         .AddScoped<IUserQueryRepository, UserRepository>()
         .AddScoped<IUserGroupRepository, UserGroupRepository>()

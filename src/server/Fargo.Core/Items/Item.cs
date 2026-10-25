@@ -127,6 +127,8 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </remarks>
     private Item(Article article)
     {
+        // TODO: Throw if article tracking type is not Entity.
+
         Article = article;
         ArticleGuid = article.Guid;
 
@@ -277,7 +279,6 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
 
         partitions.Add(new ItemPartition(this, partition));
     }
-
 
     /// <summary>
     /// Removes the association between the item and the specified partition.
