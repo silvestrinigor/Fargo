@@ -1,7 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Application.Items;
 using Fargo.Application.Tests.Common;
-using Fargo.Core.Actors;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

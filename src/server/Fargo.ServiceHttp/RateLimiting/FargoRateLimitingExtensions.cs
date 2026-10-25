@@ -1,6 +1,6 @@
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Threading.RateLimiting;
-using Microsoft.Extensions.Options;
 
 namespace Fargo.ServiceHttp.RateLimiting;
 
