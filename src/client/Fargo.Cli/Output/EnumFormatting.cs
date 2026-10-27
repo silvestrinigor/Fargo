@@ -51,7 +51,8 @@ public enum EntityType
 /// Action performed in the system. Mirrors the server's ActionType enum.
 /// </summary>
 public enum ActionType
-{    CreateArticle = 1,
+{
+    CreateArticle = 1,
     DeleteArticle = 2,
     EditArticle = 3,
     CreateItem = 4,

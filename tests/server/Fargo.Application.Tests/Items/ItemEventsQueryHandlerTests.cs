@@ -2,7 +2,6 @@ using Fargo.Application.Common;
 using Fargo.Application.Items;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Actors;
-using Fargo.Core.Common;
 using Fargo.Core.Items.Events;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Logging;

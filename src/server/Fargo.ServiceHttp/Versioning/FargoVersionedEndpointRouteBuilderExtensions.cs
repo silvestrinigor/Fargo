@@ -1,5 +1,4 @@
 using Asp.Versioning;
-using Asp.Versioning.Builder;
 
 namespace Fargo.ServiceHttp.Versioning;
 

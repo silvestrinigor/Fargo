@@ -9,7 +9,8 @@ namespace Fargo.Mcp.Tools;
 /// generated DTOs' additional-data bags and nested value objects.
 /// </summary>
 public static class ToolResults
-{    public static ArticleSummary ToSummary(this ArticleDto dto) => new(
+{
+    public static ArticleSummary ToSummary(this ArticleDto dto) => new(
         dto.Guid,
         dto.Name,
         dto.Description,
