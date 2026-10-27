@@ -33,5 +33,10 @@ public enum EntityType
     /// <summary>
     /// Audit log entity.
     /// </summary>
-    AuditLog = 5
+    AuditLog = 5,
+
+    /// <summary>
+    /// Item event entity.
+    /// </summary>
+    ItemEvent = 6
 }

@@ -24,4 +24,10 @@ public enum AuditLogType
     /// The entity was deleted.
     /// </summary>
     EntityDeleted = 3,
+
+    /// <summary>
+    /// An event was recorded against an event-tracked entity, such as a
+    /// movement of a quantity of an event-tracked article.
+    /// </summary>
+    ItemEventRecorded = 4,
 }

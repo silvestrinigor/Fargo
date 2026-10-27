@@ -84,9 +84,11 @@ public sealed class MoveItemEventCommandHandler(
             create.Quantity,
             create.OccuredAt);
 
-        // The movement changes the stock of the article, so the audit is recorded
-        // against the article, which carries the partition scope.
-        var audit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityUpdated);
+        // The movement is recorded as an event against the article. The audit is
+        // recorded against the item event itself, while inheriting the partition
+        // scope from the article the event concerns.
+        var audit = AuditLog.CreateAuditLog(
+            actor, movimentEvent.ItemEvent, article, AuditLogType.ItemEventRecorded);
 
         audit.Metadata.AddArticleGuid(article.Guid);
         audit.Metadata.AddPackQuantity(create.Quantity);

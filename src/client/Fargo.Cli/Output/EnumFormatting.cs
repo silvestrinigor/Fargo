@@ -30,6 +30,7 @@ public enum AuditLogType
     EntityCreated = 1,
     EntityUpdated = 2,
     EntityDeleted = 3,
+    ItemEventRecorded = 4,
 }
 
 /// <summary>
@@ -43,6 +44,7 @@ public enum EntityType
     UserGroup = 3,
     Partition = 4,
     AuditLog = 5,
+    ItemEvent = 6,
 }
 
 /// <summary>

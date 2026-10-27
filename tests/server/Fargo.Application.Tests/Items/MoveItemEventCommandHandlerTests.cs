@@ -5,6 +5,7 @@ using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Common;
+using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 using Fargo.Core.Items;
 using Fargo.Core.Items.Events;
@@ -57,7 +58,9 @@ public class MoveItemEventCommandHandlerTests
             e => e.ItemEvent.ArticleGuid == article.Guid
                  && e.Quantity.Amount == 50
                  && e.ToItemContainerGuid == container.Guid));
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
+        auditLogRepository.Received(1).Add(Arg.Is<AuditLog>(
+            a => a.AuditLogType == AuditLogType.ItemEventRecorded
+                 && a.EntityType == EntityType.ItemEvent));
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 

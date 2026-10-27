@@ -116,6 +116,34 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     }
 
     /// <summary>
+    /// Creates an audit log for an action performed on an entity whose partition
+    /// access is derived from a separate partitioned entity.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the audited entity.</typeparam>
+    /// <param name="actor">The actor that performed the action.</param>
+    /// <param name="entity">The entity affected by the action.</param>
+    /// <param name="partitionSource">
+    /// The partitioned entity from which the audit log inherits its partition
+    /// access.
+    /// </param>
+    /// <param name="auditLogType">The type of change that occurred.</param>
+    /// <returns>
+    /// A new audit log recorded against <paramref name="entity"/> and associated
+    /// with the partitions of <paramref name="partitionSource"/>.
+    /// </returns>
+    /// <remarks>
+    /// This overload is used when the audited entity is not itself partitioned
+    /// but its access must follow another entity's partition scope. For example,
+    /// an item event is recorded against an event-tracked article but has no
+    /// partitions of its own, so the audit log inherits the article's partitions.
+    /// </remarks>
+    public static AuditLog CreateAuditLog<TEntity>(Actor actor, TEntity entity, IPartitionedGuidsReadOnly partitionSource, AuditLogType auditLogType)
+        where TEntity : IEntity, IEntityTyped
+    {
+        return new AuditLog(actor.Guid, actor.ActorType, entity.Guid, entity.GetEntityType(), auditLogType, partitionSource.PartitionGuids);
+    }
+
+    /// <summary>
     /// Creates an audit log for an action performed on a partition.
     /// </summary>
     /// <param name="actor">The actor that performed the action.</param>
