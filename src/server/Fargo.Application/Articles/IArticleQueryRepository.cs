@@ -105,6 +105,41 @@ public interface IArticleQueryRepository
     );
 
     /// <summary>
+    /// Retrieves the event-based inventory of an event-tracked article, computed
+    /// as the net of signed movement quantities (received minus dispatched).
+    /// </summary>
+    /// <remarks>
+    /// The net quantity is derived from <c>item_moviment_events</c>. When
+    /// containers are provided, only movements into/out of those containers (and,
+    /// when descendants are included, their nested containers) are considered;
+    /// otherwise every movement of the article is considered, and the result is
+    /// the quantity received from outside minus the quantity dispatched to the
+    /// outside. When <paramref name="at"/> is provided, only events at or before
+    /// that instant are considered.
+    /// </remarks>
+    /// <param name="articleGuid">The event-tracked article to evaluate.</param>
+    /// <param name="insideItemContainerGuids">
+    /// When provided, restricts the evaluation to these containers.
+    /// </param>
+    /// <param name="includeDescendents">
+    /// When <see langword="true"/>, includes descendant containers. Ignored when
+    /// no containers are provided.
+    /// </param>
+    /// <param name="at">
+    /// The instant, in UTC, at which the inventory is evaluated. When
+    /// <see langword="null"/>, the current inventory is returned.
+    /// </param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The net quantity of the article.</returns>
+    Task<ArticleInventoryDto> GetEventInventoryInfoByGuidAsync(
+        Guid articleGuid,
+        IReadOnlyCollection<Guid>? insideItemContainerGuids = null,
+        bool includeDescendents = true,
+        DateTimeOffset? at = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Retrieves multiple article information records.
     /// </summary>
     /// <param name="pagination">
@@ -142,6 +177,26 @@ public interface IArticleQueryRepository
     /// otherwise false.
     /// </returns>
     Task<bool> ExistByGuidAsync(
+        Guid articleGuid,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Retrieves the tracking mode of an article, or <see langword="null"/> when
+    /// the article does not exist within the specified partitions.
+    /// </summary>
+    /// <param name="articleGuid">The article to inspect.</param>
+    /// <param name="childOfAnyOfThesePartitions">
+    /// Filters articles inside the provided partitions. When null, no partition
+    /// filtering is applied.
+    /// </param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>
+    /// The article's <see cref="Fargo.Core.Articles.ArticleTrackingMode"/>, or
+    /// <see langword="null"/> when the article was not found.
+    /// </returns>
+    Task<Fargo.Core.Articles.ArticleTrackingMode?> GetTrackingModeByGuidAsync(
         Guid articleGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default

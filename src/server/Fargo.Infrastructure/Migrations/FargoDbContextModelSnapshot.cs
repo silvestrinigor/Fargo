@@ -404,6 +404,10 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("from_no_container");
 
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("quantity");
+
                     b.Property<Guid?>("ToItemContainerGuid")
                         .HasColumnType("uuid")
                         .HasColumnName("to_item_container_guid");

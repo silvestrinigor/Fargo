@@ -343,6 +343,94 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     private sealed record InventoryRow(Guid ArticleGuid, int TotalCount);
 
+    public async Task<IReadOnlyCollection<ItemContainerInventoryDto>> GetEventInventoryInfoByGuidAsync(
+        Guid itemContainerGuid,
+        IReadOnlyCollection<Guid>? articleGuids = null,
+        bool includeDescendents = true,
+        DateTimeOffset? at = null,
+        CancellationToken cancellationToken = default)
+    {
+        // Event-based inventory per article for a container.
+        //
+        // The container set is the container plus (when descendants are included)
+        // every descendant container in the live item tree. Only container-typed
+        // items are recursed into, mirroring the entity-based descendant walk.
+        //
+        // For each event-tracked article, the net quantity is the sum of
+        // quantities whose destination container is in the set minus the sum of
+        // quantities whose origin container is in the set. A single transfer
+        // between two containers that are both in the set nets to zero, which is
+        // correct for the aggregate container view. Only non-zero nets are
+        // returned.
+        var articleFilter = articleGuids is { Count: > 0 }
+            ? articleGuids.ToArray()
+            : null;
+
+        // A null upper bound means "all events"; coalesce to the maximum instant
+        // so the single SQL statement can treat both cases uniformly.
+        var upperBound = at ?? DateTimeOffset.MaxValue;
+
+        FormattableString query = $"""
+        WITH RECURSIVE container_set AS
+        (
+            SELECT {itemContainerGuid} AS guid
+
+            UNION ALL
+
+            SELECT child.guid
+            FROM items AS child
+            INNER JOIN container_set AS parent
+                ON child.parent_item_container_guid = parent.guid
+            INNER JOIN articles AS child_article
+                ON child_article.guid = child.article_guid
+            WHERE {includeDescendents}
+              AND child_article.article_type = {(int)ArticleType.Container}
+        )
+        SELECT
+            event.article_guid AS article_guid,
+            COALESCE(SUM(
+                CASE
+                    WHEN moviment.to_item_container_guid IN (SELECT guid FROM container_set) THEN moviment.quantity
+                    ELSE 0
+                END
+                -
+                CASE
+                    WHEN moviment.from_item_container_guid IN (SELECT guid FROM container_set) THEN moviment.quantity
+                    ELSE 0
+                END
+            ), 0) AS total_count
+        FROM item_moviment_events AS moviment
+        INNER JOIN item_events AS event
+            ON event.guid = moviment.item_event_guid
+        WHERE event.occured_at <= {upperBound}
+          AND (
+                moviment.to_item_container_guid IN (SELECT guid FROM container_set)
+             OR moviment.from_item_container_guid IN (SELECT guid FROM container_set)
+          )
+          AND ({articleFilter}::uuid[] IS NULL OR event.article_guid = ANY({articleFilter}::uuid[]))
+        GROUP BY event.article_guid
+        HAVING COALESCE(SUM(
+            CASE
+                WHEN moviment.to_item_container_guid IN (SELECT guid FROM container_set) THEN moviment.quantity
+                ELSE 0
+            END
+            -
+            CASE
+                WHEN moviment.from_item_container_guid IN (SELECT guid FROM container_set) THEN moviment.quantity
+                ELSE 0
+            END
+        ), 0) <> 0;
+        """;
+
+        var rows = await context.Database
+            .SqlQuery<EventInventoryRow>(query)
+            .ToListAsync(cancellationToken);
+
+        return [.. rows.Select(r => new ItemContainerInventoryDto(r.ArticleGuid, r.TotalCount))];
+    }
+
+    private sealed record EventInventoryRow(Guid ArticleGuid, double TotalCount);
+
     public Task<bool> ExistByGuidAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(

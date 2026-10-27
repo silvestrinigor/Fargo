@@ -88,6 +88,40 @@ public interface IItemQueryRepository
         CancellationToken cancellationToken = default
     );
 
+    /// <summary>
+    /// Gets the event-based inventory contained in a container, computed as the
+    /// net of signed movement quantities per event-tracked article.
+    /// </summary>
+    /// <remarks>
+    /// For each event-tracked article, the net quantity is the sum of quantities
+    /// moved into the container set minus the sum of quantities moved out of it,
+    /// derived from <c>item_moviment_events</c>. When <paramref name="at"/> is
+    /// provided, only events that occurred at or before that instant are
+    /// considered; otherwise all events are considered. Only non-zero net
+    /// quantities are returned. Entity-tracked articles are not included.
+    /// </remarks>
+    /// <param name="itemContainerGuid">The container item to inspect.</param>
+    /// <param name="articleGuids">
+    /// When provided, restricts the inventory to these articles.
+    /// </param>
+    /// <param name="includeDescendents">
+    /// When <see langword="true"/>, counts quantities in descendant containers as
+    /// well as the container itself.
+    /// </param>
+    /// <param name="at">
+    /// The instant, in UTC, at which the inventory is evaluated. When
+    /// <see langword="null"/>, the current inventory is returned.
+    /// </param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The per-article net quantities contained in the container.</returns>
+    Task<IReadOnlyCollection<ItemContainerInventoryDto>> GetEventInventoryInfoByGuidAsync(
+        Guid itemContainerGuid,
+        IReadOnlyCollection<Guid>? articleGuids = null,
+        bool includeDescendents = true,
+        DateTimeOffset? at = null,
+        CancellationToken cancellationToken = default
+    );
+
     Task<bool> ExistByGuidAsync(
         Guid itemGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

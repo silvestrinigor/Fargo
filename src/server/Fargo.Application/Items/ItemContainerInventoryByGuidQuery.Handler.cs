@@ -54,9 +54,39 @@ public sealed class ItemContainerInventoryByGuidQueryHandler(
                 [query.ItemContainerGuid], query.ArticleGuids, cancellationToken);
         }
 
+        // Event-tracked articles have no item rows, so their stock in the
+        // container is computed separately from the movement-event stream and
+        // merged with the entity-tracked counts. The event query honours the same
+        // container, descendant, article-filter and point-in-time options.
+        var eventInventory = await itemQueryRepository.GetEventInventoryInfoByGuidAsync(
+            query.ItemContainerGuid,
+            query.ArticleGuids,
+            query.IncludeDescendents,
+            query.At,
+            cancellationToken);
+
+        inventory = MergeByArticle(inventory, eventInventory);
+
         logger.QueryInventoryByGuidCompleted(
             query.ItemContainerGuid, currentActor.Guid, currentActor.ActorType, inventory is not null);
 
         return inventory;
+    }
+
+    // An article is tracked either as entity or as event, so the two result sets
+    // normally have disjoint article keys; the merge sums defensively by article
+    // in case both ever contribute, and drops any entry that nets to zero.
+    private static IReadOnlyCollection<ItemContainerInventoryDto> MergeByArticle(
+        IReadOnlyCollection<ItemContainerInventoryDto> entityInventory,
+        IReadOnlyCollection<ItemContainerInventoryDto> eventInventory)
+    {
+        return
+        [
+            .. entityInventory
+                .Concat(eventInventory)
+                .GroupBy(dto => dto.ArticleGuid)
+                .Select(group => new ItemContainerInventoryDto(group.Key, group.Sum(dto => dto.TotalCount)))
+                .Where(dto => dto.TotalCount != 0)
+        ];
     }
 }

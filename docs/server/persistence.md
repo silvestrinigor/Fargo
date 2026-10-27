@@ -19,6 +19,22 @@ Entity-to-table mapping is defined by `IEntityTypeConfiguration<T>` classes unde
 `Fargo.Infrastructure/Configurations` (one per entity), keeping mapping out of
 the domain types.
 
+### Event-tracking tables
+
+Event-tracked articles record their stock as movement events rather than
+individual item rows (see [Articles and Items](../concepts/articles-and-items.md)):
+
+- **`item_events`** — one row per event, with the article it concerns, the event
+  type, and an `occured_at` timestamp. Indexed by `article_guid`, by `occured_at`,
+  and by both together to support point-in-time inventory.
+- **`item_moviment_events`** — the movement payload, keyed one-to-one by the
+  event GUID. It stores the moved `quantity` (a `Scalar` persisted as
+  `double precision`) and the optional origin/destination container references
+  (`from_item_container_guid` / `to_item_container_guid`, each with a
+  `*_no_container` flag preserving whether the movement originally had no
+  container on that side, since the FK is set to `NULL` if the container is
+  deleted).
+
 ## Repositories
 
 Each resource has two repository interfaces in the application layer:
@@ -34,6 +50,14 @@ in one transaction.
 
 Read queries apply the actor's partition access as a filter and project directly
 to DTOs, so reads never over-fetch or leak entities the actor cannot see.
+
+Inventory for event-tracked articles is computed with raw recursive SQL
+(`item_moviment_events` joined to `item_events`) as the **net of signed
+quantities** — quantity moved into a container minus quantity moved out —
+optionally bounded by an `occured_at <= at` instant and expanded over the live
+container subtree. The article and container inventory query handlers branch on
+the article's tracking mode and merge entity-based counts with event-based net
+quantities per article.
 
 ## Audit logs
 

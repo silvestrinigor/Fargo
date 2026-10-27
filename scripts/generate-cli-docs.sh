@@ -21,7 +21,7 @@ CLI_GROUPS=(
     "config|Config|set-server get-server show"
     "identity|Identity|login logout change-password"
     "article|Article|list tree get get-by-barcode inventory create update update-by-barcode delete delete-by-barcode"
-    "item|Item|list get create update delete location moviments inventory"
+    "item|Item|list get create update move delete location moviments inventory"
     "partition|Partition|list tree get create update delete"
     "user-group|User Group|list tree get create update delete"
     "user|User|list get create update delete"

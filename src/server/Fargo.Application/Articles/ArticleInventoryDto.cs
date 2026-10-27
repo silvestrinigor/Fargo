@@ -4,8 +4,11 @@ namespace Fargo.Application.Articles;
 /// Represents a summary of inventory information for a specific article.
 /// </summary>
 /// <param name="TotalCount">
-/// The total number of items available in inventory for this article.
+/// The total quantity available in inventory for this article.
+/// For entity-tracked articles this is a whole number of items; for
+/// event-tracked articles it is the net quantity derived from movement events
+/// (received minus dispatched) and may be fractional.
 /// </param>
 public sealed record ArticleInventoryDto(
-    int TotalCount
+    double TotalCount
 );

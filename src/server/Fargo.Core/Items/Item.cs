@@ -127,7 +127,14 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </remarks>
     private Item(Article article)
     {
-        // TODO: Throw if article tracking type is not Entity.
+        ArgumentNullException.ThrowIfNull(article);
+
+        if (article.TrackingMode != ArticleTrackingMode.Entity)
+        {
+            throw new FargoCoreException(
+                $"An item cannot be created for article '{article.Guid}' because it is not entity-tracked. Event-tracked articles record stock through movement events instead of individual items.",
+                FargoErrorType.InvalidOperation);
+        }
 
         Article = article;
         ArticleGuid = article.Guid;

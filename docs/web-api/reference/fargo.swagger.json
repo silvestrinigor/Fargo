@@ -549,6 +549,34 @@
         }
       }
     },
+    "/items/movements": {
+      "post": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Records an item movement event",
+        "description": "Records a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event; entity-tracked articles record movements through their individual items instead.",
+        "operationId": "CreateItemMovement",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ItemMovementCreateDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/users/{userGuid}": {
       "get": {
         "tags": [
@@ -1699,9 +1727,9 @@
       ],
       "properties": {
         "totalCount": {
-          "description": "The total number of items available in inventory for this article.",
-          "format": "int32",
-          "pattern": "^-?(?:0|[1-9]\\d*)$"
+          "description": "The total quantity available in inventory for this article.\r\nFor entity-tracked articles this is a whole number of items; for\r\nevent-tracked articles it is the net quantity derived from movement events\r\n(received minus dispatched) and may be fractional.",
+          "format": "double",
+          "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"
         }
       }
     },
@@ -2009,6 +2037,7 @@
     },
     "ItemContainerInventoryDto": {
       "type": "object",
+      "description": "Represents the inventory of a single article contained in a container.",
       "required": [
         "articleGuid",
         "totalCount"
@@ -2016,11 +2045,13 @@
       "properties": {
         "articleGuid": {
           "type": "string",
+          "description": "The article the quantity belongs to.",
           "format": "uuid"
         },
         "totalCount": {
-          "format": "int32",
-          "pattern": "^-?(?:0|[1-9]\\d*)$"
+          "description": "The total quantity of the article in the container. For entity-tracked\r\narticles this is a whole number of items; for event-tracked articles it is\r\nthe net quantity derived from movement events (received minus dispatched) and\r\nmay be fractional.",
+          "format": "double",
+          "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"
         }
       }
     },
@@ -2081,6 +2112,42 @@
             "type": "string",
             "format": "uuid"
           }
+        }
+      }
+    },
+    "ItemMovementCreateDto": {
+      "type": "object",
+      "description": "Describes a movement of a quantity of an event-tracked article between\r\ncontainers.",
+      "required": [
+        "articleGuid",
+        "quantity"
+      ],
+      "properties": {
+        "articleGuid": {
+          "type": "string",
+          "description": "The unique identifier of the event-tracked article being moved.",
+          "format": "uuid"
+        },
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "fromItemContainerGuid": {
+          "type": "string",
+          "description": "The origin container, or `null` when the quantity entered\r\nstock from outside any container (a receipt).",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "toItemContainerGuid": {
+          "type": "string",
+          "description": "The destination container, or `null` when the quantity left\r\nstock to outside any container (a dispatch).",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "occuredAt": {
+          "type": "string",
+          "description": "The instant, in UTC, at which the movement occurred. When\r\n`null`, the server records the current instant. Provide a\r\nvalue to back-date a movement, for example when importing historical data.",
+          "format": "date-time",
+          "x-nullable": true
         }
       }
     },

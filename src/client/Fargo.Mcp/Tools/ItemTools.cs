@@ -163,6 +163,34 @@ public static class ItemTools
         return result?.Select(m => m.ToSummary()).ToArray() ?? [];
     }
 
+    [McpServerTool(Name = "fargo_items_move")]
+    [Description("Record a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event. Provide a destination for a receipt, an origin for a dispatch, or both for a transfer.")]
+    public static async Task<string> MoveItemAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the event-tracked article being moved.")] Guid articleGuid,
+        [Description("The strictly positive quantity moved.")] double quantity,
+        [Description("The GUID of the origin container. Omit for a receipt from outside any container.")] Guid? fromItemContainerGuid = null,
+        [Description("The GUID of the destination container. Omit for a dispatch to outside any container.")] Guid? toItemContainerGuid = null,
+        [Description("Optional instant (ISO 8601 UTC) at which the movement occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ItemMovementCreateDto
+        {
+            ArticleGuid = articleGuid,
+            Quantity = new Scalar { Double = quantity },
+            FromItemContainerGuid = fromItemContainerGuid,
+            ToItemContainerGuid = toItemContainerGuid,
+            OccuredAt = occuredAt
+        };
+
+        await client.Items.Movements.PostAsync(body, cancellationToken: cancellationToken);
+
+        return $"Movement of {quantity} recorded for article '{articleGuid}'.";
+    }
+
     [McpServerTool(Name = "fargo_items_get_inventory")]
     [Description("Get the inventory of an item treated as a container: the count of contained items grouped by article. When 'at' is supplied, the inventory is reconstructed from the item containment history as it was at that instant.")]
     public static async Task<IReadOnlyList<ItemContainerInventorySummary>> GetItemInventoryAsync(

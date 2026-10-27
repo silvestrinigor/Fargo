@@ -45,6 +45,16 @@ Commands:
                     Examples:
                       fargo item update 22222222-2222-2222-2222-222222222222 --container 33333333-3333-3333-3333-333333333333
                       fargo item update 22222222-2222-2222-2222-222222222222 --remove-container
+  move              Record a movement of a quantity of an event-tracked article between
+                    containers.
+  
+                    Only valid for articles whose tracking mode is Event. Provide a
+                    destination (--to) for a receipt, an origin (--from) for a dispatch,
+                    or both for a transfer.
+  
+                    Examples:
+                      fargo item move --article 11111111-1111-1111-1111-111111111111 --quantity 50 --to 22222222-2222-2222-2222-222222222222
+                      fargo item move --article 11111111-1111-1111-1111-111111111111 --quantity 10 --from 22222222-2222-2222-2222-222222222222
   delete <guid>     Delete an item by GUID.
   
                     Examples:
@@ -182,6 +192,42 @@ Options:
   -?, -h, --help                           Show help and usage information
   --server <server>                        The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
   -v, --verbose                            Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo item move`
+
+```text
+Description:
+  Record a movement of a quantity of an event-tracked article between containers.
+  
+  Only valid for articles whose tracking mode is Event. Provide a destination
+  (--to) for a receipt, an origin (--from) for a dispatch, or both for a transfer.
+  
+  Examples:
+    # Receive 50 units into a container
+    fargo item move --article 11111111-1111-1111-1111-111111111111 --quantity 50 --to 22222222-2222-2222-2222-222222222222
+  
+    # Dispatch 10 units out of a container
+    fargo item move --article 11111111-1111-1111-1111-111111111111 --quantity 10 --from 22222222-2222-2222-2222-222222222222
+  
+    # Transfer 5 units between containers
+    fargo item move --article 11111111-1111-1111-1111-111111111111 --quantity 5 --from 22222222-2222-2222-2222-222222222222 --to 33333333-3333-3333-3333-333333333333
+
+Usage:
+  fargo item move [options]
+
+Options:
+  --article <article>    GUID of the event-tracked article being moved.
+  --quantity <quantity>  The strictly positive quantity moved.
+  --from <from>          GUID of the origin container. Omit for a receipt from outside any container.
+  --to <to>              GUID of the destination container. Omit for a dispatch to outside any container.
+  --at <at>              Instant (ISO 8601 UTC) at which the movement occurred. Defaults to now.
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

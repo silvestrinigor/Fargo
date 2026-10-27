@@ -7,17 +7,18 @@ using System.IO;
 using System;
 namespace Fargo.ClientHttp.Models
 {
+    /// <summary>
+    /// Represents the inventory of a single article contained in a container.
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    #pragma warning disable CS1591
     public partial class ItemContainerInventoryDto : IAdditionalDataHolder, IParsable
-    #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The articleGuid property</summary>
+        /// <summary>The article the quantity belongs to.</summary>
         public Guid? ArticleGuid { get; set; }
-        /// <summary>The totalCount property</summary>
-        public int? TotalCount { get; set; }
+        /// <summary>The total quantity of the article in the container. For entity-trackedarticles this is a whole number of items; for event-tracked articles it isthe net quantity derived from movement events (received minus dispatched) andmay be fractional.</summary>
+        public double? TotalCount { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ItemContainerInventoryDto"/> and sets the default values.
         /// </summary>
@@ -44,7 +45,7 @@ namespace Fargo.ClientHttp.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "articleGuid", n => { ArticleGuid = n.GetGuidValue(); } },
-                { "totalCount", n => { TotalCount = n.GetIntValue(); } },
+                { "totalCount", n => { TotalCount = n.GetDoubleValue(); } },
             };
         }
         /// <summary>
@@ -55,7 +56,7 @@ namespace Fargo.ClientHttp.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteGuidValue("articleGuid", ArticleGuid);
-            writer.WriteIntValue("totalCount", TotalCount);
+            writer.WriteDoubleValue("totalCount", TotalCount);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

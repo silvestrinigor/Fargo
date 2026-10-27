@@ -44,7 +44,12 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </summary>
     public ArticleType ArticleType { get; private init; } = ArticleType.Default;
 
-    // TODO: Doc
+    /// <summary>
+    /// Gets the tracking mode of the article, which determines whether its stock
+    /// is tracked as individual items (<see cref="ArticleTrackingMode.Entity"/>)
+    /// or as aggregate quantities recorded through movement events
+    /// (<see cref="ArticleTrackingMode.Event"/>).
+    /// </summary>
     public ArticleTrackingMode TrackingMode { get; private init; } = ArticleTrackingMode.Entity;
 
     /// <summary>
@@ -180,6 +185,10 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// Creates a new article.
     /// </summary>
     /// <param name="name">The name of the article.</param>
+    /// <param name="trackingMode">
+    /// The tracking mode of the article. Defaults to
+    /// <see cref="ArticleTrackingMode.Entity"/>.
+    /// </param>
     /// <returns>
     /// A new <see cref="Article"/> instance.
     /// </returns>
@@ -200,6 +209,10 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </summary>
     /// <param name="name">The name of the article.</param>
     /// <param name="fromArticle">The article this article is a variation of.</param>
+    /// <param name="trackingMode">
+    /// The tracking mode of the article. Defaults to
+    /// <see cref="ArticleTrackingMode.Entity"/>.
+    /// </param>
     /// <returns>
     /// A new <see cref="Article"/> instance.
     /// </returns>
@@ -219,7 +232,11 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// </summary>
     /// <param name="name">The name of the article.</param>
     /// <param name="fromArticle">The article this article is a pack of.</param>
-    /// <param name="quantity"></param>
+    /// <param name="quantity">The number of units of <paramref name="fromArticle"/> in the pack.</param>
+    /// <param name="trackingMode">
+    /// The tracking mode of the article. Defaults to
+    /// <see cref="ArticleTrackingMode.Entity"/>.
+    /// </param>
     /// <returns>
     /// A new <see cref="Article"/> instance.
     /// </returns>
@@ -238,7 +255,11 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// creates a new article kit.
     /// </summary>
     /// <param name="name">The name of the article.</param>
-    /// <param name="kitComponents"></param>
+    /// <param name="kitComponents">The component articles and their quantities that compose the kit.</param>
+    /// <param name="trackingMode">
+    /// The tracking mode of the article. Defaults to
+    /// <see cref="ArticleTrackingMode.Entity"/>.
+    /// </param>
     /// <returns>
     /// A new <see cref="Article"/> instance.
     /// </returns>

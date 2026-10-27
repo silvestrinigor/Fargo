@@ -14,8 +14,10 @@ Every domain entity has a `Guid` identity (`IEntity`) and reports its kind
 
 | Concept | Description |
 | --- | --- |
-| **Article** | A product definition in the catalog. Has a type, optional barcodes, dimensions, mass, color, and shelf life. |
-| **Item** | A physical instance of an article. May live inside a container item, and records its movement history. |
+| **Article** | A product definition in the catalog. Has a type, a tracking mode (entity or event), optional barcodes, dimensions, mass, color, and shelf life. |
+| **Item** | A physical instance of an **entity-tracked** article. May live inside a container item, and records its movement history. |
+| **ItemEvent** | The base record of a change recorded against an **event-tracked** article: which article, the event kind, and when it occurred. |
+| **ItemMovimentEvent** | A movement event: a positive quantity of an event-tracked article moved between containers (or into/out of no container). The source of event-based inventory. |
 | **Partition** | A node in the access hierarchy. Scopes which actors can see which entities. |
 | **User** | An account that authenticates and acts. Has partition access, group memberships, and permissions. |
 | **UserGroup** | A collection of users that share permissions and partition access. Groups can be nested. |
@@ -29,6 +31,7 @@ flowchart TD
     Partition["Partition<br/>(hierarchy)"]
     Article["Article"]
     Item["Item"]
+    ItemMovimentEvent["ItemMovimentEvent"]
     User["User"]
     UserGroup["UserGroup"]
     AuditLog["AuditLog"]
@@ -38,6 +41,8 @@ flowchart TD
     Item -->|instance of| Article
     Item -->|belongs to| Partition
     Item -->|contained in| Item
+    ItemMovimentEvent -->|records a move of| Article
+    ItemMovimentEvent -->|from / to| Item
     User -->|has access to| Partition
     User -->|member of| UserGroup
     UserGroup -->|parent of| UserGroup

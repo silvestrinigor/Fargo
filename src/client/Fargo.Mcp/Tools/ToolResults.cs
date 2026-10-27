@@ -111,11 +111,11 @@ public sealed record AuditLogSummary(
     DateTimeOffset? OccurredAt);
 
 public sealed record ArticleInventorySummary(
-    int? TotalCount);
+    double? TotalCount);
 
 public sealed record ItemContainerInventorySummary(
     Guid? ArticleGuid,
-    int? TotalCount);
+    double? TotalCount);
 
 public sealed record ItemMovimentSummary(
     Guid? MovedToItemContainerGuid,

@@ -55,6 +55,7 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>()
         .AddScoped<ICommandHandler<ItemUpdateCommand>, ItemUpdateCommandHandler>()
         .AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>()
+        .AddScoped<ICommandHandler<MoveItemEventCommand>, MoveItemEventCommandHandler>()
         .AddScoped<IQueryHandler<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>()
         .AddScoped<IQueryHandler<ItemsQuery, PagedResult<ItemDto>>, ItemsQueryHandler>()
         .AddScoped<IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>>, ItemLocationQueryHandler>()

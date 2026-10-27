@@ -12,6 +12,8 @@ public sealed class ItemMovimentEventConfiguration : IEntityTypeConfiguration<It
 
         builder.HasKey(i => new { i.ItemEventGuid });
 
+        builder.Property(x => x.Quantity);
+
         builder
         .HasOne(x => x.ItemEvent)
         .WithOne()

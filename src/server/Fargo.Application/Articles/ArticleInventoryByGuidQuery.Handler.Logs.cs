@@ -15,5 +15,5 @@ internal static partial class ArticleInventoryByGuidQueryHandlerLogs
         Level = LogLevel.Debug,
         Message = "Article inventory query by guid completed for article '{articleGuid}' by actor '{actorGuid}' of type '{actorType}'. Found: {found}. Count: {count}.")]
     public static partial void ArticleInventoryQueryByGuidCompleted(
-        this ILogger logger, Guid articleGuid, Guid actorGuid, ActorType actorType, bool found, int count);
+        this ILogger logger, Guid articleGuid, Guid actorGuid, ActorType actorType, bool found, double count);
 }

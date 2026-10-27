@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
+using Fargo.Core.Articles;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
@@ -32,11 +33,26 @@ public sealed class ArticleInventoryByGuidQueryHandler(
 
         ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
 
-        var articleExist = await articleRepository.ExistByGuidAsync(query.ArticleGuid, actor.PartitionAccessGuids, cancellationToken);
+        // Resolving the tracking mode also serves as the existence/access check:
+        // a null result means the article does not exist (or is not accessible)
+        // within the actor's partitions.
+        var trackingMode = await articleRepository.GetTrackingModeByGuidAsync(
+            query.ArticleGuid, actor.PartitionAccessGuids, cancellationToken);
 
         ArticleInventoryDto? inventory = null;
 
-        if (articleExist && query.At is { } at)
+        if (trackingMode is ArticleTrackingMode.Event)
+        {
+            // Event-tracked articles have no item rows; inventory is the net of
+            // signed movement quantities derived from the event stream.
+            inventory = await articleRepository.GetEventInventoryInfoByGuidAsync(
+                query.ArticleGuid,
+                query.InsideItemContainerGuids,
+                query.IncludeDescendents,
+                query.At,
+                cancellationToken);
+        }
+        else if (trackingMode is ArticleTrackingMode.Entity && query.At is { } at)
         {
             // Point-in-time inventory is resolved entirely from the containment
             // history in a single query, including the descendant walk.
@@ -47,7 +63,7 @@ public sealed class ArticleInventoryByGuidQueryHandler(
                 query.IncludeDescendents,
                 cancellationToken);
         }
-        else if (articleExist && query.IncludeDescendents && query.InsideItemContainerGuids is { Count: > 0 } containers)
+        else if (trackingMode is ArticleTrackingMode.Entity && query.IncludeDescendents && query.InsideItemContainerGuids is { Count: > 0 } containers)
         {
             // Resolve the containers and all their descendant containers in a
             // single recursive query rather than walking each container in the
@@ -57,7 +73,7 @@ public sealed class ArticleInventoryByGuidQueryHandler(
                 containers,
                 cancellationToken);
         }
-        else if (articleExist)
+        else if (trackingMode is ArticleTrackingMode.Entity)
         {
             // Standard query: Use only the provided container IDs without recursion.
             inventory = await articleRepository.GetInventoryInfoByGuidAsync(

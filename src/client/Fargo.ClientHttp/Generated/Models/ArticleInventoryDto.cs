@@ -15,8 +15,8 @@ namespace Fargo.ClientHttp.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The total number of items available in inventory for this article.</summary>
-        public int? TotalCount { get; set; }
+        /// <summary>The total quantity available in inventory for this article.For entity-tracked articles this is a whole number of items; forevent-tracked articles it is the net quantity derived from movement events(received minus dispatched) and may be fractional.</summary>
+        public double? TotalCount { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ArticleInventoryDto"/> and sets the default values.
         /// </summary>
@@ -42,7 +42,7 @@ namespace Fargo.ClientHttp.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "totalCount", n => { TotalCount = n.GetIntValue(); } },
+                { "totalCount", n => { TotalCount = n.GetDoubleValue(); } },
             };
         }
         /// <summary>
@@ -52,7 +52,7 @@ namespace Fargo.ClientHttp.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteIntValue("totalCount", TotalCount);
+            writer.WriteDoubleValue("totalCount", TotalCount);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

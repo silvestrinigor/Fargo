@@ -33,6 +33,52 @@ particular blue widget." Many items can share one article.
 
 An item knows which article it instantiates and where it currently lives.
 
+## Tracking mode — entity vs event
+
+Not every kind of stock is best represented as individually numbered units.
+Each article therefore chooses a **tracking mode** that decides how its stock is
+recorded. The mode is fixed for the article's lifetime.
+
+### Entity tracking (the default)
+
+With **entity tracking**, every physical unit is a distinct **item**. This is
+the model described above: each unit has its own identity, its own location, its
+own movement history, and can be individually fixed in place. Article inventory
+is simply the number of item rows.
+
+Use entity tracking when you control and care about each unit — serialized,
+high-value, or otherwise individually managed goods — and you have (or want to
+maintain) complete information for each one.
+
+### Event tracking
+
+With **event tracking**, no per-unit items exist at all. Instead, stock is
+recorded as a stream of **movement events**, each describing that a *quantity* of
+the article moved between containers (or into/out of stock). The current stock is
+*derived* from those events rather than stored as rows.
+
+Use event tracking when tracking each unit individually is impractical or
+unnecessary, for example:
+
+- **No single-unit control.** The goods are fungible or bulk — screws, sand,
+  liquids, grain — where there is no meaningful "one unit" to identify and move.
+- **Incomplete per-item information.** You do not have, or do not want to
+  maintain, full details for each individual unit; you only know *how much*
+  moved and *where*.
+- **Very high volume or throughput.** The number of units, or the rate of
+  movements, is so large that creating and moving one item row per unit would be
+  impractical. Recording an aggregate quantity per event is far cheaper.
+
+A movement event carries a positive **quantity**, an optional **origin**
+container, an optional **destination** container, and the **instant** it
+occurred (which may be back-dated, e.g. when importing historical data). A
+movement with only a destination is a *receipt* into stock; one with only an
+origin is a *dispatch* out of stock; one with both is a *transfer*.
+
+> Entity-tracked and event-tracked articles coexist in the same catalog and the
+> same containers. A container's inventory lists both kinds side by side.
+
+
 ## Containers and location
 
 An item whose article is of type **Container** can hold other items. Because a
@@ -72,6 +118,19 @@ inventory questions:
 
 Both can also be evaluated **as of a past instant**, reconstructed from the
 containment history.
+
+### How event-tracked stock is counted
+
+For an event-tracked article there are no item rows to count. Its inventory is
+instead the **net of signed movement quantities**: the total quantity moved
+*into* a container minus the total quantity moved *out* of it. A transfer
+between two containers that are both inside the queried scope nets to zero, as
+expected. Because every event is timestamped, an event-based inventory can also
+be evaluated as of a past instant by considering only the events that occurred
+at or before it — exactly like the point-in-time view of entity-tracked stock.
+Event-derived quantities may be fractional (for bulk goods), whereas
+entity-tracked counts are always whole numbers of items.
+
 
 ## Partitions apply here too
 

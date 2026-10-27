@@ -310,4 +310,104 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
 
         return articleTask;
     }
+
+    public async Task<ArticleTrackingMode?> GetTrackingModeByGuidAsync(
+        Guid articleGuid,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default)
+    {
+        var queryFiltered = ApplyPartitionFilter(
+            context.Articles.AsNoTracking(),
+            childOfAnyOfThesePartitions);
+
+        var modes = await queryFiltered
+            .Where(a => a.Guid == articleGuid)
+            .Select(a => (ArticleTrackingMode?)a.TrackingMode)
+            .ToListAsync(cancellationToken);
+
+        return modes.FirstOrDefault();
+    }
+
+    public async Task<ArticleInventoryDto> GetEventInventoryInfoByGuidAsync(
+        Guid articleGuid,
+        IReadOnlyCollection<Guid>? insideItemContainerGuids = null,
+        bool includeDescendents = true,
+        DateTimeOffset? at = null,
+        CancellationToken cancellationToken = default)
+    {
+        // A null upper bound means "all events"; coalesce to the maximum instant
+        // so the SQL statement treats both cases uniformly.
+        var upperBound = at ?? DateTimeOffset.MaxValue;
+
+        if (insideItemContainerGuids is not { Count: > 0 })
+        {
+            // No container filter: the net stock of the article across the whole
+            // system is the quantity that entered containers minus the quantity
+            // that left them. A transfer between two containers contributes +q
+            // (destination) and -q (origin) and so nets to zero, leaving only
+            // receipts (from outside) and dispatches (to outside).
+            FormattableString allQuery = $"""
+            SELECT COALESCE(SUM(
+                CASE WHEN moviment.to_item_container_guid IS NOT NULL THEN moviment.quantity ELSE 0 END
+                -
+                CASE WHEN moviment.from_item_container_guid IS NOT NULL THEN moviment.quantity ELSE 0 END
+            ), 0) AS value
+            FROM item_moviment_events AS moviment
+            INNER JOIN item_events AS event
+                ON event.guid = moviment.item_event_guid
+            WHERE event.article_guid = {articleGuid}
+              AND event.occured_at <= {upperBound}
+            """;
+
+            var allNet = await context.Database
+                .SqlQuery<double>(allQuery)
+                .ToListAsync(cancellationToken);
+
+            return new ArticleInventoryDto(TotalCount: allNet.FirstOrDefault());
+        }
+
+        var containers = insideItemContainerGuids.Distinct().ToArray();
+
+        FormattableString query = $"""
+        WITH RECURSIVE container_set AS
+        (
+            SELECT guid
+            FROM items
+            WHERE guid = ANY({containers}::uuid[])
+
+            UNION ALL
+
+            SELECT child.guid
+            FROM items AS child
+            INNER JOIN container_set AS parent
+                ON child.parent_item_container_guid = parent.guid
+            INNER JOIN articles AS child_article
+                ON child_article.guid = child.article_guid
+            WHERE {includeDescendents}
+              AND child_article.article_type = {(int)ArticleType.Container}
+        )
+        SELECT COALESCE(SUM(
+            CASE
+                WHEN moviment.to_item_container_guid IN (SELECT guid FROM container_set) THEN moviment.quantity
+                ELSE 0
+            END
+            -
+            CASE
+                WHEN moviment.from_item_container_guid IN (SELECT guid FROM container_set) THEN moviment.quantity
+                ELSE 0
+            END
+        ), 0) AS value
+        FROM item_moviment_events AS moviment
+        INNER JOIN item_events AS event
+            ON event.guid = moviment.item_event_guid
+        WHERE event.article_guid = {articleGuid}
+          AND event.occured_at <= {upperBound}
+        """;
+
+        var net = await context.Database
+            .SqlQuery<double>(query)
+            .ToListAsync(cancellationToken);
+
+        return new ArticleInventoryDto(TotalCount: net.FirstOrDefault());
+    }
 }
