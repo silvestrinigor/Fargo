@@ -8,7 +8,7 @@ This guide shows the typical first calls against the Fargo Web API. Examples use
 Exchange credentials for an access token and a refresh token:
 
 ```bash
-curl -X POST https://localhost:7563/identity/login \
+curl -X POST https://localhost:7563/v1/identity/login \
   -H "Content-Type: application/json" \
   -d '{ "nameid": "admin", "password": "<password>" }'
 ```
@@ -28,21 +28,21 @@ Response:
 Send the access token as a bearer token:
 
 ```bash
-curl https://localhost:7563/articles \
+curl https://localhost:7563/v1/articles \
   -H "Authorization: Bearer <access-token>"
 ```
 
 Add paging and partition filters as query parameters:
 
 ```bash
-curl "https://localhost:7563/articles?page=1&limit=20&childOfAnyOfThesePartitions=<partition-guid>" \
+curl "https://localhost:7563/v1/articles?page=1&limit=20&childOfAnyOfThesePartitions=<partition-guid>" \
   -H "Authorization: Bearer <access-token>"
 ```
 
 ## 3. Create a resource
 
 ```bash
-curl -X POST https://localhost:7563/articles \
+curl -X POST https://localhost:7563/v1/articles \
   -H "Authorization: Bearer <access-token>" \
   -H "Content-Type: application/json" \
   -d '{ "name": "Widget", "articleType": 1 }'
@@ -53,7 +53,7 @@ The response is the identifier of the created article.
 ## 4. Refresh the token when it expires
 
 ```bash
-curl -X POST https://localhost:7563/identity/refresh \
+curl -X POST https://localhost:7563/v1/identity/refresh \
   -H "Content-Type: application/json" \
   -d '{ "refreshToken": "<refresh-token>" }'
 ```
@@ -64,7 +64,7 @@ Every create, update, and delete is recorded. Fetch a single audit log,
 including its metadata, by GUID:
 
 ```bash
-curl https://localhost:7563/audit-logs/<audit-log-guid> \
+curl https://localhost:7563/v1/audit-logs/<audit-log-guid> \
   -H "Authorization: Bearer <access-token>"
 ```
 

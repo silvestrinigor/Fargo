@@ -55,7 +55,7 @@ public sealed class ListUserGroupsCommand : Command
                 limit,
                 fetch: async (p, l) =>
                 {
-                    var result = await client.UserGroups.GetAsync(request =>
+                    var result = await client.V1.UserGroups.GetAsync(request =>
                     {
                         request.QueryParameters.Page = p;
                         request.QueryParameters.Limit = l;

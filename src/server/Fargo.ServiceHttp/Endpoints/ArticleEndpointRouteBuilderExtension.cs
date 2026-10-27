@@ -1,6 +1,7 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Common;
 using Fargo.Core.Barcodes;
+using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.ServiceHttp.Endpoints;
@@ -29,7 +30,7 @@ public static class ArticleEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapArticleGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-        .MapGroup("/articles")
+        .MapVersionedGroup("Articles", "/articles")
         .RequireAuthorization()
         .WithTags("Articles")
         .RequireRateLimiting("general-authenticated");

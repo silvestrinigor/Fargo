@@ -25,7 +25,7 @@ public sealed class DeleteItemCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            await client.Items[guid].DeleteAsync(cancellationToken: cancellationToken);
+            await client.V1.Items[guid].DeleteAsync(cancellationToken: cancellationToken);
 
             StatusWriter.Success("Item deleted.", ("GUID", guid.ToString()));
 

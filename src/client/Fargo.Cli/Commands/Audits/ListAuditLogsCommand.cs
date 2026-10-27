@@ -47,7 +47,7 @@ public sealed class ListAuditLogsCommand : Command
                 limit,
                 fetch: async (p, l) =>
                 {
-                    var result = await client.AuditLogs.GetAsync(request =>
+                    var result = await client.V1.AuditLogs.GetAsync(request =>
                     {
                         request.QueryParameters.Page = p;
                         request.QueryParameters.Limit = l;

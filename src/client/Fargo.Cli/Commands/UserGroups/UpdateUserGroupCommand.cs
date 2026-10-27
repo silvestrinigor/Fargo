@@ -55,7 +55,7 @@ public sealed class UpdateUserGroupCommand : Command
                 RemoveParentUserGroup = removeParent ? true : null
             };
 
-            await client.UserGroups[guid].PutAsync(dto, cancellationToken: cancellationToken);
+            await client.V1.UserGroups[guid].PutAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("User group updated.", ("GUID", guid.ToString()));
 

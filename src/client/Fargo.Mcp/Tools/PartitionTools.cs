@@ -25,7 +25,7 @@ public static class PartitionTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Partitions.GetAsync(request =>
+        var result = await client.V1.Partitions.GetAsync(request =>
         {
             if (page.HasValue)
             {
@@ -57,7 +57,7 @@ public static class PartitionTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var partition = await client.Partitions[partitionGuid].GetAsync(cancellationToken: cancellationToken);
+        var partition = await client.V1.Partitions[partitionGuid].GetAsync(cancellationToken: cancellationToken);
 
         return partition?.ToSummary();
     }
@@ -81,7 +81,7 @@ public static class PartitionTools
             ParentPartitionGuid = parentPartitionGuid
         };
 
-        return await client.Partitions.PostAsync(body, cancellationToken: cancellationToken);
+        return await client.V1.Partitions.PostAsync(body, cancellationToken: cancellationToken);
     }
 
     [McpServerTool(Name = "fargo_partitions_delete")]
@@ -94,7 +94,7 @@ public static class PartitionTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        await client.Partitions[partitionGuid].DeleteAsync(cancellationToken: cancellationToken);
+        await client.V1.Partitions[partitionGuid].DeleteAsync(cancellationToken: cancellationToken);
 
         return $"Partition '{partitionGuid}' deleted.";
     }
@@ -119,7 +119,7 @@ public static class PartitionTools
             ParentPartitionGuid = parentPartitionGuid
         };
 
-        await client.Partitions[partitionGuid].PatchAsync(body, cancellationToken: cancellationToken);
+        await client.V1.Partitions[partitionGuid].PatchAsync(body, cancellationToken: cancellationToken);
 
         return $"Partition '{partitionGuid}' updated.";
     }

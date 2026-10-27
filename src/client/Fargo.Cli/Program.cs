@@ -107,7 +107,7 @@ if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password)
 
     try
     {
-        authResult = await client.Identity.Login.PostAsync(new IdentityLoginDto
+        authResult = await client.V1.Identity.Login.PostAsync(new IdentityLoginDto
         {
             Nameid = username,
             Password = password

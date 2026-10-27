@@ -4,35 +4,35 @@
 
 ### Get
 
-GET {{host}}/items/{{itemGuid}}
+GET {{host}}/v1/items/{{itemGuid}}
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### Get location
 
-GET {{host}}/items/{{itemGuid}}/location
+GET {{host}}/v1/items/{{itemGuid}}/location
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### Get moviments
 
-GET {{host}}/items/{{itemGuid}}/moviments
+GET {{host}}/v1/items/{{itemGuid}}/moviments
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### List
 
-GET {{host}}/items?page=1&limit=20
+GET {{host}}/v1/items?page=1&limit=20
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### Create
 
-POST {{host}}/items
+POST {{host}}/v1/items
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
@@ -44,7 +44,7 @@ Content-Type: application/json
 
 ### Update
 
-PATCH {{host}}/items/{{itemGuid}}
+PATCH {{host}}/v1/items/{{itemGuid}}
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
@@ -57,5 +57,5 @@ Content-Type: application/json
 
 ### Delete
 
-DELETE {{host}}/items/{{itemGuid}}
+DELETE {{host}}/v1/items/{{itemGuid}}
 Authorization: Bearer {{jwt}}

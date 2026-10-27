@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Application.Partitions;
+using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.ServiceHttp.Endpoints;
@@ -24,7 +25,7 @@ public static class PartitionEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapPartitionGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-        .MapGroup("/partitions")
+        .MapVersionedGroup("Partitions", "/partitions")
         .RequireAuthorization()
         .WithTags("Partitions")
         .RequireRateLimiting("general-authenticated");

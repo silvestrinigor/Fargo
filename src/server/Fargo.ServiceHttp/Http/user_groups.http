@@ -3,21 +3,21 @@
 
 ### Get
 
-GET {{host}}/user-groups/{{userGroupGuid}}
+GET {{host}}/v1/user-groups/{{userGroupGuid}}
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### List
 
-GET {{host}}/user-groups?page=1&limit=20
+GET {{host}}/v1/user-groups?page=1&limit=20
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### Create
 
-POST {{host}}/user-groups
+POST {{host}}/v1/user-groups
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
@@ -30,7 +30,7 @@ Content-Type: application/json
 
 ### Update
 
-PUT {{host}}/user-groups/{{userGroupGuid}}
+PUT {{host}}/v1/user-groups/{{userGroupGuid}}
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
@@ -42,5 +42,5 @@ Content-Type: application/json
 
 ### Delete
 
-DELETE {{host}}/user-groups/{{userGroupGuid}}
+DELETE {{host}}/v1/user-groups/{{userGroupGuid}}
 Authorization: Bearer {{jwt}}

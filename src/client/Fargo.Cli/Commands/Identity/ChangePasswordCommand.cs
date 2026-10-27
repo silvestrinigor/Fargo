@@ -62,7 +62,7 @@ public sealed class ChangePasswordCommand : Command
                 return 1;
             }
 
-            await client.Identity.Password.PutAsync(new IdentityPasswordUpdateDto
+            await client.V1.Identity.Password.PutAsync(new IdentityPasswordUpdateDto
             {
                 Nameid = nameid,
                 CurrentPassword = currentPassword,

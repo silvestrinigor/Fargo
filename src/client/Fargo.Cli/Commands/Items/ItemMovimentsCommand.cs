@@ -25,7 +25,7 @@ public sealed class ItemMovimentsCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            var result = await client.Items[guid].Moviments.GetAsync(cancellationToken: cancellationToken);
+            var result = await client.V1.Items[guid].Moviments.GetAsync(cancellationToken: cancellationToken);
 
             new TableWriter<Fargo.ClientHttp.Models.ItemMovimentDto>()
                 .Column("OCCURRED AT", m => m.OccurredAt?.ToString("u"))

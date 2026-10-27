@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Application.Items;
+using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.ServiceHttp.Endpoints;
@@ -30,7 +31,7 @@ public static class ItemEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapItemGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-        .MapGroup("/items")
+        .MapVersionedGroup("Items", "/items")
         .RequireAuthorization()
         .WithTags("Items")
         .RequireRateLimiting("general-authenticated");

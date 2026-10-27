@@ -25,7 +25,7 @@ public sealed class DeletePartitionCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            await client.Partitions[guid].DeleteAsync(cancellationToken: cancellationToken);
+            await client.V1.Partitions[guid].DeleteAsync(cancellationToken: cancellationToken);
 
             StatusWriter.Success("Partition deleted.", ("GUID", guid.ToString()));
 

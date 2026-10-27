@@ -80,7 +80,7 @@ public sealed class ListItemEventsCommand : Command
                 limit,
                 fetch: async (p, l) =>
                 {
-                    var result = await client.Item.Events.GetAsync(request =>
+                    var result = await client.V1.Item.Events.GetAsync(request =>
                     {
                         request.QueryParameters.Page = p;
                         request.QueryParameters.Limit = l;

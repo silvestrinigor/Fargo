@@ -25,7 +25,7 @@ public static class ArticleTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Articles.GetAsync(request =>
+        var result = await client.V1.Articles.GetAsync(request =>
         {
             if (page.HasValue)
             {
@@ -57,7 +57,7 @@ public static class ArticleTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var article = await client.Articles[barcode].GetAsync(cancellationToken: cancellationToken);
+        var article = await client.V1.Articles[barcode].GetAsync(cancellationToken: cancellationToken);
 
         return article?.ToSummary();
     }
@@ -81,7 +81,7 @@ public static class ArticleTools
             ArticleType = articleType
         };
 
-        return await client.Articles.PostAsync(body, cancellationToken: cancellationToken);
+        return await client.V1.Articles.PostAsync(body, cancellationToken: cancellationToken);
     }
 
     [McpServerTool(Name = "fargo_articles_delete_by_barcode")]
@@ -94,7 +94,7 @@ public static class ArticleTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        await client.Articles[barcode].DeleteAsync(cancellationToken: cancellationToken);
+        await client.V1.Articles[barcode].DeleteAsync(cancellationToken: cancellationToken);
 
         return $"Article with barcode '{barcode}' deleted.";
     }
@@ -121,7 +121,7 @@ public static class ArticleTools
             PartitionsToRemove = partitionsToRemove?.Select(g => (Guid?)g).ToList()
         };
 
-        await client.Articles[barcode].PatchAsync(body, cancellationToken: cancellationToken);
+        await client.V1.Articles[barcode].PatchAsync(body, cancellationToken: cancellationToken);
 
         return $"Article with barcode '{barcode}' updated.";
     }
@@ -139,7 +139,7 @@ public static class ArticleTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var inventory = await client.Articles[barcode].Inventory.GetAsync(request =>
+        var inventory = await client.V1.Articles[barcode].Inventory.GetAsync(request =>
         {
             if (insideItemContainerGuids is { Length: > 0 })
             {

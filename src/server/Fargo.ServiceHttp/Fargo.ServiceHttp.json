@@ -1,11 +1,12 @@
 {
   "openapi": "3.1.1",
   "info": {
-    "title": "Fargo.ServiceHttp | v1",
-    "version": "1.0.0"
+    "title": "GetDocument.Insider | v1",
+    "description": "GetDocument Command-line Tool inside man",
+    "version": "1"
   },
   "paths": {
-    "/articles/{articleGuid}": {
+    "/v1/articles/{articleGuid}": {
       "get": {
         "tags": [
           "Articles"
@@ -99,7 +100,7 @@
         }
       }
     },
-    "/articles/{articleBarcode}": {
+    "/v1/articles/{articleBarcode}": {
       "get": {
         "tags": [
           "Articles"
@@ -136,7 +137,7 @@
         }
       }
     },
-    "/articles/{articleGuid}/inventory": {
+    "/v1/articles/{articleGuid}/inventory": {
       "get": {
         "tags": [
           "Articles"
@@ -198,7 +199,7 @@
         }
       }
     },
-    "/articles": {
+    "/v1/articles": {
       "get": {
         "tags": [
           "Articles"
@@ -283,7 +284,7 @@
         }
       }
     },
-    "/items/{itemGuid}": {
+    "/v1/items/{itemGuid}": {
       "get": {
         "tags": [
           "Items"
@@ -377,7 +378,7 @@
         }
       }
     },
-    "/items/{itemGuid}/location": {
+    "/v1/items/{itemGuid}/location": {
       "get": {
         "tags": [
           "Items"
@@ -424,7 +425,7 @@
         }
       }
     },
-    "/items/{itemGuid}/moviments": {
+    "/v1/items/{itemGuid}/moviments": {
       "get": {
         "tags": [
           "Items"
@@ -463,7 +464,7 @@
         }
       }
     },
-    "/items/{itemGuid}/inventory": {
+    "/v1/items/{itemGuid}/inventory": {
       "get": {
         "tags": [
           "Items"
@@ -510,7 +511,7 @@
         }
       }
     },
-    "/items": {
+    "/v1/items": {
       "get": {
         "tags": [
           "Items"
@@ -600,7 +601,7 @@
         }
       }
     },
-    "/item/events": {
+    "/v1/item/events": {
       "get": {
         "tags": [
           "ItemEvents"
@@ -705,7 +706,7 @@
         }
       }
     },
-    "/users/{userGuid}": {
+    "/v1/users/{userGuid}": {
       "get": {
         "tags": [
           "Users"
@@ -799,7 +800,7 @@
         }
       }
     },
-    "/users": {
+    "/v1/users": {
       "get": {
         "tags": [
           "Users"
@@ -889,7 +890,7 @@
         }
       }
     },
-    "/user-groups/{userGroupGuid}": {
+    "/v1/user-groups/{userGroupGuid}": {
       "get": {
         "tags": [
           "UserGroups"
@@ -983,7 +984,7 @@
         }
       }
     },
-    "/user-groups": {
+    "/v1/user-groups": {
       "get": {
         "tags": [
           "UserGroups"
@@ -1073,7 +1074,7 @@
         }
       }
     },
-    "/partitions/{partitionGuid}": {
+    "/v1/partitions/{partitionGuid}": {
       "get": {
         "tags": [
           "Partitions"
@@ -1167,7 +1168,7 @@
         }
       }
     },
-    "/partitions": {
+    "/v1/partitions": {
       "get": {
         "tags": [
           "Partitions"
@@ -1252,7 +1253,7 @@
         }
       }
     },
-    "/identity/login": {
+    "/v1/identity/login": {
       "post": {
         "tags": [
           "Identity"
@@ -1287,7 +1288,7 @@
         }
       }
     },
-    "/identity/logout": {
+    "/v1/identity/logout": {
       "post": {
         "tags": [
           "Identity"
@@ -1315,7 +1316,7 @@
         }
       }
     },
-    "/identity/refresh": {
+    "/v1/identity/refresh": {
       "post": {
         "tags": [
           "Identity"
@@ -1350,7 +1351,7 @@
         }
       }
     },
-    "/identity/password": {
+    "/v1/identity/password": {
       "put": {
         "tags": [
           "Identity"
@@ -1381,7 +1382,7 @@
         }
       }
     },
-    "/audit-logs/{auditLogGuid}": {
+    "/v1/audit-logs/{auditLogGuid}": {
       "get": {
         "tags": [
           "AuditLogs"
@@ -1417,7 +1418,7 @@
         }
       }
     },
-    "/audit-logs": {
+    "/v1/audit-logs": {
       "get": {
         "tags": [
           "AuditLogs"

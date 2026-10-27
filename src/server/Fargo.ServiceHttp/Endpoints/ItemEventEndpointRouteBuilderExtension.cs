@@ -1,6 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Application.Items;
 using Fargo.Core.Items.Events;
+using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.ServiceHttp.Endpoints;
@@ -19,7 +20,7 @@ public static class ItemEventEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapItemEventGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-        .MapGroup("/item/events")
+        .MapVersionedGroup("ItemEvents", "/item/events")
         .RequireAuthorization()
         .WithTags("ItemEvents")
         .RequireRateLimiting("general-authenticated");

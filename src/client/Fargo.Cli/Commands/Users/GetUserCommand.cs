@@ -25,7 +25,7 @@ public sealed class GetUserCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            var user = await client.Users[guid].GetAsync(cancellationToken: cancellationToken);
+            var user = await client.V1.Users[guid].GetAsync(cancellationToken: cancellationToken);
 
             if (user is null)
             {

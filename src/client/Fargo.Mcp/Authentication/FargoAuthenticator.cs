@@ -122,7 +122,7 @@ public sealed class FargoAuthenticator
 
         try
         {
-            result = await _client.Identity.Refresh.PostAsync(
+            result = await _client.V1.Identity.Refresh.PostAsync(
                 new IdentityRefreshDto { RefreshToken = refreshToken },
                 cancellationToken: cancellationToken);
         }
@@ -136,7 +136,7 @@ public sealed class FargoAuthenticator
 
     private async Task LoginAsync(CancellationToken cancellationToken)
     {
-        var result = await _client.Identity.Login.PostAsync(
+        var result = await _client.V1.Identity.Login.PostAsync(
             new IdentityLoginDto
             {
                 Nameid = _options.Username,

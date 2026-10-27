@@ -55,7 +55,7 @@ public sealed class ListArticlesCommand : Command
                 limit,
                 fetch: async (p, l) =>
                 {
-                    var result = await client.Articles.GetAsync(request =>
+                    var result = await client.V1.Articles.GetAsync(request =>
                     {
                         request.QueryParameters.Page = p;
                         request.QueryParameters.Limit = l;

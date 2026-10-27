@@ -24,7 +24,7 @@ public static class UserTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Users.GetAsync(request =>
+        var result = await client.V1.Users.GetAsync(request =>
         {
             if (page.HasValue)
             {
@@ -56,7 +56,7 @@ public static class UserTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var user = await client.Users[userGuid].GetAsync(cancellationToken: cancellationToken);
+        var user = await client.V1.Users[userGuid].GetAsync(cancellationToken: cancellationToken);
 
         return user?.ToSummary();
     }

@@ -53,7 +53,7 @@ public sealed class ArticleInventoryCommand : Command
             var includeDescendants = parseResult.GetValue(includeDescendantsOption);
             var at = parseResult.GetValue(atOption);
 
-            var result = await client.Articles[guid.ToString()].Inventory.GetAsync(request =>
+            var result = await client.V1.Articles[guid.ToString()].Inventory.GetAsync(request =>
             {
                 request.QueryParameters.IncludeDescendents = includeDescendants;
 

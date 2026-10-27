@@ -45,7 +45,7 @@ public sealed class CreatePartitionCommand : Command
                 ParentPartitionGuid = parent
             };
 
-            var guid = await client.Partitions.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.V1.Partitions.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "Partition created.",

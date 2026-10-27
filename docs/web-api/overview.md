@@ -10,31 +10,47 @@ endpoints, request parameters, and response schemas, see the
 All endpoints are served relative to the HTTP API's base address (for example
 `https://localhost:7563` in local development).
 
+## Versioning
+
+Every endpoint is versioned through a required `v{version}` segment at the start
+of its path — for example `GET /v1/articles`. The current version is **v1**.
+
+Versioning is **per endpoint**: an endpoint advertises only the versions it
+actually implements. When a single endpoint gets a breaking change it gains a
+new version (for example `v2`) while every other endpoint stays on `v1`, so a
+request to a version an endpoint does not implement returns `404 Not Found`.
+This lets clients migrate one call at a time instead of all at once.
+
+Each version has its own OpenAPI document, served at `/openapi/v{version}.json`
+(for example `/openapi/v1.json`). Responses also carry an
+`api-supported-versions` header listing the versions the endpoint supports.
+
 ## Resources
 
-The API is organized around these resource groups:
+The API is organized around these resource groups (shown at the current `v1`):
 
 | Group | Base path | Description |
 | --- | --- | --- |
-| Identity | `/identity` | Authentication: login, logout, token refresh, password change. |
-| Articles | `/articles` | Product catalog definitions. |
-| Items | `/items` | Physical instances of articles and their locations. |
-| Partitions | `/partitions` | The hierarchy used to scope and group data. |
-| Users | `/users` | User accounts. |
-| User groups | `/user-groups` | Collections of users that share permissions. |
-| Audit logs | `/audit-logs` | Immutable record of changes. |
+| Identity | `/v1/identity` | Authentication: login, logout, token refresh, password change. |
+| Articles | `/v1/articles` | Product catalog definitions. |
+| Items | `/v1/items` | Physical instances of articles and their locations. |
+| Item events | `/v1/item/events` | Stock changes (movement, creation, deletion) for event-tracked articles. |
+| Partitions | `/v1/partitions` | The hierarchy used to scope and group data. |
+| Users | `/v1/users` | User accounts. |
+| User groups | `/v1/user-groups` | Collections of users that share permissions. |
+| Audit logs | `/v1/audit-logs` | Immutable record of changes. |
 
 ## Authentication
 
 Most endpoints require a bearer token. Obtain one by posting credentials to
-`POST /identity/login`, then send it on subsequent requests:
+`POST /v1/identity/login`, then send it on subsequent requests:
 
 ```http
 Authorization: Bearer <access-token>
 ```
 
-Tokens expire; use `POST /identity/refresh` with your refresh token to obtain a
-new access token without logging in again.
+Tokens expire; use `POST /v1/identity/refresh` with your refresh token to obtain
+a new access token without logging in again.
 
 A request without a valid token receives `401 Unauthorized`. A request from an
 authenticated actor that lacks permission for the action receives
@@ -63,7 +79,7 @@ with `Content-Type: application/problem+json`. A typical body:
   "status": 403,
   "title": "Permission denied.",
   "detail": "Action 'CreatePartition' permission denied for actor '...' of type 'User'.",
-  "instance": "/partitions",
+  "instance": "/v1/partitions",
   "traceId": "00-...-01",
   "errorType": "..."
 }

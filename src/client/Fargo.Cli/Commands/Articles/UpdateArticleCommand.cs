@@ -46,7 +46,7 @@ public sealed class UpdateArticleCommand : Command
                 return 1;
             }
 
-            await client.Articles[guid.ToString()].PatchAsync(dto, cancellationToken: cancellationToken);
+            await client.V1.Articles[guid.ToString()].PatchAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("Article updated.", ("GUID", guid.ToString()));
 

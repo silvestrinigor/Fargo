@@ -77,7 +77,7 @@ public sealed class MoveItemEventCommand : Command
                 OccuredAt = at
             };
 
-            var guid = await client.Item.Events.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.V1.Item.Events.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "Item movement event recorded.",

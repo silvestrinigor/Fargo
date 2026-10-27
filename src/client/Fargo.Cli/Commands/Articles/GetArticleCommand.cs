@@ -24,7 +24,7 @@ public sealed class GetArticleCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            var article = await client.Articles[guid.ToString()].GetAsync(cancellationToken: cancellationToken);
+            var article = await client.V1.Articles[guid.ToString()].GetAsync(cancellationToken: cancellationToken);
 
             if (article is null)
             {

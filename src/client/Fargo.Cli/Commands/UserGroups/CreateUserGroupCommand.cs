@@ -50,7 +50,7 @@ public sealed class CreateUserGroupCommand : Command
                 ParentUserGroup = parent
             };
 
-            var guid = await client.UserGroups.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.V1.UserGroups.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "User group created.",

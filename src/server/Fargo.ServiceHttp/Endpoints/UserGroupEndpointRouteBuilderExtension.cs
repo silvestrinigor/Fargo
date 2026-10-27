@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Application.UserGroups;
+using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.ServiceHttp.Endpoints;
@@ -24,7 +25,7 @@ public static class UserGroupEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapUserGroupGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-        .MapGroup("/user-groups")
+        .MapVersionedGroup("UserGroups", "/user-groups")
         .RequireAuthorization()
         .WithTags("UserGroups")
         .RequireRateLimiting("general-authenticated");

@@ -32,7 +32,7 @@ public sealed class TreePartitionsCommand : Command
     {
         SetAction(async (_, cancellationToken) =>
         {
-            var partitions = (await client.Partitions.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
+            var partitions = (await client.V1.Partitions.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
 
             // Index partitions and their parent/child relationships. The parent
             // link lives in ParentPartitionGuid (the parent partition GUID).

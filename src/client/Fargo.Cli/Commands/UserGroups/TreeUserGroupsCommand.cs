@@ -34,8 +34,8 @@ public sealed class TreeUserGroupsCommand : Command
     {
         SetAction(async (_, cancellationToken) =>
         {
-            var groups = (await client.UserGroups.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
-            var users = (await client.Users.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
+            var groups = (await client.V1.UserGroups.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
+            var users = (await client.V1.Users.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
 
             // Index users by each group they belong to (UserDto.UserGroups).
             var usersByGroup = new Dictionary<Guid, List<UserDto>>();

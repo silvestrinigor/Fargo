@@ -54,7 +54,7 @@ public sealed class ListUsersCommand : Command
                 limit,
                 fetch: async (p, l) =>
                 {
-                    var result = await client.Users.GetAsync(request =>
+                    var result = await client.V1.Users.GetAsync(request =>
                     {
                         request.QueryParameters.Page = p;
                         request.QueryParameters.Limit = l;

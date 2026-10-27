@@ -26,7 +26,7 @@ public sealed class GetArticleByBarcodeCommand : Command
         {
             var barcode = parseResult.GetValue(barcodeArgument)!;
 
-            var article = await client.Articles[barcode].GetAsync(cancellationToken: cancellationToken);
+            var article = await client.V1.Articles[barcode].GetAsync(cancellationToken: cancellationToken);
 
             if (article is null)
             {

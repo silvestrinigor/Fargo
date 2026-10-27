@@ -25,7 +25,7 @@ public sealed class GetUserGroupCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            var group = await client.UserGroups[guid].GetAsync(cancellationToken: cancellationToken);
+            var group = await client.V1.UserGroups[guid].GetAsync(cancellationToken: cancellationToken);
 
             if (group is null)
             {

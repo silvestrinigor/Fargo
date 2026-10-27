@@ -25,7 +25,7 @@ public sealed class GetPartitionCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            var partition = await client.Partitions[guid].GetAsync(cancellationToken: cancellationToken);
+            var partition = await client.V1.Partitions[guid].GetAsync(cancellationToken: cancellationToken);
 
             if (partition is null)
             {

@@ -1,6 +1,6 @@
 ### Login
 
-POST {{host}}/identity/login
+POST {{host}}/v1/identity/login
 Content-Type: application/json
 
 {
@@ -12,7 +12,7 @@ Content-Type: application/json
 
 ### Refresh
 
-POST {{host}}/identity/refresh
+POST {{host}}/v1/identity/refresh
 Content-Type: application/json
 
 {
@@ -23,7 +23,7 @@ Content-Type: application/json
 
 ### Logout
 
-POST {{host}}/identity/logout
+POST {{host}}/v1/identity/logout
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
@@ -35,7 +35,7 @@ Content-Type: application/json
 
 ### Change password
 
-PUT {{host}}/identity/password
+PUT {{host}}/v1/identity/password
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 

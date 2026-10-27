@@ -28,7 +28,7 @@ public static class AuditLogTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.AuditLogs.GetAsync(request =>
+        var result = await client.V1.AuditLogs.GetAsync(request =>
         {
             if (page.HasValue)
             {
@@ -84,7 +84,7 @@ public static class AuditLogTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var entry = await client.AuditLogs[auditLogGuid].GetAsync(cancellationToken: cancellationToken);
+        var entry = await client.V1.AuditLogs[auditLogGuid].GetAsync(cancellationToken: cancellationToken);
 
         return entry?.ToSummary();
     }

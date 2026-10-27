@@ -3,21 +3,21 @@
 
 ### Get
 
-GET {{host}}/partitions/{{partitionGuid}}
+GET {{host}}/v1/partitions/{{partitionGuid}}
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### List
 
-GET {{host}}/partitions?page=1&limit=20
+GET {{host}}/v1/partitions?page=1&limit=20
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### Create
 
-POST {{host}}/partitions
+POST {{host}}/v1/partitions
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
@@ -31,7 +31,7 @@ Content-Type: application/json
 
 ### Update
 
-PATCH {{host}}/partitions/{{partitionGuid}}
+PATCH {{host}}/v1/partitions/{{partitionGuid}}
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
@@ -44,5 +44,5 @@ Content-Type: application/json
 
 ### Delete
 
-DELETE {{host}}/partitions/{{partitionGuid}}
+DELETE {{host}}/v1/partitions/{{partitionGuid}}
 Authorization: Bearer {{jwt}}

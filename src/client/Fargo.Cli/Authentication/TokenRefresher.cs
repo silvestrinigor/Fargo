@@ -45,7 +45,7 @@ public static class TokenRefresher
 
         try
         {
-            result = await client.Identity.Refresh.PostAsync(
+            result = await client.V1.Identity.Refresh.PostAsync(
                 new IdentityRefreshDto { RefreshToken = tokens.RefreshToken },
                 cancellationToken: cancellationToken);
         }

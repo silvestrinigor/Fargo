@@ -38,7 +38,7 @@ public sealed class UpdatePartitionCommand : Command
                 ParentPartitionGuid = parent
             };
 
-            await client.Partitions[guid].PatchAsync(dto, cancellationToken: cancellationToken);
+            await client.V1.Partitions[guid].PatchAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("Partition updated.", ("GUID", guid.ToString()));
 

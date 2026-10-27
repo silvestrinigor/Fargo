@@ -55,7 +55,7 @@ public sealed class ListPartitionsCommand : Command
                 limit,
                 fetch: async (p, l) =>
                 {
-                    var result = await client.Partitions.GetAsync(request =>
+                    var result = await client.V1.Partitions.GetAsync(request =>
                     {
                         request.QueryParameters.Page = p;
                         request.QueryParameters.Limit = l;

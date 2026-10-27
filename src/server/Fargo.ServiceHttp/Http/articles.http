@@ -3,35 +3,35 @@
 
 ### Get by Guid
 
-GET {{host}}/articles/{{articleGuid}}
+GET {{host}}/v1/articles/{{articleGuid}}
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### Get inventory by Guid
 
-GET {{host}}/articles/{{articleGuid}}/inventory
+GET {{host}}/v1/articles/{{articleGuid}}/inventory
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### Get by Barcode
 
-GET {{host}}/articles/7891234567895:Ean13
+GET {{host}}/v1/articles/7891234567895:Ean13
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### List
 
-GET {{host}}/articles?page=1&limit=20
+GET {{host}}/v1/articles?page=1&limit=20
 Authorization: Bearer {{jwt}}
 
 ###
 
 ### Create
 
-POST {{host}}/articles
+POST {{host}}/v1/articles
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
@@ -47,7 +47,7 @@ Content-Type: application/json
 
 ### Patch
 
-PATCH {{host}}/articles/{{articleGuid}}
+PATCH {{host}}/v1/articles/{{articleGuid}}
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
 
@@ -63,5 +63,5 @@ Content-Type: application/json
 
 ### Delete
 
-DELETE {{host}}/articles/{{articleGuid}}
+DELETE {{host}}/v1/articles/{{articleGuid}}
 Authorization: Bearer {{jwt}}

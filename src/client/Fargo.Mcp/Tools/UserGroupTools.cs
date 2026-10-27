@@ -24,7 +24,7 @@ public static class UserGroupTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.UserGroups.GetAsync(request =>
+        var result = await client.V1.UserGroups.GetAsync(request =>
         {
             if (page.HasValue)
             {
@@ -56,7 +56,7 @@ public static class UserGroupTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var group = await client.UserGroups[userGroupGuid].GetAsync(cancellationToken: cancellationToken);
+        var group = await client.V1.UserGroups[userGroupGuid].GetAsync(cancellationToken: cancellationToken);
 
         return group?.ToSummary();
     }

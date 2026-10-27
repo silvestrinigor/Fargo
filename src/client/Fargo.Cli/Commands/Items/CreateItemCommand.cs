@@ -49,7 +49,7 @@ public sealed class CreateItemCommand : Command
                 PartitionsToAdd = partitions?.Select(g => (Guid?)g).ToList()
             };
 
-            var guid = await client.Items.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.V1.Items.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "Item created.",

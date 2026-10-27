@@ -44,7 +44,7 @@ public sealed class UpdateArticleByBarcodeCommand : Command
                 return 1;
             }
 
-            await client.Articles[barcode].PatchAsync(dto, cancellationToken: cancellationToken);
+            await client.V1.Articles[barcode].PatchAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("Article updated.", ("Barcode", barcode));
 

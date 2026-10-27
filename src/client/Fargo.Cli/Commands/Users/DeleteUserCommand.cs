@@ -25,7 +25,7 @@ public sealed class DeleteUserCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            await client.Users[guid].DeleteAsync(cancellationToken: cancellationToken);
+            await client.V1.Users[guid].DeleteAsync(cancellationToken: cancellationToken);
 
             StatusWriter.Success("User deleted.", ("GUID", guid.ToString()));
 

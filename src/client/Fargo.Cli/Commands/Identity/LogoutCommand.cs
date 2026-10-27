@@ -28,7 +28,7 @@ public sealed class LogoutCommand : Command
 
             try
             {
-                await client.Identity.Logout.PostAsync(new IdentityLogOutDto
+                await client.V1.Identity.Logout.PostAsync(new IdentityLogOutDto
                 {
                     RefreshToken = tokens.RefreshToken
                 }, cancellationToken: cancellationToken);

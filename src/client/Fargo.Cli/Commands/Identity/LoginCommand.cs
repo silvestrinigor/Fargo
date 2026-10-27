@@ -53,7 +53,7 @@ public sealed class LoginCommand : Command
                 return 1;
             }
 
-            var result = await client.Identity.Login.PostAsync(
+            var result = await client.V1.Identity.Login.PostAsync(
                 new IdentityLoginDto
                 {
                     Nameid = username,

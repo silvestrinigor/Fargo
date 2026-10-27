@@ -77,7 +77,7 @@ public sealed class UpdateUserCommand : Command
                 dto.IsActive = isActive;
             }
 
-            await client.Users[guid].PutAsync(dto, cancellationToken: cancellationToken);
+            await client.V1.Users[guid].PutAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("User updated.", ("GUID", guid.ToString()));
 

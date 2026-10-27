@@ -25,7 +25,7 @@ public static class ItemTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Items.GetAsync(request =>
+        var result = await client.V1.Items.GetAsync(request =>
         {
             if (page.HasValue)
             {
@@ -57,7 +57,7 @@ public static class ItemTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var item = await client.Items[itemGuid].GetAsync(cancellationToken: cancellationToken);
+        var item = await client.V1.Items[itemGuid].GetAsync(cancellationToken: cancellationToken);
 
         return item?.ToSummary();
     }
@@ -81,7 +81,7 @@ public static class ItemTools
             PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList()
         };
 
-        return await client.Items.PostAsync(body, cancellationToken: cancellationToken);
+        return await client.V1.Items.PostAsync(body, cancellationToken: cancellationToken);
     }
 
     [McpServerTool(Name = "fargo_items_delete")]
@@ -94,7 +94,7 @@ public static class ItemTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        await client.Items[itemGuid].DeleteAsync(cancellationToken: cancellationToken);
+        await client.V1.Items[itemGuid].DeleteAsync(cancellationToken: cancellationToken);
 
         return $"Item '{itemGuid}' deleted.";
     }
@@ -121,7 +121,7 @@ public static class ItemTools
             PartitionsToRemove = partitionsToRemove?.Select(g => (Guid?)g).ToList()
         };
 
-        await client.Items[itemGuid].PatchAsync(body, cancellationToken: cancellationToken);
+        await client.V1.Items[itemGuid].PatchAsync(body, cancellationToken: cancellationToken);
 
         return $"Item '{itemGuid}' updated.";
     }
@@ -137,7 +137,7 @@ public static class ItemTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Items[itemGuid].Location.GetAsync(request =>
+        var result = await client.V1.Items[itemGuid].Location.GetAsync(request =>
         {
             if (at.HasValue)
             {
@@ -158,7 +158,7 @@ public static class ItemTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Items[itemGuid].Moviments.GetAsync(cancellationToken: cancellationToken);
+        var result = await client.V1.Items[itemGuid].Moviments.GetAsync(cancellationToken: cancellationToken);
 
         return result?.Select(m => m.ToSummary()).ToArray() ?? [];
     }
@@ -187,7 +187,7 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        var guid = await client.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
 
         return $"Movement event '{guid}' recorded for article '{articleGuid}'.";
     }
@@ -214,7 +214,7 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        var guid = await client.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
 
         return $"Creation event '{guid}' recorded for article '{articleGuid}'.";
     }
@@ -241,7 +241,7 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        var guid = await client.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
 
         return $"Deletion event '{guid}' recorded for article '{articleGuid}'.";
     }
@@ -261,7 +261,7 @@ public static class ItemTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Item.Events.GetAsync(request =>
+        var result = await client.V1.Item.Events.GetAsync(request =>
         {
             if (articleGuid.HasValue)
             {
@@ -308,7 +308,7 @@ public static class ItemTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.Items[itemGuid].Inventory.GetAsync(request =>
+        var result = await client.V1.Items[itemGuid].Inventory.GetAsync(request =>
         {
             if (at.HasValue)
             {

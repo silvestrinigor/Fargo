@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
+using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.ServiceHttp.Endpoints;
@@ -22,7 +23,7 @@ public static class IdentityEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapIdentityGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-            .MapGroup("/identity")
+            .MapVersionedGroup("Identity", "/identity")
             .WithTags("Identity");
 
         return group;

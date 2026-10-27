@@ -38,7 +38,7 @@ public sealed class ItemInventoryCommand : Command
 
             var at = parseResult.GetValue(atOption);
 
-            var result = await client.Items[guid].Inventory.GetAsync(request =>
+            var result = await client.V1.Items[guid].Inventory.GetAsync(request =>
             {
                 if (at.HasValue)
                 {

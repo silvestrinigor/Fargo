@@ -50,7 +50,7 @@ public sealed class ItemLocationCommand : Command
 
             var at = parseResult.GetValue(atOption);
 
-            var result = await client.Items[guid].Location.GetAsync(request =>
+            var result = await client.V1.Items[guid].Location.GetAsync(request =>
             {
                 if (at.HasValue)
                 {

@@ -3,7 +3,7 @@
 
 ### List
 
-GET {{host}}/audit-logs?page=1&limit=20
+GET {{host}}/v1/audit-logs?page=1&limit=20
 Authorization: Bearer {{jwt}}
 
 ###

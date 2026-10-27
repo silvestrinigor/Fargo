@@ -65,7 +65,7 @@ public sealed class UpdateItemCommand : Command
                 PartitionsToRemove = removePartitions?.Select(g => (Guid?)g).ToList()
             };
 
-            await client.Items[guid].PatchAsync(dto, cancellationToken: cancellationToken);
+            await client.V1.Items[guid].PatchAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success("Item updated.", ("GUID", guid.ToString()));
 

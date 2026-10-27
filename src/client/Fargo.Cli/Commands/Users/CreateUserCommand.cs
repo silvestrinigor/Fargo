@@ -78,7 +78,7 @@ public sealed class CreateUserCommand : Command
                 dto.LastName = lastName;
             }
 
-            var guid = await client.Users.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.V1.Users.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "User created.",

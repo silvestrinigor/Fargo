@@ -266,7 +266,7 @@ public sealed class ArticleCreateCommand : Command
                 return 1;
             }
 
-            var guid = await client.Articles.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.V1.Articles.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "Article created.",

@@ -25,7 +25,7 @@ public sealed class DeleteArticleCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            await client.Articles[guid.ToString()].DeleteAsync(cancellationToken: cancellationToken);
+            await client.V1.Articles[guid.ToString()].DeleteAsync(cancellationToken: cancellationToken);
 
             StatusWriter.Success("Article deleted.", ("GUID", guid.ToString()));
 

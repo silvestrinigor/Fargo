@@ -2,6 +2,7 @@ using Fargo.Application.Audits;
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
 using Fargo.Core.Entities;
+using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Fargo.ServiceHttp.Endpoints;
@@ -20,7 +21,7 @@ public static class AuditLogEndpointRouteBuilderExtension
     private static RouteGroupBuilder MapAuditLogGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-        .MapGroup("/audit-logs")
+        .MapVersionedGroup("AuditLogs", "/audit-logs")
         .RequireAuthorization()
         .WithTags("AuditLogs")
         .RequireRateLimiting("general-authenticated");
