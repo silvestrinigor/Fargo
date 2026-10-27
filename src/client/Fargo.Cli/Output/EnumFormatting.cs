@@ -51,8 +51,7 @@ public enum EntityType
 /// Action performed in the system. Mirrors the server's ActionType enum.
 /// </summary>
 public enum ActionType
-{
-    CreateArticle = 1,
+{    CreateArticle = 1,
     DeleteArticle = 2,
     EditArticle = 3,
     CreateItem = 4,
@@ -70,6 +69,16 @@ public enum ActionType
     DeletePartition = 16,
     EditPartition = 17,
     ReadAuditLogs = 18,
+    ReadItemEvents = 19,
+}
+
+/// <summary>
+/// Kind of event recorded against an event-tracked article. Mirrors the
+/// server's ItemEventType enum.
+/// </summary>
+public enum ItemEventType
+{
+    Moviment = 1,
 }
 
 /// <summary>

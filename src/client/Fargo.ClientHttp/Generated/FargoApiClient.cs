@@ -3,6 +3,7 @@
 using Fargo.ClientHttp.Articles;
 using Fargo.ClientHttp.AuditLogs;
 using Fargo.ClientHttp.Identity;
+using Fargo.ClientHttp.ItemEvents;
 using Fargo.ClientHttp.Items;
 using Fargo.ClientHttp.Partitions;
 using Fargo.ClientHttp.UserGroups;
@@ -39,6 +40,11 @@ namespace Fargo.ClientHttp
         public global::Fargo.ClientHttp.Identity.IdentityRequestBuilder Identity
         {
             get => new global::Fargo.ClientHttp.Identity.IdentityRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The itemEvents property</summary>
+        public global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder ItemEvents
+        {
+            get => new global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The items property</summary>
         public global::Fargo.ClientHttp.Items.ItemsRequestBuilder Items

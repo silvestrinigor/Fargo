@@ -9,8 +9,7 @@ namespace Fargo.Mcp.Tools;
 /// generated DTOs' additional-data bags and nested value objects.
 /// </summary>
 public static class ToolResults
-{
-    public static ArticleSummary ToSummary(this ArticleDto dto) => new(
+{    public static ArticleSummary ToSummary(this ArticleDto dto) => new(
         dto.Guid,
         dto.Name,
         dto.Description,
@@ -64,6 +63,15 @@ public static class ToolResults
     public static ItemMovimentSummary ToSummary(this ItemMovimentDto dto) => new(
         dto.MovedToItemContainerGuid,
         dto.OccurredAt);
+
+    public static ItemEventSummary ToSummary(this ItemEventDto dto) => new(
+        dto.Guid,
+        dto.ArticleGuid,
+        dto.EventType,
+        dto.OccuredAt,
+        dto.Moviment?.Quantity?.Double,
+        dto.Moviment?.FromItemContainerGuid,
+        dto.Moviment?.ToItemContainerGuid);
 }
 
 public sealed record ArticleSummary(
@@ -120,3 +128,22 @@ public sealed record ItemContainerInventorySummary(
 public sealed record ItemMovimentSummary(
     Guid? MovedToItemContainerGuid,
     DateTimeOffset? OccurredAt);
+
+public sealed record ItemEventSummary(
+    Guid? Guid,
+    Guid? ArticleGuid,
+    int? EventType,
+    DateTimeOffset? OccuredAt,
+    double? Quantity,
+    Guid? FromItemContainerGuid,
+    Guid? ToItemContainerGuid);
+
+/// <summary>
+/// Numeric values of the server's <c>ItemEventType</c> enum, which the API
+/// serializes as integers.
+/// </summary>
+public static class ItemEventTypes
+{
+    /// <summary>A movement of a quantity between containers.</summary>
+    public const int Moviment = 1;
+}

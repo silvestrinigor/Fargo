@@ -22,8 +22,6 @@ public static class ItemEndpointRouteBuilderExtension
 
         group.MapCreateItem();
 
-        group.MapCreateItemMovement();
-
         group.MapUpdateItem();
 
         group.MapDeleteItem();
@@ -217,33 +215,6 @@ public static class ItemEndpointRouteBuilderExtension
     }
 
     #endregion Create
-
-    #region Create movement event
-
-    private static IEndpointRouteBuilder MapCreateItemMovement(this IEndpointRouteBuilder builder)
-    {
-        builder.MapPost("/movements", CreateItemMovement)
-            .WithName("CreateItemMovement")
-            .WithSummary("Records an item movement event")
-            .WithDescription("Records a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event; entity-tracked articles record movements through their individual items instead.")
-            .Produces(StatusCodes.Status204NoContent);
-
-        return builder;
-    }
-
-    private static async Task<NoContent> CreateItemMovement(
-        ItemMovementCreateDto request,
-        ICommandHandler<MoveItemEventCommand> handler,
-        CancellationToken cancellationToken)
-    {
-        var command = new MoveItemEventCommand(request);
-
-        await handler.HandleAsync(command, cancellationToken);
-
-        return TypedResults.NoContent();
-    }
-
-    #endregion Create movement event
 
     #region Update
 

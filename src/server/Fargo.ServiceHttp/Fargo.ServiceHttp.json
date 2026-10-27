@@ -600,19 +600,91 @@
         }
       }
     },
-    "/items/movements": {
+    "/item-events": {
+      "get": {
+        "tags": [
+          "ItemEvents"
+        ],
+        "summary": "Gets multiple item events",
+        "description": "Retrieves a paginated list of item events, optionally filtered by article, event type, and time period, including the total number of matching entries. Requires the ReadItemEvents permission; only events whose article is accessible to the caller are returned.",
+        "operationId": "GetItemEvents",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer",
+              "default": 1000
+            }
+          },
+          {
+            "name": "articleGuid",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ItemEventType"
+            }
+          },
+          {
+            "name": "periodStart",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "periodEnd",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfItemEventDto"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
-          "Items"
+          "ItemEvents"
         ],
-        "summary": "Records an item movement event",
-        "description": "Records a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event; entity-tracked articles record movements through their individual items instead.",
-        "operationId": "CreateItemMovement",
+        "summary": "Records an item event",
+        "description": "Records a new item event. Currently the only supported event type is a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event; entity-tracked articles record movements through their individual items instead.",
+        "operationId": "CreateItemEvent",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ItemMovementCreateDto"
+                "$ref": "#/components/schemas/ItemEventCreateDto"
               }
             }
           },
@@ -2309,16 +2381,21 @@
           }
         }
       },
-      "ItemMovementCreateDto": {
+      "ItemEventCreateDto": {
         "required": [
+          "eventType",
           "articleGuid",
           "quantity"
         ],
         "type": "object",
         "properties": {
+          "eventType": {
+            "description": "The kind of event to record.",
+            "$ref": "#/components/schemas/ItemEventType"
+          },
           "articleGuid": {
             "type": "string",
-            "description": "The unique identifier of the event-tracked article being moved.",
+            "description": "The unique identifier of the event-tracked article the event concerns.",
             "format": "uuid"
           },
           "quantity": {
@@ -2346,11 +2423,58 @@
               "null",
               "string"
             ],
-            "description": "The instant, in UTC, at which the movement occurred. When\r\n`null`, the server records the current instant. Provide a\r\nvalue to back-date a movement, for example when importing historical data.",
+            "description": "The instant, in UTC, at which the event occurred. When\r\n`null`, the server records the current instant.",
             "format": "date-time"
           }
         },
-        "description": "Describes a movement of a quantity of an event-tracked article between\r\ncontainers."
+        "description": "Describes a new item event to record against an event-tracked article."
+      },
+      "ItemEventDto": {
+        "required": [
+          "guid",
+          "articleGuid",
+          "eventType",
+          "occuredAt",
+          "moviment"
+        ],
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "string",
+            "description": "The unique identifier of the item event.",
+            "format": "uuid"
+          },
+          "articleGuid": {
+            "type": "string",
+            "description": "The unique identifier of the event-tracked article the event concerns.",
+            "format": "uuid"
+          },
+          "eventType": {
+            "description": "The kind of event recorded.",
+            "$ref": "#/components/schemas/ItemEventType"
+          },
+          "occuredAt": {
+            "type": "string",
+            "description": "The instant, in UTC, at which the event occurred.",
+            "format": "date-time"
+          },
+          "moviment": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The movement payload when EventType is\r\nItemEventType.Moviment; otherwise `null`.",
+                "$ref": "#/components/schemas/ItemMovimentEventDto"
+              }
+            ]
+          }
+        },
+        "description": "Represents a data transfer object for an item event recorded against an\r\nevent-tracked article."
+      },
+      "ItemEventType": {
+        "type": "integer",
+        "description": "Identifies the kind of event recorded against an event-tracked article."
       },
       "ItemMovimentDto": {
         "required": [
@@ -2371,6 +2495,47 @@
             "format": "date-time"
           }
         }
+      },
+      "ItemMovimentEventDto": {
+        "required": [
+          "quantity",
+          "fromItemContainerGuid",
+          "fromNoContainer",
+          "toItemContainerGuid",
+          "toNoContainer"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "description": "The strictly positive quantity moved.",
+            "$ref": "#/components/schemas/Scalar"
+          },
+          "fromItemContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The origin container, or `null` when the movement originated\r\noutside any container, or when the origin container has since been deleted.",
+            "format": "uuid"
+          },
+          "fromNoContainer": {
+            "type": "boolean",
+            "description": "Whether the movement originally had no origin container."
+          },
+          "toItemContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The destination container, or `null` when the movement left\r\nthe quantity outside any container, or when the destination container has\r\nsince been deleted.",
+            "format": "uuid"
+          },
+          "toNoContainer": {
+            "type": "boolean",
+            "description": "Whether the movement originally had no destination container."
+          }
+        },
+        "description": "Represents the movement payload of an item event."
       },
       "ItemUpdateDto": {
         "type": "object",
@@ -2581,6 +2746,69 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ItemDto"
+            },
+            "description": "The items on the current page."
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The 1-based index of the current page.",
+            "format": "int32"
+          },
+          "limit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+            "format": "int32"
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page after the current one exists."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page before the current one exists."
+          }
+        },
+        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
+      },
+      "PagedResultOfItemEventDto": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemEventDto"
             },
             "description": "The items on the current page."
           },
@@ -3511,6 +3739,9 @@
     },
     {
       "name": "Items"
+    },
+    {
+      "name": "ItemEvents"
     },
     {
       "name": "Users"

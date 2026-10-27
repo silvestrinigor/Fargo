@@ -177,8 +177,9 @@ public static class ItemTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var body = new ItemMovementCreateDto
+        var body = new ItemEventCreateDto
         {
+            EventType = ItemEventTypes.Moviment,
             ArticleGuid = articleGuid,
             Quantity = new Scalar { Double = quantity },
             FromItemContainerGuid = fromItemContainerGuid,
@@ -186,9 +187,60 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        await client.Items.Movements.PostAsync(body, cancellationToken: cancellationToken);
+        await client.ItemEvents.PostAsync(body, cancellationToken: cancellationToken);
 
         return $"Movement of {quantity} recorded for article '{articleGuid}'.";
+    }
+
+    [McpServerTool(Name = "fargo_item_events_list")]
+    [Description("List item events (such as stock movements of event-tracked articles), optionally filtered by article, event type, and time period. Requires the ReadItemEvents permission; only events whose article is accessible to the caller are returned.")]
+    public static async Task<IReadOnlyList<ItemEventSummary>> ListItemEventsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("Only return events for this event-tracked article GUID.")] Guid? articleGuid = null,
+        [Description("Only return events of this type. 1 = moviment (the only type currently supported).")] int? eventType = null,
+        [Description("Only return events that occurred at or after this instant (ISO 8601 UTC).")] DateTimeOffset? periodStart = null,
+        [Description("Only return events that occurred at or before this instant (ISO 8601 UTC).")] DateTimeOffset? periodEnd = null,
+        [Description("Page number to retrieve, starting at 1.")] int? page = null,
+        [Description("Maximum number of events to return per page.")] int? limit = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var result = await client.ItemEvents.GetAsync(request =>
+        {
+            if (articleGuid.HasValue)
+            {
+                request.QueryParameters.ArticleGuid = articleGuid.Value;
+            }
+
+            if (eventType.HasValue)
+            {
+                request.QueryParameters.EventType = eventType.Value;
+            }
+
+            if (periodStart.HasValue)
+            {
+                request.QueryParameters.PeriodStart = periodStart.Value;
+            }
+
+            if (periodEnd.HasValue)
+            {
+                request.QueryParameters.PeriodEnd = periodEnd.Value;
+            }
+
+            if (page.HasValue)
+            {
+                request.QueryParameters.Page = page.Value;
+            }
+
+            if (limit.HasValue)
+            {
+                request.QueryParameters.Limit = limit.Value;
+            }
+        }, cancellationToken);
+
+        return result?.Items?.Select(e => e.ToSummary()).ToArray() ?? [];
     }
 
     [McpServerTool(Name = "fargo_items_get_inventory")]

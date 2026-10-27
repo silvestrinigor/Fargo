@@ -49,7 +49,8 @@ domain state.
 
 Permissions are values of [`ActionType`](xref:Fargo.Core.Actors.ActionType) — a
 create / delete / edit permission per resource plus a few specific actions such
-as `ChangeAnotherUserPassword`, `ChangeUserGroupMembers`, and `ReadAuditLogs`.
+as `ChangeAnotherUserPassword`, `ChangeUserGroupMembers`, `ReadAuditLogs`, and
+`ReadItemEvents`.
 
 Permissions can be granted directly to a user or to a user group; a user's
 effective permissions are the union of both (including permissions inherited

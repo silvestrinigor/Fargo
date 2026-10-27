@@ -8,19 +8,17 @@ using System;
 namespace Fargo.ClientHttp.Models
 {
     /// <summary>
-    /// Describes a movement of a quantity of an event-tracked article betweencontainers.
+    /// Represents the movement payload of an item event.
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class ItemMovementCreateDto : IAdditionalDataHolder, IParsable
+    public partial class ItemMovimentEventDto : IAdditionalDataHolder, IParsable
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The unique identifier of the event-tracked article being moved.</summary>
-        public Guid? ArticleGuid { get; set; }
-        /// <summary>The origin container, or `null` when the quantity enteredstock from outside any container (a receipt).</summary>
+        /// <summary>The origin container, or `null` when the movement originatedoutside any container, or when the origin container has since been deleted.</summary>
         public Guid? FromItemContainerGuid { get; set; }
-        /// <summary>The instant, in UTC, at which the movement occurred. When`null`, the server records the current instant. Provide avalue to back-date a movement, for example when importing historical data.</summary>
-        public DateTimeOffset? OccuredAt { get; set; }
+        /// <summary>Whether the movement originally had no origin container.</summary>
+        public bool? FromNoContainer { get; set; }
         /// <summary>The strictly positive quantity moved.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -29,24 +27,26 @@ namespace Fargo.ClientHttp.Models
 #else
         public global::Fargo.ClientHttp.Models.Scalar Quantity { get; set; }
 #endif
-        /// <summary>The destination container, or `null` when the quantity leftstock to outside any container (a dispatch).</summary>
+        /// <summary>The destination container, or `null` when the movement leftthe quantity outside any container, or when the destination container hassince been deleted.</summary>
         public Guid? ToItemContainerGuid { get; set; }
+        /// <summary>Whether the movement originally had no destination container.</summary>
+        public bool? ToNoContainer { get; set; }
         /// <summary>
-        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ItemMovementCreateDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ItemMovimentEventDto"/> and sets the default values.
         /// </summary>
-        public ItemMovementCreateDto()
+        public ItemMovimentEventDto()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::Fargo.ClientHttp.Models.ItemMovementCreateDto"/></returns>
+        /// <returns>A <see cref="global::Fargo.ClientHttp.Models.ItemMovimentEventDto"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::Fargo.ClientHttp.Models.ItemMovementCreateDto CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::Fargo.ClientHttp.Models.ItemMovimentEventDto CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::Fargo.ClientHttp.Models.ItemMovementCreateDto();
+            return new global::Fargo.ClientHttp.Models.ItemMovimentEventDto();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -56,11 +56,11 @@ namespace Fargo.ClientHttp.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "articleGuid", n => { ArticleGuid = n.GetGuidValue(); } },
                 { "fromItemContainerGuid", n => { FromItemContainerGuid = n.GetGuidValue(); } },
-                { "occuredAt", n => { OccuredAt = n.GetDateTimeOffsetValue(); } },
+                { "fromNoContainer", n => { FromNoContainer = n.GetBoolValue(); } },
                 { "quantity", n => { Quantity = n.GetObjectValue<global::Fargo.ClientHttp.Models.Scalar>(global::Fargo.ClientHttp.Models.Scalar.CreateFromDiscriminatorValue); } },
                 { "toItemContainerGuid", n => { ToItemContainerGuid = n.GetGuidValue(); } },
+                { "toNoContainer", n => { ToNoContainer = n.GetBoolValue(); } },
             };
         }
         /// <summary>
@@ -70,11 +70,11 @@ namespace Fargo.ClientHttp.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteGuidValue("articleGuid", ArticleGuid);
             writer.WriteGuidValue("fromItemContainerGuid", FromItemContainerGuid);
-            writer.WriteDateTimeOffsetValue("occuredAt", OccuredAt);
+            writer.WriteBoolValue("fromNoContainer", FromNoContainer);
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.Scalar>("quantity", Quantity);
             writer.WriteGuidValue("toItemContainerGuid", ToItemContainerGuid);
+            writer.WriteBoolValue("toNoContainer", ToNoContainer);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

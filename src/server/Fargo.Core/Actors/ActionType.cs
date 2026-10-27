@@ -93,5 +93,10 @@ public enum ActionType
     /// <summary>
     /// Read audit logs.
     /// </summary>
-    ReadAuditLogs = 18
+    ReadAuditLogs = 18,
+
+    /// <summary>
+    /// Read item events.
+    /// </summary>
+    ReadItemEvents = 19
 }

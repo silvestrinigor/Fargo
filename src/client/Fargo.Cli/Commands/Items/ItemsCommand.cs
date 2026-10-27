@@ -17,5 +17,6 @@ public sealed class ItemsCommand : Command
         Add(new ItemLocationCommand(client));
         Add(new ItemMovimentsCommand(client));
         Add(new ItemInventoryCommand(client));
+        Add(new ItemEventCommand(client));
     }
 }

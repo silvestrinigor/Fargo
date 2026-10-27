@@ -89,6 +89,7 @@ public static class DependencyInjectionServiceCollectionExtensions
         .AddScoped<IItemRepository, ItemRepository>()
         .AddScoped<IItemQueryRepository, ItemRepository>()
         .AddScoped<IItemEventRepository, ItemEventRepository>()
+        .AddScoped<IItemEventQueryRepository, ItemEventRepository>()
         .AddScoped<IUserRepository, UserRepository>()
         .AddScoped<IUserQueryRepository, UserRepository>()
         .AddScoped<IUserGroupRepository, UserGroupRepository>()

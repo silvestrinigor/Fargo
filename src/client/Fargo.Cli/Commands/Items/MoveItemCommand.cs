@@ -66,8 +66,9 @@ public sealed class MoveItemCommand : Command
             var to = parseResult.GetValue(toOption);
             var at = parseResult.GetValue(atOption);
 
-            var dto = new ItemMovementCreateDto
+            var dto = new ItemEventCreateDto
             {
+                EventType = (int)ItemEventType.Moviment,
                 ArticleGuid = article,
                 Quantity = new Scalar { Double = quantity },
                 FromItemContainerGuid = from,
@@ -75,7 +76,7 @@ public sealed class MoveItemCommand : Command
                 OccuredAt = at
             };
 
-            await client.Items.Movements.PostAsync(dto, cancellationToken: cancellationToken);
+            await client.ItemEvents.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
                 "Item movement recorded.",

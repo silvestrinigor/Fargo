@@ -78,6 +78,7 @@ Commands:
                     Pass --at to reconstruct the inventory as it was at a specific
                     instant, using the item containment history, instead of the current
                     inventory.
+  event             Query item events - stock changes recorded for event-tracked articles.
   
                     Examples:
                       fargo item inventory 22222222-2222-2222-2222-222222222222
@@ -340,3 +341,83 @@ Options:
 
 ```
 
+
+
+## `fargo item event`
+
+```text
+Description:
+  Query item events - stock changes recorded for event-tracked articles.
+
+Usage:
+  fargo item event [command] [options]
+
+Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+Commands:
+  list  List item events as a table.
+  
+        Item events record stock changes for event-tracked articles - for
+        example a movement of a quantity between containers. Results can be
+        filtered by article, event type, and time period. Requires the
+        "read item events" permission; only events whose article you can
+        access are returned.
+  
+        By default the list is paged interactively: a page of entries is shown
+        and you can press 'n' for the next page, 'p' for the previous page, or
+        'q' to quit (press Enter after the key). Passing --page or --limit
+        switches to a single, non-interactive fetch of exactly that page.
+  
+        Examples:
+          fargo item event list
+          fargo item event list --article 11111111-1111-1111-1111-111111111111
+          fargo item event list --from 2026-01-01T00:00:00Z --to 2026-02-01T00:00:00Z
+          fargo item event list --page 1 --limit 50
+
+```
+
+## `fargo item event list`
+
+```text
+Description:
+  List item events as a table.
+  
+  Item events record stock changes for event-tracked articles - for
+  example a movement of a quantity between containers. Results can be
+  filtered by article, event type, and time period. Requires the
+  "read item events" permission; only events whose article you can
+  access are returned.
+  
+  By default the list is paged interactively: a page of entries is shown
+  and you can press 'n' for the next page, 'p' for the previous page, or
+  'q' to quit (press Enter after the key). Passing --page or --limit
+  switches to a single, non-interactive fetch of exactly that page.
+  
+  Examples:
+    fargo item event list
+    fargo item event list --article 11111111-1111-1111-1111-111111111111
+    fargo item event list --from 2026-01-01T00:00:00Z --to 2026-02-01T00:00:00Z
+    fargo item event list --page 1 --limit 50
+
+Usage:
+  fargo item event list [options]
+
+Options:
+  --article <article>    Only show events for this event-tracked article GUID.
+  --type <type>          Only show events of this type (1 = moviment).
+  --from <from>          Only show events at or after this instant (ISO 8601 UTC).
+  --to <to>              Only show events at or before this instant (ISO 8601 UTC).
+  --page <page>          Page number to retrieve (starts at 1). Disables interactive paging.
+  --limit <limit>        Maximum number of events per page. Disables interactive paging.
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```

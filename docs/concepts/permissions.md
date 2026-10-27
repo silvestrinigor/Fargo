@@ -18,12 +18,14 @@ create / delete / edit triple, plus a few targeted actions:
 | User groups | create, delete, edit, change members |
 | Partitions | create, delete, edit |
 | Audit logs | read |
+| Item events | read |
 
 Some actions are deliberately separated from the basic edit permission because
 they are more sensitive — for example, changing another user's password or
 changing a group's membership are distinct from editing the user or group's
 other fields, and reading audit logs is its own permission rather than being
-implied by any edit right.
+implied by any edit right. Reading item events — the stream of stock changes
+recorded for event-tracked articles — is likewise a distinct read permission.
 
 ## Direct and inherited grants
 

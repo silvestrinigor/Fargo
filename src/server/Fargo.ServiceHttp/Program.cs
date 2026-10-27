@@ -77,6 +77,8 @@ app.MapFargoArticle();
 
 app.MapFargoItem();
 
+app.MapFargoItemEvent();
+
 app.MapFargoUser();
 
 app.MapFargoUserGroup();
