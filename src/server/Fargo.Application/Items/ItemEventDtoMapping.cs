@@ -12,10 +12,11 @@ public static class ItemEventDtoMapping
     /// Converts an item event entity to an <see cref="ItemEventDto"/>.
     /// </summary>
     /// <param name="itemEvent">The item event to convert.</param>
-    /// <returns>A DTO populated from the event and its movement payload, if any.</returns>
+    /// <returns>A DTO populated from the event and its payload, if any.</returns>
     public static ItemEventDto ToDto(this ItemEvent itemEvent)
     {
         var moviment = itemEvent.Moviment;
+        var lifecycle = itemEvent.Lifecycle;
 
         return new ItemEventDto(
             itemEvent.Guid,
@@ -29,6 +30,12 @@ public static class ItemEventDtoMapping
                     moviment.FromItemContainerGuid,
                     moviment.FromNoContainer,
                     moviment.ToItemContainerGuid,
-                    moviment.ToNoContainer));
+                    moviment.ToNoContainer),
+            lifecycle is null
+                ? null
+                : new ItemLifecycleEventDto(
+                    lifecycle.Quantity,
+                    lifecycle.ItemContainerGuid,
+                    lifecycle.NoContainer));
     }
 }

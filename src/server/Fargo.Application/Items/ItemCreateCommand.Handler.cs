@@ -36,6 +36,8 @@ public sealed class ItemCreateCommandHandler(
 
         actor.ThrowIfAccessDenied(article);
 
+        // Event-tracked articles do not materialize item rows; their stock is
+        // recorded through item events instead (see the item events resource).
         var item = Item.CreateItem(article);
 
         var itemAudit = AuditLog.CreateAuditLog(actor, item, AuditLogType.EntityCreated);

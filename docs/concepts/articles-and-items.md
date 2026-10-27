@@ -75,6 +75,19 @@ occurred (which may be back-dated, e.g. when importing historical data). A
 movement with only a destination is a *receipt* into stock; one with only an
 origin is a *dispatch* out of stock; one with both is a *transfer*.
 
+Besides movements, event-tracked stock also records **creation** and
+**deletion** events — the event-based counterpart of adding or removing stock.
+Because event-based stock is not unit-tracked, these are not tied to an item
+identity: a single creation or deletion carries a **quantity** and an optional
+**container**, so one event can cover many units at once.
+
+All item events are recorded the same way: a `POST` to **`/item/events`** whose
+`eventType` selects the kind (movement, creation, or deletion). There is no
+separate verb for deletion — it is just an event with `eventType = deletion`.
+Each call returns the identifier of the recorded event. (The CLI exposes this as
+`fargo item event create|delete|move`.) Creating or deleting an *entity-tracked*
+item is unrelated and still goes through `POST /items` / `DELETE /items/{guid}`.
+
 > Entity-tracked and event-tracked articles coexist in the same catalog and the
 > same containers. A container's inventory lists both kinds side by side.
 

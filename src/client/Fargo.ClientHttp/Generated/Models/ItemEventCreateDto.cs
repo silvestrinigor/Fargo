@@ -19,11 +19,13 @@ namespace Fargo.ClientHttp.Models
         public Guid? ArticleGuid { get; set; }
         /// <summary>The kind of event to record.</summary>
         public int? EventType { get; set; }
-        /// <summary>The origin container, or `null` when the quantity enteredstock from outside any container (a receipt).</summary>
+        /// <summary>For a movement, the origin container, or `null` for a receiptfrom outside any container.</summary>
         public Guid? FromItemContainerGuid { get; set; }
+        /// <summary>For a creation or deletion, the container the quantity was created in ordeleted from, or `null` when outside any container.</summary>
+        public Guid? ItemContainerGuid { get; set; }
         /// <summary>The instant, in UTC, at which the event occurred. When`null`, the server records the current instant.</summary>
         public DateTimeOffset? OccuredAt { get; set; }
-        /// <summary>The strictly positive quantity moved.</summary>
+        /// <summary>The strictly positive quantity.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public global::Fargo.ClientHttp.Models.Scalar? Quantity { get; set; }
@@ -31,7 +33,7 @@ namespace Fargo.ClientHttp.Models
 #else
         public global::Fargo.ClientHttp.Models.Scalar Quantity { get; set; }
 #endif
-        /// <summary>The destination container, or `null` when the quantity leftstock to outside any container (a dispatch).</summary>
+        /// <summary>For a movement, the destination container, or `null` for adispatch to outside any container.</summary>
         public Guid? ToItemContainerGuid { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ItemEventCreateDto"/> and sets the default values.
@@ -61,6 +63,7 @@ namespace Fargo.ClientHttp.Models
                 { "articleGuid", n => { ArticleGuid = n.GetGuidValue(); } },
                 { "eventType", n => { EventType = n.GetIntValue(); } },
                 { "fromItemContainerGuid", n => { FromItemContainerGuid = n.GetGuidValue(); } },
+                { "itemContainerGuid", n => { ItemContainerGuid = n.GetGuidValue(); } },
                 { "occuredAt", n => { OccuredAt = n.GetDateTimeOffsetValue(); } },
                 { "quantity", n => { Quantity = n.GetObjectValue<global::Fargo.ClientHttp.Models.Scalar>(global::Fargo.ClientHttp.Models.Scalar.CreateFromDiscriminatorValue); } },
                 { "toItemContainerGuid", n => { ToItemContainerGuid = n.GetGuidValue(); } },
@@ -76,6 +79,7 @@ namespace Fargo.ClientHttp.Models
             writer.WriteGuidValue("articleGuid", ArticleGuid);
             writer.WriteIntValue("eventType", EventType);
             writer.WriteGuidValue("fromItemContainerGuid", FromItemContainerGuid);
+            writer.WriteGuidValue("itemContainerGuid", ItemContainerGuid);
             writer.WriteDateTimeOffsetValue("occuredAt", OccuredAt);
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.Scalar>("quantity", Quantity);
             writer.WriteGuidValue("toItemContainerGuid", ToItemContainerGuid);

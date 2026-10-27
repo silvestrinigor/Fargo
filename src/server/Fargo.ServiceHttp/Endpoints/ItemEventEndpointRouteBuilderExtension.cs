@@ -13,13 +13,13 @@ public static class ItemEventEndpointRouteBuilderExtension
 
         group.MapGetItemEvents();
 
-        group.MapCreateItemMovementEvent();
+        group.MapCreateItemEvent();
     }
 
     private static RouteGroupBuilder MapItemEventGroup(this IEndpointRouteBuilder builder)
     {
         var group = builder
-        .MapGroup("/item-events")
+        .MapGroup("/item/events")
         .RequireAuthorization()
         .WithTags("ItemEvents")
         .RequireRateLimiting("general-authenticated");
@@ -62,31 +62,31 @@ public static class ItemEventEndpointRouteBuilderExtension
 
     #endregion Get Many
 
-    #region Create movement event
+    #region Create event
 
-    private static IEndpointRouteBuilder MapCreateItemMovementEvent(this IEndpointRouteBuilder builder)
+    private static IEndpointRouteBuilder MapCreateItemEvent(this IEndpointRouteBuilder builder)
     {
         builder
-        .MapPost("/", CreateItemMovementEvent)
+        .MapPost("/", CreateItemEvent)
         .WithName("CreateItemEvent")
         .WithSummary("Records an item event")
-        .WithDescription("Records a new item event. Currently the only supported event type is a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event; entity-tracked articles record movements through their individual items instead.")
-        .Produces(StatusCodes.Status204NoContent);
+        .WithDescription("Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.")
+        .Produces<Guid>(StatusCodes.Status200OK);
 
         return builder;
     }
 
-    private static async Task<NoContent> CreateItemMovementEvent(
+    private static async Task<Ok<Guid>> CreateItemEvent(
         ItemEventCreateDto request,
-        ICommandHandler<MoveItemEventCommand> handler,
+        ICommandHandler<ItemEventCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var command = new MoveItemEventCommand(request.ToMovement());
+        var command = new ItemEventCreateCommand(request);
 
-        await handler.HandleAsync(command, cancellationToken);
+        var response = await handler.HandleAsync(command, cancellationToken);
 
-        return TypedResults.NoContent();
+        return TypedResults.Ok(response);
     }
 
-    #endregion Create movement event
+    #endregion Create event
 }

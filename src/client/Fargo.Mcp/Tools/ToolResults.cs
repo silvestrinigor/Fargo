@@ -71,7 +71,9 @@ public static class ToolResults
         dto.OccuredAt,
         dto.Moviment?.Quantity?.Double,
         dto.Moviment?.FromItemContainerGuid,
-        dto.Moviment?.ToItemContainerGuid);
+        dto.Moviment?.ToItemContainerGuid,
+        dto.Lifecycle?.Quantity?.Double,
+        dto.Lifecycle?.ItemContainerGuid);
 }
 
 public sealed record ArticleSummary(
@@ -134,9 +136,11 @@ public sealed record ItemEventSummary(
     Guid? ArticleGuid,
     int? EventType,
     DateTimeOffset? OccuredAt,
-    double? Quantity,
+    double? MovimentQuantity,
     Guid? FromItemContainerGuid,
-    Guid? ToItemContainerGuid);
+    Guid? ToItemContainerGuid,
+    double? LifecycleQuantity,
+    Guid? ItemContainerGuid);
 
 /// <summary>
 /// Numeric values of the server's <c>ItemEventType</c> enum, which the API
@@ -146,4 +150,10 @@ public static class ItemEventTypes
 {
     /// <summary>A movement of a quantity between containers.</summary>
     public const int Moviment = 1;
+
+    /// <summary>The creation of a unit of stock.</summary>
+    public const int Creation = 2;
+
+    /// <summary>The deletion of a previously created unit of stock.</summary>
+    public const int Deletion = 3;
 }

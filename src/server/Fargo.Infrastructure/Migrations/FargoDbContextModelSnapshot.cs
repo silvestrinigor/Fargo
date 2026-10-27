@@ -390,6 +390,33 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("item_events", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.Items.Events.ItemLifecycleEvent", b =>
+                {
+                    b.Property<Guid>("ItemEventGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_event_guid");
+
+                    b.Property<Guid?>("ItemContainerGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_container_guid");
+
+                    b.Property<bool>("NoContainer")
+                        .HasColumnType("boolean")
+                        .HasColumnName("no_container");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("quantity");
+
+                    b.HasKey("ItemEventGuid")
+                        .HasName("pk_item_lifecycle_events");
+
+                    b.HasIndex("ItemContainerGuid")
+                        .HasDatabaseName("ix_item_lifecycle_events_item_container_guid");
+
+                    b.ToTable("item_lifecycle_events", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Items.Events.ItemMovimentEvent", b =>
                 {
                     b.Property<Guid>("ItemEventGuid")
@@ -954,6 +981,24 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Article");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Items.Events.ItemLifecycleEvent", b =>
+                {
+                    b.HasOne("Fargo.Core.Items.Item", "ItemContainer")
+                        .WithMany()
+                        .HasForeignKey("ItemContainerGuid")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_item_lifecycle_events_items_item_container_guid");
+
+                    b.HasOne("Fargo.Core.Items.Events.ItemEvent", null)
+                        .WithOne("Lifecycle")
+                        .HasForeignKey("Fargo.Core.Items.Events.ItemLifecycleEvent", "ItemEventGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_lifecycle_events_item_events_item_event_guid");
+
+                    b.Navigation("ItemContainer");
+                });
+
             modelBuilder.Entity("Fargo.Core.Items.Events.ItemMovimentEvent", b =>
                 {
                     b.HasOne("Fargo.Core.Items.Item", "FromItemContainer")
@@ -962,8 +1007,8 @@ namespace Fargo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_item_moviment_events_items_from_item_container_guid");
 
-                    b.HasOne("Fargo.Core.Items.Events.ItemEvent", "ItemEvent")
-                        .WithOne()
+                    b.HasOne("Fargo.Core.Items.Events.ItemEvent", null)
+                        .WithOne("Moviment")
                         .HasForeignKey("Fargo.Core.Items.Events.ItemMovimentEvent", "ItemEventGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -976,8 +1021,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasConstraintName("fk_item_moviment_events_items_to_item_container_guid");
 
                     b.Navigation("FromItemContainer");
-
-                    b.Navigation("ItemEvent");
 
                     b.Navigation("ToItemContainer");
                 });
@@ -1220,6 +1263,13 @@ namespace Fargo.Infrastructure.Migrations
             modelBuilder.Entity("Fargo.Core.Audits.AuditLog", b =>
                 {
                     b.Navigation("Partitions");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Items.Events.ItemEvent", b =>
+                {
+                    b.Navigation("Lifecycle");
+
+                    b.Navigation("Moviment");
                 });
 
             modelBuilder.Entity("Fargo.Core.Items.Item", b =>

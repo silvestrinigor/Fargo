@@ -80,7 +80,7 @@ public sealed class ListItemEventsCommand : Command
                 limit,
                 fetch: async (p, l) =>
                 {
-                    var result = await client.ItemEvents.GetAsync(request =>
+                    var result = await client.Item.Events.GetAsync(request =>
                     {
                         request.QueryParameters.Page = p;
                         request.QueryParameters.Limit = l;
@@ -129,9 +129,10 @@ public sealed class ListItemEventsCommand : Command
             .Column("GUID", e => e.Guid?.ToString())
             .Column("ARTICLE", e => e.ArticleGuid?.ToString())
             .Column("TYPE", e => EnumFormatting.Format<ItemEventType>(e.EventType))
-            .Column("QUANTITY", e => e.Moviment?.Quantity?.Double?.ToString())
+            .Column("QUANTITY", e => (e.Moviment?.Quantity?.Double ?? e.Lifecycle?.Quantity?.Double)?.ToString())
             .Column("FROM", e => e.Moviment?.FromItemContainerGuid?.ToString())
             .Column("TO", e => e.Moviment?.ToItemContainerGuid?.ToString())
+            .Column("CONTAINER", e => e.Lifecycle?.ItemContainerGuid?.ToString())
             .Column("OCCURRED AT", e => e.OccuredAt?.ToString("u"))
             .EmptyMessage("No item events found.")
             .Write(items);

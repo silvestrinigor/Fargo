@@ -79,6 +79,8 @@ public enum ActionType
 public enum ItemEventType
 {
     Moviment = 1,
+    Creation = 2,
+    Deletion = 3,
 }
 
 /// <summary>

@@ -41,7 +41,10 @@ fargo
 │  ├─ moviments
 │  ├─ inventory
 │  └─ event
-│     └─ list
+│     ├─ list
+│     ├─ create
+│     ├─ delete
+│     └─ move
 ├─ partitions     Manage partitions
 │  ├─ list
 │  ├─ tree

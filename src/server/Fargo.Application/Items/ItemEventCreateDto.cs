@@ -1,4 +1,3 @@
-using Fargo.Core.Common;
 using Fargo.Core.Items.Events;
 using UnitsNet;
 
@@ -8,26 +7,44 @@ namespace Fargo.Application.Items;
 /// Describes a new item event to record against an event-tracked article.
 /// </summary>
 /// <remarks>
-/// The <see cref="EventType"/> acts as a discriminator for the payload.
-/// Currently the only supported event type is
-/// <see cref="ItemEventType.Moviment"/>, which records a movement of a quantity
-/// between containers (or into/out of no container). The movement fields
-/// (<see cref="ArticleGuid"/>, <see cref="Quantity"/>,
-/// <see cref="FromItemContainerGuid"/>, <see cref="ToItemContainerGuid"/>,
-/// <see cref="OccuredAt"/>) describe that movement.
+/// The <see cref="EventType"/> acts as a discriminator that selects which fields
+/// apply:
+/// <list type="bullet">
+///   <item>
+///     <description>
+///     <see cref="ItemEventType.Moviment"/> uses
+///     <see cref="FromItemContainerGuid"/> and <see cref="ToItemContainerGuid"/>
+///     to describe a movement of <see cref="Quantity"/> between containers (or
+///     into/out of no container).
+///     </description>
+///   </item>
+///   <item>
+///     <description>
+///     <see cref="ItemEventType.Creation"/> and
+///     <see cref="ItemEventType.Deletion"/> use <see cref="ItemContainerGuid"/>
+///     to describe where a <see cref="Quantity"/> of stock was created or
+///     deleted. Event-based stock is not unit-tracked, so a single event can
+///     create or delete many units at once.
+///     </description>
+///   </item>
+/// </list>
 /// </remarks>
 /// <param name="EventType">The kind of event to record.</param>
 /// <param name="ArticleGuid">
 /// The unique identifier of the event-tracked article the event concerns.
 /// </param>
-/// <param name="Quantity">The strictly positive quantity moved.</param>
+/// <param name="Quantity">The strictly positive quantity.</param>
 /// <param name="FromItemContainerGuid">
-/// The origin container, or <see langword="null"/> when the quantity entered
-/// stock from outside any container (a receipt).
+/// For a movement, the origin container, or <see langword="null"/> for a receipt
+/// from outside any container.
 /// </param>
 /// <param name="ToItemContainerGuid">
-/// The destination container, or <see langword="null"/> when the quantity left
-/// stock to outside any container (a dispatch).
+/// For a movement, the destination container, or <see langword="null"/> for a
+/// dispatch to outside any container.
+/// </param>
+/// <param name="ItemContainerGuid">
+/// For a creation or deletion, the container the quantity was created in or
+/// deleted from, or <see langword="null"/> when outside any container.
 /// </param>
 /// <param name="OccuredAt">
 /// The instant, in UTC, at which the event occurred. When
@@ -39,31 +56,6 @@ public sealed record ItemEventCreateDto(
     Scalar Quantity,
     Guid? FromItemContainerGuid = null,
     Guid? ToItemContainerGuid = null,
+    Guid? ItemContainerGuid = null,
     DateTimeOffset? OccuredAt = null
-)
-{
-    /// <summary>
-    /// Translates this event-creation request into the movement command payload.
-    /// </summary>
-    /// <returns>The movement description carried by the create request.</returns>
-    /// <exception cref="FargoCoreException">
-    /// Thrown when <see cref="EventType"/> is not a supported event type for
-    /// creation.
-    /// </exception>
-    public ItemMovementCreateDto ToMovement()
-    {
-        if (EventType != ItemEventType.Moviment)
-        {
-            throw new FargoCoreException(
-                $"Unsupported item event type '{EventType}' for creation.",
-                FargoErrorType.InvalidOperation);
-        }
-
-        return new ItemMovementCreateDto(
-            ArticleGuid,
-            Quantity,
-            FromItemContainerGuid,
-            ToItemContainerGuid,
-            OccuredAt);
-    }
-}
+);

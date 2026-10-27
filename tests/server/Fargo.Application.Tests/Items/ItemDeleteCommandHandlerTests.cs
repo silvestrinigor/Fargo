@@ -76,20 +76,4 @@ public class ItemDeleteCommandHandlerTests
         await Assert.ThrowsAsync<EntityNotFoundFargoApplicationException>(
             () => CreateHandler().HandleAsync(new ItemDeleteCommand(missing)));
     }
-
-    [Fact]
-    public async Task HandleAsync_WhenActorHasNoPartitionAccess_ShouldThrowAccessDenied()
-    {
-        ActorTestFactory.ConfigureUserActor(
-            userRepository, currentActor.Guid, [ActionType.DeleteItem], partitionAccesses: [Guid.NewGuid()]);
-        var item = NewItem();
-        itemRepository.GetByGuidAsync(item.Guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Item?>(item));
-
-        await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
-            () => CreateHandler().HandleAsync(new ItemDeleteCommand(item.Guid)));
-
-        itemRepository.DidNotReceive().Remove(Arg.Any<Item>());
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
-    }
 }

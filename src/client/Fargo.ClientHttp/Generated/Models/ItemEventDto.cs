@@ -21,6 +21,14 @@ namespace Fargo.ClientHttp.Models
         public int? EventType { get; set; }
         /// <summary>The unique identifier of the item event.</summary>
         public Guid? Guid { get; set; }
+        /// <summary>The lifecycle property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public global::Fargo.ClientHttp.Models.ItemLifecycleEventDto? Lifecycle { get; set; }
+#nullable restore
+#else
+        public global::Fargo.ClientHttp.Models.ItemLifecycleEventDto Lifecycle { get; set; }
+#endif
         /// <summary>The moviment property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -59,6 +67,7 @@ namespace Fargo.ClientHttp.Models
                 { "articleGuid", n => { ArticleGuid = n.GetGuidValue(); } },
                 { "eventType", n => { EventType = n.GetIntValue(); } },
                 { "guid", n => { Guid = n.GetGuidValue(); } },
+                { "lifecycle", n => { Lifecycle = n.GetObjectValue<global::Fargo.ClientHttp.Models.ItemLifecycleEventDto>(global::Fargo.ClientHttp.Models.ItemLifecycleEventDto.CreateFromDiscriminatorValue); } },
                 { "moviment", n => { Moviment = n.GetObjectValue<global::Fargo.ClientHttp.Models.ItemMovimentEventDto>(global::Fargo.ClientHttp.Models.ItemMovimentEventDto.CreateFromDiscriminatorValue); } },
                 { "occuredAt", n => { OccuredAt = n.GetDateTimeOffsetValue(); } },
             };
@@ -73,6 +82,7 @@ namespace Fargo.ClientHttp.Models
             writer.WriteGuidValue("articleGuid", ArticleGuid);
             writer.WriteIntValue("eventType", EventType);
             writer.WriteGuidValue("guid", Guid);
+            writer.WriteObjectValue<global::Fargo.ClientHttp.Models.ItemLifecycleEventDto>("lifecycle", Lifecycle);
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.ItemMovimentEventDto>("moviment", Moviment);
             writer.WriteDateTimeOffsetValue("occuredAt", OccuredAt);
             writer.WriteAdditionalData(AdditionalData);

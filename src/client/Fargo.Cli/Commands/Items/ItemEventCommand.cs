@@ -6,8 +6,11 @@ namespace Fargo.Cli.Commands.Items;
 public sealed class ItemEventCommand : Command
 {
     public ItemEventCommand(FargoApiClient client)
-        : base("event", "Query item events - stock changes recorded for event-tracked articles.")
+        : base("event", "Record and query item events - stock changes for event-tracked articles.")
     {
         Add(new ListItemEventsCommand(client));
+        Add(new CreateItemEventCommand(client));
+        Add(new DeleteItemEventCommand(client));
+        Add(new MoveItemEventCommand(client));
     }
 }

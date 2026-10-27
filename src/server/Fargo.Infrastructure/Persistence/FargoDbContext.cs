@@ -27,6 +27,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     public DbSet<ItemMovimentEvent> ItemMovimentEvents { get; set; }
 
+    public DbSet<ItemLifecycleEvent> ItemLifecycleEvents { get; set; }
+
     public DbSet<User> Users { get; set; }
 
     public DbSet<UserGroup> UserGroups { get; set; }
@@ -131,6 +133,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new AuditLogPartitionConfiguration())
         .ApplyConfiguration(new AuthenticationAttemptConfiguration())
         .ApplyConfiguration(new ItemEventConfiguration())
-        .ApplyConfiguration(new ItemMovimentEventConfiguration());
+        .ApplyConfiguration(new ItemMovimentEventConfiguration())
+        .ApplyConfiguration(new ItemLifecycleEventConfiguration());
     }
 }

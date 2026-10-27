@@ -163,8 +163,8 @@ public static class ItemTools
         return result?.Select(m => m.ToSummary()).ToArray() ?? [];
     }
 
-    [McpServerTool(Name = "fargo_items_move")]
-    [Description("Record a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event. Provide a destination for a receipt, an origin for a dispatch, or both for a transfer.")]
+    [McpServerTool(Name = "fargo_item_events_move")]
+    [Description("Record a movement event: a quantity of an event-tracked article moved between containers (or into/out of no container). Provide a destination for a receipt, an origin for a dispatch, or both for a transfer. Returns the recorded event's GUID.")]
     public static async Task<string> MoveItemAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
@@ -187,9 +187,63 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        await client.ItemEvents.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
 
-        return $"Movement of {quantity} recorded for article '{articleGuid}'.";
+        return $"Movement event '{guid}' recorded for article '{articleGuid}'.";
+    }
+
+    [McpServerTool(Name = "fargo_item_events_create")]
+    [Description("Record a creation event: a quantity of an event-tracked article that entered stock, optionally at a container. Event-based stock is not unit-tracked, so a single event can create many units at once. Returns the recorded event's GUID.")]
+    public static async Task<string> CreateItemEventAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the event-tracked article.")] Guid articleGuid,
+        [Description("The strictly positive quantity created.")] double quantity,
+        [Description("The GUID of the container the quantity was created in. Omit for outside any container.")] Guid? itemContainerGuid = null,
+        [Description("Optional instant (ISO 8601 UTC) at which the creation occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ItemEventCreateDto
+        {
+            EventType = ItemEventTypes.Creation,
+            ArticleGuid = articleGuid,
+            Quantity = new Scalar { Double = quantity },
+            ItemContainerGuid = itemContainerGuid,
+            OccuredAt = occuredAt
+        };
+
+        var guid = await client.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+
+        return $"Creation event '{guid}' recorded for article '{articleGuid}'.";
+    }
+
+    [McpServerTool(Name = "fargo_item_events_delete")]
+    [Description("Record a deletion event: a quantity of an event-tracked article that left stock, optionally from a container. Event-based stock is not unit-tracked, so you describe how much left and from where rather than an item GUID. Returns the recorded event's GUID.")]
+    public static async Task<string> DeleteItemEventAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the event-tracked article.")] Guid articleGuid,
+        [Description("The strictly positive quantity deleted.")] double quantity,
+        [Description("The GUID of the container the quantity was deleted from. Omit for outside any container.")] Guid? itemContainerGuid = null,
+        [Description("Optional instant (ISO 8601 UTC) at which the deletion occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ItemEventCreateDto
+        {
+            EventType = ItemEventTypes.Deletion,
+            ArticleGuid = articleGuid,
+            Quantity = new Scalar { Double = quantity },
+            ItemContainerGuid = itemContainerGuid,
+            OccuredAt = occuredAt
+        };
+
+        var guid = await client.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+
+        return $"Deletion event '{guid}' recorded for article '{articleGuid}'.";
     }
 
     [McpServerTool(Name = "fargo_item_events_list")]
@@ -198,7 +252,7 @@ public static class ItemTools
         FargoApiClient client,
         FargoAuthenticator authenticator,
         [Description("Only return events for this event-tracked article GUID.")] Guid? articleGuid = null,
-        [Description("Only return events of this type. 1 = moviment (the only type currently supported).")] int? eventType = null,
+        [Description("Only return events of this type. 1 = moviment, 2 = creation, 3 = deletion.")] int? eventType = null,
         [Description("Only return events that occurred at or after this instant (ISO 8601 UTC).")] DateTimeOffset? periodStart = null,
         [Description("Only return events that occurred at or before this instant (ISO 8601 UTC).")] DateTimeOffset? periodEnd = null,
         [Description("Page number to retrieve, starting at 1.")] int? page = null,
@@ -207,7 +261,7 @@ public static class ItemTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var result = await client.ItemEvents.GetAsync(request =>
+        var result = await client.Item.Events.GetAsync(request =>
         {
             if (articleGuid.HasValue)
             {

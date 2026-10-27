@@ -600,7 +600,7 @@
         }
       }
     },
-    "/item-events": {
+    "/item/events": {
       "get": {
         "tags": [
           "ItemEvents"
@@ -678,7 +678,7 @@
           "ItemEvents"
         ],
         "summary": "Records an item event",
-        "description": "Records a new item event. Currently the only supported event type is a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event; entity-tracked articles record movements through their individual items instead.",
+        "description": "Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.",
         "operationId": "CreateItemEvent",
         "requestBody": {
           "content": {
@@ -691,8 +691,16 @@
           "required": true
         },
         "responses": {
-          "204": {
-            "description": "No Content"
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
           }
         }
       }
@@ -2399,7 +2407,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "description": "The strictly positive quantity moved.",
+            "description": "The strictly positive quantity.",
             "$ref": "#/components/schemas/Scalar"
           },
           "fromItemContainerGuid": {
@@ -2407,7 +2415,7 @@
               "null",
               "string"
             ],
-            "description": "The origin container, or `null` when the quantity entered\r\nstock from outside any container (a receipt).",
+            "description": "For a movement, the origin container, or `null` for a receipt\r\nfrom outside any container.",
             "format": "uuid"
           },
           "toItemContainerGuid": {
@@ -2415,7 +2423,15 @@
               "null",
               "string"
             ],
-            "description": "The destination container, or `null` when the quantity left\r\nstock to outside any container (a dispatch).",
+            "description": "For a movement, the destination container, or `null` for a\r\ndispatch to outside any container.",
+            "format": "uuid"
+          },
+          "itemContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "For a creation or deletion, the container the quantity was created in or\r\ndeleted from, or `null` when outside any container.",
             "format": "uuid"
           },
           "occuredAt": {
@@ -2435,7 +2451,8 @@
           "articleGuid",
           "eventType",
           "occuredAt",
-          "moviment"
+          "moviment",
+          "lifecycle"
         ],
         "type": "object",
         "properties": {
@@ -2468,6 +2485,17 @@
                 "$ref": "#/components/schemas/ItemMovimentEventDto"
               }
             ]
+          },
+          "lifecycle": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The creation/deletion payload when EventType is\r\nItemEventType.Creation or ItemEventType.Deletion;\r\notherwise `null`.",
+                "$ref": "#/components/schemas/ItemLifecycleEventDto"
+              }
+            ]
           }
         },
         "description": "Represents a data transfer object for an item event recorded against an\r\nevent-tracked article."
@@ -2475,6 +2503,33 @@
       "ItemEventType": {
         "type": "integer",
         "description": "Identifies the kind of event recorded against an event-tracked article."
+      },
+      "ItemLifecycleEventDto": {
+        "required": [
+          "quantity",
+          "itemContainerGuid",
+          "noContainer"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "description": "The strictly positive quantity created or deleted.",
+            "$ref": "#/components/schemas/Scalar"
+          },
+          "itemContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The container the quantity was created in or deleted from, or\r\n`null` when outside any container, or when the container has\r\nsince been deleted.",
+            "format": "uuid"
+          },
+          "noContainer": {
+            "type": "boolean",
+            "description": "Whether the event originally had no container."
+          }
+        },
+        "description": "Represents the creation/deletion payload of an item event."
       },
       "ItemMovimentDto": {
         "required": [

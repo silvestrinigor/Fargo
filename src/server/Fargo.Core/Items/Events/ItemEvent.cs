@@ -55,6 +55,13 @@ public class ItemEvent : IEntity, IEntityTyped
     public ItemMovimentEvent? Moviment { get; private set; }
 
     /// <summary>
+    /// Gets the creation/deletion payload of this event, when its
+    /// <see cref="EventType"/> is <see cref="ItemEventType.Creation"/> or
+    /// <see cref="ItemEventType.Deletion"/>; otherwise <see langword="null"/>.
+    /// </summary>
+    public ItemLifecycleEvent? Lifecycle { get; private set; }
+
+    /// <summary>
     /// Gets the instant, in UTC, at which the event occurred.
     /// </summary>
     /// <remarks>
@@ -163,6 +170,90 @@ public class ItemEvent : IEntity, IEntityTyped
         moviment.ItemEventGuid = itemEvent.Guid;
 
         itemEvent.Moviment = moviment;
+
+        return itemEvent;
+    }
+
+    /// <summary>
+    /// Creates a new creation event for an event-tracked article, recording that
+    /// a quantity of stock was created, optionally inside a container.
+    /// </summary>
+    /// <param name="article">The event-tracked article the stock belongs to.</param>
+    /// <param name="container">
+    /// The container the quantity was created in, or <see langword="null"/> when
+    /// it was created outside any container.
+    /// </param>
+    /// <param name="quantity">The strictly positive quantity created.</param>
+    /// <param name="occuredAt">
+    /// The instant, in UTC, at which the creation occurred. When
+    /// <see langword="null"/>, the current UTC instant is used.
+    /// </param>
+    /// <returns>
+    /// A new <see cref="ItemEvent"/> of type <see cref="ItemEventType.Creation"/>
+    /// with its <see cref="Lifecycle"/> payload populated.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="article"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the article is not event-tracked, when
+    /// <paramref name="quantity"/> is not strictly positive, or when
+    /// <paramref name="container"/> is not a container-type article.
+    /// </exception>
+    public static ItemEvent NewCreationEvent(
+        Article article,
+        Item? container,
+        Scalar quantity,
+        DateTimeOffset? occuredAt = null)
+        => NewLifecycleEvent(article, ItemEventType.Creation, container, quantity, occuredAt);
+
+    /// <summary>
+    /// Creates a new deletion event for an event-tracked article, recording that
+    /// a quantity of stock was deleted, optionally from a container.
+    /// </summary>
+    /// <param name="article">The event-tracked article the stock belongs to.</param>
+    /// <param name="container">
+    /// The container the quantity was deleted from, or <see langword="null"/>
+    /// when it was deleted from outside any container.
+    /// </param>
+    /// <param name="quantity">The strictly positive quantity deleted.</param>
+    /// <param name="occuredAt">
+    /// The instant, in UTC, at which the deletion occurred. When
+    /// <see langword="null"/>, the current UTC instant is used.
+    /// </param>
+    /// <returns>
+    /// A new <see cref="ItemEvent"/> of type <see cref="ItemEventType.Deletion"/>
+    /// with its <see cref="Lifecycle"/> payload populated.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="article"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the article is not event-tracked, when
+    /// <paramref name="quantity"/> is not strictly positive, or when
+    /// <paramref name="container"/> is not a container-type article.
+    /// </exception>
+    public static ItemEvent NewDeletionEvent(
+        Article article,
+        Item? container,
+        Scalar quantity,
+        DateTimeOffset? occuredAt = null)
+        => NewLifecycleEvent(article, ItemEventType.Deletion, container, quantity, occuredAt);
+
+    private static ItemEvent NewLifecycleEvent(
+        Article article,
+        ItemEventType eventType,
+        Item? container,
+        Scalar quantity,
+        DateTimeOffset? occuredAt)
+    {
+        var itemEvent = new ItemEvent(article, eventType, occuredAt);
+
+        var lifecycle = ItemLifecycleEvent.NewItemLifecycleEvent(article, container, quantity);
+
+        lifecycle.ItemEventGuid = itemEvent.Guid;
+
+        itemEvent.Lifecycle = lifecycle;
 
         return itemEvent;
     }

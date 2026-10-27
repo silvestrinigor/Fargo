@@ -17,12 +17,18 @@ namespace Fargo.Application.Items;
 /// The movement payload when <paramref name="EventType"/> is
 /// <see cref="ItemEventType.Moviment"/>; otherwise <see langword="null"/>.
 /// </param>
+/// <param name="Lifecycle">
+/// The creation/deletion payload when <paramref name="EventType"/> is
+/// <see cref="ItemEventType.Creation"/> or <see cref="ItemEventType.Deletion"/>;
+/// otherwise <see langword="null"/>.
+/// </param>
 public sealed record ItemEventDto(
     Guid Guid,
     Guid ArticleGuid,
     ItemEventType EventType,
     DateTimeOffset OccuredAt,
-    ItemMovimentEventDto? Moviment
+    ItemMovimentEventDto? Moviment,
+    ItemLifecycleEventDto? Lifecycle
 );
 
 /// <summary>
@@ -50,4 +56,22 @@ public sealed record ItemMovimentEventDto(
     bool FromNoContainer,
     Guid? ToItemContainerGuid,
     bool ToNoContainer
+);
+
+/// <summary>
+/// Represents the creation/deletion payload of an item event.
+/// </summary>
+/// <param name="Quantity">The strictly positive quantity created or deleted.</param>
+/// <param name="ItemContainerGuid">
+/// The container the quantity was created in or deleted from, or
+/// <see langword="null"/> when outside any container, or when the container has
+/// since been deleted.
+/// </param>
+/// <param name="NoContainer">
+/// Whether the event originally had no container.
+/// </param>
+public sealed record ItemLifecycleEventDto(
+    Scalar Quantity,
+    Guid? ItemContainerGuid,
+    bool NoContainer
 );

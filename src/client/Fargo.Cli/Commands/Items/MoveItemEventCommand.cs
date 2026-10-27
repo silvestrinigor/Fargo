@@ -5,24 +5,25 @@ using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Items;
 
-public sealed class MoveItemCommand : Command
+public sealed class MoveItemEventCommand : Command
 {
-    public MoveItemCommand(FargoApiClient client)
+    public MoveItemEventCommand(FargoApiClient client)
         : base("move", """
-            Record a movement of a quantity of an event-tracked article between containers.
+            Record a movement event: a quantity of an event-tracked article moved
+            between containers.
 
-            Only valid for articles whose tracking mode is Event. Provide a destination
-            (--to) for a receipt, an origin (--from) for a dispatch, or both for a transfer.
+            Provide a destination (--to) for a receipt, an origin (--from) for a
+            dispatch, or both for a transfer. Prints the recorded event's GUID.
 
             Examples:
               # Receive 50 units into a container
-              fargo item move --article 11111111-1111-1111-1111-111111111111 --quantity 50 --to 22222222-2222-2222-2222-222222222222
+              fargo item event move --article 11111111-1111-1111-1111-111111111111 --quantity 50 --to 22222222-2222-2222-2222-222222222222
 
               # Dispatch 10 units out of a container
-              fargo item move --article 11111111-1111-1111-1111-111111111111 --quantity 10 --from 22222222-2222-2222-2222-222222222222
+              fargo item event move --article 11111111-1111-1111-1111-111111111111 --quantity 10 --from 22222222-2222-2222-2222-222222222222
 
               # Transfer 5 units between containers
-              fargo item move --article 11111111-1111-1111-1111-111111111111 --quantity 5 --from 22222222-2222-2222-2222-222222222222 --to 33333333-3333-3333-3333-333333333333
+              fargo item event move --article 11111111-1111-1111-1111-111111111111 --quantity 5 --from 22222222-2222-2222-2222-222222222222 --to 33333333-3333-3333-3333-333333333333
             """)
     {
         var articleOption = new Option<Guid?>("--article")
@@ -76,10 +77,11 @@ public sealed class MoveItemCommand : Command
                 OccuredAt = at
             };
 
-            await client.ItemEvents.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.Item.Events.PostAsync(dto, cancellationToken: cancellationToken);
 
             StatusWriter.Success(
-                "Item movement recorded.",
+                "Item movement event recorded.",
+                ("Event", guid?.ToString()),
                 ("Article", article?.ToString()),
                 ("Quantity", quantity?.ToString()),
                 ("From", from?.ToString() ?? "(outside)"),

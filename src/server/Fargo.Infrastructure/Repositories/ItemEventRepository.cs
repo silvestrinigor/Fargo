@@ -51,6 +51,7 @@ public sealed class ItemEventRepository(FargoDbContext context) : IItemEventRepo
         var itemEvents = await queryFiltered
             .OrderBy(e => e.OccuredAt)
             .Include(e => e.Moviment)
+            .Include(e => e.Lifecycle)
             .WithPagination(pagination)
             .ToListAsync(cancellationToken);
 

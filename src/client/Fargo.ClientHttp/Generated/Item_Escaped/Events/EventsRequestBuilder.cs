@@ -9,28 +9,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace Fargo.ClientHttp.ItemEvents
+namespace Fargo.ClientHttp.Item_Escaped.Events
 {
     /// <summary>
-    /// Builds and executes requests for operations under \item-events
+    /// Builds and executes requests for operations under \item\events
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class ItemEventsRequestBuilder : BaseRequestBuilder
+    public partial class EventsRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ItemEventsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/item-events{?articleGuid*,eventType*,limit*,page*,periodEnd*,periodStart*}", pathParameters)
+        public EventsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/item/events{?articleGuid*,eventType*,limit*,page*,periodEnd*,periodStart*}", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ItemEventsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/item-events{?articleGuid*,eventType*,limit*,page*,periodEnd*,periodStart*}", rawUrl)
+        public EventsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/item/events{?articleGuid*,eventType*,limit*,page*,periodEnd*,periodStart*}", rawUrl)
         {
         }
         /// <summary>
@@ -41,34 +41,35 @@ namespace Fargo.ClientHttp.ItemEvents
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::Fargo.ClientHttp.Models.PagedResultOfItemEventDto?> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder.ItemEventsRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Fargo.ClientHttp.Models.PagedResultOfItemEventDto?> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder.EventsRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::Fargo.ClientHttp.Models.PagedResultOfItemEventDto> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder.ItemEventsRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::Fargo.ClientHttp.Models.PagedResultOfItemEventDto> GetAsync(Action<RequestConfiguration<global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder.EventsRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.PagedResultOfItemEventDto>(requestInfo, global::Fargo.ClientHttp.Models.PagedResultOfItemEventDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Records a new item event. Currently the only supported event type is a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event; entity-tracked articles record movements through their individual items instead.
+        /// Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.
         /// </summary>
+        /// <returns>A <see cref="Guid"/></returns>
         /// <param name="body">Describes a new item event to record against an event-tracked article.</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task PostAsync(global::Fargo.ClientHttp.Models.ItemEventCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Guid?> PostAsync(global::Fargo.ClientHttp.Models.ItemEventCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task PostAsync(global::Fargo.ClientHttp.Models.ItemEventCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<Guid?> PostAsync(global::Fargo.ClientHttp.Models.ItemEventCreateDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
             var requestInfo = ToPostRequestInformation(body, requestConfiguration);
-            await RequestAdapter.SendNoContentAsync(requestInfo, default, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendPrimitiveAsync<Guid?>(requestInfo, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
         /// Retrieves a paginated list of item events, optionally filtered by article, event type, and time period, including the total number of matching entries. Requires the ReadItemEvents permission; only events whose article is accessible to the caller are returned.
@@ -77,11 +78,11 @@ namespace Fargo.ClientHttp.ItemEvents
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder.ItemEventsRequestBuilderGetQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder.EventsRequestBuilderGetQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder.ItemEventsRequestBuilderGetQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder.EventsRequestBuilderGetQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
@@ -90,7 +91,7 @@ namespace Fargo.ClientHttp.ItemEvents
             return requestInfo;
         }
         /// <summary>
-        /// Records a new item event. Currently the only supported event type is a movement of a quantity of an event-tracked article between containers (or into/out of no container). Only valid for articles whose tracking mode is Event; entity-tracked articles record movements through their individual items instead.
+        /// Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">Describes a new item event to record against an event-tracked article.</param>
@@ -107,23 +108,24 @@ namespace Fargo.ClientHttp.ItemEvents
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
             var requestInfo = new RequestInformation(Method.POST, UrlTemplate, PathParameters);
             requestInfo.Configure(requestConfiguration);
+            requestInfo.Headers.TryAdd("Accept", "application/json");
             requestInfo.SetContentFromParsable(RequestAdapter, "application/json", body);
             return requestInfo;
         }
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder WithUrl(string rawUrl)
+        public global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder(rawUrl, RequestAdapter);
+            return new global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
         /// Retrieves a paginated list of item events, optionally filtered by article, event type, and time period, including the total number of matching entries. Requires the ReadItemEvents permission; only events whose article is accessible to the caller are returned.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ItemEventsRequestBuilderGetQueryParameters 
+        public partial class EventsRequestBuilderGetQueryParameters 
         {
             #pragma warning disable CS1591
             [QueryParameter("articleGuid")]
@@ -155,7 +157,7 @@ namespace Fargo.ClientHttp.ItemEvents
         /// </summary>
         [Obsolete("This class is deprecated. Please use the generic RequestConfiguration class generated by the generator.")]
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ItemEventsRequestBuilderGetRequestConfiguration : RequestConfiguration<global::Fargo.ClientHttp.ItemEvents.ItemEventsRequestBuilder.ItemEventsRequestBuilderGetQueryParameters>
+        public partial class EventsRequestBuilderGetRequestConfiguration : RequestConfiguration<global::Fargo.ClientHttp.Item_Escaped.Events.EventsRequestBuilder.EventsRequestBuilderGetQueryParameters>
         {
         }
         /// <summary>
@@ -163,7 +165,7 @@ namespace Fargo.ClientHttp.ItemEvents
         /// </summary>
         [Obsolete("This class is deprecated. Please use the generic RequestConfiguration class generated by the generator.")]
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        public partial class ItemEventsRequestBuilderPostRequestConfiguration : RequestConfiguration<DefaultQueryParameters>
+        public partial class EventsRequestBuilderPostRequestConfiguration : RequestConfiguration<DefaultQueryParameters>
         {
         }
     }
