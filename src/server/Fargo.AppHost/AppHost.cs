@@ -1,5 +1,3 @@
-using Fargo.AppHost.Extensions;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 var environmentName = builder.Environment.EnvironmentName;
@@ -12,13 +10,15 @@ var databaseFargo = postgres.AddDatabase("fargo-database", "fargo");
 
 var serviceMigrations = builder
 .AddProject<Projects.Fargo_ServiceMigration>("fargo-migration")
-.WithFargoEnvironment(environmentName)
+.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+.WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
 .WithReference(databaseFargo)
 .WaitFor(databaseFargo);
 
 var serviceSeeds = builder
 .AddProject<Projects.Fargo_ServiceSeed>("fargo-seed")
-.WithFargoEnvironment(environmentName)
+.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+.WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
 .WithReference(databaseFargo)
 .WithReference(serviceMigrations)
 .WaitForCompletion(serviceMigrations);
@@ -26,7 +26,8 @@ var serviceSeeds = builder
 _ = builder
 .AddProject<Projects.Fargo_ServiceHttp>("fargo-api")
 .WithHttpHealthCheck("/health")
-.WithFargoEnvironment(environmentName)
+.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+.WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
 .WithReference(databaseFargo)
 .WithReference(serviceMigrations)
 .WithReference(serviceSeeds)
