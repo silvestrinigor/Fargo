@@ -47,12 +47,7 @@ public class ItemMovimentEvent
     /// Gets the unique identifier of the owning <see cref="ItemEvent"/>, which is
     /// also the primary key of this record.
     /// </summary>
-    public Guid ItemEventGuid { get; private init; }
-
-    /// <summary>
-    /// Gets the owning base event.
-    /// </summary>
-    public ItemEvent ItemEvent { get; private init; }
+    public Guid ItemEventGuid { get; internal set; }
 
     /// <summary>
     /// Gets the quantity of the article that was moved.
@@ -131,16 +126,8 @@ public class ItemMovimentEvent
     private ItemMovimentEvent() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-    private ItemMovimentEvent(Article article, DateTimeOffset? occuredAt)
-    {
-        var itemEvent = new ItemEvent(article, ItemEventType.Moviment, occuredAt);
-
-        ItemEvent = itemEvent;
-        ItemEventGuid = itemEvent.Guid;
-    }
-
     /// <summary>
-    /// Creates a new movement event for an event-tracked article.
+    /// Creates a new movement payload for an event-tracked article.
     /// </summary>
     /// <param name="article">The event-tracked article being moved.</param>
     /// <param name="fromContainer">
@@ -152,27 +139,27 @@ public class ItemMovimentEvent
     /// left stock to outside any container.
     /// </param>
     /// <param name="quantity">The strictly positive quantity moved.</param>
-    /// <param name="occuredAt">
-    /// The instant, in UTC, at which the movement occurred. When
-    /// <see langword="null"/>, the current UTC instant is used.
-    /// </param>
-    /// <returns>A new <see cref="ItemMovimentEvent"/> instance.</returns>
+    /// <returns>A new <see cref="ItemMovimentEvent"/> payload.</returns>
+    /// <remarks>
+    /// The returned payload is not yet attached to an <see cref="ItemEvent"/>.
+    /// The owning event is created by
+    /// <see cref="ItemEvent.NewMovimentEvent(Article, Item?, Item?, Scalar, DateTimeOffset?)"/>,
+    /// which links this payload and assigns its <see cref="ItemEventGuid"/>.
+    /// </remarks>
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="article"/> is <see langword="null"/>.
     /// </exception>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the article is not event-tracked, when
-    /// <paramref name="quantity"/> is not strictly positive, when the origin and
-    /// destination are the same container, when the movement has neither an origin
-    /// nor a destination container, or when a provided container is not a
-    /// container-type article.
+    /// Thrown when <paramref name="quantity"/> is not strictly positive, when the
+    /// origin and destination are the same container, when the movement has
+    /// neither an origin nor a destination container, or when a provided
+    /// container is not a container-type article.
     /// </exception>
-    public static ItemMovimentEvent NewItemMovimentEvent(
+    internal static ItemMovimentEvent NewItemMovimentEvent(
         Article article,
         Item? fromContainer,
         Item? toContainer,
-        Scalar quantity,
-        DateTimeOffset? occuredAt = null)
+        Scalar quantity)
     {
         ArgumentNullException.ThrowIfNull(article);
 
@@ -202,7 +189,7 @@ public class ItemMovimentEvent
         ThrowIfNotContainer(fromContainer);
         ThrowIfNotContainer(toContainer);
 
-        var itemMovimentEvent = new ItemMovimentEvent(article, occuredAt)
+        return new ItemMovimentEvent
         {
             Quantity = quantity,
 
@@ -214,8 +201,6 @@ public class ItemMovimentEvent
             ToItemContainerGuid = toContainer?.Guid,
             ToNoContainer = toContainer is null,
         };
-
-        return itemMovimentEvent;
     }
 
     private static void ThrowIfNotContainer(Item? container)

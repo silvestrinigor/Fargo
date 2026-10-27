@@ -21,15 +21,19 @@ public class ItemMovimentEventTests
     private static Scalar Qty(double amount) => Scalar.FromAmount(amount);
 
     [Fact]
-    public void NewItemMovimentEvent_WhenReceiptIntoContainer_ShouldCapturePayload()
+    public void NewMovimentEvent_WhenReceiptIntoContainer_ShouldCapturePayload()
     {
         var article = EventArticle();
         var to = Container();
 
-        var moviment = ItemMovimentEvent.NewItemMovimentEvent(article, null, to, Qty(50));
+        var itemEvent = ItemEvent.NewMovimentEvent(article, null, to, Qty(50));
 
-        Assert.Equal(article.Guid, moviment.ItemEvent.ArticleGuid);
-        Assert.Equal(ItemEventType.Moviment, moviment.ItemEvent.EventType);
+        Assert.Equal(article.Guid, itemEvent.ArticleGuid);
+        Assert.Equal(ItemEventType.Moviment, itemEvent.EventType);
+
+        var moviment = itemEvent.Moviment;
+        Assert.NotNull(moviment);
+        Assert.Equal(itemEvent.Guid, moviment!.ItemEventGuid);
         Assert.Equal(50, moviment.Quantity.Amount);
         Assert.True(moviment.FromNoContainer);
         Assert.Null(moviment.FromItemContainerGuid);
@@ -38,52 +42,52 @@ public class ItemMovimentEventTests
     }
 
     [Fact]
-    public void NewItemMovimentEvent_WhenOccuredAtProvided_ShouldBackdate()
+    public void NewMovimentEvent_WhenOccuredAtProvided_ShouldBackdate()
     {
         var at = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
-        var moviment = ItemMovimentEvent.NewItemMovimentEvent(EventArticle(), null, Container(), Qty(1), at);
+        var itemEvent = ItemEvent.NewMovimentEvent(EventArticle(), null, Container(), Qty(1), at);
 
-        Assert.Equal(at, moviment.ItemEvent.OccuredAt);
+        Assert.Equal(at, itemEvent.OccuredAt);
     }
 
     [Fact]
-    public void NewItemMovimentEvent_WhenArticleIsEntityTracked_ShouldThrow()
+    public void NewMovimentEvent_WhenArticleIsEntityTracked_ShouldThrow()
     {
         Assert.Throws<FargoCoreException>(
-            () => ItemMovimentEvent.NewItemMovimentEvent(EntityArticle(), null, Container(), Qty(1)));
+            () => ItemEvent.NewMovimentEvent(EntityArticle(), null, Container(), Qty(1)));
     }
 
     [Fact]
-    public void NewItemMovimentEvent_WhenQuantityNotPositive_ShouldThrow()
+    public void NewMovimentEvent_WhenQuantityNotPositive_ShouldThrow()
     {
         Assert.Throws<FargoCoreException>(
-            () => ItemMovimentEvent.NewItemMovimentEvent(EventArticle(), null, Container(), Qty(0)));
+            () => ItemEvent.NewMovimentEvent(EventArticle(), null, Container(), Qty(0)));
     }
 
     [Fact]
-    public void NewItemMovimentEvent_WhenNoOriginNorDestination_ShouldThrow()
+    public void NewMovimentEvent_WhenNoOriginNorDestination_ShouldThrow()
     {
         Assert.Throws<FargoCoreException>(
-            () => ItemMovimentEvent.NewItemMovimentEvent(EventArticle(), null, null, Qty(1)));
+            () => ItemEvent.NewMovimentEvent(EventArticle(), null, null, Qty(1)));
     }
 
     [Fact]
-    public void NewItemMovimentEvent_WhenOriginEqualsDestination_ShouldThrow()
+    public void NewMovimentEvent_WhenOriginEqualsDestination_ShouldThrow()
     {
         var container = Container();
 
         Assert.Throws<FargoCoreException>(
-            () => ItemMovimentEvent.NewItemMovimentEvent(EventArticle(), container, container, Qty(1)));
+            () => ItemEvent.NewMovimentEvent(EventArticle(), container, container, Qty(1)));
     }
 
     [Fact]
-    public void NewItemMovimentEvent_WhenContainerIsNotAContainerArticle_ShouldThrow()
+    public void NewMovimentEvent_WhenContainerIsNotAContainerArticle_ShouldThrow()
     {
         var notAContainer = Item.CreateItem(Article.NewArticle(new Name("Loose item")));
 
         Assert.Throws<FargoCoreException>(
-            () => ItemMovimentEvent.NewItemMovimentEvent(EventArticle(), null, notAContainer, Qty(1)));
+            () => ItemEvent.NewMovimentEvent(EventArticle(), null, notAContainer, Qty(1)));
     }
 
     [Fact]

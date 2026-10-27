@@ -77,7 +77,7 @@ public sealed class MoveItemEventCommandHandler(
 
         // Domain invariants (event-tracked article, positive quantity, distinct
         // origin/destination, container-type items) are enforced by the factory.
-        var movimentEvent = ItemMovimentEvent.NewItemMovimentEvent(
+        var itemEvent = ItemEvent.NewMovimentEvent(
             article,
             fromContainer,
             toContainer,
@@ -88,18 +88,18 @@ public sealed class MoveItemEventCommandHandler(
         // recorded against the item event itself, while inheriting the partition
         // scope from the article the event concerns.
         var audit = AuditLog.CreateAuditLog(
-            actor, movimentEvent.ItemEvent, article, AuditLogType.ItemEventRecorded);
+            actor, itemEvent, article, AuditLogType.ItemEventRecorded);
 
         audit.Metadata.AddArticleGuid(article.Guid);
         audit.Metadata.AddPackQuantity(create.Quantity);
 
-        itemEventRepository.Add(movimentEvent);
+        itemEventRepository.Add(itemEvent);
 
         auditLogRepository.Add(audit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.MoveItemEventCompleted(
-            movimentEvent.ItemEventGuid, article.Guid, currentActor.Guid, currentActor.ActorType);
+            itemEvent.Guid, article.Guid, currentActor.Guid, currentActor.ActorType);
     }
 }

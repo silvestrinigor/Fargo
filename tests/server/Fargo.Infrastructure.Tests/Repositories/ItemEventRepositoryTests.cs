@@ -29,9 +29,9 @@ public class ItemEventRepositoryTests
         var container = Item.CreateItem(Article.NewArticleContainer(new Name("Silo")));
         itemRepo.Add(container);
 
-        var older = ItemMovimentEvent.NewItemMovimentEvent(
+        var older = ItemEvent.NewMovimentEvent(
             article, null, container, Qty(10), DateTimeOffset.UtcNow.AddHours(-2));
-        var newer = ItemMovimentEvent.NewItemMovimentEvent(
+        var newer = ItemEvent.NewMovimentEvent(
             article, container, null, Qty(4), DateTimeOffset.UtcNow.AddHours(-1));
         eventRepo.Add(newer);
         eventRepo.Add(older);
@@ -61,9 +61,9 @@ public class ItemEventRepositoryTests
         var container = Item.CreateItem(Article.NewArticleContainer(new Name("Silo")));
         itemRepo.Add(container);
 
-        var old = ItemMovimentEvent.NewItemMovimentEvent(
+        var old = ItemEvent.NewMovimentEvent(
             article, null, container, Qty(10), DateTimeOffset.UtcNow.AddDays(-10));
-        var recent = ItemMovimentEvent.NewItemMovimentEvent(
+        var recent = ItemEvent.NewMovimentEvent(
             article, null, container, Qty(5), DateTimeOffset.UtcNow.AddDays(-1));
         eventRepo.Add(old);
         eventRepo.Add(recent);

@@ -54,10 +54,12 @@ public class MoveItemEventCommandHandlerTests
         await CreateHandler().HandleAsync(new MoveItemEventCommand(
             new ItemMovementCreateDto(article.Guid, Qty(50), ToItemContainerGuid: container.Guid)));
 
-        itemEventRepository.Received(1).Add(Arg.Is<ItemMovimentEvent>(
-            e => e.ItemEvent.ArticleGuid == article.Guid
-                 && e.Quantity.Amount == 50
-                 && e.ToItemContainerGuid == container.Guid));
+        itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
+            e => e.ArticleGuid == article.Guid
+                 && e.EventType == ItemEventType.Moviment
+                 && e.Moviment != null
+                 && e.Moviment.Quantity.Amount == 50
+                 && e.Moviment.ToItemContainerGuid == container.Guid));
         auditLogRepository.Received(1).Add(Arg.Is<AuditLog>(
             a => a.AuditLogType == AuditLogType.ItemEventRecorded
                  && a.EntityType == EntityType.ItemEvent));
@@ -79,7 +81,7 @@ public class MoveItemEventCommandHandlerTests
             () => CreateHandler().HandleAsync(new MoveItemEventCommand(
                 new ItemMovementCreateDto(article.Guid, Qty(1), ToItemContainerGuid: container.Guid))));
 
-        itemEventRepository.DidNotReceive().Add(Arg.Any<ItemMovimentEvent>());
+        itemEventRepository.DidNotReceive().Add(Arg.Any<ItemEvent>());
         await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 

@@ -8,9 +8,9 @@ namespace Fargo.Infrastructure.Repositories;
 
 public sealed class ItemEventRepository(FargoDbContext context) : IItemEventRepository, IItemEventQueryRepository
 {
-    public void Add(ItemMovimentEvent itemMovimentEvent)
+    public void Add(ItemEvent itemEvent)
     {
-        context.ItemMovimentEvents.Add(itemMovimentEvent);
+        context.ItemEvents.Add(itemEvent);
     }
 
     public async Task<PagedResult<ItemEventDto>> GetManyInfoOrderedByOccuredAtAsync(
@@ -23,38 +23,38 @@ public sealed class ItemEventRepository(FargoDbContext context) : IItemEventRepo
         CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(
-            context.ItemMovimentEvents.AsNoTracking(),
+            context.ItemEvents.AsNoTracking(),
             childOfAnyOfThesePartitions);
 
         if (articleGuid is not null)
         {
-            queryFiltered = queryFiltered.Where(e => e.ItemEvent.ArticleGuid == articleGuid);
+            queryFiltered = queryFiltered.Where(e => e.ArticleGuid == articleGuid);
         }
 
         if (eventType is not null)
         {
-            queryFiltered = queryFiltered.Where(e => e.ItemEvent.EventType == eventType);
+            queryFiltered = queryFiltered.Where(e => e.EventType == eventType);
         }
 
         if (periodStart is not null)
         {
-            queryFiltered = queryFiltered.Where(e => e.ItemEvent.OccuredAt >= periodStart);
+            queryFiltered = queryFiltered.Where(e => e.OccuredAt >= periodStart);
         }
 
         if (periodEnd is not null)
         {
-            queryFiltered = queryFiltered.Where(e => e.ItemEvent.OccuredAt <= periodEnd);
+            queryFiltered = queryFiltered.Where(e => e.OccuredAt <= periodEnd);
         }
 
         var totalCount = await queryFiltered.CountAsync(cancellationToken);
 
-        var movimentEvents = await queryFiltered
-            .OrderBy(e => e.ItemEvent.OccuredAt)
-            .Include(e => e.ItemEvent)
+        var itemEvents = await queryFiltered
+            .OrderBy(e => e.OccuredAt)
+            .Include(e => e.Moviment)
             .WithPagination(pagination)
             .ToListAsync(cancellationToken);
 
-        var items = movimentEvents.Select(e => e.ToDto()).ToList();
+        var items = itemEvents.Select(e => e.ToDto()).ToList();
 
         return new PagedResult<ItemEventDto>(
             items,
@@ -63,8 +63,8 @@ public sealed class ItemEventRepository(FargoDbContext context) : IItemEventRepo
             pagination.Limit.Value);
     }
 
-    private static IQueryable<ItemMovimentEvent> ApplyPartitionFilter(
-        IQueryable<ItemMovimentEvent> query,
+    private static IQueryable<ItemEvent> ApplyPartitionFilter(
+        IQueryable<ItemEvent> query,
         IReadOnlyCollection<Guid>? partitionGuids)
     {
         if (partitionGuids is null)
@@ -72,8 +72,8 @@ public sealed class ItemEventRepository(FargoDbContext context) : IItemEventRepo
             return query;
         }
 
-        return query.Where(movimentEvent =>
-            movimentEvent.ItemEvent.Article.Partitions.Any(
+        return query.Where(itemEvent =>
+            itemEvent.Article.Partitions.Any(
                 partition => partitionGuids.Contains(partition.PartitionGuid)));
     }
 }

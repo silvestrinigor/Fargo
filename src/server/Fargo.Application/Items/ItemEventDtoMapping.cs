@@ -9,24 +9,26 @@ namespace Fargo.Application.Items;
 public static class ItemEventDtoMapping
 {
     /// <summary>
-    /// Converts a movement event entity to an <see cref="ItemEventDto"/>.
+    /// Converts an item event entity to an <see cref="ItemEventDto"/>.
     /// </summary>
-    /// <param name="movimentEvent">The movement event to convert.</param>
-    /// <returns>A DTO populated from the movement event and its base event.</returns>
-    public static ItemEventDto ToDto(this ItemMovimentEvent movimentEvent)
+    /// <param name="itemEvent">The item event to convert.</param>
+    /// <returns>A DTO populated from the event and its movement payload, if any.</returns>
+    public static ItemEventDto ToDto(this ItemEvent itemEvent)
     {
-        var itemEvent = movimentEvent.ItemEvent;
+        var moviment = itemEvent.Moviment;
 
         return new ItemEventDto(
             itemEvent.Guid,
             itemEvent.ArticleGuid,
             itemEvent.EventType,
             itemEvent.OccuredAt,
-            new ItemMovimentEventDto(
-                movimentEvent.Quantity,
-                movimentEvent.FromItemContainerGuid,
-                movimentEvent.FromNoContainer,
-                movimentEvent.ToItemContainerGuid,
-                movimentEvent.ToNoContainer));
+            moviment is null
+                ? null
+                : new ItemMovimentEventDto(
+                    moviment.Quantity,
+                    moviment.FromItemContainerGuid,
+                    moviment.FromNoContainer,
+                    moviment.ToItemContainerGuid,
+                    moviment.ToNoContainer));
     }
 }

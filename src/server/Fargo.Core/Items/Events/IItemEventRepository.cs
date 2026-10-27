@@ -6,8 +6,8 @@ namespace Fargo.Core.Items.Events;
 public interface IItemEventRepository
 {
     /// <summary>
-    /// Adds a movement event to be persisted.
+    /// Adds an item event (with its payload) to be persisted.
     /// </summary>
-    /// <param name="itemMovimentEvent">The movement event to add.</param>
-    void Add(ItemMovimentEvent itemMovimentEvent);
+    /// <param name="itemEvent">The item event to add.</param>
+    void Add(ItemEvent itemEvent);
 }

@@ -15,8 +15,8 @@ public sealed class ItemMovimentEventConfiguration : IEntityTypeConfiguration<It
         builder.Property(x => x.Quantity);
 
         builder
-        .HasOne(x => x.ItemEvent)
-        .WithOne()
+        .HasOne<ItemEvent>()
+        .WithOne(x => x.Moviment)
         .HasForeignKey<ItemMovimentEvent>(x => x.ItemEventGuid)
         .OnDelete(DeleteBehavior.Cascade);
 

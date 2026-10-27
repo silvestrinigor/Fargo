@@ -23,6 +23,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
     public DbSet<Item> Items { get; set; }
 
+    public DbSet<ItemEvent> ItemEvents { get; set; }
+
     public DbSet<ItemMovimentEvent> ItemMovimentEvents { get; set; }
 
     public DbSet<User> Users { get; set; }
