@@ -83,15 +83,10 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
     private static IQueryable<User> ApplyPartitionFilter(
         IQueryable<User> query,
         IReadOnlyCollection<Guid>? partitionGuids)
-    {
-        if (partitionGuids is null)
-        {
-            return query;
-        }
-
-        return query.Where(user =>
-            user.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
-    }
+        => query.WherePartitionAccessible(
+            partitionGuids,
+            user => user.Partitions,
+            partition => partition.PartitionGuid);
 
     public async Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsFromUserAsync(
         Guid userGuid,

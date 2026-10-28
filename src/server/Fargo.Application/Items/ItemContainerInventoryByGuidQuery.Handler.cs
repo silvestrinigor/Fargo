@@ -17,9 +17,7 @@ public sealed class ItemContainerInventoryByGuidQueryHandler(
     {
         logger.QueryInventoryByGuidStarted(query.ItemContainerGuid, currentActor.Guid, currentActor.ActorType);
 
-        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
+        var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         var itemExist = await itemQueryRepository.ExistByGuidAsync(query.ItemContainerGuid, actor.PartitionAccessGuids, cancellationToken);
 

@@ -110,15 +110,10 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
     private static IQueryable<Item> ApplyPartitionFilter(
         IQueryable<Item> query,
         IReadOnlyCollection<Guid>? partitionGuids)
-    {
-        if (partitionGuids is null)
-        {
-            return query;
-        }
-
-        return query.Where(item =>
-            item.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
-    }
+        => query.WherePartitionAccessible(
+            partitionGuids,
+            item => item.Partitions,
+            partition => partition.PartitionGuid);
 
     public async Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidOrderedByDepthAsync(
         Guid itemGuid,

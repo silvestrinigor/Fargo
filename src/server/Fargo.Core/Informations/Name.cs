@@ -1,13 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Text;
 
 namespace Fargo.Core.Informations;
 
 /// <summary>
 /// Represents a validated name.
 /// </summary>
-public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<Name>, IFormattable, ISpanFormattable, IUtf8SpanParsable<Name>, IUtf8SpanFormattable
+public readonly struct Name : IEquatable<Name>, IParsable<Name>
 {
     /// <summary>
     /// Maximum length.
@@ -58,58 +56,6 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
         => Value;
 
     /// <inheritdoc />
-    public string ToString(string? format, IFormatProvider? formatProvider)
-    {
-        format ??= "G";
-
-        return format switch
-        {
-            "G" => Value,
-            "U" => Value.ToUpper(formatProvider as CultureInfo),
-            "L" => Value.ToLower(formatProvider as CultureInfo),
-            _ => throw new FormatException($"Unsupported format '{format}'.")
-        };
-    }
-
-    /// <inheritdoc />
-    public bool TryFormat(
-        Span<char> destination,
-        out int charsWritten,
-        ReadOnlySpan<char> format,
-        IFormatProvider? provider)
-    {
-        string formatted = ToString(
-            format.IsEmpty ? "G" : format.ToString(),
-            provider);
-
-        if (formatted.AsSpan().TryCopyTo(destination))
-        {
-            charsWritten = formatted.Length;
-            return true;
-        }
-
-        charsWritten = 0;
-        return false;
-    }
-
-    /// <inheritdoc />
-    public bool TryFormat(
-        Span<byte> utf8Destination,
-        out int bytesWritten,
-        ReadOnlySpan<char> format,
-        IFormatProvider? provider)
-    {
-        string formatted = ToString(
-            format.IsEmpty ? "G" : format.ToString(),
-            provider);
-
-        return Encoding.UTF8.TryGetBytes(
-            formatted,
-            utf8Destination,
-            out bytesWritten);
-    }
-
-    /// <inheritdoc />
     public bool Equals(Name other)
         => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
@@ -158,59 +104,6 @@ public readonly struct Name : IEquatable<Name>, IParsable<Name>, ISpanParsable<N
         try
         {
             result = new Name(s!);
-            return true;
-        }
-        catch
-        {
-            result = default;
-            return false;
-        }
-    }
-
-    /// <inheritdoc />
-    public static Name Parse(
-        ReadOnlySpan<char> s,
-        IFormatProvider? provider)
-        => new(s.ToString());
-
-    /// <inheritdoc />
-    public static bool TryParse(
-        ReadOnlySpan<char> s,
-        IFormatProvider? provider,
-        out Name result)
-    {
-        try
-        {
-            result = new Name(s.ToString());
-            return true;
-        }
-        catch
-        {
-            result = default;
-            return false;
-        }
-    }
-
-    /// <inheritdoc />
-    public static Name Parse(
-        ReadOnlySpan<byte> utf8Text,
-        IFormatProvider? provider)
-    {
-        string value = Encoding.UTF8.GetString(utf8Text);
-        return new Name(value);
-    }
-
-    /// <inheritdoc />
-    public static bool TryParse(
-        ReadOnlySpan<byte> utf8Text,
-        IFormatProvider? provider,
-        out Name result)
-    {
-        try
-        {
-            string value = Encoding.UTF8.GetString(utf8Text);
-
-            result = new Name(value);
             return true;
         }
         catch

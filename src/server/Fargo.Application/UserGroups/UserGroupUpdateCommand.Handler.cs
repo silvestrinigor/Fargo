@@ -25,9 +25,7 @@ public sealed class UserGroupUpdateCommandHandler(
     {
         logger.UpdateStarted(command.UserGroupGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
+        var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUserGroup);
 

@@ -14,30 +14,17 @@ public sealed class FargoInfrastructureExceptionHandler(IProblemDetailsService p
             return false;
         }
 
-        httpContext.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-
         var problem = new ProblemDetails
         {
             Status = StatusCodes.Status503ServiceUnavailable,
-            Title = "Infra error.",
+            Title = infraException.ErrorType == FargoErrorType.InvalidOperation
+                ? "Infra invalid operation."
+                : "Infra error.",
             Detail = infraException.Message,
-            Instance = httpContext.Request.Path,
         };
 
-        if (infraException.ErrorType == FargoErrorType.InvalidOperation)
-        {
-            problem.Title = "Infra invalid operation.";
-        }
-
-        problem.Extensions["traceId"] = httpContext.TraceIdentifier;
-        problem.Extensions["errorType"] = infraException.ErrorType;
-
-        await problemDetailsService.WriteAsync(new ProblemDetailsContext
-        {
-            HttpContext = httpContext,
-            ProblemDetails = problem,
-            Exception = exception,
-        });
+        await ProblemDetailsWriter.WriteAsync(
+            problemDetailsService, httpContext, exception, problem, infraException.ErrorType);
 
         return true;
     }

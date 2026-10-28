@@ -96,13 +96,8 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
     private static IQueryable<AuditLog> ApplyPartitionFilter(
         IQueryable<AuditLog> query,
         IReadOnlyCollection<Guid>? partitionGuids)
-    {
-        if (partitionGuids is null)
-        {
-            return query;
-        }
-
-        return query.Where(auditLog =>
-            auditLog.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
-    }
+        => query.WherePartitionAccessible(
+            partitionGuids,
+            auditLog => auditLog.Partitions,
+            partition => partition.PartitionGuid);
 }

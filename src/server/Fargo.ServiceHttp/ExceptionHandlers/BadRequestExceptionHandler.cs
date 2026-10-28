@@ -17,24 +17,16 @@ public sealed class BadRequestExceptionHandler(
             return false;
         }
 
-        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-
         var problem = new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
             Title = "Invalid request",
             Detail = badRequest.InnerException?.Message ?? badRequest.Message,
-            Instance = httpContext.Request.Path
         };
 
-        await problemDetailsService.WriteAsync(new ProblemDetailsContext
-        {
-            HttpContext = httpContext,
-            ProblemDetails = problem,
-            Exception = exception,
-        });
+        await ProblemDetailsWriter.WriteAsync(
+            problemDetailsService, httpContext, exception, problem);
 
         return true;
     }
 }
-

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Threading.RateLimiting;
 
@@ -22,9 +21,8 @@ public static class FargoRateLimitingExtensions
         services
             .AddOptions<RateLimitingOptions>()
             .Bind(configuration.GetSection(RateLimitingOptions.SectionName))
+            .ValidateDataAnnotations()
             .ValidateOnStart();
-
-        services.AddSingleton<IValidateOptions<RateLimitingOptions>, RateLimitingOptionsValidator>();
 
         // Resolve the configured options once at startup to build the limiters.
         var options = configuration

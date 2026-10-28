@@ -43,9 +43,7 @@ public sealed class ItemEventCreateCommandHandler(
 
         logger.ItemEventCreateStarted(create.EventType, create.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
-        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
+        var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateItem);
 

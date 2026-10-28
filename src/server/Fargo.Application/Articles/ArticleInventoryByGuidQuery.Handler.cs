@@ -29,9 +29,7 @@ public sealed class ArticleInventoryByGuidQueryHandler(
     {
         logger.ArticleInventoryQueryByGuidStarted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType);
 
-        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
+        var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         // Resolving the tracking mode also serves as the existence/access check:
         // a null result means the article does not exist (or is not accessible)

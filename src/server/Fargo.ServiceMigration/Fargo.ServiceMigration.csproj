@@ -9,7 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="13.4.6" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
         <!-- Pin patched version to resolve transitive vulnerability GHSA-846f-f764-76mx (CVE-2026-84008). -->
         <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />

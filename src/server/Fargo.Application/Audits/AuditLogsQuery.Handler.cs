@@ -29,9 +29,7 @@ public sealed class AuditLogsQueryHandler(
     {
         logger.AuditLogManyQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
 
-        var actor = await actorResolver.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
+        var actor = await actorResolver.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         var result = await auditLogQueryRepository.GetManyInfoOrderedByOccurredAtAsync(
             query.WithPagination,

@@ -67,14 +67,8 @@ public sealed class ItemEventRepository(FargoDbContext context) : IItemEventRepo
     private static IQueryable<ItemEvent> ApplyPartitionFilter(
         IQueryable<ItemEvent> query,
         IReadOnlyCollection<Guid>? partitionGuids)
-    {
-        if (partitionGuids is null)
-        {
-            return query;
-        }
-
-        return query.Where(itemEvent =>
-            itemEvent.Article.Partitions.Any(
-                partition => partitionGuids.Contains(partition.PartitionGuid)));
-    }
+        => query.WherePartitionAccessible(
+            partitionGuids,
+            itemEvent => itemEvent.Article.Partitions,
+            partition => partition.PartitionGuid);
 }

@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace Fargo.Core.Identity;
 
 /// <summary>
@@ -15,9 +13,7 @@ namespace Fargo.Core.Identity;
 /// </remarks>
 public readonly struct Token :
     IEquatable<Token>,
-    IParsable<Token>,
-    ISpanParsable<Token>,
-    IUtf8SpanParsable<Token>
+    IParsable<Token>
 {
     /// <summary>
     /// Minimum allowed length for a token.
@@ -132,62 +128,6 @@ public readonly struct Token :
         try
         {
             result = new Token(s!);
-            return true;
-        }
-        catch
-        {
-            result = default;
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Parses a character span into a <see cref="Token"/>.
-    /// </summary>
-    public static Token Parse(
-        ReadOnlySpan<char> s,
-        IFormatProvider? provider)
-        => new(s.ToString());
-
-    /// <summary>
-    /// Attempts to parse a character span into a <see cref="Token"/>.
-    /// </summary>
-    public static bool TryParse(
-        ReadOnlySpan<char> s,
-        IFormatProvider? provider,
-        out Token result)
-    {
-        try
-        {
-            result = new Token(s.ToString());
-            return true;
-        }
-        catch
-        {
-            result = default;
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Parses a UTF-8 byte span into a <see cref="Token"/>.
-    /// </summary>
-    public static Token Parse(
-        ReadOnlySpan<byte> utf8Text,
-        IFormatProvider? provider)
-        => new(Encoding.UTF8.GetString(utf8Text));
-
-    /// <summary>
-    /// Attempts to parse a UTF-8 byte span into a <see cref="Token"/>.
-    /// </summary>
-    public static bool TryParse(
-        ReadOnlySpan<byte> utf8Text,
-        IFormatProvider? provider,
-        out Token result)
-    {
-        try
-        {
-            result = new Token(Encoding.UTF8.GetString(utf8Text));
             return true;
         }
         catch

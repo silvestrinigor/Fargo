@@ -74,15 +74,10 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
     private static IQueryable<UserGroup> ApplyPartitionFilter(
         IQueryable<UserGroup> query,
         IReadOnlyCollection<Guid>? partitionGuids)
-    {
-        if (partitionGuids is null)
-        {
-            return query;
-        }
-
-        return query.Where(userGroup =>
-            userGroup.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
-    }
+        => query.WherePartitionAccessible(
+            partitionGuids,
+            userGroup => userGroup.Partitions,
+            partition => partition.PartitionGuid);
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantUserGroupGuidsAsync(Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default)
     {

@@ -36,8 +36,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
         {
             case ActorAccessDeniedFargoApplicationException ex:
 
-                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
-
                 problem = new ProblemDetails
                 {
                     Status = StatusCodes.Status403Forbidden,
@@ -53,8 +51,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
             case ActorPermissionDeniedFargoApplicationException ex:
 
-                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
-
                 problem = new ProblemDetails
                 {
                     Status = StatusCodes.Status403Forbidden,
@@ -69,8 +65,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
             case EntityNotFoundFargoApplicationException ex:
 
-                httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-
                 problem = new ProblemDetails
                 {
                     Status = StatusCodes.Status404NotFound,
@@ -83,8 +77,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                 break;
 
             case ActorNotFoundFargoApplicationException ex:
-
-                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
 
                 problem = new ProblemDetails
                 {
@@ -100,8 +92,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
             case InvalidCredentialsFargoApplicationException ex:
 
-                httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
                 problem = new ProblemDetails
                 {
                     Status = StatusCodes.Status401Unauthorized,
@@ -112,8 +102,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                 break;
 
             case UserPasswordChangeRequiredFargoApplicationException ex:
-
-                httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
                 problem = new ProblemDetails
                 {
@@ -128,8 +116,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
             case AuthenticationRateLimitFargoApplicationException ex:
 
-                httpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-
                 problem = new ProblemDetails
                 {
                     Status = StatusCodes.Status429TooManyRequests,
@@ -143,8 +129,6 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
             default:
 
-                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-
                 problem = new ProblemDetails
                 {
                     Status = StatusCodes.Status400BadRequest,
@@ -155,16 +139,8 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
                 break;
         }
 
-        problem.Instance = httpContext.Request.Path;
-        problem.Extensions["traceId"] = httpContext.TraceIdentifier;
-        problem.Extensions["errorType"] = appException.ErrorType;
-
-        await problemDetailsService.WriteAsync(new ProblemDetailsContext
-        {
-            HttpContext = httpContext,
-            ProblemDetails = problem,
-            Exception = exception,
-        });
+        await ProblemDetailsWriter.WriteAsync(
+            problemDetailsService, httpContext, exception, problem, appException.ErrorType);
 
         return true;
     }

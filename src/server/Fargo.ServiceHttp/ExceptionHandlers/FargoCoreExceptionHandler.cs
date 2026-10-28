@@ -18,30 +18,17 @@ public sealed class FargoCoreExceptionHandler(
             return false;
         }
 
-        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-
         var problem = new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Core error.",
+            Title = coreException.ErrorType == FargoErrorType.InvalidOperation
+                ? "Core invalid operation."
+                : "Core error.",
             Detail = coreException.Message,
-            Instance = httpContext.Request.Path,
         };
 
-        if (coreException.ErrorType == FargoErrorType.InvalidOperation)
-        {
-            problem.Title = "Core invalid operation.";
-        }
-
-        problem.Extensions["traceId"] = httpContext.TraceIdentifier;
-        problem.Extensions["errorType"] = coreException.ErrorType;
-
-        await problemDetailsService.WriteAsync(new ProblemDetailsContext
-        {
-            HttpContext = httpContext,
-            ProblemDetails = problem,
-            Exception = exception,
-        });
+        await ProblemDetailsWriter.WriteAsync(
+            problemDetailsService, httpContext, exception, problem, coreException.ErrorType);
 
         return true;
     }

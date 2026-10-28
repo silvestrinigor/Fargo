@@ -21,9 +21,7 @@ public sealed class ItemDeleteCommandHandler(
     {
         logger.DeleteStarted(command.ItemGuid, currentActor.Guid, currentActor.ActorType);
 
-        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
+        var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteItem);
 

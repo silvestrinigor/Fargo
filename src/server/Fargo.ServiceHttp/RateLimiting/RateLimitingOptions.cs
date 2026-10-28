@@ -32,6 +32,7 @@ public sealed class RateLimitingOptions
     /// The global limiter applied to every request, partitioned by client IP.
     /// Acts as a coarse backstop in front of the per-endpoint policies.
     /// </summary>
+    [ValidateObjectMembers]
     public RateLimitPolicyOptions Global { get; init; } = new()
     {
         PermitLimit = 300,
@@ -44,6 +45,7 @@ public sealed class RateLimitingOptions
     /// items, partitions, users, user groups, audit logs), partitioned by the
     /// authenticated user.
     /// </summary>
+    [ValidateObjectMembers]
     public RateLimitPolicyOptions GeneralAuthenticated { get; init; } = new()
     {
         PermitLimit = 100,
@@ -55,6 +57,7 @@ public sealed class RateLimitingOptions
     /// The limiter for the login endpoint, partitioned by client IP. Kept strict
     /// to slow credential-stuffing and brute-force attempts.
     /// </summary>
+    [ValidateObjectMembers]
     public RateLimitPolicyOptions IdentityLogin { get; init; } = new()
     {
         PermitLimit = 10,
@@ -65,6 +68,7 @@ public sealed class RateLimitingOptions
     /// <summary>
     /// The limiter for the token refresh endpoint, partitioned by client IP.
     /// </summary>
+    [ValidateObjectMembers]
     public RateLimitPolicyOptions IdentityRefresh { get; init; } = new()
     {
         PermitLimit = 30,
@@ -76,24 +80,13 @@ public sealed class RateLimitingOptions
     /// The limiter for the remaining identity endpoints (logout, change
     /// password), partitioned by client IP.
     /// </summary>
+    [ValidateObjectMembers]
     public RateLimitPolicyOptions IdentityDefault { get; init; } = new()
     {
         PermitLimit = 10,
         WindowSeconds = 60,
         QueueLimit = 0,
     };
-
-    /// <summary>
-    /// Enumerates every policy together with a label, for validation.
-    /// </summary>
-    internal IEnumerable<(string Name, RateLimitPolicyOptions Policy)> AllPolicies()
-    {
-        yield return (nameof(Global), Global);
-        yield return (nameof(GeneralAuthenticated), GeneralAuthenticated);
-        yield return (nameof(IdentityLogin), IdentityLogin);
-        yield return (nameof(IdentityRefresh), IdentityRefresh);
-        yield return (nameof(IdentityDefault), IdentityDefault);
-    }
 }
 
 /// <summary>
@@ -125,37 +118,4 @@ public sealed class RateLimitPolicyOptions
     /// Gets the window as a <see cref="TimeSpan"/>.
     /// </summary>
     public TimeSpan Window => TimeSpan.FromSeconds(WindowSeconds);
-}
-
-/// <summary>
-/// Validates that every configured rate-limit policy has sane values.
-/// </summary>
-public sealed class RateLimitingOptionsValidator : IValidateOptions<RateLimitingOptions>
-{
-    public ValidateOptionsResult Validate(string? name, RateLimitingOptions options)
-    {
-        var failures = new List<string>();
-
-        foreach (var (policyName, policy) in options.AllPolicies())
-        {
-            if (policy.PermitLimit < 1)
-            {
-                failures.Add($"RateLimiting:{policyName}:PermitLimit must be >= 1.");
-            }
-
-            if (policy.WindowSeconds < 1)
-            {
-                failures.Add($"RateLimiting:{policyName}:WindowSeconds must be >= 1.");
-            }
-
-            if (policy.QueueLimit < 0)
-            {
-                failures.Add($"RateLimiting:{policyName}:QueueLimit must be >= 0.");
-            }
-        }
-
-        return failures.Count > 0
-            ? ValidateOptionsResult.Fail(failures)
-            : ValidateOptionsResult.Success;
-    }
 }

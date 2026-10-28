@@ -81,8 +81,8 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>()
         .AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticleUpdateCommandHandler>()
         .AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>()
-        .AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleByGuidQueryHandler>()
-        .AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleByBarcodeQueryHandler>()
+        .AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleQueryHandler>()
+        .AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleQueryHandler>()
         .AddScoped<IQueryHandler<ArticlesQuery, PagedResult<ArticleDto>>, ArticlesQueryHandler>()
         .AddScoped<IQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?>, ArticleInventoryByGuidQueryHandler>();
 

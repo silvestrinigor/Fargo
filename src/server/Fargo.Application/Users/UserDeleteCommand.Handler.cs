@@ -19,11 +19,9 @@ public sealed class UserDeleteCommandHandler(
     public async Task HandleAsync(
         UserDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        logger.UserDeleteCompleted(command.UserGuid, currentActor.Guid);
+        logger.UserDeleteStarted(command.UserGuid, currentActor.Guid);
 
-        var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
-
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, currentActor.Guid, currentActor.ActorType);
+        var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteUser);
 

@@ -115,15 +115,10 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
     private static IQueryable<Article> ApplyPartitionFilter(
         IQueryable<Article> query,
         IReadOnlyCollection<Guid>? partitionGuids)
-    {
-        if (partitionGuids is null)
-        {
-            return query;
-        }
-
-        return query.Where(article =>
-            article.Partitions.Any(partition => partitionGuids.Contains(partition.PartitionGuid)));
-    }
+        => query.WherePartitionAccessible(
+            partitionGuids,
+            article => article.Partitions,
+            partition => partition.PartitionGuid);
 
     private static IQueryable<Article> ApplyBarcodeFilter(IQueryable<Article> query, Barcode barcode)
     {
