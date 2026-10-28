@@ -37,8 +37,6 @@ public sealed class IdentityPasswordChangeCommandHandler(
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
     public async Task HandleAsync(IdentityPasswordChangeCommand command, CancellationToken cancellationToken = default)
     {
-        logger.IdentityPasswordChangeStarted(command.Passwords.Nameid);
-
         Nameid nameid;
 
         try
@@ -113,18 +111,11 @@ public sealed class IdentityPasswordChangeCommandHandler(
         auditLogRepository.Add(passwordChangeAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.IdentityPasswordChangeCompleted(user.Guid);
     }
 }
 
 internal static partial class IdentityPasswordChangeCommandHandlerLogs
 {
-    [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "Password change flow started for user '{userNameid}'.")]
-    public static partial void IdentityPasswordChangeStarted(this ILogger logger, string userNameid);
-
     [LoggerMessage(
         Level = LogLevel.Warning,
         Message = "Password change flow rejected because user '{nameid}' was not found.")]
@@ -145,9 +136,4 @@ internal static partial class IdentityPasswordChangeCommandHandlerLogs
         Level = LogLevel.Warning,
         Message = "Password change flow rejected because the current password was invalid for user '{userGuid}'.")]
     public static partial void IdentityPasswordChangeInvalidPassword(this ILogger logger, Guid userGuid);
-
-    [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "Password change flow completed for user '{userGuid}'.")]
-    public static partial void IdentityPasswordChangeCompleted(this ILogger logger, Guid userGuid);
 }

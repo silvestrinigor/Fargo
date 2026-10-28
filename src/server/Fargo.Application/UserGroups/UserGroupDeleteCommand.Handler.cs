@@ -3,7 +3,6 @@ using Fargo.Core.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.UserGroups;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.UserGroups;
 
@@ -13,17 +12,13 @@ public sealed class UserGroupDeleteCommandHandler(
     IUserGroupRepository userGroupRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
-    IUnitOfWork unitOfWork,
-    ILogger<UserGroupDeleteCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<UserGroupDeleteCommand>
 {
     public async Task HandleAsync(
         UserGroupDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("User group delete", "userGroup", command.UserGroupGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteUserGroup);
@@ -43,7 +38,5 @@ public sealed class UserGroupDeleteCommandHandler(
         auditLogRepository.Add(audit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("User group delete", "userGroup", command.UserGroupGuid);
     }
 }

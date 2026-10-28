@@ -7,7 +7,6 @@ using Fargo.Core.Common;
 using Fargo.Core.Informations;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.UserGroups;
@@ -27,8 +26,7 @@ public class UserGroupDeleteCommandHandlerTests
             userGroupRepository,
             auditLogRepository,
             currentActor,
-            unitOfWork,
-            Substitute.For<ILogger<UserGroupDeleteCommandHandler>>());
+            unitOfWork);
 
     private static UserGroup NewUserGroup()
         => UserGroup.CreateUserGroup(new Nameid("editors"));

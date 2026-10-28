@@ -1,6 +1,5 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Audits;
 
@@ -11,12 +10,10 @@ namespace Fargo.Application.Audits;
 /// <param name="actorResolver">Resolves the current actor and its partition access.</param>
 /// <param name="auditLogQueryRepository">Provides access to audit log query data.</param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
-/// <param name="logger">Logs the execution of the query.</param>
 public sealed class AuditLogsQueryHandler(
     ActorResolver actorResolver,
     IAuditLogQueryRepository auditLogQueryRepository,
-    ICurrentActor currentActor,
-    ILogger<AuditLogsQueryHandler> logger
+    ICurrentActor currentActor
 ) : IQueryHandler<AuditLogsQuery, PagedResult<AuditLogDto>>
 {
     /// <summary>
@@ -27,9 +24,6 @@ public sealed class AuditLogsQueryHandler(
     /// <returns>A task that represents the asynchronous operation. The task result contains a page of audit log DTOs together with the total count</returns>
     public async Task<PagedResult<AuditLogDto>> HandleAsync(AuditLogsQuery query, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CollectionStarted("Audit logs query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
-
         var actor = await actorResolver.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         var result = await auditLogQueryRepository.GetManyInfoOrderedByOccurredAtAsync(
@@ -43,8 +37,6 @@ public sealed class AuditLogsQueryHandler(
             query.PeriodEnd,
             cancellationToken
         );
-
-        logger.CollectionCompleted("Audit logs query", result.Items.Count);
 
         return result;
     }

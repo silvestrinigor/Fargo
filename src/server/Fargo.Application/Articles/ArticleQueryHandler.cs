@@ -1,6 +1,5 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
 
@@ -13,10 +12,9 @@ namespace Fargo.Application.Articles;
 /// <param name="actorService">Resolves the current actor and its partition access.</param>
 /// <param name="articleRepository">Provides access to article query data.</param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
-/// <param name="logger">Logs the execution of the query.</param>
 public sealed class ArticleQueryHandler(
     ActorResolver actorService, IArticleQueryRepository articleRepository,
-    ICurrentActor currentActor, ILogger<ArticleQueryHandler> logger
+    ICurrentActor currentActor
 ) : IQueryHandler<ArticleByGuidQuery, ArticleDto?>,
     IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>
 {
@@ -30,14 +28,9 @@ public sealed class ArticleQueryHandler(
     public async Task<ArticleDto?> HandleAsync(
         ArticleByGuidQuery query, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.QueryStarted("Article query by guid", "article", query.ArticleGuid);
-
         var article = await QueryAsync(
             (repository, partitions, ct) => repository.GetInfoByGuidAsync(query.ArticleGuid, partitions, ct),
             cancellationToken);
-
-        logger.QueryCompleted("Article query by guid", "article", query.ArticleGuid, found: article is not null);
 
         return article;
     }
@@ -52,14 +45,9 @@ public sealed class ArticleQueryHandler(
     public async Task<ArticleDto?> HandleAsync(
         ArticleByBarcodeQuery query, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.QueryStarted("Article query by barcode", "barcode", query.ArticleBarcode.ToString());
-
         var article = await QueryAsync(
             (repository, partitions, ct) => repository.GetInfoByBarcodeAsync(query.ArticleBarcode, partitions, ct),
             cancellationToken);
-
-        logger.QueryCompleted("Article query by barcode", "barcode", query.ArticleBarcode.ToString(), found: article is not null);
 
         return article;
     }

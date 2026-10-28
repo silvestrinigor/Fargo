@@ -26,8 +26,6 @@ public sealed class IdentityLogoutCommandHandler(
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
     public async Task HandleAsync(IdentityLogoutCommand command, CancellationToken cancellationToken = default)
     {
-        logger.IdentityLogoutStarted();
-
         var refreshTokenHash = tokenHasher.Hash(command.RefreshToken);
 
         var storedRefreshToken = await refreshTokenRepository.GetByTokenHashAsync(refreshTokenHash, cancellationToken);
@@ -42,25 +40,13 @@ public sealed class IdentityLogoutCommandHandler(
         storedRefreshToken.Revoke();
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.IdentityLogoutCompleted(storedRefreshToken.UserGuid);
     }
 }
 
 internal static partial class IdentityLogoutCommandHandlerLogs
 {
     [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "Logout flow started.")]
-    public static partial void IdentityLogoutStarted(this ILogger logger);
-
-    [LoggerMessage(
         Level = LogLevel.Warning,
         Message = "Logout flow completed without revoking a refresh token because it was not found.")]
     public static partial void IdentityLogoutCompletedRefreshTokenNotFound(this ILogger logger);
-
-    [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "Logout flow completed for user '{UserGuid}'.")]
-    public static partial void IdentityLogoutCompleted(this ILogger logger, Guid userGuid);
 }

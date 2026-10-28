@@ -3,7 +3,6 @@ using Fargo.Core.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Users;
 
@@ -12,16 +11,12 @@ public sealed class UserDeleteCommandHandler(
     IUserRepository userRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
-    IUnitOfWork unitOfWork,
-    ILogger<UserDeleteCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<UserDeleteCommand>
 {
     public async Task HandleAsync(
         UserDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("User delete", "user", command.UserGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteUser);
@@ -46,7 +41,5 @@ public sealed class UserDeleteCommandHandler(
         auditLogRepository.Add(audit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("User delete", "user", command.UserGuid);
     }
 }

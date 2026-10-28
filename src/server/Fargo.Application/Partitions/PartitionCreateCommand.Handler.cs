@@ -5,7 +5,6 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Partitions;
 
@@ -13,17 +12,13 @@ public sealed class PartitionCreateCommandHandler(
     ActorResolver actorService,
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    IUnitOfWork unitOfWork, ICurrentActor currentActor,
-    ILogger<PartitionCreateCommandHandler> logger
+    IUnitOfWork unitOfWork, ICurrentActor currentActor
 ) : ICommandHandler<PartitionCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
         PartitionCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("Partition create");
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.CreatePartition);
@@ -65,8 +60,6 @@ public sealed class PartitionCreateCommandHandler(
         partitionRepository.Add(newPartition);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("Partition create", "partition", newPartition.Guid);
 
         return newPartition.Guid;
     }

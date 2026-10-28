@@ -3,7 +3,6 @@ using Fargo.Core.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Items;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Items;
 
@@ -11,17 +10,13 @@ public sealed class ItemDeleteCommandHandler(
     ActorResolver actorService,
     IItemRepository itemRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor, IUnitOfWork unitOfWork,
-    ILogger<ItemDeleteCommandHandler> logger
+    ICurrentActor currentActor, IUnitOfWork unitOfWork
 ) : ICommandHandler<ItemDeleteCommand>
 {
     public async Task HandleAsync(
         ItemDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("Item delete", "item", command.ItemGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteItem);
@@ -39,7 +34,5 @@ public sealed class ItemDeleteCommandHandler(
         itemRepository.Remove(item);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("Item delete", "item", item.Guid);
     }
 }

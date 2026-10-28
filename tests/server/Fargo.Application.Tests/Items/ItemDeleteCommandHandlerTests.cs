@@ -7,7 +7,6 @@ using Fargo.Core.Audits;
 using Fargo.Core.Informations;
 using Fargo.Core.Items;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;
@@ -26,8 +25,7 @@ public class ItemDeleteCommandHandlerTests
             itemRepository,
             auditLogRepository,
             currentActor,
-            unitOfWork,
-            Substitute.For<ILogger<ItemDeleteCommandHandler>>());
+            unitOfWork);
 
     private static Item NewItem()
         => Item.CreateItem(Article.NewArticle(new Name("Widget")));

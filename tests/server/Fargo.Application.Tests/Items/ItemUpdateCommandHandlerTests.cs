@@ -9,7 +9,6 @@ using Fargo.Core.Informations;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;
@@ -31,8 +30,7 @@ public class ItemUpdateCommandHandlerTests
             partitionRepository,
             auditLogRepository,
             unitOfWork,
-            currentActor,
-            Substitute.For<ILogger<ItemUpdateCommandHandler>>());
+            currentActor);
 
     private static Item NewItem()
         => Item.CreateItem(Article.NewArticle(new Name("Widget")));

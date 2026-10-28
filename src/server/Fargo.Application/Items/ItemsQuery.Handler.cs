@@ -1,14 +1,12 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Items;
 
 public sealed class ItemsQueryHandler(
     ActorResolver actorService,
     IItemQueryRepository itemRepository,
-    ICurrentActor currentActor,
-    ILogger<ItemsQueryHandler> logger
+    ICurrentActor currentActor
 ) : IQueryHandler<ItemsQuery, PagedResult<ItemDto>>
 {
     public async Task<PagedResult<ItemDto>> HandleAsync(
@@ -16,9 +14,6 @@ public sealed class ItemsQueryHandler(
         CancellationToken cancellationToken = default)
     {
         var pagination = query.WithPagination;
-
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CollectionStarted("Items query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -33,8 +28,6 @@ public sealed class ItemsQueryHandler(
             partitionGuids,
             cancellationToken
         );
-
-        logger.CollectionCompleted("Items query", items.Items.Count);
 
         return items;
     }

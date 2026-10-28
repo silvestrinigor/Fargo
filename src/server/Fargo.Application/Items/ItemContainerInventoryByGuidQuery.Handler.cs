@@ -1,7 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
 using Fargo.Core.Items;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Items;
 
@@ -9,15 +8,11 @@ public sealed class ItemContainerInventoryByGuidQueryHandler(
     ActorResolver actorService,
     IItemQueryRepository itemQueryRepository,
     IItemRepository itemRepository,
-    ICurrentActor currentActor,
-    ILogger<ItemContainerInventoryByGuidQueryHandler> logger
+    ICurrentActor currentActor
 ) : IQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?>
 {
     public async Task<IReadOnlyCollection<ItemContainerInventoryDto>?> HandleAsync(ItemContainerInventoryByGuidQuery query, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.QueryStarted("Item container inventory query", "container", query.ItemContainerGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         var itemExist = await itemQueryRepository.ExistByGuidAsync(query.ItemContainerGuid, actor.PartitionAccessGuids, cancellationToken);
@@ -65,9 +60,6 @@ public sealed class ItemContainerInventoryByGuidQueryHandler(
             cancellationToken);
 
         inventory = MergeByArticle(inventory, eventInventory);
-
-        logger.QueryCompleted(
-            "Item container inventory query", "container", query.ItemContainerGuid, found: inventory is not null);
 
         return inventory;
     }

@@ -9,7 +9,6 @@ using Fargo.Core.Informations;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;
@@ -32,8 +31,7 @@ public class ItemCreateCommandHandlerTests
             partitionRepository,
             auditLogRepository,
             currentActor,
-            unitOfWork,
-            Substitute.For<ILogger<ItemCreateCommandHandler>>());
+            unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WhenValid_ShouldAddItemAndAuditAndSave()

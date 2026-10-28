@@ -6,7 +6,6 @@ using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Users;
 
@@ -19,16 +18,12 @@ public sealed class UserCreateCommandHandler(
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
     IPasswordHasher passwordHasher,
-    IUnitOfWork unitOfWork,
-    ILogger<UserCreateCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<UserCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
         UserCreateCommand command, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("User create");
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateUser);
@@ -153,8 +148,6 @@ public sealed class UserCreateCommandHandler(
         auditLogRepository.Add(userAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("User create", "user", user.Guid);
 
         return user.Guid;
     }

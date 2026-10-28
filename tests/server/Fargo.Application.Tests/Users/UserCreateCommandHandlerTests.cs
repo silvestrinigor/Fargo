@@ -9,7 +9,6 @@ using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Users;
@@ -34,8 +33,7 @@ public class UserCreateCommandHandlerTests
             auditLogRepository,
             currentActor,
             passwordHasher,
-            unitOfWork,
-            Substitute.For<ILogger<UserCreateCommandHandler>>());
+            unitOfWork);
 
     private static UserCreateCommand SimpleCommand(string nameid = "newuser")
         => new(new UserCreateDto(new Nameid(nameid)));

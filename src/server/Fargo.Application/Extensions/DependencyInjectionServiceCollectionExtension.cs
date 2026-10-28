@@ -43,58 +43,58 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddScoped<IAuthenticationAttemptService, AuthenticationAttemptService>();
 
         public IServiceCollection AddFargoSystemApplication() => services
-        .AddScoped<ICommandHandler<InitializeSystemCommand>, InitializeSystemCommandHandler>();
+        .AddFargoCommandHandler<InitializeSystemCommand, InitializeSystemCommandHandler>();
 
         public IServiceCollection AddFargoIdentityApplication() => services
-        .AddScoped<ICommandHandler<IdentityLoginCommand, IdentityAuthResultDto>, IdentityLoginCommandHandler>()
-        .AddScoped<ICommandHandler<IdentityLogoutCommand>, IdentityLogoutCommandHandler>()
-        .AddScoped<ICommandHandler<IdentityRefreshCommand, IdentityAuthResultDto>, IdentityRefreshCommandHandler>()
-        .AddScoped<ICommandHandler<IdentityPasswordChangeCommand>, IdentityPasswordChangeCommandHandler>();
+        .AddFargoCommandHandler<IdentityLoginCommand, IdentityAuthResultDto, IdentityLoginCommandHandler>()
+        .AddFargoCommandHandler<IdentityLogoutCommand, IdentityLogoutCommandHandler>()
+        .AddFargoCommandHandler<IdentityRefreshCommand, IdentityAuthResultDto, IdentityRefreshCommandHandler>()
+        .AddFargoCommandHandler<IdentityPasswordChangeCommand, IdentityPasswordChangeCommandHandler>();
 
         public IServiceCollection AddFargoItemApplication() => services
-        .AddScoped<ICommandHandler<ItemCreateCommand, Guid>, ItemCreateCommandHandler>()
-        .AddScoped<ICommandHandler<ItemUpdateCommand>, ItemUpdateCommandHandler>()
-        .AddScoped<ICommandHandler<ItemDeleteCommand>, ItemDeleteCommandHandler>()
-        .AddScoped<ICommandHandler<ItemEventCreateCommand, Guid>, ItemEventCreateCommandHandler>()
-        .AddScoped<IQueryHandler<ItemSingleQuery, ItemDto?>, ItemSingleQueryHandler>()
-        .AddScoped<IQueryHandler<ItemsQuery, PagedResult<ItemDto>>, ItemsQueryHandler>()
-        .AddScoped<IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>>, ItemLocationQueryHandler>()
-        .AddScoped<IQueryHandler<ItemMovimentsQuery, IReadOnlyCollection<ItemMovimentDto>?>, ItemMovimentsQueryHandler>()
-        .AddScoped<IQueryHandler<ItemEventsQuery, PagedResult<ItemEventDto>>, ItemEventsQueryHandler>()
-        .AddScoped<IQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?>, ItemContainerInventoryByGuidQueryHandler>();
+        .AddFargoCommandHandler<ItemCreateCommand, Guid, ItemCreateCommandHandler>()
+        .AddFargoCommandHandler<ItemUpdateCommand, ItemUpdateCommandHandler>()
+        .AddFargoCommandHandler<ItemDeleteCommand, ItemDeleteCommandHandler>()
+        .AddFargoCommandHandler<ItemEventCreateCommand, Guid, ItemEventCreateCommandHandler>()
+        .AddFargoQueryHandler<ItemSingleQuery, ItemDto?, ItemSingleQueryHandler>()
+        .AddFargoQueryHandler<ItemsQuery, PagedResult<ItemDto>, ItemsQueryHandler>()
+        .AddFargoQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>, ItemLocationQueryHandler>()
+        .AddFargoQueryHandler<ItemMovimentsQuery, IReadOnlyCollection<ItemMovimentDto>?, ItemMovimentsQueryHandler>()
+        .AddFargoQueryHandler<ItemEventsQuery, PagedResult<ItemEventDto>, ItemEventsQueryHandler>()
+        .AddFargoQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?, ItemContainerInventoryByGuidQueryHandler>();
 
         public IServiceCollection AddFargoUserApplication() => services
-        .AddScoped<ICommandHandler<UserCreateCommand, Guid>, UserCreateCommandHandler>()
-        .AddScoped<ICommandHandler<UserUpdateCommand>, UserUpdateCommandHandler>()
-        .AddScoped<ICommandHandler<UserDeleteCommand>, UserDeleteCommandHandler>()
-        .AddScoped<IQueryHandler<UserSingleQuery, UserDto?>, UserSingleQueryHandler>()
-        .AddScoped<IQueryHandler<UsersQuery, PagedResult<UserDto>>, UsersQueryHandler>();
+        .AddFargoCommandHandler<UserCreateCommand, Guid, UserCreateCommandHandler>()
+        .AddFargoCommandHandler<UserUpdateCommand, UserUpdateCommandHandler>()
+        .AddFargoCommandHandler<UserDeleteCommand, UserDeleteCommandHandler>()
+        .AddFargoQueryHandler<UserSingleQuery, UserDto?, UserSingleQueryHandler>()
+        .AddFargoQueryHandler<UsersQuery, PagedResult<UserDto>, UsersQueryHandler>();
 
         public IServiceCollection AddFargoUserGroupApplication() => services
-        .AddScoped<ICommandHandler<UserGroupCreateCommand, Guid>, UserGroupCreateCommandHandler>()
-        .AddScoped<ICommandHandler<UserGroupUpdateCommand>, UserGroupUpdateCommandHandler>()
-        .AddScoped<ICommandHandler<UserGroupDeleteCommand>, UserGroupDeleteCommandHandler>()
-        .AddScoped<IQueryHandler<UserGroupSingleQuery, UserGroupDto?>, UserGroupSingleQueryHandler>()
-        .AddScoped<IQueryHandler<UserGroupsQuery, PagedResult<UserGroupDto>>, UserGroupsQueryHandler>();
+        .AddFargoCommandHandler<UserGroupCreateCommand, Guid, UserGroupCreateCommandHandler>()
+        .AddFargoCommandHandler<UserGroupUpdateCommand, UserGroupUpdateCommandHandler>()
+        .AddFargoCommandHandler<UserGroupDeleteCommand, UserGroupDeleteCommandHandler>()
+        .AddFargoQueryHandler<UserGroupSingleQuery, UserGroupDto?, UserGroupSingleQueryHandler>()
+        .AddFargoQueryHandler<UserGroupsQuery, PagedResult<UserGroupDto>, UserGroupsQueryHandler>();
 
         public IServiceCollection AddFargoArticleApplication() => services
-        .AddScoped<ICommandHandler<ArticleCreateCommand, Guid>, ArticleCreateCommandHandler>()
-        .AddScoped<ICommandHandler<ArticleUpdateCommand>, ArticleUpdateCommandHandler>()
-        .AddScoped<ICommandHandler<ArticleDeleteCommand>, ArticleDeleteCommandHandler>()
-        .AddScoped<IQueryHandler<ArticleByGuidQuery, ArticleDto?>, ArticleQueryHandler>()
-        .AddScoped<IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>, ArticleQueryHandler>()
-        .AddScoped<IQueryHandler<ArticlesQuery, PagedResult<ArticleDto>>, ArticlesQueryHandler>()
-        .AddScoped<IQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?>, ArticleInventoryByGuidQueryHandler>();
+        .AddFargoCommandHandler<ArticleCreateCommand, Guid, ArticleCreateCommandHandler>()
+        .AddFargoCommandHandler<ArticleUpdateCommand, ArticleUpdateCommandHandler>()
+        .AddFargoCommandHandler<ArticleDeleteCommand, ArticleDeleteCommandHandler>()
+        .AddFargoQueryHandler<ArticleByGuidQuery, ArticleDto?, ArticleQueryHandler>()
+        .AddFargoQueryHandler<ArticleByBarcodeQuery, ArticleDto?, ArticleQueryHandler>()
+        .AddFargoQueryHandler<ArticlesQuery, PagedResult<ArticleDto>, ArticlesQueryHandler>()
+        .AddFargoQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?, ArticleInventoryByGuidQueryHandler>();
 
         public IServiceCollection AddFargoPartitionApplication() => services
-        .AddScoped<ICommandHandler<PartitionCreateCommand, Guid>, PartitionCreateCommandHandler>()
-        .AddScoped<ICommandHandler<PartitionUpdateCommand>, PartitionUpdateCommandHandler>()
-        .AddScoped<ICommandHandler<PartitionDeleteCommand>, PartitionDeleteCommandHandler>()
-        .AddScoped<IQueryHandler<PartitionSingleQuery, PartitionDto?>, PartitionSingleQueryHandler>()
-        .AddScoped<IQueryHandler<PartitionsQuery, PagedResult<PartitionDto>>, PartitionsQueryHandler>();
+        .AddFargoCommandHandler<PartitionCreateCommand, Guid, PartitionCreateCommandHandler>()
+        .AddFargoCommandHandler<PartitionUpdateCommand, PartitionUpdateCommandHandler>()
+        .AddFargoCommandHandler<PartitionDeleteCommand, PartitionDeleteCommandHandler>()
+        .AddFargoQueryHandler<PartitionSingleQuery, PartitionDto?, PartitionSingleQueryHandler>()
+        .AddFargoQueryHandler<PartitionsQuery, PagedResult<PartitionDto>, PartitionsQueryHandler>();
 
         public IServiceCollection AddFargoAuditLogApplication() => services
-        .AddScoped<IQueryHandler<AuditLogsQuery, PagedResult<AuditLogDto>>, AuditLogsQueryHandler>()
-        .AddScoped<IQueryHandler<AuditLogSingleQuery, AuditLogDto?>, AuditLogSingleQueryHandler>();
+        .AddFargoQueryHandler<AuditLogsQuery, PagedResult<AuditLogDto>, AuditLogsQueryHandler>()
+        .AddFargoQueryHandler<AuditLogSingleQuery, AuditLogDto?, AuditLogSingleQueryHandler>();
     }
 }

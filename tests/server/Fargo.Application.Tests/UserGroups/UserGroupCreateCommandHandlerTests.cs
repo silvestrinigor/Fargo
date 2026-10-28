@@ -8,7 +8,6 @@ using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.UserGroups;
@@ -30,8 +29,7 @@ public class UserGroupCreateCommandHandlerTests
             partitionRepository,
             auditLogRepository,
             currentActor,
-            unitOfWork,
-            Substitute.For<ILogger<UserGroupCreateCommandHandler>>());
+            unitOfWork);
 
     private static Partition GlobalPartition()
         => Partition.CreateGlobalPartition(new Name("Global"));

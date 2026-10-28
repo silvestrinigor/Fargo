@@ -4,7 +4,6 @@ using Fargo.Core.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
 
@@ -18,13 +17,11 @@ namespace Fargo.Application.Articles;
 /// <param name="auditLogRepository"></param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
 /// <param name="unitOfWork">Coordinates persistence of the changes.</param>
-/// <param name="logger">Logs the execution of the command.</param>
 public sealed class ArticleUpdateCommandHandler(
     ActorResolver actorService, ArticleService articleService,
     IArticleRepository articleRepository, IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor, IUnitOfWork unitOfWork,
-    ILogger<ArticleUpdateCommandHandler> logger
+    ICurrentActor currentActor, IUnitOfWork unitOfWork
 ) : ICommandHandler<ArticleUpdateCommand>
 {
     /// <summary>
@@ -45,9 +42,6 @@ public sealed class ArticleUpdateCommandHandler(
     /// </exception>
     public async Task HandleAsync(ArticleUpdateCommand command, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("Article update", "article", command.ArticleGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.EditArticle);
@@ -167,7 +161,5 @@ public sealed class ArticleUpdateCommandHandler(
         auditLogRepository.Add(articleAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("Article update", "article", article.Guid);
     }
 }

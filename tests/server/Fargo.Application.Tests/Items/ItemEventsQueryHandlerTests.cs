@@ -4,7 +4,6 @@ using Fargo.Application.Tests.Common;
 using Fargo.Core.Actors;
 using Fargo.Core.Items.Events;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;
@@ -19,8 +18,7 @@ public class ItemEventsQueryHandlerTests
         => new(
             ActorTestFactory.Resolver(userRepository),
             itemEventQueryRepository,
-            currentActor,
-            Substitute.For<ILogger<ItemEventsQueryHandler>>());
+            currentActor);
 
     private static PagedResult<ItemEventDto> EmptyPage()
         => new([], 0, Page.FirstPage.Value, Limit.MaxLimit.Value);

@@ -7,7 +7,6 @@ using Fargo.Core.Audits;
 using Fargo.Core.Common;
 using Fargo.Core.Informations;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Articles;
@@ -27,8 +26,7 @@ public class ArticleDeleteCommandHandlerTests
             articleRepository,
             auditLogRepository,
             currentActor,
-            unitOfWork,
-            Substitute.For<ILogger<ArticleDeleteCommandHandler>>());
+            unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WhenValid_ShouldRemoveArticleAndAuditAndSave()

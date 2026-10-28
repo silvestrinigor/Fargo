@@ -1,6 +1,5 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Items;
 
@@ -17,12 +16,10 @@ namespace Fargo.Application.Items;
 /// <param name="actorResolver">Resolves the current actor and its partition access.</param>
 /// <param name="itemEventQueryRepository">Provides access to item event query data.</param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
-/// <param name="logger">Logs the execution of the query.</param>
 public sealed class ItemEventsQueryHandler(
     ActorResolver actorResolver,
     IItemEventQueryRepository itemEventQueryRepository,
-    ICurrentActor currentActor,
-    ILogger<ItemEventsQueryHandler> logger
+    ICurrentActor currentActor
 ) : IQueryHandler<ItemEventsQuery, PagedResult<ItemEventDto>>
 {
     /// <summary>
@@ -34,9 +31,6 @@ public sealed class ItemEventsQueryHandler(
     /// <returns>A page of item event DTOs together with the total count.</returns>
     public async Task<PagedResult<ItemEventDto>> HandleAsync(ItemEventsQuery query, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CollectionStarted("Item events query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
-
         var actor = await actorResolver.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.ReadItemEvents);
@@ -50,8 +44,6 @@ public sealed class ItemEventsQueryHandler(
             query.PeriodEnd,
             cancellationToken
         );
-
-        logger.CollectionCompleted("Item events query", result.Items.Count);
 
         return result;
     }

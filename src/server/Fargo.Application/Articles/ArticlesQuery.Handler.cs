@@ -1,6 +1,5 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
 
@@ -11,12 +10,10 @@ namespace Fargo.Application.Articles;
 /// <param name="actorService">Resolves the current actor and its partition access.</param>
 /// <param name="articleRepository">Provides access to article query data.</param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
-/// <param name="logger">Logs the execution of the query.</param>
 public sealed class ArticlesQueryHandler(
     ActorResolver actorService,
     IArticleQueryRepository articleRepository,
-    ICurrentActor currentActor,
-    ILogger<ArticlesQueryHandler> logger
+    ICurrentActor currentActor
 ) : IQueryHandler<ArticlesQuery, PagedResult<ArticleDto>>
 {
     /// <summary>
@@ -29,9 +26,6 @@ public sealed class ArticlesQueryHandler(
     /// </returns>
     public async Task<PagedResult<ArticleDto>> HandleAsync(ArticlesQuery query, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CollectionStarted("Articles query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         var partitionGuids =
@@ -45,8 +39,6 @@ public sealed class ArticlesQueryHandler(
             partitionGuids,
             cancellationToken
         );
-
-        logger.CollectionCompleted("Articles query", articles.Items.Count);
 
         return articles;
     }

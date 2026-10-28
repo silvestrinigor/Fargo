@@ -4,7 +4,6 @@ using Fargo.Application.Tests.Common;
 using Fargo.Core.Articles;
 using Fargo.Core.Items;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;
@@ -48,8 +47,7 @@ public class InventoryEventHandlingTests
             ActorTestFactory.Resolver(userRepository),
             itemQueryRepository,
             itemRepository,
-            currentActor,
-            Substitute.For<ILogger<ItemContainerInventoryByGuidQueryHandler>>());
+            currentActor);
 
         var result = await handler.HandleAsync(new ItemContainerInventoryByGuidQuery(container));
 
@@ -79,8 +77,7 @@ public class InventoryEventHandlingTests
         var handler = new ArticleInventoryByGuidQueryHandler(
             ActorTestFactory.Resolver(userRepository),
             articleRepository,
-            currentActor,
-            Substitute.For<ILogger<ArticleInventoryByGuidQueryHandler>>());
+            currentActor);
 
         var result = await handler.HandleAsync(new ArticleInventoryByGuidQuery(article));
 
@@ -108,8 +105,7 @@ public class InventoryEventHandlingTests
         var handler = new ArticleInventoryByGuidQueryHandler(
             ActorTestFactory.Resolver(userRepository),
             articleRepository,
-            currentActor,
-            Substitute.For<ILogger<ArticleInventoryByGuidQueryHandler>>());
+            currentActor);
 
         var result = await handler.HandleAsync(new ArticleInventoryByGuidQuery(article));
 
@@ -133,8 +129,7 @@ public class InventoryEventHandlingTests
         var handler = new ArticleInventoryByGuidQueryHandler(
             ActorTestFactory.Resolver(userRepository),
             articleRepository,
-            currentActor,
-            Substitute.For<ILogger<ArticleInventoryByGuidQueryHandler>>());
+            currentActor);
 
         var result = await handler.HandleAsync(new ArticleInventoryByGuidQuery(article));
 

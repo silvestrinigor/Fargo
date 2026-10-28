@@ -6,7 +6,6 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
-using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Fargo.Application.Articles;
@@ -35,16 +34,12 @@ namespace Fargo.Application.Articles;
 /// <param name="unitOfWork">
 /// Coordinates persistence of the article and its audit log.
 /// </param>
-/// <param name="logger">
-/// Logs the execution of the command.
-/// </param>
 public sealed class ArticleCreateCommandHandler(
     ArticleService articleService, ActorResolver actorService,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor, IUnitOfWork unitOfWork,
-    ILogger<ArticleCreateCommandHandler> logger
+    ICurrentActor currentActor, IUnitOfWork unitOfWork
     ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     /// <summary>
@@ -76,9 +71,6 @@ public sealed class ArticleCreateCommandHandler(
     /// </exception>
     public async Task<Guid> HandleAsync(ArticleCreateCommand command, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("Article create");
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateArticle);
@@ -260,8 +252,6 @@ public sealed class ArticleCreateCommandHandler(
         auditLogRepository.Add(articleAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("Article create", "article", article.Guid);
 
         return article.Guid;
     }

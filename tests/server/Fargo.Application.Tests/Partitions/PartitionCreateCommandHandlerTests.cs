@@ -7,7 +7,6 @@ using Fargo.Core.Common;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Partitions;
@@ -26,8 +25,7 @@ public class PartitionCreateCommandHandlerTests
             partitionRepository,
             auditLogRepository,
             unitOfWork,
-            currentActor,
-            Substitute.For<ILogger<PartitionCreateCommandHandler>>());
+            currentActor);
 
     private static Partition GlobalPartition()
         => Partition.CreateGlobalPartition(new Name("Global"));

@@ -3,7 +3,6 @@ using Fargo.Core.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Partitions;
 
@@ -13,17 +12,13 @@ public sealed class PartitionDeleteCommandHandler(
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
-    IUnitOfWork unitOfWork,
-    ILogger<PartitionDeleteCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<PartitionDeleteCommand>
 {
     public async Task HandleAsync(
         PartitionDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("Partition delete", "partition", command.PartitionGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.DeletePartition);
@@ -54,7 +49,5 @@ public sealed class PartitionDeleteCommandHandler(
         auditLogRepository.Add(audit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("Partition delete", "partition", command.PartitionGuid);
     }
 }

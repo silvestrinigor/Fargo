@@ -6,7 +6,6 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Items;
 using Fargo.Core.Items.Events;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Items;
 
@@ -27,8 +26,7 @@ public sealed class ItemEventCreateCommandHandler(
     IItemEventRepository itemEventRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
-    IUnitOfWork unitOfWork,
-    ILogger<ItemEventCreateCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<ItemEventCreateCommand, Guid>
 {
     /// <summary>
@@ -40,9 +38,6 @@ public sealed class ItemEventCreateCommandHandler(
     public async Task<Guid> HandleAsync(ItemEventCreateCommand command, CancellationToken cancellationToken = default)
     {
         var create = command.Create;
-
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("Item event create", "article", create.ArticleGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -79,8 +74,6 @@ public sealed class ItemEventCreateCommandHandler(
         auditLogRepository.Add(audit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("Item event create", "itemEvent", itemEvent.Guid);
 
         return itemEvent.Guid;
     }

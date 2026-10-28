@@ -1,7 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
 using Fargo.Core.Articles;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
 
@@ -11,8 +10,7 @@ namespace Fargo.Application.Articles;
 public sealed class ArticleInventoryByGuidQueryHandler(
     ActorResolver actorService,
     IArticleQueryRepository articleRepository,
-    ICurrentActor currentActor,
-    ILogger<ArticleInventoryByGuidQueryHandler> logger
+    ICurrentActor currentActor
 ) : IQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?>
 {
     /// <summary>
@@ -27,9 +25,6 @@ public sealed class ArticleInventoryByGuidQueryHandler(
     /// </remarks>
     public async Task<ArticleInventoryDto?> HandleAsync(ArticleInventoryByGuidQuery query, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.QueryStarted("Article inventory query by guid", "article", query.ArticleGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         // Resolving the tracking mode also serves as the existence/access check:
@@ -80,9 +75,6 @@ public sealed class ArticleInventoryByGuidQueryHandler(
                 query.InsideItemContainerGuids,
                 cancellationToken);
         }
-
-        logger.QueryCompleted(
-            "Article inventory query by guid", "article", query.ArticleGuid, found: inventory is not null);
 
         return inventory;
     }

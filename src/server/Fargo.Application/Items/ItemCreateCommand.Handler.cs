@@ -5,7 +5,6 @@ using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Items;
 using Fargo.Core.Partitions;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Items;
 
@@ -16,15 +15,11 @@ public sealed class ItemCreateCommandHandler(
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
-    IUnitOfWork unitOfWork,
-    ILogger<ItemCreateCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<ItemCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("Item create", "article", command.Create.ArticleGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateItem);
@@ -77,8 +72,6 @@ public sealed class ItemCreateCommandHandler(
         auditLogRepository.Add(itemAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("Item create", "item", item.Guid);
 
         return item.Guid;
     }

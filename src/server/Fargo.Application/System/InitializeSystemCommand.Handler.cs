@@ -22,8 +22,6 @@ public sealed class InitializeSystemCommandHandler(
         InitializeSystemCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.InitializeSystemStarted();
-
         var anyUser = await userRepository.AnyAsync(cancellationToken);
 
         if (anyUser)
@@ -87,17 +85,12 @@ public sealed class InitializeSystemCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.InitializeSystemCompleted(globalPartitionCreated, administratorsGroupCreated, true);
+        logger.InitializeSystemCompleted(globalPartitionCreated, administratorsGroupCreated, adminUserCreated: true);
     }
 }
 
 internal static partial class InitializeSystemCommandHandlerLogs
 {
-    [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "System initialization flow started.")]
-    public static partial void InitializeSystemStarted(this ILogger logger);
-
     [LoggerMessage(
         Level = LogLevel.Information,
         Message = "System initialization flow skipped because users already exist.")]

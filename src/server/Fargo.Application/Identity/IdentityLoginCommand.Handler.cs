@@ -62,8 +62,6 @@ public sealed class IdentityLoginCommandHandler(
     /// </exception>
     public async Task<IdentityAuthResultDto> HandleAsync(IdentityLoginCommand command, CancellationToken cancellationToken = default)
     {
-        logger.IdentityLoginStarted(command.Nameid);
-
         var shouldLogin = await attemptService.IsAllowedAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
         if (!shouldLogin.Allow)
@@ -176,20 +174,12 @@ public sealed class IdentityLoginCommandHandler(
         var authResult = new IdentityAuthResultDto(
             accessTokenResult.AccessToken.Value, rawRefreshToken.Value, accessTokenResult.ExpiresAt);
 
-        logger.IdentityLoginCompleted(command.Nameid);
-
         return authResult;
     }
 }
 
 internal static partial class IdentityLoginCommandHandlerLogs
 {
-    [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "Login flow started for user '{nameId}'.")]
-    public static partial void IdentityLoginStarted(
-        this ILogger logger, string nameId);
-
     [LoggerMessage(
         Level = LogLevel.Warning,
         Message = "Login flow rejected because too many authentication attempts for user '{nameid}'.")]
@@ -231,10 +221,4 @@ internal static partial class IdentityLoginCommandHandlerLogs
         Message = "Login flow requires password change for user '{UserGuid}'.")]
     public static partial void IdentityLoginRejectedPasswordChangeRequired(
         this ILogger logger, Guid userGuid);
-
-    [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "Login flow completed for user '{nameId}'.")]
-    public static partial void IdentityLoginCompleted(
-        this ILogger logger, string nameId);
 }

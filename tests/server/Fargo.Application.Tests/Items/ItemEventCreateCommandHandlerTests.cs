@@ -10,7 +10,6 @@ using Fargo.Core.Informations;
 using Fargo.Core.Items;
 using Fargo.Core.Items.Events;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using UnitsNet;
 
@@ -34,8 +33,7 @@ public class ItemEventCreateCommandHandlerTests
             itemEventRepository,
             auditLogRepository,
             currentActor,
-            unitOfWork,
-            Substitute.For<ILogger<ItemEventCreateCommandHandler>>());
+            unitOfWork);
 
     private static Scalar Qty(double amount) => Scalar.FromAmount(amount);
 

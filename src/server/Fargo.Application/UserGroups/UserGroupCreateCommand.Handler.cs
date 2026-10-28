@@ -5,7 +5,6 @@ using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.UserGroups;
 
@@ -16,17 +15,13 @@ public sealed class UserGroupCreateCommandHandler(
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
-    IUnitOfWork unitOfWork,
-    ILogger<UserGroupCreateCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<UserGroupCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
         UserGroupCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("User group create");
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.CreateUserGroup);
@@ -119,8 +114,6 @@ public sealed class UserGroupCreateCommandHandler(
         auditLogRepository.Add(userGroupAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("User group create", "userGroup", userGroup.Guid);
 
         return userGroup.Guid;
     }

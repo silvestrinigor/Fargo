@@ -2,7 +2,6 @@ using Fargo.Application.Common;
 using Fargo.Application.Items;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;
@@ -17,8 +16,7 @@ public class ItemLocationQueryHandlerTests
         => new(
             ActorTestFactory.Resolver(userRepository),
             itemRepository,
-            currentActor,
-            Substitute.For<ILogger<ItemLocationQueryHandler>>());
+            currentActor);
 
     private static ItemDto SampleItem()
         => new(Guid.NewGuid(), Guid.NewGuid(), null, false, []);

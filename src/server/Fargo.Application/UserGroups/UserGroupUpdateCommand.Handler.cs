@@ -4,7 +4,6 @@ using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
 using Fargo.Core.UserGroups;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.UserGroups;
 
@@ -15,17 +14,13 @@ public sealed class UserGroupUpdateCommandHandler(
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
-    IUnitOfWork unitOfWork,
-    ILogger<UserGroupUpdateCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<UserGroupUpdateCommand>
 {
     public async Task HandleAsync(
         UserGroupUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("User group update", "userGroup", command.UserGroupGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.EditUserGroup);
@@ -179,7 +174,5 @@ public sealed class UserGroupUpdateCommandHandler(
         auditLogRepository.Add(userGroupAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("User group update", "userGroup", command.UserGroupGuid);
     }
 }

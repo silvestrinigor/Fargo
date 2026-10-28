@@ -1,72 +1,127 @@
+using System.Diagnostics;
 using Fargo.Core.Actors;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Common;
 
 /// <summary>
-/// Shared, source-generated logging for application handlers.
+/// Shared, source-generated logging primitives for application handlers.
+///
 /// <para>
-/// Actor identity (<c>ActorGuid</c> / <c>ActorType</c>) is attached once per
-/// handler invocation through <see cref="BeginActorScope"/> rather than
-/// repeated on every log call. All messages emitted inside that scope —
-/// including lower-layer logs — automatically carry the actor fields in
-/// structured sinks.
+/// Handlers no longer log their own start/finish. The
+/// <see cref="LoggingCommandHandlerDecorator{TCommand}"/> /
+/// <see cref="LoggingQueryHandlerDecorator{TQuery, TResponse}"/> wrap every
+/// handler and use <see cref="BeginOperation"/> to emit a consistent
+/// <em>started</em> event, a terminal <em>completed</em> (with elapsed
+/// milliseconds) or <em>failed</em> (with elapsed milliseconds and the
+/// exception) event, and to attach the operation name — and, when available,
+/// the current actor's identity — as a logging scope so every nested log entry
+/// is correlated.
 /// </para>
 /// </summary>
 public static partial class HandlerLog
 {
-    // ── Actor scope ─────────────────────────────────────────────────
-
     /// <summary>
-    /// Opens a logging scope that stamps the current actor's identity onto
-    /// every log entry emitted while the scope is active.
+    /// Begins an operation: opens a correlation scope (operation name plus, when
+    /// supplied, the actor identity) and logs the <em>started</em> event. Call
+    /// <see cref="OperationLog.Complete"/> on success or
+    /// <see cref="OperationLog.Fail"/> on error; disposing the returned handle
+    /// emits the terminal event with the measured duration.
     /// </summary>
-    public static IDisposable? BeginActorScope(this ILogger logger, ICurrentActor actor)
-        => logger.BeginScope(new Dictionary<string, object>
+    /// <param name="logger">The logger.</param>
+    /// <param name="operation">
+    /// A stable operation label derived from the message type (e.g.
+    /// "ArticleDeleteCommand").
+    /// </param>
+    /// <param name="actor">
+    /// The current actor, or <see langword="null"/> for actor-less operations
+    /// (e.g. login, system initialization) or hosts without an actor context.
+    /// </param>
+    public static OperationLog BeginOperation(this ILogger logger, string operation, ICurrentActor? actor = null)
+        => new(logger, operation, actor);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "{Operation} started.")]
+    internal static partial void OperationStarted(this ILogger logger, string operation);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "{Operation} completed in {ElapsedMilliseconds} ms.")]
+    internal static partial void OperationCompleted(this ILogger logger, string operation, long elapsedMilliseconds);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "{Operation} failed after {ElapsedMilliseconds} ms.")]
+    internal static partial void OperationFailed(this ILogger logger, string operation, long elapsedMilliseconds, Exception exception);
+}
+
+/// <summary>
+/// Tracks a single handler invocation: holds the correlation scope and a
+/// stopwatch, and on <see cref="Dispose"/> emits the terminal log event.
+///
+/// <para>
+/// Call <see cref="Complete"/> on the success path or <see cref="Fail"/> with
+/// the thrown exception on the error path. If the handle is disposed without
+/// either having been called, the operation is still recorded as failed (with
+/// no exception) so a terminal event is never missing.
+/// </para>
+/// </summary>
+public sealed class OperationLog : IDisposable
+{
+    private readonly ILogger logger;
+    private readonly string operation;
+    private readonly IDisposable? scope;
+    private readonly long startTimestamp;
+    private bool completed;
+    private Exception? failure;
+    private bool disposed;
+
+    internal OperationLog(ILogger logger, string operation, ICurrentActor? actor)
+    {
+        this.logger = logger;
+        this.operation = operation;
+
+        scope = logger.BeginScope(BuildScopeState(operation, actor));
+        startTimestamp = Stopwatch.GetTimestamp();
+
+        logger.OperationStarted(operation);
+    }
+
+    /// <summary>Marks the operation as successful.</summary>
+    public void Complete() => completed = true;
+
+    /// <summary>Marks the operation as failed with the given exception.</summary>
+    public void Fail(Exception exception) => failure = exception;
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (disposed)
         {
-            ["ActorGuid"] = actor.Guid,
-            ["ActorType"] = actor.ActorType,
-        });
+            return;
+        }
 
-    // ── Command operations (Information) ────────────────────────────
+        disposed = true;
 
-    [LoggerMessage(Level = LogLevel.Information,
-        Message = "{Operation} started.")]
-    public static partial void CommandStarted(this ILogger logger, string operation);
+        var elapsed = (long)Stopwatch.GetElapsedTime(startTimestamp).TotalMilliseconds;
 
-    [LoggerMessage(Level = LogLevel.Information,
-        Message = "{Operation} started for {EntityType} '{EntityGuid}'.")]
-    public static partial void CommandStarted(this ILogger logger, string operation, string entityType, Guid entityGuid);
+        if (completed && failure is null)
+        {
+            logger.OperationCompleted(operation, elapsed);
+        }
+        else
+        {
+            logger.OperationFailed(operation, elapsed, failure!);
+        }
 
-    [LoggerMessage(Level = LogLevel.Information,
-        Message = "{Operation} completed for {EntityType} '{EntityGuid}'.")]
-    public static partial void CommandCompleted(this ILogger logger, string operation, string entityType, Guid entityGuid);
+        scope?.Dispose();
+    }
 
-    // ── Query lookups (Debug) ───────────────────────────────────────
+    private static Dictionary<string, object> BuildScopeState(string operation, ICurrentActor? actor)
+    {
+        var state = new Dictionary<string, object> { ["Operation"] = operation };
 
-    [LoggerMessage(Level = LogLevel.Debug,
-        Message = "{Operation} started for {EntityType} '{EntityGuid}'.")]
-    public static partial void QueryStarted(this ILogger logger, string operation, string entityType, Guid entityGuid);
+        if (actor is { IsAuthenticated: true })
+        {
+            state["ActorGuid"] = actor.Guid;
+            state["ActorType"] = actor.ActorType;
+        }
 
-    [LoggerMessage(Level = LogLevel.Debug,
-        Message = "{Operation} started for {EntityType} '{EntityKey}'.")]
-    public static partial void QueryStarted(this ILogger logger, string operation, string entityType, string entityKey);
-
-    [LoggerMessage(Level = LogLevel.Debug,
-        Message = "{Operation} completed for {EntityType} '{EntityGuid}'. Found: {Found}.")]
-    public static partial void QueryCompleted(this ILogger logger, string operation, string entityType, Guid entityGuid, bool found);
-
-    [LoggerMessage(Level = LogLevel.Debug,
-        Message = "{Operation} completed for {EntityType} '{EntityKey}'. Found: {Found}.")]
-    public static partial void QueryCompleted(this ILogger logger, string operation, string entityType, string entityKey, bool found);
-
-    // ── Collection queries (Debug) ──────────────────────────────────
-
-    [LoggerMessage(Level = LogLevel.Debug,
-        Message = "{Operation} started. Page: {Page}. Limit: {Limit}.")]
-    public static partial void CollectionStarted(this ILogger logger, string operation, int page, int limit);
-
-    [LoggerMessage(Level = LogLevel.Debug,
-        Message = "{Operation} completed. ResultCount: {ResultCount}.")]
-    public static partial void CollectionCompleted(this ILogger logger, string operation, int resultCount);
+        return state;
+    }
 }

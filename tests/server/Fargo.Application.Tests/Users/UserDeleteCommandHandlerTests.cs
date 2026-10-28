@@ -6,7 +6,6 @@ using Fargo.Core.Audits;
 using Fargo.Core.Common;
 using Fargo.Core.Informations;
 using Fargo.Core.Users;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Users;
@@ -24,8 +23,7 @@ public class UserDeleteCommandHandlerTests
             userRepository,
             auditLogRepository,
             currentActor,
-            unitOfWork,
-            Substitute.For<ILogger<UserDeleteCommandHandler>>());
+            unitOfWork);
 
     [Fact]
     public async Task HandleAsync_WhenValid_ShouldRemoveUserAndAuditAndSave()

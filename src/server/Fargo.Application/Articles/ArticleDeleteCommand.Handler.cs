@@ -3,7 +3,6 @@ using Fargo.Core.Actors;
 using Fargo.Core.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Articles;
 
@@ -16,14 +15,12 @@ namespace Fargo.Application.Articles;
 /// <param name="auditLogRepository">Persists audit logs for article operations.</param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
 /// <param name="unitOfWork">Coordinates persistence of the operation.</param>
-/// <param name="logger">Logs the execution of the command.</param>
 public sealed class ArticleDeleteCommandHandler(
     ArticleService articleService,
     ActorResolver actorService,
     IArticleRepository articleRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor, IUnitOfWork unitOfWork,
-    ILogger<ArticleDeleteCommandHandler> logger
+    ICurrentActor currentActor, IUnitOfWork unitOfWork
     ) : ICommandHandler<ArticleDeleteCommand>
 {
     /// <summary>
@@ -41,9 +38,6 @@ public sealed class ArticleDeleteCommandHandler(
     /// </exception>
     public async Task HandleAsync(ArticleDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("Article delete", "article", command.ArticleGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.DeleteArticle);
@@ -63,7 +57,5 @@ public sealed class ArticleDeleteCommandHandler(
         auditLogRepository.Add(audit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("Article delete", "article", article.Guid);
     }
 }

@@ -3,7 +3,6 @@ using Fargo.Core.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Partitions;
 
@@ -13,15 +12,11 @@ public sealed class PartitionUpdateCommandHandler(
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
     IUnitOfWork unitOfWork,
-    ICurrentActor currentActor,
-    ILogger<PartitionUpdateCommandHandler> logger
+    ICurrentActor currentActor
 ) : ICommandHandler<PartitionUpdateCommand>
 {
     public async Task HandleAsync(PartitionUpdateCommand command, CancellationToken cancellationToken = default)
     {
-        using var scope = logger.BeginActorScope(currentActor);
-        logger.CommandStarted("Partition update", "partition", command.PartitionGuid);
-
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
         actor.ThrowIfPermissionDenied(ActionType.EditPartition);
@@ -66,7 +61,5 @@ public sealed class PartitionUpdateCommandHandler(
         auditLogRepository.Add(partitionAudit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.CommandCompleted("Partition update", "partition", partitionToEdit.Guid);
     }
 }
