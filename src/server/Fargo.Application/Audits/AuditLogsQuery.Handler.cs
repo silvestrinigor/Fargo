@@ -27,7 +27,8 @@ public sealed class AuditLogsQueryHandler(
     /// <returns>A task that represents the asynchronous operation. The task result contains a page of audit log DTOs together with the total count</returns>
     public async Task<PagedResult<AuditLogDto>> HandleAsync(AuditLogsQuery query, CancellationToken cancellationToken = default)
     {
-        logger.AuditLogManyQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CollectionStarted("Audit logs query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
 
         var actor = await actorResolver.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -43,7 +44,7 @@ public sealed class AuditLogsQueryHandler(
             cancellationToken
         );
 
-        logger.AuditLogManyQueryCompleted(currentActor.Guid, currentActor.ActorType, actor.PartitionAccessGuids.Count, result.Items.Count);
+        logger.CollectionCompleted("Audit logs query", result.Items.Count);
 
         return result;
     }

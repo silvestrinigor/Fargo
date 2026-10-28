@@ -41,7 +41,8 @@ public sealed class ItemEventCreateCommandHandler(
     {
         var create = command.Create;
 
-        logger.ItemEventCreateStarted(create.EventType, create.ArticleGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("Item event create", "article", create.ArticleGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -79,7 +80,7 @@ public sealed class ItemEventCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.ItemEventCreateCompleted(itemEvent.Guid, create.EventType, article.Guid, currentActor.Guid, currentActor.ActorType);
+        logger.CommandCompleted("Item event create", "itemEvent", itemEvent.Guid);
 
         return itemEvent.Guid;
     }

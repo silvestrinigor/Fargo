@@ -19,7 +19,8 @@ public sealed class PartitionUpdateCommandHandler(
 {
     public async Task HandleAsync(PartitionUpdateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.PartitionGuid, currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("Partition update", "partition", command.PartitionGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -66,6 +67,6 @@ public sealed class PartitionUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(partitionToEdit.Guid, currentActor.Guid);
+        logger.CommandCompleted("Partition update", "partition", partitionToEdit.Guid);
     }
 }

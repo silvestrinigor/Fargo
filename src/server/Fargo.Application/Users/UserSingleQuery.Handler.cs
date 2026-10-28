@@ -14,7 +14,8 @@ public sealed class UserSingleQueryHandler(
     public async Task<UserDto?> HandleAsync(
         UserSingleQuery query, CancellationToken cancellationToken = default)
     {
-        logger.SingleQueryStarted(query.UserGuid, currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("User single query", "user", query.UserGuid);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -25,7 +26,7 @@ public sealed class UserSingleQueryHandler(
             actor.PartitionAccessGuids,
             cancellationToken);
 
-        logger.SingleQueryCompleted(query.UserGuid, currentActor.Guid, user is not null);
+        logger.QueryCompleted("User single query", "user", query.UserGuid, found: user is not null);
 
         return user;
     }

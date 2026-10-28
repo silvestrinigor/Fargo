@@ -21,7 +21,8 @@ public sealed class PartitionDeleteCommandHandler(
         PartitionDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.PartitionGuid, currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("Partition delete", "partition", command.PartitionGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -54,6 +55,6 @@ public sealed class PartitionDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(command.PartitionGuid, currentActor.Guid);
+        logger.CommandCompleted("Partition delete", "partition", command.PartitionGuid);
     }
 }

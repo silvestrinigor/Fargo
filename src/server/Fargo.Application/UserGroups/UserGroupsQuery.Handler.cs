@@ -15,7 +15,8 @@ public sealed class UserGroupsQueryHandler(
         UserGroupsQuery query,
         CancellationToken cancellationToken = default)
     {
-        logger.ManyQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CollectionStarted("User groups query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -31,11 +32,7 @@ public sealed class UserGroupsQueryHandler(
             partitionGuids,
             cancellationToken);
 
-        logger.ManyQueryCompleted(
-            currentActor.Guid,
-            query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            partitionGuids?.Count ?? 0,
-            userGroups.Items.Count);
+        logger.CollectionCompleted("User groups query", userGroups.Items.Count);
 
         return userGroups;
     }

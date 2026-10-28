@@ -27,7 +27,8 @@ public sealed class UserUpdateCommandHandler(
         UserUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.UserGuid, currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("User update", "user", command.UserGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -233,6 +234,6 @@ public sealed class UserUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(command.UserGuid, currentActor.Guid);
+        logger.CommandCompleted("User update", "user", command.UserGuid);
     }
 }

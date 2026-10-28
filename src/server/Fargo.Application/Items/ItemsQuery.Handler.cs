@@ -17,7 +17,8 @@ public sealed class ItemsQueryHandler(
     {
         var pagination = query.WithPagination;
 
-        logger.ManyQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CollectionStarted("Items query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -33,11 +34,7 @@ public sealed class ItemsQueryHandler(
             cancellationToken
         );
 
-        logger.ManyQueryCompleted(
-            currentActor.Guid, currentActor.ActorType,
-            query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            partitionGuids?.Count ?? 0, items.Items.Count
-        );
+        logger.CollectionCompleted("Items query", items.Items.Count);
 
         return items;
     }

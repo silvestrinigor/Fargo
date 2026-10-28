@@ -12,7 +12,8 @@ public sealed class ItemSingleQueryHandler(
     public async Task<ItemDto?> HandleAsync(
         ItemSingleQuery query, CancellationToken cancellationToken = default)
     {
-        logger.SingleQueryStarted(query.ItemGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("Item single query", "item", query.ItemGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -22,7 +23,7 @@ public sealed class ItemSingleQueryHandler(
             cancellationToken
         );
 
-        logger.SingleQueryCompleted(query.ItemGuid, actor.Guid, actor.ActorType, item is not null);
+        logger.QueryCompleted("Item single query", "item", query.ItemGuid, found: item is not null);
 
         return item;
     }

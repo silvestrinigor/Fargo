@@ -14,7 +14,8 @@ public sealed class ItemMovimentsQueryHandler(
     public async Task<IReadOnlyCollection<ItemMovimentDto>?> HandleAsync(
         ItemMovimentsQuery query, CancellationToken cancellationToken = default)
     {
-        logger.MovimentsQueryStarted(query.ItemGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("Item moviments query", "item", query.ItemGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -24,7 +25,7 @@ public sealed class ItemMovimentsQueryHandler(
             cancellationToken
         );
 
-        logger.MovimentsQueryCompleted(query.ItemGuid, currentActor.Guid, currentActor.ActorType, itemMoviments is not null);
+        logger.QueryCompleted("Item moviments query", "item", query.ItemGuid, found: itemMoviments is not null);
 
         return itemMoviments;
     }

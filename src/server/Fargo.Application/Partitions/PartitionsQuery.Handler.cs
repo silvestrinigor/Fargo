@@ -14,7 +14,8 @@ public sealed class PartitionsQueryHandler(
     public async Task<PagedResult<PartitionDto>> HandleAsync(
         PartitionsQuery query, CancellationToken cancellationToken = default)
     {
-        logger.ManyQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CollectionStarted("Partitions query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -29,10 +30,7 @@ public sealed class PartitionsQueryHandler(
             query.WithPagination, partitionGuids,
             cancellationToken);
 
-        logger.ManyQueryCompleted(
-            currentActor.Guid,
-            query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            partitionGuids?.Count ?? 0, partitions.Items.Count);
+        logger.CollectionCompleted("Partitions query", partitions.Items.Count);
 
         return partitions;
     }

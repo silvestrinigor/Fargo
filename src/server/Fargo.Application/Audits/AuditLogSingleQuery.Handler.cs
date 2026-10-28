@@ -27,7 +27,8 @@ public sealed class AuditLogSingleQueryHandler(
     /// <returns>The audit log DTO if found and accessible; otherwise, <see langword="null"/>.</returns>
     public async Task<AuditLogDto?> HandleAsync(AuditLogSingleQuery query, CancellationToken cancellationToken = default)
     {
-        logger.AuditLogSingleQueryStarted(query.AuditLogGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("Audit log single query", "auditLog", query.AuditLogGuid);
 
         var actor = await actorResolver.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -36,7 +37,7 @@ public sealed class AuditLogSingleQueryHandler(
             actor.PartitionAccessGuids,
             cancellationToken);
 
-        logger.AuditLogSingleQueryCompleted(query.AuditLogGuid, currentActor.Guid, auditLog is not null);
+        logger.QueryCompleted("Audit log single query", "auditLog", query.AuditLogGuid, found: auditLog is not null);
 
         return auditLog;
     }

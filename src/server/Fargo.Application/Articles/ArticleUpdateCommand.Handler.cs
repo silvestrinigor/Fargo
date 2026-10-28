@@ -45,7 +45,8 @@ public sealed class ArticleUpdateCommandHandler(
     /// </exception>
     public async Task HandleAsync(ArticleUpdateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.ArticleUpdateStarted(command.ArticleGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("Article update", "article", command.ArticleGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -167,6 +168,6 @@ public sealed class ArticleUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.ArticleUpdateCompleted(article.Guid, actor.Guid, actor.ActorType);
+        logger.CommandCompleted("Article update", "article", article.Guid);
     }
 }

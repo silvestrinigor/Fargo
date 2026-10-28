@@ -29,7 +29,8 @@ public sealed class ArticlesQueryHandler(
     /// </returns>
     public async Task<PagedResult<ArticleDto>> HandleAsync(ArticlesQuery query, CancellationToken cancellationToken = default)
     {
-        logger.ArticlesQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CollectionStarted("Articles query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -45,13 +46,7 @@ public sealed class ArticlesQueryHandler(
             cancellationToken
         );
 
-        logger.ArticlesQueryCompleted(
-            actor.Guid,
-            actor.ActorType,
-            requestedPartitionCount: query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            effectivePartitionCount: partitionGuids?.Count ?? 0,
-            resultCount: articles.Items.Count
-        );
+        logger.CollectionCompleted("Articles query", articles.Items.Count);
 
         return articles;
     }

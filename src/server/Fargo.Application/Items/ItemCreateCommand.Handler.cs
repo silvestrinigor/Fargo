@@ -22,7 +22,8 @@ public sealed class ItemCreateCommandHandler(
 {
     public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(command.Create.ArticleGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("Item create", "article", command.Create.ArticleGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -77,7 +78,7 @@ public sealed class ItemCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(item.Guid, actor.Guid, actor.ActorType, article.Guid);
+        logger.CommandCompleted("Item create", "item", item.Guid);
 
         return item.Guid;
     }

@@ -19,7 +19,8 @@ public sealed class UserDeleteCommandHandler(
     public async Task HandleAsync(
         UserDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        logger.UserDeleteStarted(command.UserGuid, currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("User delete", "user", command.UserGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -46,6 +47,6 @@ public sealed class UserDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UserDeleteCompleted(command.UserGuid, currentActor.Guid);
+        logger.CommandCompleted("User delete", "user", command.UserGuid);
     }
 }

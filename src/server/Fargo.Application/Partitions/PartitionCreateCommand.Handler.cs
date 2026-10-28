@@ -21,7 +21,8 @@ public sealed class PartitionCreateCommandHandler(
         PartitionCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("Partition create");
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -65,7 +66,7 @@ public sealed class PartitionCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(newPartition.Guid, currentActor.Guid);
+        logger.CommandCompleted("Partition create", "partition", newPartition.Guid);
 
         return newPartition.Guid;
     }

@@ -41,7 +41,8 @@ public sealed class ArticleDeleteCommandHandler(
     /// </exception>
     public async Task HandleAsync(ArticleDeleteCommand command, CancellationToken cancellationToken = default)
     {
-        logger.ArticleDeleteStarted(command.ArticleGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("Article delete", "article", command.ArticleGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -63,6 +64,6 @@ public sealed class ArticleDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.ArticleDeleteCompleted(article.Guid, currentActor.Guid, currentActor.ActorType);
+        logger.CommandCompleted("Article delete", "article", article.Guid);
     }
 }

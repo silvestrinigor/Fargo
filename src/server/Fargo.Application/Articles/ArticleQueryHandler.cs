@@ -30,13 +30,14 @@ public sealed class ArticleQueryHandler(
     public async Task<ArticleDto?> HandleAsync(
         ArticleByGuidQuery query, CancellationToken cancellationToken = default)
     {
-        logger.ArticleQueryByGuidStarted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("Article query by guid", "article", query.ArticleGuid);
 
         var article = await QueryAsync(
             (repository, partitions, ct) => repository.GetInfoByGuidAsync(query.ArticleGuid, partitions, ct),
             cancellationToken);
 
-        logger.ArticleQueryByGuidCompleted(query.ArticleGuid, currentActor.Guid, currentActor.ActorType, found: article is not null);
+        logger.QueryCompleted("Article query by guid", "article", query.ArticleGuid, found: article is not null);
 
         return article;
     }
@@ -51,13 +52,14 @@ public sealed class ArticleQueryHandler(
     public async Task<ArticleDto?> HandleAsync(
         ArticleByBarcodeQuery query, CancellationToken cancellationToken = default)
     {
-        logger.ArticleQueryByBarcodeStarted(query.ArticleBarcode, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("Article query by barcode", "barcode", query.ArticleBarcode.ToString());
 
         var article = await QueryAsync(
             (repository, partitions, ct) => repository.GetInfoByBarcodeAsync(query.ArticleBarcode, partitions, ct),
             cancellationToken);
 
-        logger.ArticleQueryByBarcodeCompleted(query.ArticleBarcode, currentActor.Guid, currentActor.ActorType, found: article is not null);
+        logger.QueryCompleted("Article query by barcode", "barcode", query.ArticleBarcode.ToString(), found: article is not null);
 
         return article;
     }

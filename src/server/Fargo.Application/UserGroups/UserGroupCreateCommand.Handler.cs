@@ -24,7 +24,8 @@ public sealed class UserGroupCreateCommandHandler(
         UserGroupCreateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.CreateStarted(currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("User group create");
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -119,7 +120,7 @@ public sealed class UserGroupCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.CreateCompleted(userGroup.Guid, currentActor.Guid);
+        logger.CommandCompleted("User group create", "userGroup", userGroup.Guid);
 
         return userGroup.Guid;
     }

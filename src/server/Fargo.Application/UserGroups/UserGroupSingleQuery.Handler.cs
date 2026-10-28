@@ -15,7 +15,8 @@ public sealed class UserGroupSingleQueryHandler(
         UserGroupSingleQuery query,
         CancellationToken cancellationToken = default)
     {
-        logger.SingleQueryStarted(query.UserGroupGuid, currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("User group single query", "userGroup", query.UserGroupGuid);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -26,7 +27,7 @@ public sealed class UserGroupSingleQueryHandler(
             actor.PartitionAccessGuids,
             cancellationToken);
 
-        logger.SingleQueryCompleted(query.UserGroupGuid, currentActor.Guid, userGroup is not null);
+        logger.QueryCompleted("User group single query", "userGroup", query.UserGroupGuid, found: userGroup is not null);
 
         return userGroup;
     }

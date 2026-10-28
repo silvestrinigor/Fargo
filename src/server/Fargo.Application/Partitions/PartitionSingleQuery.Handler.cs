@@ -14,7 +14,8 @@ public sealed class PartitionSingleQueryHandler(
     public async Task<PartitionDto?> HandleAsync(
         PartitionSingleQuery query, CancellationToken cancellationToken = default)
     {
-        logger.SingleQueryStarted(query.PartitionGuid, currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("Partition single query", "partition", query.PartitionGuid);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -25,7 +26,7 @@ public sealed class PartitionSingleQueryHandler(
             childOfAnyOfThesePartitions: actor.PartitionAccessGuids,
             notChildOfAnyPartition: true, cancellationToken);
 
-        logger.SingleQueryCompleted(query.PartitionGuid, currentActor.Guid, partition is not null);
+        logger.QueryCompleted("Partition single query", "partition", query.PartitionGuid, found: partition is not null);
 
         return partition;
     }

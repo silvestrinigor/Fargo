@@ -34,7 +34,8 @@ public sealed class ItemEventsQueryHandler(
     /// <returns>A page of item event DTOs together with the total count.</returns>
     public async Task<PagedResult<ItemEventDto>> HandleAsync(ItemEventsQuery query, CancellationToken cancellationToken = default)
     {
-        logger.ItemEventsQueryStarted(currentActor.Guid, currentActor.ActorType, query.WithPagination.Page, query.WithPagination.Limit);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CollectionStarted("Item events query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
 
         var actor = await actorResolver.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -50,7 +51,7 @@ public sealed class ItemEventsQueryHandler(
             cancellationToken
         );
 
-        logger.ItemEventsQueryCompleted(currentActor.Guid, currentActor.ActorType, actor.PartitionAccessGuids.Count, result.Items.Count);
+        logger.CollectionCompleted("Item events query", result.Items.Count);
 
         return result;
     }

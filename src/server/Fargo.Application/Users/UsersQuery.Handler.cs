@@ -14,7 +14,8 @@ public sealed class UsersQueryHandler(
     public async Task<PagedResult<UserDto>> HandleAsync(
         UsersQuery query, CancellationToken cancellationToken = default)
     {
-        logger.ManyQueryStarted(currentActor.Guid, query.WithPagination.Page, query.WithPagination.Limit);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CollectionStarted("Users query", query.WithPagination.Page.Value, query.WithPagination.Limit.Value);
 
         var actor = await actorService.GetActorByGuidAndTypeAsync(currentActor.Guid, currentActor.ActorType, cancellationToken);
 
@@ -30,11 +31,7 @@ public sealed class UsersQueryHandler(
             partitionGuids,
             cancellationToken);
 
-        logger.ManyQueryCompleted(
-            currentActor.Guid,
-            query.ChildOfAnyOfThesePartitions?.Count ?? 0,
-            partitionGuids?.Count ?? 0,
-            users.Items.Count);
+        logger.CollectionCompleted("Users query", users.Items.Count);
 
         return users;
     }

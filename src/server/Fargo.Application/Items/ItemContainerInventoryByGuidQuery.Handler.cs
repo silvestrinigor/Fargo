@@ -15,7 +15,8 @@ public sealed class ItemContainerInventoryByGuidQueryHandler(
 {
     public async Task<IReadOnlyCollection<ItemContainerInventoryDto>?> HandleAsync(ItemContainerInventoryByGuidQuery query, CancellationToken cancellationToken = default)
     {
-        logger.QueryInventoryByGuidStarted(query.ItemContainerGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("Item container inventory query", "container", query.ItemContainerGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -65,8 +66,8 @@ public sealed class ItemContainerInventoryByGuidQueryHandler(
 
         inventory = MergeByArticle(inventory, eventInventory);
 
-        logger.QueryInventoryByGuidCompleted(
-            query.ItemContainerGuid, currentActor.Guid, currentActor.ActorType, inventory is not null);
+        logger.QueryCompleted(
+            "Item container inventory query", "container", query.ItemContainerGuid, found: inventory is not null);
 
         return inventory;
     }

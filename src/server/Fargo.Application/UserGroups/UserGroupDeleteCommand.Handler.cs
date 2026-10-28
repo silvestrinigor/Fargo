@@ -21,7 +21,8 @@ public sealed class UserGroupDeleteCommandHandler(
         UserGroupDeleteCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.DeleteStarted(command.UserGroupGuid, currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("User group delete", "userGroup", command.UserGroupGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -43,6 +44,6 @@ public sealed class UserGroupDeleteCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.DeleteCompleted(command.UserGroupGuid, currentActor.Guid);
+        logger.CommandCompleted("User group delete", "userGroup", command.UserGroupGuid);
     }
 }

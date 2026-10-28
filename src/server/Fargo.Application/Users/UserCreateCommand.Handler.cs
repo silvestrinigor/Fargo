@@ -26,7 +26,8 @@ public sealed class UserCreateCommandHandler(
     public async Task<Guid> HandleAsync(
         UserCreateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.UserCreateStarted(currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("User create");
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -153,7 +154,7 @@ public sealed class UserCreateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UserCreateCompleted(user.Guid, currentActor.Guid);
+        logger.CommandCompleted("User create", "user", user.Guid);
 
         return user.Guid;
     }

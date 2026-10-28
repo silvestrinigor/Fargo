@@ -21,7 +21,8 @@ public sealed class ItemUpdateCommandHandler(
 {
     public async Task HandleAsync(ItemUpdateCommand command, CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.ItemGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("Item update", "item", command.ItemGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -92,6 +93,6 @@ public sealed class ItemUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(item.Guid, currentActor.Guid, currentActor.ActorType);
+        logger.CommandCompleted("Item update", "item", item.Guid);
     }
 }

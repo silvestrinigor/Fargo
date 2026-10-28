@@ -14,7 +14,8 @@ public sealed class ItemLocationQueryHandler(
     public async Task<IReadOnlyCollection<ItemDto>> HandleAsync(
         ItemLocationQuery query, CancellationToken cancellationToken = default)
     {
-        logger.LocationQueryStarted(query.ItemGuid, currentActor.Guid, currentActor.ActorType);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.QueryStarted("Item location query", "item", query.ItemGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -29,7 +30,7 @@ public sealed class ItemLocationQueryHandler(
                 actor.PartitionAccessGuids,
                 cancellationToken);
 
-        logger.LocationQueryCompleted(query.ItemGuid, currentActor.Guid, currentActor.ActorType, item.Count != 0);
+        logger.QueryCompleted("Item location query", "item", query.ItemGuid, found: item.Count != 0);
 
         return item;
     }

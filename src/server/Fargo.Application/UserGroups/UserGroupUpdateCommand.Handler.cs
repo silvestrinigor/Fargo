@@ -23,7 +23,8 @@ public sealed class UserGroupUpdateCommandHandler(
         UserGroupUpdateCommand command,
         CancellationToken cancellationToken = default)
     {
-        logger.UpdateStarted(command.UserGroupGuid, currentActor.Guid);
+        using var scope = logger.BeginActorScope(currentActor);
+        logger.CommandStarted("User group update", "userGroup", command.UserGroupGuid);
 
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
@@ -179,6 +180,6 @@ public sealed class UserGroupUpdateCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.UpdateCompleted(command.UserGroupGuid, currentActor.Guid);
+        logger.CommandCompleted("User group update", "userGroup", command.UserGroupGuid);
     }
 }
