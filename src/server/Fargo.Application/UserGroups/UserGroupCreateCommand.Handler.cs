@@ -14,8 +14,7 @@ public sealed class UserGroupCreateCommandHandler(
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor,
-    IUnitOfWork unitOfWork
+    ICurrentActor currentActor
 ) : ICommandHandler<UserGroupCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
@@ -112,8 +111,6 @@ public sealed class UserGroupCreateCommandHandler(
         userGroupRepository.Add(userGroup);
 
         auditLogRepository.Add(userGroupAudit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return userGroup.Guid;
     }

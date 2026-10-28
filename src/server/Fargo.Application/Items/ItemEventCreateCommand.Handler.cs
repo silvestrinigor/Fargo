@@ -25,8 +25,7 @@ public sealed class ItemEventCreateCommandHandler(
     IItemRepository itemRepository,
     IItemEventRepository itemEventRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor,
-    IUnitOfWork unitOfWork
+    ICurrentActor currentActor
 ) : ICommandHandler<ItemEventCreateCommand, Guid>
 {
     /// <summary>
@@ -72,8 +71,6 @@ public sealed class ItemEventCreateCommandHandler(
         itemEventRepository.Add(itemEvent);
 
         auditLogRepository.Add(audit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return itemEvent.Guid;
     }

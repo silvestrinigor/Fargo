@@ -32,8 +32,7 @@ public class UserCreateCommandHandlerTests
             userGroupRepository,
             auditLogRepository,
             currentActor,
-            passwordHasher,
-            unitOfWork);
+            passwordHasher);
 
     private static UserCreateCommand SimpleCommand(string nameid = "newuser")
         => new(new UserCreateDto(new Nameid(nameid)));
@@ -49,7 +48,6 @@ public class UserCreateCommandHandlerTests
 
         userRepository.Received(1).Add(Arg.Any<User>());
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

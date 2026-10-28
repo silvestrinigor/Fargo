@@ -24,8 +24,7 @@ public class ItemDeleteCommandHandlerTests
             ActorTestFactory.Resolver(userRepository),
             itemRepository,
             auditLogRepository,
-            currentActor,
-            unitOfWork);
+            currentActor);
 
     private static Item NewItem()
         => Item.CreateItem(Article.NewArticle(new Name("Widget")));
@@ -42,7 +41,6 @@ public class ItemDeleteCommandHandlerTests
 
         itemRepository.Received(1).Remove(item);
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

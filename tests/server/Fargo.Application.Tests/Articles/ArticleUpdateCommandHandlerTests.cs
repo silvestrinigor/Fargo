@@ -29,8 +29,7 @@ public class ArticleUpdateCommandHandlerTests
             articleRepository,
             partitionRepository,
             auditLogRepository,
-            currentActor,
-            unitOfWork);
+            currentActor);
 
     [Fact]
     public async Task HandleAsync_WhenValid_ShouldUpdateArticleAndAuditAndSave()
@@ -46,7 +45,6 @@ public class ArticleUpdateCommandHandlerTests
 
         Assert.Equal(new Name("Renamed"), article.Name);
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

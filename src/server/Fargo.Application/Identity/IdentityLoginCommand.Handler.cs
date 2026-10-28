@@ -83,6 +83,9 @@ public sealed class IdentityLoginCommandHandler(
 
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
+            // Persist the recorded failed attempt before throwing: the
+            // commit-on-success decorator skips committing when the handler
+            // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             throw new InvalidCredentialsFargoApplicationException();
@@ -96,6 +99,9 @@ public sealed class IdentityLoginCommandHandler(
 
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
+            // Persist the recorded failed attempt before throwing: the
+            // commit-on-success decorator skips committing when the handler
+            // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             throw new InvalidCredentialsFargoApplicationException();
@@ -107,6 +113,9 @@ public sealed class IdentityLoginCommandHandler(
 
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
+            // Persist the recorded failed attempt before throwing: the
+            // commit-on-success decorator skips committing when the handler
+            // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             throw new InvalidCredentialsFargoApplicationException();
@@ -124,6 +133,9 @@ public sealed class IdentityLoginCommandHandler(
 
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
+            // Persist the recorded failed attempt before throwing: the
+            // commit-on-success decorator skips committing when the handler
+            // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             throw new InvalidCredentialsFargoApplicationException();
@@ -138,6 +150,9 @@ public sealed class IdentityLoginCommandHandler(
 
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
+            // Persist the recorded failed attempt before throwing: the
+            // commit-on-success decorator skips committing when the handler
+            // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             throw new InvalidCredentialsFargoApplicationException();
@@ -152,6 +167,9 @@ public sealed class IdentityLoginCommandHandler(
                 clientContext.IpAddress,
                 cancellationToken);
 
+            // Persist the recorded attempt before throwing: the
+            // commit-on-success decorator skips committing when the handler
+            // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             throw new UserPasswordChangeRequiredFargoApplicationException(user.Guid);

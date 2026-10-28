@@ -16,12 +16,11 @@ namespace Fargo.Application.Articles;
 /// <param name="partitionRepository">Persists the audit log generated for the article update.</param>
 /// <param name="auditLogRepository"></param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
-/// <param name="unitOfWork">Coordinates persistence of the changes.</param>
 public sealed class ArticleUpdateCommandHandler(
     ActorResolver actorService, ArticleService articleService,
     IArticleRepository articleRepository, IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor, IUnitOfWork unitOfWork
+    ICurrentActor currentActor
 ) : ICommandHandler<ArticleUpdateCommand>
 {
     /// <summary>
@@ -159,7 +158,5 @@ public sealed class ArticleUpdateCommandHandler(
         }
 
         auditLogRepository.Add(articleAudit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

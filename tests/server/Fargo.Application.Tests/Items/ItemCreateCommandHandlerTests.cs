@@ -30,8 +30,7 @@ public class ItemCreateCommandHandlerTests
             articleRepository,
             partitionRepository,
             auditLogRepository,
-            currentActor,
-            unitOfWork);
+            currentActor);
 
     [Fact]
     public async Task HandleAsync_WhenValid_ShouldAddItemAndAuditAndSave()
@@ -46,7 +45,6 @@ public class ItemCreateCommandHandlerTests
 
         itemRepository.Received(1).Add(Arg.Is<Item>(i => i.Guid == result && i.ArticleGuid == article.Guid));
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -66,7 +64,6 @@ public class ItemCreateCommandHandlerTests
             new ItemCreateCommand(new ItemCreateDto(article.Guid, ParentItemContainerGuid: parentContainer.Guid)));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(i => i.ParentItemContainerGuid == parentContainer.Guid));
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

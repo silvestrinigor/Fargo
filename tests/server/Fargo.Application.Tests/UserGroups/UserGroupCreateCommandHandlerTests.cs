@@ -28,8 +28,7 @@ public class UserGroupCreateCommandHandlerTests
             userGroupRepository,
             partitionRepository,
             auditLogRepository,
-            currentActor,
-            unitOfWork);
+            currentActor);
 
     private static Partition GlobalPartition()
         => Partition.CreateGlobalPartition(new Name("Global"));
@@ -47,7 +46,6 @@ public class UserGroupCreateCommandHandlerTests
 
         userGroupRepository.Received(1).Add(Arg.Any<UserGroup>());
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

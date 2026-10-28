@@ -29,7 +29,6 @@ public class ItemUpdateCommandHandlerTests
             itemRepository,
             partitionRepository,
             auditLogRepository,
-            unitOfWork,
             currentActor);
 
     private static Item NewItem()
@@ -56,7 +55,6 @@ public class ItemUpdateCommandHandlerTests
 
         Assert.Equal(parentContainer.Guid, item.ParentItemContainerGuid);
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

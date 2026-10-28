@@ -31,15 +31,12 @@ namespace Fargo.Application.Articles;
 /// <param name="currentActor">
 /// Provides information about the currently authenticated actor.
 /// </param>
-/// <param name="unitOfWork">
-/// Coordinates persistence of the article and its audit log.
-/// </param>
 public sealed class ArticleCreateCommandHandler(
     ArticleService articleService, ActorResolver actorService,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor, IUnitOfWork unitOfWork
+    ICurrentActor currentActor
     ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
     /// <summary>
@@ -250,8 +247,6 @@ public sealed class ArticleCreateCommandHandler(
         articleRepository.Add(article);
 
         auditLogRepository.Add(articleAudit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return article.Guid;
     }

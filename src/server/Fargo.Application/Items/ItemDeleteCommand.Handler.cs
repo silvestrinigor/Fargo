@@ -10,7 +10,7 @@ public sealed class ItemDeleteCommandHandler(
     ActorResolver actorService,
     IItemRepository itemRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor, IUnitOfWork unitOfWork
+    ICurrentActor currentActor
 ) : ICommandHandler<ItemDeleteCommand>
 {
     public async Task HandleAsync(
@@ -32,7 +32,5 @@ public sealed class ItemDeleteCommandHandler(
         auditLogRepository.Add(audit);
 
         itemRepository.Remove(item);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

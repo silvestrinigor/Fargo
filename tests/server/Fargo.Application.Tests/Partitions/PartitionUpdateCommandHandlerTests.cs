@@ -25,7 +25,6 @@ public class PartitionUpdateCommandHandlerTests
             new PartitionService(partitionRepository),
             partitionRepository,
             auditLogRepository,
-            unitOfWork,
             currentActor);
 
     private static Partition GlobalPartition()
@@ -54,7 +53,6 @@ public class PartitionUpdateCommandHandlerTests
         Assert.Equal("Renamed", partition.Name.Value);
         Assert.Equal("Updated", partition.Description.Value);
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

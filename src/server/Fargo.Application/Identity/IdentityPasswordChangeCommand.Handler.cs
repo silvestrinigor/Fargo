@@ -17,7 +17,6 @@ namespace Fargo.Application.Identity;
 /// <param name="refreshTokenRepository">Manages refresh token persistence for token invalidation.</param>
 /// <param name="actorResolver">Resolves the actor representing the user changing their password.</param>
 /// <param name="auditLogRepository">Persists the audit log generated for the password change.</param>
-/// <param name="unitOfWork">Provides transactional consistency for data operations.</param>
 /// <param name="logger">Logs the execution of the password change process.</param>
 public sealed class IdentityPasswordChangeCommandHandler(
     IUserRepository userRepository,
@@ -25,7 +24,6 @@ public sealed class IdentityPasswordChangeCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     ActorResolver actorResolver,
     IAuditLogRepository auditLogRepository,
-    IUnitOfWork unitOfWork,
     ILogger<IdentityPasswordChangeCommandHandler> logger
 ) : ICommandHandler<IdentityPasswordChangeCommand>
 {
@@ -109,8 +107,6 @@ public sealed class IdentityPasswordChangeCommandHandler(
         passwordChangeAudit.Metadata.AddRefreshTokensRevoked(revokedCount);
 
         auditLogRepository.Add(passwordChangeAudit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
 

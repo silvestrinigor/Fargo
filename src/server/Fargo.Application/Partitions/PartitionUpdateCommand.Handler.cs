@@ -11,7 +11,6 @@ public sealed class PartitionUpdateCommandHandler(
     PartitionService partitionService,
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    IUnitOfWork unitOfWork,
     ICurrentActor currentActor
 ) : ICommandHandler<PartitionUpdateCommand>
 {
@@ -59,7 +58,5 @@ public sealed class PartitionUpdateCommandHandler(
         }
 
         auditLogRepository.Add(partitionAudit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

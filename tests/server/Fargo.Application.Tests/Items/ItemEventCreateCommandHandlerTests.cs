@@ -32,8 +32,7 @@ public class ItemEventCreateCommandHandlerTests
             itemRepository,
             itemEventRepository,
             auditLogRepository,
-            currentActor,
-            unitOfWork);
+            currentActor);
 
     private static Scalar Qty(double amount) => Scalar.FromAmount(amount);
 
@@ -71,7 +70,6 @@ public class ItemEventCreateCommandHandlerTests
                  && e.Moviment.ToItemContainerGuid == container.Guid));
         auditLogRepository.Received(1).Add(Arg.Is<AuditLog>(
             a => a.AuditLogType == AuditLogType.ItemEventRecorded && a.EntityType == EntityType.ItemEvent));
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -90,7 +88,6 @@ public class ItemEventCreateCommandHandlerTests
                  && e.Lifecycle.Quantity.Amount == 120
                  && e.Lifecycle.ItemContainerGuid == container.Guid
                  && e.Moviment == null));
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -107,7 +104,6 @@ public class ItemEventCreateCommandHandlerTests
                  && e.Lifecycle != null
                  && e.Lifecycle.Quantity.Amount == 7
                  && e.Lifecycle.NoContainer));
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

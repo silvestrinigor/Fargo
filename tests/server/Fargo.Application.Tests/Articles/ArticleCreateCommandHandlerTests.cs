@@ -29,8 +29,7 @@ public class ArticleCreateCommandHandlerTests
             articleRepository,
             partitionRepository,
             auditLogRepository,
-            currentActor,
-            unitOfWork);
+            currentActor);
 
     private static ArticleCreateCommand DefaultCommand()
         => new(new ArticleCreateDto(new Name("Widget")));
@@ -44,7 +43,6 @@ public class ArticleCreateCommandHandlerTests
 
         articleRepository.Received(1).Add(Arg.Is<Article>(a => a.Guid == result));
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

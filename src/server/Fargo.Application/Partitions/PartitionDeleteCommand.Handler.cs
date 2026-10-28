@@ -11,8 +11,7 @@ public sealed class PartitionDeleteCommandHandler(
     ActorResolver actorService,
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor,
-    IUnitOfWork unitOfWork
+    ICurrentActor currentActor
 ) : ICommandHandler<PartitionDeleteCommand>
 {
     public async Task HandleAsync(
@@ -47,7 +46,5 @@ public sealed class PartitionDeleteCommandHandler(
         var audit = AuditLog.CreateAuditLog(actor, partitionToDelete, AuditLogType.EntityDeleted);
 
         auditLogRepository.Add(audit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

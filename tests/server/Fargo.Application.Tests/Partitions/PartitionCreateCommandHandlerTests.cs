@@ -24,7 +24,6 @@ public class PartitionCreateCommandHandlerTests
             ActorTestFactory.Resolver(userRepository),
             partitionRepository,
             auditLogRepository,
-            unitOfWork,
             currentActor);
 
     private static Partition GlobalPartition()
@@ -43,7 +42,6 @@ public class PartitionCreateCommandHandlerTests
 
         partitionRepository.Received(1).Add(Arg.Any<Partition>());
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

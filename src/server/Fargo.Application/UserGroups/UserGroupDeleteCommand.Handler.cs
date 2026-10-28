@@ -11,8 +11,7 @@ public sealed class UserGroupDeleteCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor,
-    IUnitOfWork unitOfWork
+    ICurrentActor currentActor
 ) : ICommandHandler<UserGroupDeleteCommand>
 {
     public async Task HandleAsync(
@@ -36,7 +35,5 @@ public sealed class UserGroupDeleteCommandHandler(
         var audit = AuditLog.CreateAuditLog(actor, userGroup, AuditLogType.EntityDeleted);
 
         auditLogRepository.Add(audit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

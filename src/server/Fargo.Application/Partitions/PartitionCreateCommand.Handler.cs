@@ -12,7 +12,7 @@ public sealed class PartitionCreateCommandHandler(
     ActorResolver actorService,
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    IUnitOfWork unitOfWork, ICurrentActor currentActor
+    ICurrentActor currentActor
 ) : ICommandHandler<PartitionCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
@@ -58,8 +58,6 @@ public sealed class PartitionCreateCommandHandler(
         auditLogRepository.Add(partitionAudit);
 
         partitionRepository.Add(newPartition);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return newPartition.Guid;
     }

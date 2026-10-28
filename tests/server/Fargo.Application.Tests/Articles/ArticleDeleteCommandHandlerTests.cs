@@ -25,8 +25,7 @@ public class ArticleDeleteCommandHandlerTests
             ActorTestFactory.Resolver(userRepository),
             articleRepository,
             auditLogRepository,
-            currentActor,
-            unitOfWork);
+            currentActor);
 
     [Fact]
     public async Task HandleAsync_WhenValid_ShouldRemoveArticleAndAuditAndSave()
@@ -44,7 +43,6 @@ public class ArticleDeleteCommandHandlerTests
 
         articleRepository.Received(1).Remove(article);
         auditLogRepository.Received(1).Add(Arg.Any<Fargo.Core.Audits.AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

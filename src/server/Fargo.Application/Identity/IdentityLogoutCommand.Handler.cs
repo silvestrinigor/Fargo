@@ -9,12 +9,10 @@ namespace Fargo.Application.Identity;
 /// </summary>
 /// <param name="refreshTokenRepository">Provides access to refresh token data.</param>
 /// <param name="tokenHasher">Hashes refresh tokens for secure lookup.</param>
-/// <param name="unitOfWork">Provides transactional consistency for data operations.</param>
 /// <param name="logger">Logs the execution of the logout process.</param>
 public sealed class IdentityLogoutCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     ITokenHasher tokenHasher,
-    IUnitOfWork unitOfWork,
     ILogger<IdentityLogoutCommandHandler> logger
 ) : ICommandHandler<IdentityLogoutCommand>
 {
@@ -38,8 +36,6 @@ public sealed class IdentityLogoutCommandHandler(
         }
 
         storedRefreshToken.Revoke();
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
 

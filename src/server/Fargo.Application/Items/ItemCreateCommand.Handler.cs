@@ -14,8 +14,7 @@ public sealed class ItemCreateCommandHandler(
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor,
-    IUnitOfWork unitOfWork
+    ICurrentActor currentActor
 ) : ICommandHandler<ItemCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(ItemCreateCommand command, CancellationToken cancellationToken = default)
@@ -70,8 +69,6 @@ public sealed class ItemCreateCommandHandler(
         itemRepository.Add(item);
 
         auditLogRepository.Add(itemAudit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return item.Guid;
     }

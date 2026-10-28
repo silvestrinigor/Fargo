@@ -32,7 +32,6 @@ public class IdentityPasswordChangeCommandHandlerTests
             refreshTokenRepository,
             ActorTestFactory.Resolver(userRepository),
             auditLogRepository,
-            unitOfWork,
             Substitute.For<ILogger<IdentityPasswordChangeCommandHandler>>());
 
     private static IdentityPasswordChangeCommand Command(
@@ -82,7 +81,6 @@ public class IdentityPasswordChangeCommandHandlerTests
         Assert.Equal("new-hash", user.Authentication.PasswordHash!.Value.Value);
         Assert.False(activeToken.IsUsable);
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

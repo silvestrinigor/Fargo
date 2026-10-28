@@ -14,7 +14,6 @@ public sealed class InitializeSystemCommandHandler(
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
     IPasswordHasher passwordHasher,
-    IUnitOfWork unitOfWork,
     ILogger<InitializeSystemCommandHandler> logger
 ) : ICommandHandler<InitializeSystemCommand>
 {
@@ -82,8 +81,6 @@ public sealed class InitializeSystemCommandHandler(
         }
 
         userRepository.Add(admin);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.InitializeSystemCompleted(globalPartitionCreated, administratorsGroupCreated, adminUserCreated: true);
     }

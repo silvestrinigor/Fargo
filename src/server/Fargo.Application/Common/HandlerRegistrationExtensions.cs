@@ -4,15 +4,19 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Fargo.Application.Common;
 
 /// <summary>
-/// Registration helpers that wire a handler together with its logging decorator
-/// so every command/query is observed uniformly (started / completed / failed
-/// with duration) without per-handler logging code.
+/// Registration helpers that wire a handler together with its cross-cutting
+/// decorators so every command/query is observed uniformly (started / completed
+/// / failed with duration) and every command commits its unit of work on
+/// success, without per-handler logging or save code.
 ///
 /// <para>
 /// Each helper registers the concrete handler as itself and registers the
-/// handler interface to resolve the <c>Logging*Decorator</c>, which in turn
-/// depends on the concrete handler. All registrations are scoped, matching the
-/// previous lifetimes.
+/// handler interface to resolve the decorator chain. For commands the resolved
+/// chain is
+/// <c>LoggingCommandHandlerDecorator(UnitOfWorkCommandHandlerDecorator(concreteHandler))</c>
+/// — logging outermost, the commit-on-success unit-of-work decorator in the
+/// middle, and the concrete handler innermost. Queries resolve only the logging
+/// decorator. All registrations are scoped, matching the previous lifetimes.
 /// </para>
 /// </summary>
 public static class HandlerRegistrationExtensions
@@ -25,7 +29,9 @@ public static class HandlerRegistrationExtensions
         services.TryAddScoped<THandler>();
         services.AddScoped<ICommandHandler<TCommand>>(sp =>
             new LoggingCommandHandlerDecorator<TCommand>(
-                sp.GetRequiredService<THandler>(),
+                new UnitOfWorkCommandHandlerDecorator<TCommand>(
+                    sp.GetRequiredService<THandler>(),
+                    sp.GetRequiredService<IUnitOfWork>()),
                 sp,
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TCommand>>()));
 
@@ -40,7 +46,9 @@ public static class HandlerRegistrationExtensions
         services.TryAddScoped<THandler>();
         services.AddScoped<ICommandHandler<TCommand, TResponse>>(sp =>
             new LoggingCommandHandlerDecorator<TCommand, TResponse>(
-                sp.GetRequiredService<THandler>(),
+                new UnitOfWorkCommandHandlerDecorator<TCommand, TResponse>(
+                    sp.GetRequiredService<THandler>(),
+                    sp.GetRequiredService<IUnitOfWork>()),
                 sp,
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TCommand>>()));
 

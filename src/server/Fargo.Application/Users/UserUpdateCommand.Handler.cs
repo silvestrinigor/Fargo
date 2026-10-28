@@ -17,8 +17,7 @@ public sealed class UserUpdateCommandHandler(
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor,
-    IUnitOfWork unitOfWork
+    ICurrentActor currentActor
 ) : ICommandHandler<UserUpdateCommand>
 {
     public async Task HandleAsync(
@@ -226,7 +225,5 @@ public sealed class UserUpdateCommandHandler(
         }
 
         auditLogRepository.Add(userAudit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

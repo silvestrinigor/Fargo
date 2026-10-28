@@ -13,7 +13,6 @@ public sealed class ItemUpdateCommandHandler(
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
-    IUnitOfWork unitOfWork,
     ICurrentActor currentActor
 ) : ICommandHandler<ItemUpdateCommand>
 {
@@ -85,7 +84,5 @@ public sealed class ItemUpdateCommandHandler(
         }
 
         auditLogRepository.Add(itemAudit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

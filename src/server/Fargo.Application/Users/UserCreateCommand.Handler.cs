@@ -17,8 +17,7 @@ public sealed class UserCreateCommandHandler(
     IUserGroupRepository userGroupRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
-    IPasswordHasher passwordHasher,
-    IUnitOfWork unitOfWork
+    IPasswordHasher passwordHasher
 ) : ICommandHandler<UserCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
@@ -146,8 +145,6 @@ public sealed class UserCreateCommandHandler(
         userRepository.Add(user);
 
         auditLogRepository.Add(userAudit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return user.Guid;
     }

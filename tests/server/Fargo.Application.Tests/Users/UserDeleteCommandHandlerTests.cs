@@ -22,8 +22,7 @@ public class UserDeleteCommandHandlerTests
             ActorTestFactory.Resolver(userRepository),
             userRepository,
             auditLogRepository,
-            currentActor,
-            unitOfWork);
+            currentActor);
 
     [Fact]
     public async Task HandleAsync_WhenValid_ShouldRemoveUserAndAuditAndSave()
@@ -37,7 +36,6 @@ public class UserDeleteCommandHandlerTests
 
         userRepository.Received(1).Remove(user);
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

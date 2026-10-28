@@ -10,8 +10,7 @@ public sealed class UserDeleteCommandHandler(
     ActorResolver actorService,
     IUserRepository userRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor,
-    IUnitOfWork unitOfWork
+    ICurrentActor currentActor
 ) : ICommandHandler<UserDeleteCommand>
 {
     public async Task HandleAsync(
@@ -39,7 +38,5 @@ public sealed class UserDeleteCommandHandler(
         var audit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityDeleted);
 
         auditLogRepository.Add(audit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

@@ -63,6 +63,9 @@ public sealed class IdentityRefreshCommandHandler(
         {
             storedOldRefreshToken.Revoke();
 
+            // Persist the token revocation before throwing: the
+            // commit-on-success decorator skips committing when the handler
+            // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             logger.IdentityRefreshRejectedUserNotActive(user.Guid);
@@ -74,6 +77,9 @@ public sealed class IdentityRefreshCommandHandler(
         {
             storedOldRefreshToken.Revoke();
 
+            // Persist the token revocation before throwing: the
+            // commit-on-success decorator skips committing when the handler
+            // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             logger.IdentityRefreshPasswordChangeRequired(user.Guid);

@@ -25,8 +25,7 @@ public class UserGroupDeleteCommandHandlerTests
             new UserGroupService(userGroupRepository),
             userGroupRepository,
             auditLogRepository,
-            currentActor,
-            unitOfWork);
+            currentActor);
 
     private static UserGroup NewUserGroup()
         => UserGroup.CreateUserGroup(new Nameid("editors"));
@@ -45,7 +44,6 @@ public class UserGroupDeleteCommandHandlerTests
 
         userGroupRepository.Received(1).Remove(userGroup);
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
-        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

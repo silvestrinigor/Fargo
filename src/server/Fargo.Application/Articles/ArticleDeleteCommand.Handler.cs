@@ -14,13 +14,12 @@ namespace Fargo.Application.Articles;
 /// <param name="articleRepository">Provides access to article entities.</param>
 /// <param name="auditLogRepository">Persists audit logs for article operations.</param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
-/// <param name="unitOfWork">Coordinates persistence of the operation.</param>
 public sealed class ArticleDeleteCommandHandler(
     ArticleService articleService,
     ActorResolver actorService,
     IArticleRepository articleRepository,
     IAuditLogRepository auditLogRepository,
-    ICurrentActor currentActor, IUnitOfWork unitOfWork
+    ICurrentActor currentActor
     ) : ICommandHandler<ArticleDeleteCommand>
 {
     /// <summary>
@@ -55,7 +54,5 @@ public sealed class ArticleDeleteCommandHandler(
         var audit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityDeleted);
 
         auditLogRepository.Add(audit);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
