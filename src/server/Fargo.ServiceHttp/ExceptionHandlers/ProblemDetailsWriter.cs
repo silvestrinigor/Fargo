@@ -1,5 +1,4 @@
 using Fargo.Core.Common;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.ServiceHttp.ExceptionHandlers;

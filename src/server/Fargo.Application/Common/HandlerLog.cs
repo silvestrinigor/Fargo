@@ -1,6 +1,5 @@
-using System.Diagnostics;
-using Fargo.Core.Actors;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace Fargo.Application.Common;
 
