@@ -37,7 +37,8 @@ An item knows which article it instantiates and where it currently lives.
 
 Not every kind of stock is best represented as individually numbered units.
 Each article therefore chooses a **tracking mode** that decides how its stock is
-recorded. The mode is fixed for the article's lifetime.
+recorded. The mode is chosen when the article is created and is fixed for the
+article's lifetime. (Container articles are always entity-tracked.)
 
 ### Entity tracking (the default)
 

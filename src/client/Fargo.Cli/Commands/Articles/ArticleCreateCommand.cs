@@ -14,6 +14,10 @@ public sealed class ArticleCreateCommand : Command
     private const int ArticleTypeKit = 4;
     private const int ArticleTypeContainer = 5;
 
+    // Mirrors the server's ArticleTrackingMode enum numeric values.
+    private const int TrackingModeEntity = 1;
+    private const int TrackingModeEvent = 2;
+
     public ArticleCreateCommand(FargoApiClient client)
         : base("create", """
             Create a new article.
@@ -45,6 +49,7 @@ public sealed class ArticleCreateCommand : Command
               fargo article create --name "Blue Widget" \
                 --variation-from 11111111-1111-1111-1111-111111111111
               fargo article create --name "Widget" --barcode-ean13 1234567890128
+              fargo article create --name "Bulk sand" --tracking-mode event
             """)
     {
         var nameOption = new Option<string>("--name")
@@ -126,6 +131,15 @@ public sealed class ArticleCreateCommand : Command
             Description = "Optional EAN-13 barcode to assign to the article."
         };
 
+        var trackingModeOption = new Option<string?>("--tracking-mode")
+        {
+            Description =
+                "How the article's stock is tracked: 'entity' (each unit is an "
+                + "individual item; the default) or 'event' (aggregate quantities "
+                + "recorded as movement events). Container articles are always "
+                + "entity-tracked."
+        };
+
         var kitComponentOption = new Option<string[]?>("--kit-component")
         {
             Description =
@@ -154,6 +168,7 @@ public sealed class ArticleCreateCommand : Command
         Add(isContainerOption);
         Add(containerMaxMassOption);
         Add(barcodeEan13Option);
+        Add(trackingModeOption);
         Add(kitComponentOption);
         Add(partitionsOption);
 
@@ -173,6 +188,7 @@ public sealed class ArticleCreateCommand : Command
             var isContainer = parseResult.GetValue(isContainerOption);
             var containerMaxMass = parseResult.GetValue(containerMaxMassOption);
             var barcodeEan13 = parseResult.GetValue(barcodeEan13Option);
+            var trackingModeRaw = parseResult.GetValue(trackingModeOption);
             var kitComponents = parseResult.GetValue(kitComponentOption);
             var partitions = parseResult.GetValue(partitionsOption);
 
@@ -193,10 +209,33 @@ public sealed class ArticleCreateCommand : Command
                 return 1;
             }
 
+            // Resolve the tracking mode (defaults to entity). Event tracking is
+            // only meaningful for non-container articles; containers are always
+            // entity-tracked, so reject the combination explicitly.
+            int trackingMode;
+            try
+            {
+                trackingMode = ParseTrackingMode(trackingModeRaw);
+            }
+            catch (FormatException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                return 1;
+            }
+
+            if (trackingMode == TrackingModeEvent && articleType == ArticleTypeContainer)
+            {
+                Console.Error.WriteLine(
+                    "Container articles are always entity-tracked; "
+                    + "--tracking-mode event cannot be combined with a container.");
+                return 1;
+            }
+
             var dto = new ArticleCreateDto
             {
                 Name = name,
                 ArticleType = articleType,
+                TrackingMode = trackingMode,
                 Description = description,
                 ShelfLife = shelfLife,
                 Color = color,
@@ -310,6 +349,27 @@ public sealed class ArticleCreateCommand : Command
         }
 
         return present.Count == 1 ? present[0].Type : ArticleTypeDefault;
+    }
+
+    /// <summary>
+    /// Parses the <c>--tracking-mode</c> option. Accepts 'entity' or 'event'
+    /// (case-insensitive); when omitted, defaults to entity tracking. Throws a
+    /// <see cref="FormatException"/> for any other value.
+    /// </summary>
+    private static int ParseTrackingMode(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return TrackingModeEntity;
+        }
+
+        return raw.Trim().ToLowerInvariant() switch
+        {
+            "entity" => TrackingModeEntity,
+            "event" => TrackingModeEvent,
+            _ => throw new FormatException(
+                $"Invalid --tracking-mode '{raw}'. Expected 'entity' or 'event'."),
+        };
     }
 
     private static ArticleDimensionDto? BuildDimension(string? lengthX, string? lengthY, string? lengthZ)

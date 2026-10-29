@@ -15,6 +15,7 @@ public static class ToolResults
         dto.Name,
         dto.Description,
         dto.ArticleType,
+        dto.TrackingMode,
         dto.Partitions?.Where(p => p.HasValue).Select(p => p!.Value).ToArray());
 
     public static PartitionSummary ToSummary(this PartitionDto dto) => new(
@@ -82,6 +83,7 @@ public sealed record ArticleSummary(
     string? Name,
     string? Description,
     int? ArticleType,
+    int? TrackingMode,
     Guid[]? Partitions);
 
 public sealed record PartitionSummary(
@@ -157,4 +159,17 @@ public static class ItemEventTypes
 
     /// <summary>The deletion of a previously created unit of stock.</summary>
     public const int Deletion = 3;
+}
+
+/// <summary>
+/// Numeric values of the server's <c>ArticleTrackingMode</c> enum, which the API
+/// serializes as integers.
+/// </summary>
+public static class ArticleTrackingModes
+{
+    /// <summary>Each physical unit is tracked individually as its own item.</summary>
+    public const int Entity = 1;
+
+    /// <summary>Stock is tracked as aggregate quantities via movement events.</summary>
+    public const int Event = 2;
 }

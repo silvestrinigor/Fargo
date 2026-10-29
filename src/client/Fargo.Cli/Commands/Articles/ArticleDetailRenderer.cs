@@ -19,6 +19,7 @@ internal static class ArticleDetailRenderer
             .Field("GUID", article.Guid)
             .Field("Name", article.Name)
             .Field("Type", EnumFormatting.Format<ArticleType>(article.ArticleType))
+            .Field("Tracking mode", EnumFormatting.Format<ArticleTrackingMode>(article.TrackingMode))
             .Field("Description", article.Description)
             .Field("Shelf life", article.ShelfLife)
             .Field("Barcode (EAN-13)", article.Barcodes?.Ean13)

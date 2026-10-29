@@ -50,6 +50,17 @@ curl -X POST https://localhost:7563/v1/articles \
 
 The response is the identifier of the created article.
 
+To create an **event-tracked** article (whose stock is recorded as movement
+events rather than individual items), set `trackingMode` to `2` (Event); the
+default is `1` (Entity):
+
+```bash
+curl -X POST https://localhost:7563/v1/articles \
+  -H "Authorization: Bearer <access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Bulk sand", "articleType": 1, "trackingMode": 2 }'
+```
+
 ## 4. Refresh the token when it expires
 
 ```bash

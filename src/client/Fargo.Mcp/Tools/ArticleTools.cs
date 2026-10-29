@@ -70,6 +70,7 @@ public static class ArticleTools
         [Description("The name of the article.")] string name,
         [Description("An optional description of the article.")] string? description = null,
         [Description("The numeric article type. Defaults to the API's default when omitted.")] int? articleType = null,
+        [Description("How stock is tracked: 1 = Entity (each unit is an individual item; the default), 2 = Event (aggregate quantities recorded as movement events). Container articles are always entity-tracked.")] int? trackingMode = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -78,7 +79,8 @@ public static class ArticleTools
         {
             Name = name,
             Description = description,
-            ArticleType = articleType
+            ArticleType = articleType,
+            TrackingMode = trackingMode
         };
 
         return await client.V1.Articles.PostAsync(body, cancellationToken: cancellationToken);

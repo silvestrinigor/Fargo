@@ -85,6 +85,16 @@ public enum ItemEventType
 }
 
 /// <summary>
+/// How the stock of an article is tracked. Mirrors the server's
+/// ArticleTrackingMode enum.
+/// </summary>
+public enum ArticleTrackingMode
+{
+    Entity = 1,
+    Event = 2,
+}
+
+/// <summary>
 /// Formats enum values as human-friendly, kebab-cased names for display, and
 /// renders raw numeric codes through their matching enum name.
 /// </summary>
