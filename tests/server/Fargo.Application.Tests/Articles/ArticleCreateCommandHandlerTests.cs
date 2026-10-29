@@ -46,6 +46,34 @@ public class ArticleCreateCommandHandlerTests
     }
 
     [Fact]
+    public async Task HandleAsync_WhenTrackingModeNotSpecified_ShouldCreateEntityTrackedArticle()
+    {
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateArticle]);
+
+        await CreateHandler().HandleAsync(DefaultCommand());
+
+        articleRepository.Received(1).Add(
+            Arg.Is<Article>(a => a.TrackingMode == ArticleTrackingMode.Entity));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenTrackingModeIsEvent_ShouldCreateEventTrackedArticle()
+    {
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateArticle]);
+
+        var command = new ArticleCreateCommand(new ArticleCreateDto(
+            new Name("Bulk sand"),
+            TrackingMode: ArticleTrackingMode.Event));
+
+        await CreateHandler().HandleAsync(command);
+
+        articleRepository.Received(1).Add(
+            Arg.Is<Article>(a =>
+                a.TrackingMode == ArticleTrackingMode.Event &&
+                a.ArticleType == ArticleType.Default));
+    }
+
+    [Fact]
     public async Task HandleAsync_WhenActorNotFound_ShouldThrow()
     {
         ActorTestFactory.ConfigureMissingActor(userRepository, currentActor.Guid);

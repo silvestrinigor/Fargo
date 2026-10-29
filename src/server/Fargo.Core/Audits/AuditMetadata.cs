@@ -137,6 +137,15 @@ public sealed class AuditMetadata
     }
 
     /// <summary>
+    /// Adds the article tracking mode to the metadata.
+    /// </summary>
+    /// <param name="value">The tracking mode to add.</param>
+    public void AddTrackingMode(ArticleTrackingMode value)
+    {
+        Add("trackingMode", new AuditValue.Number((byte)value));
+    }
+
+    /// <summary>
     /// Adds the identifier of the source article to the metadata.
     /// </summary>
     /// <param name="fromArticleGuid">

@@ -12,6 +12,7 @@ namespace Fargo.Application.Articles;
 /// <param name="Name">The name of the article.</param>
 /// <param name="Description">The description of the article.</param>
 /// <param name="ArticleType">The type of the article.</param>
+/// <param name="TrackingMode">The stock tracking mode of the article (entity or event).</param>
 /// <param name="ShelfLife">The optional shelf life of the article.</param>
 /// <param name="Color">The optional color of the article.</param>
 /// <param name="Mass">The optional mass of the article.</param>
@@ -27,6 +28,7 @@ public sealed record ArticleDto(
     Name Name,
     Description Description,
     ArticleType ArticleType,
+    ArticleTrackingMode TrackingMode,
     TimeSpan? ShelfLife,
     Color? Color,
     Mass? Mass,

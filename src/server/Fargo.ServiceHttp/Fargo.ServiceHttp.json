@@ -1687,6 +1687,10 @@
               }
             ]
           },
+          "trackingMode": {
+            "description": "The stock tracking mode of the article. Defaults to\r\nArticleTrackingMode.Entity. Container articles are always\r\nentity-tracked regardless of this value.",
+            "$ref": "#/components/schemas/ArticleTrackingMode"
+          },
           "partitionsToAdd": {
             "type": [
               "null",
@@ -1836,6 +1840,7 @@
           "name",
           "description",
           "articleType",
+          "trackingMode",
           "shelfLife",
           "color",
           "mass",
@@ -1865,6 +1870,10 @@
           "articleType": {
             "description": "The type of the article.",
             "$ref": "#/components/schemas/ArticleType"
+          },
+          "trackingMode": {
+            "description": "The stock tracking mode of the article (entity or event).",
+            "$ref": "#/components/schemas/ArticleTrackingMode"
           },
           "shelfLife": {
             "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
@@ -2013,6 +2022,10 @@
           }
         },
         "description": "Represents the packaging information for an article pack."
+      },
+      "ArticleTrackingMode": {
+        "type": "integer",
+        "description": "Determines how the stock of an Article is tracked."
       },
       "ArticleType": {
         "type": "integer",

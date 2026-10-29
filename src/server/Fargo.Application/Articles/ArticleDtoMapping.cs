@@ -21,6 +21,7 @@ public static class ArticleDtoMapping
             article.Name,
             article.Description,
             article.ArticleType,
+            article.TrackingMode,
             article.ShelfLife,
             article.Color,
             article.Mass,

@@ -80,7 +80,7 @@ public sealed class ArticleCreateCommandHandler(
         {
             case ArticleType.Default:
                 {
-                    article = Article.NewArticle(command.Create.Name);
+                    article = Article.NewArticle(command.Create.Name, command.Create.TrackingMode);
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityCreated);
 
@@ -101,7 +101,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
-                    article = Article.NewArticleVariation(command.Create.Name, fromArticle);
+                    article = Article.NewArticleVariation(command.Create.Name, fromArticle, command.Create.TrackingMode);
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityCreated);
 
@@ -130,7 +130,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
-                    article = Article.NewArticlePack(command.Create.Name, fromArticle, command.Create.Pack.Quantity);
+                    article = Article.NewArticlePack(command.Create.Name, fromArticle, command.Create.Pack.Quantity, command.Create.TrackingMode);
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityCreated);
 
@@ -164,7 +164,7 @@ public sealed class ArticleCreateCommandHandler(
                         kitComponents.Add(kit);
                     }
 
-                    article = Article.NewArticleKit(command.Create.Name, kitComponents);
+                    article = Article.NewArticleKit(command.Create.Name, kitComponents, command.Create.TrackingMode);
 
                     articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityCreated);
 
@@ -192,6 +192,8 @@ public sealed class ArticleCreateCommandHandler(
         articleAudit.Metadata.AddName(article.Name);
 
         articleAudit.Metadata.AddArticleType(article.ArticleType);
+
+        articleAudit.Metadata.AddTrackingMode(article.TrackingMode);
 
         article.Description = command.Create.Description ?? Description.Empty;
 

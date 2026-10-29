@@ -107,6 +107,8 @@ namespace Fargo.ClientHttp.Models
 #else
         public string ShelfLife { get; set; }
 #endif
+        /// <summary>The stock tracking mode of the article (entity or event).</summary>
+        public int? TrackingMode { get; set; }
         /// <summary>The variation property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -153,6 +155,7 @@ namespace Fargo.ClientHttp.Models
                 { "pack", n => { Pack = n.GetObjectValue<global::Fargo.ClientHttp.Models.ArticlePackDto>(global::Fargo.ClientHttp.Models.ArticlePackDto.CreateFromDiscriminatorValue); } },
                 { "partitions", n => { Partitions = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "shelfLife", n => { ShelfLife = n.GetStringValue(); } },
+                { "trackingMode", n => { TrackingMode = n.GetIntValue(); } },
                 { "variation", n => { Variation = n.GetObjectValue<global::Fargo.ClientHttp.Models.ArticleVariationDto>(global::Fargo.ClientHttp.Models.ArticleVariationDto.CreateFromDiscriminatorValue); } },
             };
         }
@@ -176,6 +179,7 @@ namespace Fargo.ClientHttp.Models
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.ArticlePackDto>("pack", Pack);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitions", Partitions);
             writer.WriteStringValue("shelfLife", ShelfLife);
+            writer.WriteIntValue("trackingMode", TrackingMode);
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.ArticleVariationDto>("variation", Variation);
             writer.WriteAdditionalData(AdditionalData);
         }

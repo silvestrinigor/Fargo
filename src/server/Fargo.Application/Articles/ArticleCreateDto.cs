@@ -33,6 +33,11 @@ namespace Fargo.Application.Articles;
 /// <param name="Mass">The optional mass of the article.</param>
 /// <param name="Dimension">The optional physical dimensions of the article.</param>
 /// <param name="Barcode">The optional barcode information of the article.</param>
+/// <param name="TrackingMode">
+/// The stock tracking mode of the article. Defaults to
+/// <see cref="ArticleTrackingMode.Entity"/>. Container articles are always
+/// entity-tracked regardless of this value.
+/// </param>
 /// <param name="PartitionsToAdd">
 /// The optional identifiers of partitions to associate with the article.
 /// </param>
@@ -49,5 +54,6 @@ public sealed record ArticleCreateDto(
     Mass? Mass = null,
     ArticleDimensionDto? Dimension = null,
     ArticleBarcodeDto? Barcode = null,
+    ArticleTrackingMode TrackingMode = ArticleTrackingMode.Entity,
     IReadOnlyCollection<Guid>? PartitionsToAdd = null
 );

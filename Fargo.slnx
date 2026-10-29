@@ -13,4 +13,5 @@
     <Project Path="tests/server/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="tests/server/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />
     <Project Path="tests/server/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
+    <Project Path="tests/client/Fargo.WorkflowTest/Fargo.WorkflowTest.csproj" />
 </Solution>
