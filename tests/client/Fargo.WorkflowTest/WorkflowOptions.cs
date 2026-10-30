@@ -81,4 +81,41 @@ public sealed class WorkflowOptions
     /// events, and verifying the computed event-based inventory.
     /// </summary>
     public bool RunItemEventScenarios { get; init; } = true;
+
+    /// <summary>
+    /// When true, the workflow runs the large-tree stress scenario: it builds a
+    /// deep and wide partition hierarchy, creates many user groups (including a
+    /// nested group hierarchy), many users and many articles/items spread across
+    /// the tree, records item events, exercises partition-scoped access and
+    /// deletion boundaries, runs concurrency tests, and inspects the audit log.
+    /// </summary>
+    public bool RunLargeTreeScenario { get; init; } = true;
+
+    /// <summary>
+    /// Fan-out (number of child partitions created per non-leaf partition) for
+    /// the large-tree scenario. Combined with <see cref="PartitionTreeDepth"/>
+    /// this drives the total number of partitions created.
+    /// </summary>
+    public int PartitionTreeFanout { get; init; } = 3;
+
+    /// <summary>Depth of the partition hierarchy built by the large-tree scenario.</summary>
+    public int PartitionTreeDepth { get; init; } = 3;
+
+    /// <summary>Number of user groups the large-tree scenario creates.</summary>
+    public int LargeTreeUserGroups { get; init; } = 12;
+
+    /// <summary>Number of users the large-tree scenario creates.</summary>
+    public int LargeTreeUsers { get; init; } = 20;
+
+    /// <summary>Number of product articles the large-tree scenario creates.</summary>
+    public int LargeTreeArticles { get; init; } = 15;
+
+    /// <summary>Number of items created per article in the large-tree scenario.</summary>
+    public int LargeTreeItemsPerArticle { get; init; } = 6;
+
+    /// <summary>
+    /// Degree of parallelism used by the concurrency tests in the large-tree
+    /// scenario (e.g. simultaneous article/item creations and item moves).
+    /// </summary>
+    public int ConcurrencyDegree { get; init; } = 16;
 }

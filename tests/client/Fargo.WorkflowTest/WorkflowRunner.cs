@@ -59,6 +59,7 @@ public sealed class WorkflowRunner
         Log.Info($"Inventory scenario: {(_options.RunInventoryScenarios ? "enabled" : "disabled")}");
         Log.Info($"Article props scenario: {(_options.RunArticlePropertyScenarios ? "enabled" : "disabled")}");
         Log.Info($"Item events scenario: {(_options.RunItemEventScenarios ? "enabled" : "disabled")}");
+        Log.Info($"Large-tree scenario: {(_options.RunLargeTreeScenario ? "enabled" : "disabled")}");
         Log.Info($"Run tag          : {_runTag}");
 
         var check = new Check();
@@ -105,6 +106,14 @@ public sealed class WorkflowRunner
         {
             var itemEvents = new ItemEventScenario(_client, _runTag, check);
             await itemEvents.RunAsync(cancellationToken);
+        }
+
+        // --- Large-tree stress / integration scenario ---
+        if (_options.RunLargeTreeScenario)
+        {
+            var clientBuilder = new FargoClientBuilder(_options.Server);
+            var largeTree = new LargeTreeScenario(_client, clientBuilder, _options, _runTag, check);
+            await largeTree.RunAsync(cancellationToken);
         }
 
         var totalFailures = inventoryFailures + check.Failures;
