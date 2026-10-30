@@ -1,7 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Application.ServiceAccounts;
-using Fargo.Core.ServiceAccounts;
 using Fargo.Core.Informations;
+using Fargo.Core.ServiceAccounts;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

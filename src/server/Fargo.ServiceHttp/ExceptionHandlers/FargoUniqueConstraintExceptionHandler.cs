@@ -1,8 +1,8 @@
-using System.Data.Common;
 using Fargo.Core.Common;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 namespace Fargo.ServiceHttp.ExceptionHandlers;
 

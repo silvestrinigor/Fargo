@@ -1,4 +1,3 @@
-using Fargo.Core.Identity;
 using Fargo.Core.ServiceAccounts;
 using Fargo.Core.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

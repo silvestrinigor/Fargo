@@ -1,4 +1,3 @@
-using Fargo.Core.Identity;
 using Fargo.Core.ServiceAccounts;
 
 namespace Fargo.Application.ServiceAccounts;

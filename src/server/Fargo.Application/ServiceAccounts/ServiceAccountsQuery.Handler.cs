@@ -1,5 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.ServiceAccounts;
 using Fargo.Core.Actors;
 
 namespace Fargo.Application.ServiceAccounts;
