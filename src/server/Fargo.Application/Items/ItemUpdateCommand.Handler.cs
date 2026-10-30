@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Core.Actors;
+using Fargo.Core.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Items;
@@ -38,19 +39,29 @@ public sealed class ItemUpdateCommandHandler(
 
         if (command.Update.ParentItemContainerGuid is { } parentItemContainerGuid && item.ParentItemContainerGuid != parentItemContainerGuid)
         {
-            // Serialize concurrent moves into the same subtree so the circular-
-            // containment check below (which reads other items) cannot be raced by
-            // another move. The lock is transaction-scoped and is released when the
-            // decorator's transaction commits or rolls back.
-            await itemRepository.AcquireContainmentLockAsync(parentItemContainerGuid, cancellationToken);
-
             var parentItemContainer = await itemRepository.GetByGuidAsync(parentItemContainerGuid, cancellationToken);
 
             EntityNotFoundFargoApplicationException.ThrowIfNull(parentItemContainer, parentItemContainerGuid, EntityType.Item);
 
             actor.ThrowIfAccessDenied(parentItemContainer);
 
-            await itemService.ValidateParentItemContainerHierarchyAssignmentAsync(parentItemContainer, item, cancellationToken);
+            // Only moving a CONTAINER item can create a circular containment
+            // hierarchy: a non-container item has no descendants, so it can never
+            // contain its destination. And a fixed item cannot be moved at all
+            // (PlaceInsideContainer rejects it), so there is nothing to protect.
+            // Restricting the lock + cycle check to the non-fixed container case
+            // keeps the heavy leaf-item move path lock-free. The lock is the single
+            // global containment lock, held until the decorator's transaction
+            // commits, so concurrent container moves cannot race the cycle check.
+            var requiresCycleProtection =
+                item.Article.ArticleType == ArticleType.Container && !item.IsFixed;
+
+            if (requiresCycleProtection)
+            {
+                await itemRepository.AcquireContainmentLockAsync(cancellationToken);
+
+                await itemService.ValidateParentItemContainerHierarchyAssignmentAsync(parentItemContainer, item, cancellationToken);
+            }
 
             item.PlaceInsideContainer(parentItemContainer);
 

@@ -82,23 +82,24 @@ public interface IItemRepository
     void Remove(Item item);
 
     /// <summary>
-    /// Acquires a transaction-scoped exclusive lock that serializes containment
-    /// mutations within the subtree rooted at the specified container item.
+    /// Acquires a single, global transaction-scoped exclusive lock that serializes
+    /// container-into-container moves across the whole item tree.
     /// </summary>
-    /// <param name="containerRootGuid">
-    /// The identifier used as the lock key. Concurrent callers that pass the same
-    /// key block until the holding transaction commits or rolls back.
-    /// </param>
     /// <param name="cancellationToken">
     /// A token used to cancel the asynchronous operation.
     /// </param>
     /// <remarks>
-    /// The lock protects the check-then-act in the item-move flow: validating
-    /// that a move does not create a circular containment hierarchy reads other
-    /// items, so two concurrent moves could each pass validation and together
-    /// create a cycle. Taking this lock before the validation forces such moves
-    /// to run one at a time. The lock is released automatically when the
-    /// surrounding transaction ends, so it must be called inside a transaction.
+    /// The lock protects the check-then-act in the item-move flow: validating that
+    /// a move does not create a circular containment hierarchy reads other items,
+    /// so two concurrent moves could each pass validation and together create a
+    /// cycle. A circular hierarchy can span several containers whose paths only
+    /// share an interior node, so a per-container key would not reliably serialize
+    /// the conflicting moves; one global lock serializes every such move and is
+    /// therefore correct for cycles of any size. It is only meant to be taken when
+    /// moving a non-fixed container item (the sole move that can create a cycle),
+    /// so the common leaf-item move never contends for it. The lock releases
+    /// automatically when the surrounding transaction ends, so it must be called
+    /// inside a transaction.
     /// </remarks>
-    Task AcquireContainmentLockAsync(Guid containerRootGuid, CancellationToken cancellationToken = default);
+    Task AcquireContainmentLockAsync(CancellationToken cancellationToken = default);
 }

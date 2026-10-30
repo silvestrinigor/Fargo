@@ -62,33 +62,26 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return guids;
     }
 
-    public async Task AcquireContainmentLockAsync(Guid containerRootGuid, CancellationToken cancellationToken = default)
-    {
-        // Serialize concurrent containment mutations on the same subtree using a
-        // PostgreSQL transaction-scoped advisory lock. pg_advisory_xact_lock takes
-        // a 64-bit key and releases automatically at transaction end, so no manual
-        // unlock is needed. The key is a stable hash of the root container GUID;
-        // callers acting on the same root block one another, while unrelated
-        // subtrees proceed concurrently.
-        var lockKey = ToAdvisoryLockKey(containerRootGuid);
+    // Fixed key for the single, global containment advisory lock. A cycle can
+    // span several containers whose only shared node is somewhere along their
+    // paths, so a per-container key does not reliably serialize the conflicting
+    // moves. One global key serializes every container-into-container move, which
+    // is correct for cycles of any size. This is cheap in practice because the
+    // caller only takes the lock when moving a (non-fixed) CONTAINER item —
+    // leaf-item moves, which dominate traffic, never contend for it.
+    private const long ContainmentLockKey = 0x_7A60_C017_A10C_1701;
 
-        FormattableString query = $"SELECT pg_advisory_xact_lock({lockKey})";
+    public async Task AcquireContainmentLockAsync(CancellationToken cancellationToken = default)
+    {
+        // PostgreSQL transaction-scoped advisory lock: acquired for the given key,
+        // released automatically when the surrounding transaction commits or rolls
+        // back, so no manual unlock is needed. It must run inside a transaction
+        // (the item-update command runs under the transactional unit-of-work
+        // decorator), otherwise the lock would release at the end of this single
+        // statement.
+        FormattableString query = $"SELECT pg_advisory_xact_lock({ContainmentLockKey})";
 
         await context.Database.ExecuteSqlInterpolatedAsync(query, cancellationToken);
-    }
-
-    // Folds a GUID into a signed 64-bit key for pg_advisory_xact_lock. Collisions
-    // only cause two unrelated subtrees to occasionally serialize, which is safe
-    // (never incorrect), so a simple fold of the 16 bytes is sufficient.
-    private static long ToAdvisoryLockKey(Guid guid)
-    {
-        Span<byte> bytes = stackalloc byte[16];
-        guid.TryWriteBytes(bytes);
-
-        var low = BitConverter.ToInt64(bytes[..8]);
-        var high = BitConverter.ToInt64(bytes[8..]);
-
-        return low ^ high;
     }
 
     public void Add(Item item) => context.Items.Add(item);

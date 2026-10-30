@@ -54,7 +54,7 @@ UnitsNet carries a unit but values are stored as-given; no conversion between pu
 
 ## Platform / non-functional
 
-### [ ] GAP-11 - Optimistic concurrency control (Tier 1)
+### [x] GAP-11 - Optimistic concurrency control (Tier 1)
 No row-version / `xmin` tokens on any aggregate; risk of silent lost updates under concurrent edits (the
 simulation concurrency test confirmed "last writer wins"). (Quick win - see below.)
 
