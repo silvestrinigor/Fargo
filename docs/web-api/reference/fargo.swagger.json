@@ -217,6 +217,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {
@@ -505,6 +515,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {
@@ -767,6 +787,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {
@@ -935,6 +965,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1104,6 +1144,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {

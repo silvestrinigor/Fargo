@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Fargo.Application.Common;
 using Fargo.Application.Users;
 using Fargo.Core.Actors;
@@ -47,9 +48,21 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         return user;
     }
 
+    private static readonly IReadOnlyDictionary<string, Expression<Func<User, object?>>> UserSortFields =
+        new Dictionary<string, Expression<Func<User, object?>>>
+        {
+            ["guid"] = u => u.Guid,
+            ["nameid"] = u => u.Nameid,
+            ["firstname"] = u => u.FirstName,
+            ["lastname"] = u => u.LastName,
+            ["isactive"] = u => u.IsActive,
+        };
+
     public async Task<PagedResult<UserDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(
@@ -57,10 +70,12 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions);
 
+        queryFiltered = ApplySearch(queryFiltered, search);
+
         var totalCount = await queryFiltered.CountAsync(cancellationToken);
 
         var result = await queryFiltered
-            .OrderBy(user => user.Guid)
+            .ApplySort(sort, UserSortFields, u => u.Nameid, u => u.Guid)
             .WithPagination(pagination)
             .Select(UserDtoMappings.Projection)
             .ToListAsync(cancellationToken);
@@ -70,6 +85,18 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             totalCount,
             pagination.Page.Value,
             pagination.Limit.Value);
+    }
+
+    private static IQueryable<User> ApplySearch(IQueryable<User> query, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return query;
+        }
+
+        var pattern = $"%{SearchPattern.Escape(search.Trim())}%";
+
+        return query.Where(u => EF.Functions.ILike((string)u.Nameid, pattern, SearchPattern.EscapeChar));
     }
 
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)

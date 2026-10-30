@@ -13,5 +13,7 @@ public interface IPartitionQueryRepository
     Task<PagedResult<PartitionDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default);
 }

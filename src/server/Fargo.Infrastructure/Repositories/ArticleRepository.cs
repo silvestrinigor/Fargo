@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Fargo.Application.Articles;
 using Fargo.Application.Common;
 using Fargo.Core.Articles;
@@ -88,19 +89,36 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         return articleTask;
     }
 
+    // Whitelist of fields an article list may be sorted by, mapping each
+    // query-string name to its key selector. Only scalar columns the database can
+    // order by are included; requesting anything else is rejected with 400.
+    private static readonly IReadOnlyDictionary<string, Expression<Func<Article, object?>>> ArticleSortFields =
+        new Dictionary<string, Expression<Func<Article, object?>>>
+        {
+            ["guid"] = a => a.Guid,
+            ["name"] = a => a.Name,
+            ["description"] = a => a.Description,
+            ["type"] = a => a.ArticleType,
+            ["trackingmode"] = a => a.TrackingMode,
+        };
+
     public async Task<PagedResult<ArticleDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var articleQueryFiltered = ApplyPartitionFilter(
             context.Articles.AsNoTracking(),
             childOfAnyOfThesePartitions);
 
+        articleQueryFiltered = ApplySearch(articleQueryFiltered, search);
+
         var totalCount = await articleQueryFiltered.CountAsync(cancellationToken);
 
         var articles = await articleQueryFiltered
-            .OrderBy(article => article.Guid)
+            .ApplySort(sort, ArticleSortFields, a => a.Name, a => a.Guid)
             .WithPagination(pagination)
             .Select(ArticleDtoMapping.Projection)
             .ToListAsync(cancellationToken);
@@ -110,6 +128,23 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
             totalCount,
             pagination.Page.Value,
             pagination.Limit.Value);
+    }
+
+    // Case-insensitive substring match on the article's name or description via
+    // PostgreSQL ILIKE. The term's LIKE wildcards are escaped so a literal '%' or
+    // '_' in the search text matches itself rather than acting as a wildcard.
+    private static IQueryable<Article> ApplySearch(IQueryable<Article> query, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return query;
+        }
+
+        var pattern = $"%{SearchPattern.Escape(search.Trim())}%";
+
+        return query.Where(a =>
+            EF.Functions.ILike((string)a.Name, pattern, SearchPattern.EscapeChar)
+            || EF.Functions.ILike((string)a.Description, pattern, SearchPattern.EscapeChar));
     }
 
     private static IQueryable<Article> ApplyPartitionFilter(

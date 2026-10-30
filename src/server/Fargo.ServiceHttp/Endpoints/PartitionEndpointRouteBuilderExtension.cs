@@ -79,6 +79,8 @@ public static class PartitionEndpointRouteBuilderExtension
         Page? page,
         Limit? limit,
         Guid[]? childOfAnyOfThesePartitions,
+        Sort? sort,
+        string? search,
         IQueryHandler<PartitionsQuery, PagedResult<PartitionDto>> handler,
         CancellationToken cancellationToken)
     {
@@ -88,7 +90,9 @@ public static class PartitionEndpointRouteBuilderExtension
 
         var query = new PartitionsQuery(
             withPagination,
-            childOfAnyOfThesePartitions);
+            childOfAnyOfThesePartitions,
+            sort,
+            search);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

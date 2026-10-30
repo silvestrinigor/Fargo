@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Fargo.Application.Common;
 using Fargo.Application.UserGroups;
 using Fargo.Core.Informations;
@@ -46,9 +47,20 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         return userGroup;
     }
 
+    private static readonly IReadOnlyDictionary<string, Expression<Func<UserGroup, object?>>> UserGroupSortFields =
+        new Dictionary<string, Expression<Func<UserGroup, object?>>>
+        {
+            ["guid"] = g => g.Guid,
+            ["nameid"] = g => g.Nameid,
+            ["description"] = g => g.Description,
+            ["isactive"] = g => g.IsActive,
+        };
+
     public async Task<PagedResult<UserGroupDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(
@@ -56,10 +68,12 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions);
 
+        queryFiltered = ApplySearch(queryFiltered, search);
+
         var totalCount = await queryFiltered.CountAsync(cancellationToken);
 
         var result = await queryFiltered
-            .OrderBy(userGroup => userGroup.Guid)
+            .ApplySort(sort, UserGroupSortFields, g => g.Nameid, g => g.Guid)
             .WithPagination(pagination)
             .Select(UserGroupDtoMappings.Projection)
             .ToListAsync(cancellationToken);
@@ -69,6 +83,20 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             totalCount,
             pagination.Page.Value,
             pagination.Limit.Value);
+    }
+
+    private static IQueryable<UserGroup> ApplySearch(IQueryable<UserGroup> query, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return query;
+        }
+
+        var pattern = $"%{SearchPattern.Escape(search.Trim())}%";
+
+        return query.Where(g =>
+            EF.Functions.ILike((string)g.Nameid, pattern, SearchPattern.EscapeChar)
+            || EF.Functions.ILike((string)g.Description, pattern, SearchPattern.EscapeChar));
     }
 
     private static IQueryable<UserGroup> ApplyPartitionFilter(

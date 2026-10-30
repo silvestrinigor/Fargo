@@ -141,6 +141,8 @@ public static class ArticleEndpointRouteBuilderExtension
     private static async Task<Ok<PagedResult<ArticleDto>>> GetManyArticleAsync(
         Page? page, Limit? limit,
         Guid[]? childOfAnyOfThesePartitions,
+        Sort? sort,
+        string? search,
         IQueryHandler<ArticlesQuery, PagedResult<ArticleDto>> handler,
         CancellationToken cancellationToken)
     {
@@ -149,7 +151,9 @@ public static class ArticleEndpointRouteBuilderExtension
 
         var query = new ArticlesQuery(
             withPagination,
-            childOfAnyOfThesePartitions);
+            childOfAnyOfThesePartitions,
+            sort,
+            search);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

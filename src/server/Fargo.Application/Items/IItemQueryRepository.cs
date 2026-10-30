@@ -52,6 +52,8 @@ public interface IItemQueryRepository
     Task<PagedResult<ItemDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default
     );
 

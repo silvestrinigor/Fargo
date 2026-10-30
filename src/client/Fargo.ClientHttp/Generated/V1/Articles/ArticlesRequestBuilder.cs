@@ -35,7 +35,7 @@ namespace Fargo.ClientHttp.V1.Articles
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ArticlesRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v1/articles{?childOfAnyOfThesePartitions*,limit*,page*}", pathParameters)
+        public ArticlesRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v1/articles{?childOfAnyOfThesePartitions*,limit*,page*,search*,sort*}", pathParameters)
         {
         }
         /// <summary>
@@ -43,7 +43,7 @@ namespace Fargo.ClientHttp.V1.Articles
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ArticlesRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v1/articles{?childOfAnyOfThesePartitions*,limit*,page*}", rawUrl)
+        public ArticlesRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v1/articles{?childOfAnyOfThesePartitions*,limit*,page*,search*,sort*}", rawUrl)
         {
         }
         /// <summary>
@@ -161,6 +161,32 @@ namespace Fargo.ClientHttp.V1.Articles
             [QueryParameter("page")]
             public int? Page { get; set; }
             #pragma warning restore CS1591
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            #pragma warning disable CS1591
+            [QueryParameter("search")]
+            public string? Search { get; set; }
+            #pragma warning restore CS1591
+#nullable restore
+#else
+            #pragma warning disable CS1591
+            [QueryParameter("search")]
+            public string Search { get; set; }
+            #pragma warning restore CS1591
+#endif
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            #pragma warning disable CS1591
+            [QueryParameter("sort")]
+            public string? Sort { get; set; }
+            #pragma warning restore CS1591
+#nullable restore
+#else
+            #pragma warning disable CS1591
+            [QueryParameter("sort")]
+            public string Sort { get; set; }
+            #pragma warning restore CS1591
+#endif
         }
         /// <summary>
         /// Configuration for the request such as headers, query parameters, and middleware options.

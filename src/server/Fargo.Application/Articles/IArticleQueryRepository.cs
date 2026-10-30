@@ -148,6 +148,8 @@ public interface IArticleQueryRepository
     /// <param name="childOfAnyOfThesePartitions">
     /// Filters articles inside the provided partitions.
     /// </param>
+    /// <param name="sort">Optional sort specification; when null, results are ordered by name then guid.</param>
+    /// <param name="search">Optional case-insensitive text matched against name or description.</param>
     /// <param name="cancellationToken">
     /// Cancellation token.
     /// </param>
@@ -157,6 +159,8 @@ public interface IArticleQueryRepository
     Task<PagedResult<ArticleDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default
     );
 

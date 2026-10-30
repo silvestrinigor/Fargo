@@ -24,6 +24,8 @@ public sealed class UsersQueryHandler(
         var users = await userRepository.GetManyInfoAsync(
             query.WithPagination,
             partitionGuids,
+            query.Sort,
+            query.Search,
             cancellationToken);
 
         return users;

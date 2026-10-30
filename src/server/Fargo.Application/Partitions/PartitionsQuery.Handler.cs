@@ -23,6 +23,8 @@ public sealed class PartitionsQueryHandler(
 
         var partitions = await partitionRepository.GetManyInfo(
             query.WithPagination, partitionGuids,
+            query.Sort,
+            query.Search,
             cancellationToken);
 
         return partitions;

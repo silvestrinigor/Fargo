@@ -63,6 +63,23 @@ List endpoints accept `page` and `limit` query parameters:
 - `page` — 1-based page number.
 - `limit` — maximum number of items per page.
 
+## Sorting and search
+
+List endpoints accept two optional query parameters:
+
+- `sort` — the field to order by. Prefix with `-` for descending order
+  (for example `sort=name` ascending, `sort=-name` descending). Each resource
+  accepts a fixed set of sort fields; requesting an unknown field returns
+  `400 Bad Request` with the list of allowed fields. Results always have a
+  stable secondary order by GUID, so paging is deterministic. When `sort` is
+  omitted, each resource keeps its natural default order.
+- `search` — case-insensitive text matched as a substring against the resource's
+  natural text field(s): article/partition name and description, user and user
+  group nameid, and the article barcode for items. The total count reflects the
+  search filter.
+
+Example: `GET /v1/articles?search=bolt&sort=-name&page=1&limit=20`.
+
 ## Partition filtering
 
 List endpoints that return partitioned data accept

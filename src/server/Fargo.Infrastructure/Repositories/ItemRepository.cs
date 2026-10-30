@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Fargo.Application.Common;
 using Fargo.Application.Items;
 using Fargo.Core.Articles;
@@ -105,19 +106,32 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return itemTask;
     }
 
+    private static readonly IReadOnlyDictionary<string, Expression<Func<Item, object?>>> ItemSortFields =
+        new Dictionary<string, Expression<Func<Item, object?>>>
+        {
+            ["guid"] = i => i.Guid,
+            ["article"] = i => i.ArticleGuid,
+            ["parentcontainer"] = i => i.ParentItemContainerGuid,
+            ["isfixed"] = i => i.IsFixed,
+        };
+
     public async Task<PagedResult<ItemDto>> GetManyInfoOrderedByGuidAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(
             context.Items.AsNoTracking(),
             childOfAnyOfThesePartitions);
 
+        queryFiltered = ApplySearch(queryFiltered, search);
+
         var totalCount = await queryFiltered.CountAsync(cancellationToken);
 
         var items = await queryFiltered
-            .OrderBy(item => item.Guid)
+            .ApplySort(sort, ItemSortFields, i => i.Guid, i => i.Guid)
             .WithPagination(pagination)
             .Select(ItemDtoMappings.Projection)
             .ToListAsync(cancellationToken);
@@ -127,6 +141,21 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
             totalCount,
             pagination.Page.Value,
             pagination.Limit.Value);
+    }
+
+    // Items have no text field of their own; a search matches the EAN-13 barcode
+    // of the item's article (case-insensitive substring).
+    private static IQueryable<Item> ApplySearch(IQueryable<Item> query, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return query;
+        }
+
+        var pattern = $"%{SearchPattern.Escape(search.Trim())}%";
+
+        return query.Where(i =>
+            EF.Functions.ILike((string)i.Article.Barcode.Ean13!, pattern, SearchPattern.EscapeChar));
     }
 
     private static IQueryable<Item> ApplyPartitionFilter(

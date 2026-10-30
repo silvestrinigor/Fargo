@@ -40,15 +40,29 @@ public sealed class ListArticlesCommand : Command
             AllowMultipleArgumentsPerToken = true
         };
 
+        var sortOption = new Option<string?>("--sort")
+        {
+            Description = "Sort field, optionally prefixed with '-' for descending (e.g. name, -name). Fields: guid, name, description, type, trackingmode."
+        };
+
+        var searchOption = new Option<string?>("--search")
+        {
+            Description = "Case-insensitive text to match against the article name or description."
+        };
+
         Add(pageOption);
         Add(limitOption);
         Add(partitionsOption);
+        Add(sortOption);
+        Add(searchOption);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
             var page = parseResult.GetValue(pageOption);
             var limit = parseResult.GetValue(limitOption);
             var partitions = parseResult.GetValue(partitionsOption);
+            var sort = parseResult.GetValue(sortOption);
+            var search = parseResult.GetValue(searchOption);
 
             await PagedListView.RunAsync<ArticleDto>(
                 page,
@@ -64,6 +78,16 @@ public sealed class ListArticlesCommand : Command
                         {
                             request.QueryParameters.ChildOfAnyOfThesePartitions =
                                 partitions.Select(g => (Guid?)g).ToArray();
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(sort))
+                        {
+                            request.QueryParameters.Sort = sort;
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(search))
+                        {
+                            request.QueryParameters.Search = search;
                         }
                     }, cancellationToken);
 

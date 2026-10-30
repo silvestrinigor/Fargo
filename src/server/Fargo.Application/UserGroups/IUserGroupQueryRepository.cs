@@ -12,5 +12,7 @@ public interface IUserGroupQueryRepository
     Task<PagedResult<UserGroupDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default);
 }

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Fargo.Application.Common;
 using Fargo.Infrastructure.Extensions;
 
@@ -41,4 +42,46 @@ public static class QueryableExtensions
         => query
             .Skip(pagination.Skip)
             .Take(pagination.Take);
+
+    /// <summary>
+    /// Applies a whitelisted <see cref="Sort"/> to the query, always appending a
+    /// stable <paramref name="tiebreaker"/> (typically the GUID key) so pages are
+    /// deterministic even when the sort key has duplicate values. When
+    /// <paramref name="sort"/> is <see langword="null"/> the query is ordered by
+    /// <paramref name="defaultKey"/> then the tiebreaker, preserving the previous
+    /// default ordering.
+    /// </summary>
+    /// <param name="query">The source query to order.</param>
+    /// <param name="sort">The requested sort, or <see langword="null"/> for the default order.</param>
+    /// <param name="allowed">
+    /// Maps each permitted (lowercased) sort-field name to its key selector. A
+    /// requested field outside this set throws
+    /// <see cref="InvalidSortFieldFargoApplicationException"/> (surfaced as 400),
+    /// so callers can never sort by an arbitrary or untranslatable column.
+    /// </param>
+    /// <param name="defaultKey">The key to order by when <paramref name="sort"/> is null.</param>
+    /// <param name="tiebreaker">A stable key appended to every order for deterministic paging.</param>
+    public static IOrderedQueryable<TEntity> ApplySort<TEntity, TDefaultKey, TTieKey>(
+        this IQueryable<TEntity> query,
+        Sort? sort,
+        IReadOnlyDictionary<string, Expression<Func<TEntity, object?>>> allowed,
+        Expression<Func<TEntity, TDefaultKey>> defaultKey,
+        Expression<Func<TEntity, TTieKey>> tiebreaker)
+    {
+        if (sort is not { } requested)
+        {
+            return query.OrderBy(defaultKey).ThenBy(tiebreaker);
+        }
+
+        if (!allowed.TryGetValue(requested.Field, out var keySelector))
+        {
+            throw new InvalidSortFieldFargoApplicationException(requested.Field, allowed.Keys);
+        }
+
+        var ordered = requested.Direction == SortDirection.Descending
+            ? query.OrderByDescending(keySelector)
+            : query.OrderBy(keySelector);
+
+        return ordered.ThenBy(tiebreaker);
+    }
 }

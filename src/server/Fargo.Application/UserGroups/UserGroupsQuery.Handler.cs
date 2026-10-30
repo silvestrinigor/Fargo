@@ -25,6 +25,8 @@ public sealed class UserGroupsQueryHandler(
         var userGroups = await userGroupRepository.GetManyInfoAsync(
             query.WithPagination,
             partitionGuids,
+            query.Sort,
+            query.Search,
             cancellationToken);
 
         return userGroups;

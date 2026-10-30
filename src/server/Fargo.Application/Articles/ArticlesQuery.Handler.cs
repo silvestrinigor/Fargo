@@ -37,6 +37,8 @@ public sealed class ArticlesQueryHandler(
         var articles = await articleRepository.GetManyInfoOrderedByGuidAsync(
             query.WithPagination,
             partitionGuids,
+            query.Sort,
+            query.Search,
             cancellationToken
         );
 

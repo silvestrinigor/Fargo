@@ -171,6 +171,8 @@ public static class ItemEndpointRouteBuilderExtension
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
+        Sort? sort,
+        string? search,
         IQueryHandler<ItemsQuery, PagedResult<ItemDto>> handler,
         CancellationToken cancellationToken
     )
@@ -181,7 +183,9 @@ public static class ItemEndpointRouteBuilderExtension
 
         var query = new ItemsQuery(
             withPagination,
-            childOfAnyOfThesePartitions);
+            childOfAnyOfThesePartitions,
+            sort,
+            search);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

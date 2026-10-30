@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Fargo.Application.Common;
 using Fargo.Application.Partitions;
 using Fargo.Core.Partitions;
@@ -35,9 +36,19 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
         .SingleOrDefaultAsync(cancellationToken);
     }
 
+    private static readonly IReadOnlyDictionary<string, Expression<Func<Partition, object?>>> PartitionSortFields =
+        new Dictionary<string, Expression<Func<Partition, object?>>>
+        {
+            ["guid"] = p => p.Guid,
+            ["name"] = p => p.Name,
+            ["description"] = p => p.Description,
+        };
+
     public async Task<PagedResult<PartitionDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var queryFiltered = ApplyPartitionFilter(
@@ -45,10 +56,12 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions);
 
+        queryFiltered = ApplySearch(queryFiltered, search);
+
         var totalCount = await queryFiltered.CountAsync(cancellationToken);
 
         var partitions = await queryFiltered
-            .OrderBy(partition => partition.Guid)
+            .ApplySort(sort, PartitionSortFields, p => p.Name, p => p.Guid)
             .WithPagination(pagination)
             .Select(PartitionDtoMappings.Projection)
             .ToListAsync(cancellationToken);
@@ -58,6 +71,20 @@ public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepo
             totalCount,
             pagination.Page.Value,
             pagination.Limit.Value);
+    }
+
+    private static IQueryable<Partition> ApplySearch(IQueryable<Partition> query, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return query;
+        }
+
+        var pattern = $"%{SearchPattern.Escape(search.Trim())}%";
+
+        return query.Where(p =>
+            EF.Functions.ILike((string)p.Name, pattern, SearchPattern.EscapeChar)
+            || EF.Functions.ILike((string)p.Description, pattern, SearchPattern.EscapeChar));
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantGuidsAsync(

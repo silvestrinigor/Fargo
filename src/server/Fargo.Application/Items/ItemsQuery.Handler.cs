@@ -26,6 +26,8 @@ public sealed class ItemsQueryHandler(
         var items = await itemRepository.GetManyInfoOrderedByGuidAsync(
             pagination,
             partitionGuids,
+            query.Sort,
+            query.Search,
             cancellationToken
         );
 

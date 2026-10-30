@@ -34,6 +34,8 @@
       href: server/cross-cutting.md
     - name: Operations
       href: server/operations.md
+    - name: Real-time Plan (SignalR)
+      href: server/realtime-plan.md
 - name: CLI
   href: cli/overview.md
   items:

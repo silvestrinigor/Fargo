@@ -80,6 +80,8 @@ public static class UserEndpointRouteBuilderExtension
         int? page,
         int? limit,
         Guid[]? childOfAnyOfThesePartitions,
+        Sort? sort,
+        string? search,
         IQueryHandler<UsersQuery, PagedResult<UserDto>> handler,
         CancellationToken cancellationToken
     )
@@ -90,7 +92,9 @@ public static class UserEndpointRouteBuilderExtension
 
         var query = new UsersQuery(
             withPagination,
-            childOfAnyOfThesePartitions);
+            childOfAnyOfThesePartitions,
+            sort,
+            search);
 
         var response = await handler.HandleAsync(query, cancellationToken);
 

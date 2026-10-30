@@ -43,6 +43,8 @@ public interface IUserQueryRepository
     /// only users associated with a partition that is a child of any of
     /// the specified partitions are considered.
     /// </param>
+    /// <param name="sort">Optional sort specification; when null, results are ordered by nameid then guid.</param>
+    /// <param name="search">Optional case-insensitive text matched against the user nameid.</param>
     /// <param name="cancellationToken">
     /// A token used to cancel the asynchronous operation.
     /// </param>
@@ -52,6 +54,8 @@ public interface IUserQueryRepository
     Task<PagedResult<UserDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
         CancellationToken cancellationToken = default
     );
 }
