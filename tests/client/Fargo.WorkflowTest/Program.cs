@@ -1,5 +1,3 @@
-using Fargo.ClientHttp;
-using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.Extensions;
 using Fargo.WorkflowTest;
 using Microsoft.Extensions.Configuration;
