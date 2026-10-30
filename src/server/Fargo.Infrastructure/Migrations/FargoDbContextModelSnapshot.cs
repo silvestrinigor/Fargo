@@ -45,7 +45,7 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnName("description");
 
                     b.Property<string>("Mass")
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("mass");
 
                     b.Property<string>("Name")
@@ -97,7 +97,7 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnName("article_guid");
 
                     b.Property<string>("MaxMass")
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("max_mass");
 
                     b.HasKey("ArticleGuid")
@@ -113,15 +113,15 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnName("article_guid");
 
                     b.Property<string>("X")
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("x");
 
                     b.Property<string>("Y")
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("y");
 
                     b.Property<string>("Z")
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("z");
 
                     b.HasKey("ArticleGuid")

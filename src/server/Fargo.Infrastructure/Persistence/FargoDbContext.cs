@@ -80,11 +80,13 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 
         configurationBuilder
         .Properties<Mass>()
-        .HaveConversion<MassStringConverter>();
+        .HaveConversion<MassJsonConverter>()
+        .HaveColumnType("jsonb");
 
         configurationBuilder
         .Properties<Length>()
-        .HaveConversion<LengthStringConverter>();
+        .HaveConversion<LengthJsonConverter>()
+        .HaveColumnType("jsonb");
 
         configurationBuilder
         .Properties<Scalar>()
