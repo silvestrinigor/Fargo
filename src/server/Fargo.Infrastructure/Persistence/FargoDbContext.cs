@@ -3,6 +3,7 @@ using Fargo.Core.Audits;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Entities;
 using Fargo.Core.Identity;
+using Fargo.Core.ServiceAccounts;
 using Fargo.Core.Informations;
 using Fargo.Core.Items;
 using Fargo.Core.Items.Events;
@@ -41,6 +42,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<AuditLog> AuditLogs { get; set; }
 
     public DbSet<AuthenticationAttempt> AuthenticationAttempts { get; set; }
+
+    public DbSet<ServiceAccount> ServiceAccounts { get; set; }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -135,6 +138,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new AuditLogConfiguration())
         .ApplyConfiguration(new AuditLogPartitionConfiguration())
         .ApplyConfiguration(new AuthenticationAttemptConfiguration())
+        .ApplyConfiguration(new ServiceAccountConfiguration())
         .ApplyConfiguration(new ItemEventConfiguration())
         .ApplyConfiguration(new ItemMovimentEventConfiguration())
         .ApplyConfiguration(new ItemLifecycleEventConfiguration());

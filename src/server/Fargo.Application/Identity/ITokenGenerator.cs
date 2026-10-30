@@ -1,3 +1,4 @@
+using Fargo.Core.ServiceAccounts;
 using Fargo.Core.Users;
 
 namespace Fargo.Application.Identity;
@@ -19,4 +20,16 @@ public interface ITokenGenerator
     /// access token and its expiration information.
     /// </returns>
     TokenGenerateResult Generate(User user);
+
+    /// <summary>
+    /// Generates an access token for the specified service account.
+    /// </summary>
+    /// <param name="serviceAccount">
+    /// The service account for which the token will be generated.
+    /// </param>
+    /// <returns>
+    /// A <see cref="TokenGenerateResult"/> containing the generated access token
+    /// and its expiration information.
+    /// </returns>
+    TokenGenerateResult Generate(ServiceAccount serviceAccount);
 }

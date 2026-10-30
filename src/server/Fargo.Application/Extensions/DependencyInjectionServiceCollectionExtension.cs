@@ -4,6 +4,7 @@ using Fargo.Application.Common;
 using Fargo.Application.Identity;
 using Fargo.Application.Items;
 using Fargo.Application.Partitions;
+using Fargo.Application.ServiceAccounts;
 using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
@@ -49,7 +50,14 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddFargoCommandHandler<IdentityLoginCommand, IdentityAuthResultDto, IdentityLoginCommandHandler>()
         .AddFargoCommandHandler<IdentityLogoutCommand, IdentityLogoutCommandHandler>()
         .AddFargoCommandHandler<IdentityRefreshCommand, IdentityAuthResultDto, IdentityRefreshCommandHandler>()
-        .AddFargoCommandHandler<IdentityPasswordChangeCommand, IdentityPasswordChangeCommandHandler>();
+        .AddFargoCommandHandler<IdentityPasswordChangeCommand, IdentityPasswordChangeCommandHandler>()
+        .AddFargoCommandHandler<ServiceTokenCommand, ServiceTokenResultDto, ServiceTokenCommandHandler>()
+        .AddFargoCommandHandler<ServiceAccountCreateCommand, ServiceAccountCreatedDto, ServiceAccountCreateCommandHandler>()
+        .AddFargoCommandHandler<ServiceAccountUpdateCommand, ServiceAccountUpdateCommandHandler>()
+        .AddFargoCommandHandler<ServiceAccountRotateSecretCommand, ServiceAccountCreatedDto, ServiceAccountRotateSecretCommandHandler>()
+        .AddFargoCommandHandler<ServiceAccountDeleteCommand, ServiceAccountDeleteCommandHandler>()
+        .AddFargoQueryHandler<ServiceAccountSingleQuery, ServiceAccountDto?, ServiceAccountSingleQueryHandler>()
+        .AddFargoQueryHandler<ServiceAccountsQuery, PagedResult<ServiceAccountDto>, ServiceAccountsQueryHandler>();
 
         public IServiceCollection AddFargoItemApplication() => services
         .AddFargoCommandHandler<ItemCreateCommand, Guid, ItemCreateCommandHandler>()

@@ -18,6 +18,8 @@ public static class IdentityEndpointRouteBuilderExtension
         group.MapIdentityRefresh();
 
         group.MapIdentityChangePassword();
+
+        group.MapIdentityServiceToken();
     }
 
     private static RouteGroupBuilder MapIdentityGroup(this IEndpointRouteBuilder builder)
@@ -110,6 +112,37 @@ public static class IdentityEndpointRouteBuilderExtension
         CancellationToken cancellationToken)
     {
         var command = new IdentityRefreshCommand(request.RefreshToken);
+
+        var result = await handler.HandleAsync(command, cancellationToken);
+
+        return TypedResults.Ok(result);
+    }
+
+    #endregion
+
+    #region Service token
+
+    private static IEndpointRouteBuilder MapIdentityServiceToken(this IEndpointRouteBuilder builder)
+    {
+        builder
+        .MapPost("/service-token", ServiceToken)
+        .WithName("ServiceToken")
+        .WithSummary("Authenticates a service account")
+        .WithDescription("Validates service-account client credentials (client id + secret) and returns a short-lived access token. Services re-exchange their credentials for a new token when the current one nears expiry; no refresh token is issued.")
+        .Produces<ServiceTokenResultDto>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status401Unauthorized)
+        .Produces(StatusCodes.Status429TooManyRequests)
+        .RequireRateLimiting("identity-login");
+
+        return builder;
+    }
+
+    private static async Task<Ok<ServiceTokenResultDto>> ServiceToken(
+        ServiceTokenRequestDto request,
+        ICommandHandler<ServiceTokenCommand, ServiceTokenResultDto> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ServiceTokenCommand(request.ClientId, request.ClientSecret);
 
         var result = await handler.HandleAsync(command, cancellationToken);
 

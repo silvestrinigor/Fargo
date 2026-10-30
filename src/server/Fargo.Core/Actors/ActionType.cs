@@ -98,5 +98,25 @@ public enum ActionType
     /// <summary>
     /// Read item events.
     /// </summary>
-    ReadItemEvents = 19
+    ReadItemEvents = 19,
+
+    /// <summary>
+    /// Create service account.
+    /// </summary>
+    CreateServiceAccount = 20,
+
+    /// <summary>
+    /// Delete service account.
+    /// </summary>
+    DeleteServiceAccount = 21,
+
+    /// <summary>
+    /// Edit service account (including rotating its secret).
+    /// </summary>
+    EditServiceAccount = 22,
+
+    /// <summary>
+    /// Read service accounts.
+    /// </summary>
+    ReadServiceAccount = 23
 }

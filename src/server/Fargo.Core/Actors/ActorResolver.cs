@@ -1,3 +1,4 @@
+using Fargo.Core.ServiceAccounts;
 using Fargo.Core.Users;
 
 namespace Fargo.Core.Actors;
@@ -8,7 +9,10 @@ namespace Fargo.Core.Actors;
 /// <param name="userRepository">
 /// The repository used to retrieve users and their permissions and partition accesses.
 /// </param>
-public sealed class ActorResolver(IUserRepository userRepository)
+/// <param name="serviceAccountRepository">
+/// The repository used to retrieve service accounts and their permissions and partition accesses.
+/// </param>
+public sealed class ActorResolver(IUserRepository userRepository, IServiceAccountRepository serviceAccountRepository)
 {
     /// <summary>
     /// Gets an actor by its unique identifier and actor type.
@@ -33,7 +37,41 @@ public sealed class ActorResolver(IUserRepository userRepository)
             return await GetUserActorByGuidAsync(actorGuid, cancellationToken);
         }
 
+        if (actorType == ActorType.Service)
+        {
+            return await GetServiceActorByGuidAsync(actorGuid, cancellationToken);
+        }
+
         return null;
+    }
+
+    /// <summary>
+    /// Gets an actor representing an active service account and its authorization
+    /// context (its own permissions and partition accesses), or null when the
+    /// account does not exist or is inactive.
+    /// </summary>
+    private async Task<Actor?> GetServiceActorByGuidAsync(Guid serviceGuid, CancellationToken cancellationToken = default)
+    {
+        var service = await serviceAccountRepository.GetByGuidAsync(serviceGuid, cancellationToken);
+
+        if (service is null || !service.IsActive)
+        {
+            return null;
+        }
+
+        // Expand the directly-granted partition accesses down the partition tree
+        // (access to a partition implies access to its descendants), exactly as
+        // the user actor does, so service and user authorization are consistent.
+        var partitionAccessGuids = await serviceAccountRepository
+            .GetAllActivePartitionAccessGuidsAsync(service.Guid, cancellationToken);
+
+        var actor = new Actor(
+            service.Guid,
+            ActorType.Service,
+            service.Permissions.ToHashSet(),
+            partitionAccessGuids.ToHashSet());
+
+        return actor;
     }
 
     /// <summary>

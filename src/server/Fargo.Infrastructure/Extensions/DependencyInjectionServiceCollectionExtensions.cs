@@ -9,6 +9,7 @@ using Fargo.Application.Users;
 using Fargo.Core.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Identity;
+using Fargo.Core.ServiceAccounts;
 using Fargo.Core.Items;
 using Fargo.Core.Items.Events;
 using Fargo.Core.Partitions;
@@ -99,12 +100,15 @@ public static class DependencyInjectionServiceCollectionExtensions
         .AddScoped<IPartitionQueryRepository, PartitionRepository>()
         .AddScoped<IAuditLogRepository, AuditLogRepository>()
         .AddScoped<IAuditLogQueryRepository, AuditLogRepository>()
-        .AddScoped<IAuthenticationAttemptRepository, AuthenticationAttemptRepository>();
+        .AddScoped<IAuthenticationAttemptRepository, AuthenticationAttemptRepository>()
+        .AddScoped<IServiceAccountRepository, ServiceAccountRepository>()
+        .AddScoped<Fargo.Application.ServiceAccounts.IServiceAccountQueryRepository, ServiceAccountRepository>();
 
         public void AddFargoSecurity() => services
         .AddScoped<IPasswordHasher, IdentityPasswordHasher>()
         .AddScoped<ITokenGenerator, JwtTokenGenerator>()
         .AddScoped<ITokenHasher, Sha256TokenHasher>()
-        .AddScoped<IRefreshTokenGenerator, CryptoRefreshTokenGenerator>();
+        .AddScoped<IRefreshTokenGenerator, CryptoRefreshTokenGenerator>()
+        .AddScoped<IClientSecretGenerator, ClientSecretGenerator>();
     }
 }

@@ -1,4 +1,5 @@
 using Fargo.Application.Identity;
+using Fargo.Core.ServiceAccounts;
 using Fargo.Core.Identity;
 using Fargo.Core.Users;
 using Microsoft.Extensions.Options;
@@ -60,6 +61,43 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions) : ITokenG
             new(ClaimTypes.Name, user.Nameid.ToString() ?? string.Empty),
             new(JwtRegisteredClaimNames.Sub, user.Guid.ToString()),
             new(FargoJwtClaims.AuthVersion, user.Authentication.AuthVersion.ToString()),
+        };
+
+        var expiresAt = DateTimeOffset.UtcNow.AddMinutes(
+            options.AccessTokenExpirationInMinutes);
+
+        var token = new JwtSecurityToken(
+            issuer: options.Issuer,
+            audience: options.Audience,
+            claims: claims,
+            expires: expiresAt.UtcDateTime,
+            signingCredentials: credentials);
+
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return new TokenGenerateResult(new Token(tokenString), expiresAt);
+    }
+
+    /// <summary>
+    /// Generates a signed JWT for the specified service account. The token mirrors
+    /// a user token but stamps the actor-type claim as "service" and carries the
+    /// service account's auth version for revocation.
+    /// </summary>
+    public TokenGenerateResult Generate(ServiceAccount serviceAccount)
+    {
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(options.Key));
+
+        var credentials = new SigningCredentials(
+            key, SecurityAlgorithms.HmacSha256);
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, serviceAccount.Guid.ToString()),
+            new(ClaimTypes.Name, serviceAccount.ClientId.ToString() ?? string.Empty),
+            new(JwtRegisteredClaimNames.Sub, serviceAccount.Guid.ToString()),
+            new(FargoJwtClaims.AuthVersion, serviceAccount.AuthVersion.ToString()),
+            new(FargoJwtClaims.ActorType, FargoJwtClaims.ActorTypeService),
         };
 
         var expiresAt = DateTimeOffset.UtcNow.AddMinutes(

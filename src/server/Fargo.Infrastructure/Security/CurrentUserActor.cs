@@ -34,5 +34,15 @@ public sealed class CurrentUserActor(IHttpContextAccessor httpContextAccessor) :
         }
     }
 
-    public ActorType ActorType => ActorType.User;
+    public ActorType ActorType
+    {
+        get
+        {
+            var actorTypeClaim = Principal?.FindFirstValue(FargoJwtClaims.ActorType);
+
+            return string.Equals(actorTypeClaim, FargoJwtClaims.ActorTypeService, StringComparison.Ordinal)
+                ? ActorType.Service
+                : ActorType.User;
+        }
+    }
 }

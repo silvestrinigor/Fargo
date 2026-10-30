@@ -1382,6 +1382,44 @@
         }
       }
     },
+    "/v1/identity/service-token": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Authenticates a service account",
+        "description": "Validates service-account client credentials (client id + secret) and returns a short-lived access token. Services re-exchange their credentials for a new token when the current one nears expiry; no refresh token is issued.",
+        "operationId": "ServiceToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceTokenRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceTokenResultDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
     "/v1/audit-logs/{auditLogGuid}": {
       "get": {
         "tags": [
@@ -1503,6 +1541,214 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}": {
+      "get": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Gets a single service account",
+        "description": "Retrieves a single service account by its unique identifier. Never returns the secret.",
+        "operationId": "GetServiceAccount",
+        "parameters": [
+          {
+            "name": "serviceAccountGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceAccountDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Updates a service account",
+        "description": "Updates mutable service-account state: description, active flag, permissions and partition accesses.",
+        "operationId": "UpdateServiceAccount",
+        "parameters": [
+          {
+            "name": "serviceAccountGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceAccountUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Deletes a service account",
+        "description": "Deletes the specified service account. Any tokens it holds stop validating.",
+        "operationId": "DeleteServiceAccount",
+        "parameters": [
+          {
+            "name": "serviceAccountGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/service-accounts": {
+      "get": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Gets multiple service accounts",
+        "description": "Retrieves a paginated list of service accounts, including the total number of matching entries.",
+        "operationId": "GetServiceAccounts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfServiceAccountDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Creates a new service account",
+        "description": "Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated).",
+        "operationId": "CreateServiceAccount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceAccountCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceAccountCreatedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}/rotate-secret": {
+      "post": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Rotates a service account's secret",
+        "description": "Generates a new client secret (returned EXACTLY ONCE) and invalidates all tokens previously issued to the account.",
+        "operationId": "RotateServiceAccountSecret",
+        "parameters": [
+          {
+            "name": "serviceAccountGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceAccountCreatedDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2991,6 +3237,69 @@
         },
         "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
       },
+      "PagedResultOfServiceAccountDto": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceAccountDto"
+            },
+            "description": "The items on the current page."
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The 1-based index of the current page.",
+            "format": "int32"
+          },
+          "limit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+            "format": "int32"
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page after the current one exists."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page before the current one exists."
+          }
+        },
+        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
+      },
       "PagedResultOfUserDto": {
         "required": [
           "items",
@@ -3211,6 +3520,204 @@
             "type": "string"
           }
         ]
+      },
+      "ServiceAccountCreatedDto": {
+        "required": [
+          "guid",
+          "clientId",
+          "clientSecret"
+        ],
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "clientSecret": {
+            "type": "string"
+          }
+        },
+        "description": "Result of creating (or rotating the secret of) a service account. The\r\nplaintext string ServiceAccountCreatedDto.ClientSecret is returned exactly once and is never\r\nretrievable again."
+      },
+      "ServiceAccountCreateDto": {
+        "required": [
+          "clientId"
+        ],
+        "type": "object",
+        "properties": {
+          "clientId": {
+            "type": "string",
+            "description": "The unique client identifier."
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "An optional human-readable description."
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the account is active on creation. Defaults to true.",
+            "default": true
+          },
+          "permissionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ActionType"
+            },
+            "description": "Permissions to grant on creation."
+          },
+          "partitionAccessesToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Partition accesses to grant on creation."
+          }
+        },
+        "description": "Data required to create a service account."
+      },
+      "ServiceAccountDto": {
+        "required": [
+          "guid",
+          "clientId",
+          "description",
+          "isActive",
+          "permissions",
+          "partitionAccessGuids"
+        ],
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          },
+          "partitionAccessGuids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Read model for a service account. Never exposes the secret."
+      },
+      "ServiceAccountUpdateDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isActive": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "permissionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          },
+          "permissionsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          },
+          "partitionAccessesToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Mutable service-account state to apply in an update."
+      },
+      "ServiceTokenRequestDto": {
+        "required": [
+          "clientId",
+          "clientSecret"
+        ],
+        "type": "object",
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "clientSecret": {
+            "type": "string"
+          }
+        },
+        "description": "Request body for the service-account client-credentials token endpoint."
+      },
+      "ServiceTokenResultDto": {
+        "required": [
+          "accessToken",
+          "expiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "The generated access token used to authenticate API requests."
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "The date and time when the access token expires.",
+            "format": "date-time"
+          }
+        },
+        "description": "Result of a successful service-account (client-credentials) authentication."
       },
       "Token": {
         "maxLength": 4096,
@@ -3826,6 +4333,9 @@
     },
     {
       "name": "AuditLogs"
+    },
+    {
+      "name": "ServiceAccounts"
     }
   ]
 }

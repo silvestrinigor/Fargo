@@ -1,4 +1,4 @@
-﻿# Fargo - Feature Gaps / Issues to Fix Later
+# Fargo - Feature Gaps / Issues to Fix Later
 
 > Internal backlog. Fargo today is a **partition-scoped catalog + physical-containment ledger**
 > (strong "what is where / what was where" engine, two tracking modes, point-in-time history, audit
@@ -62,10 +62,30 @@ simulation concurrency test confirmed "last writer wins"). (Quick win - see belo
 Deleting an aggregate physically removes the row (history survives only via temporal tables + audit
 logs). No undo / compliance archival.
 
-### [ ] GAP-13 - Enterprise auth (Tier 3)
-No MFA, no API keys, no OAuth/OIDC/SSO, no service-to-service auth; single shared symmetric JWT secret
-(no asymmetric signing / key rotation); `AuthenticationAttempt` is tracked but no account-lockout policy
-is wired to it. (Wiring lockout is a quick win - see below.)
+### [ ] GAP-13 - Enterprise auth (Tier 3, partially resolved / scoped)
+Status after review (2026-10):
+
+- **Account lockout - DONE (was a false positive).** `AuthenticationAttempt` is not just tracked; the
+  login handler calls `IAuthenticationAttemptService.IsAllowedAsync` BEFORE verifying credentials and
+  enforces three thresholds (>=5 fails per IP+identifier / 5 min; >=20 per IP / 1 min; >=5 per identifier
+  / 15 min), returns the longest `RetryAfter`, records every failure, and surfaces 429 with `retryAfter`.
+  Success resets the count. No work needed.
+- **MFA - WON'T DO (by design).** Fargo runs internally over a VPN on shared warehouse terminals, not on
+  the public web. Per-login MFA would wreck floor throughput, and the VPN perimeter is itself a factor.
+  Documented risk acceptance: if an attacker is already on the VPN there is no second barrier.
+- **OAuth/OIDC/SSO - OPTIONAL.** Only worth it if operators should log in with a corporate directory
+  (AD / Entra / LDAP) for centralized account lifecycle. Skip while Fargo's own user store is the
+  intended home for accounts. (Open question: does the org have a central directory?)
+- **Service-to-service auth - REAL, build when the first machine caller appears.** Design captured in
+  the appendix below (native `ServiceAccount` + `ActorType.Service` + client-credentials token endpoint).
+  Not yet built because no confirmed unattended machine caller exists today.
+- **JWT signing-key hardening - REAL, low priority given VPN.** Today a single shared symmetric secret
+  (`JwtOptions.Key`, HMAC-SHA256) both signs and verifies, so anyone who can read it can forge an admin
+  token, and there is no rotation (changing the key logs everyone out). Fix tiers: (a) treat the secret
+  as a real secret - out of source/logs, long/random, injected via a secrets manager; (b) add rotation
+  support - multiple keys + `kid` header + an accept-set so keys can change with zero forced logouts;
+  (c) optionally switch to asymmetric (RSA/ECDSA) signing so verifiers only ever get the public key -
+  worth it once more than one service must validate Fargo tokens.
 
 ### [ ] GAP-14 - Outbound integration / eventing (Tier 3)
 No webhooks, message bus, or working outbox/inbox (the `ComInbox` type is orphaned, not mapped to the
@@ -97,6 +117,71 @@ instance; no automated integration tests with a throwaway DB (Testcontainers / W
 
 ## Quick wins (small, self-contained, high value)
 
-- [ ] Enforce `ArticleContainer.MaxMass` on placement (field exists; check is missing). -> GAP-08
-- [ ] Add an EF concurrency token (row-version) to aggregates. -> GAP-11
-- [ ] Wire account lockout to the existing `AuthenticationAttempt` tracking. -> GAP-13
+- [ ] Enforce `ArticleContainer.MaxMass` on placement (confirmed: the field exists and is NOT checked in
+  `Item.PlaceInsideContainer` nor in the event-movement validation). -> GAP-08
+- [x] Add an EF concurrency token (`xmin`) to the mutable aggregates (Article, Item, User, UserGroup,
+  Partition) + translate `DbUpdateConcurrencyException` to 409. Done in code; EF migration still to be
+  generated/reviewed. -> GAP-11
+- [x] ~~Wire account lockout to `AuthenticationAttempt`~~ - already implemented; removed as a false
+  positive. -> GAP-13
+
+---
+
+## Appendix A - Service-to-service auth design (GAP-13)
+
+Ready-to-implement plan. Build when the first confirmed unattended machine caller appears (e.g. an ERP
+importer, a scheduled job, or the MCP server running under its own identity rather than a human token).
+
+### Why this shape
+
+Fargo's authorization is built around an `Actor` (GUID + `ActorType` + permission set + partition-access
+set). `ActorType` is an enum that today has only `User = 1`, and `ActorResolver` switches on it - so the
+model already anticipates non-user actors. A service should therefore be a first-class actor, not a fake
+user. Mechanism: the slim OAuth2 client-credentials pattern (client id + secret -> short-lived JWT),
+which reuses Fargo's existing JWT validation and `Actor` pipeline wholesale.
+
+Deliberately NOT mTLS/client certificates (operationally heavy; overkill on a trusted VPN) and NOT an
+external IdP (only relevant if also doing SSO).
+
+### Components
+
+1. **`ServiceAccount` aggregate (new, Fargo.Core).** Fields: `Guid`, human-readable `ClientId`
+   (unique, like `Nameid`), a HASHED client secret (reuse `IPasswordHasher`/`ITokenHasher` - never store
+   clear), `IsActive`, its own permissions (`ActionType` set) and partition accesses (mirroring `User`),
+   and an `AuthVersion` for revocation (same trick users use).
+2. **`ActorType.Service = 2`** + teach `ActorResolver.GetActorByGuidAndTypeAsync` to resolve it
+   (load the `ServiceAccount`, pull permissions + partition accesses, build
+   `Actor(guid, ActorType.Service, perms, partitions)`). ~10 lines following `GetUserActorByGuidAsync`.
+   Nothing downstream changes - `ThrowIfPermissionDenied` / `ThrowIfAccessDenied` already take an `Actor`.
+3. **Token endpoint** `POST /v1/identity/service-token` with `{ clientId, clientSecret }`: look up by
+   clientId, constant-time verify the secret hash, check `IsActive`, issue a JWT. Same shape as a user
+   token but with an `actor_type: service` claim and `sub = serviceGuid`; shorter lifetime (e.g. 15 min).
+   Reuse `JwtTokenGenerator` almost verbatim.
+4. **Make `CurrentUserActor` read the `actor_type` claim** instead of hard-coding `ActorType.User`
+   (`service` -> Service, default -> User so existing user tokens are unchanged). Rename to `CurrentActor`.
+5. **Extend `UseFargoTokenValidation`** with a parallel branch for service tokens (re-check the
+   `ServiceAccount` is active + `AuthVersion` matches on each request), mirroring the user check.
+6. **Management endpoints** to create / disable / rotate-secret a `ServiceAccount`, each permission-gated;
+   `ServiceAccount` itself should be an auditable `EntityType`.
+
+### Flow
+
+```
+service -> POST /v1/identity/service-token {clientId, clientSecret}
+        <- { accessToken (JWT: actor_type=service, sub=serviceGuid), expiresAt }
+service -> GET /v1/items  Authorization: Bearer <serviceToken>
+        -> JwtBearer validates signature/issuer/audience/lifetime (existing path)
+        -> CurrentActor reads actor_type=service, sub=guid
+        -> ActorResolver resolves Service actor (perms + partitions)
+        -> existing permission/partition checks apply; audit log attributes to ActorType.Service
+```
+
+### Caveats
+
+- The client secret is a bearer credential - same risk class as the JWT signing key (GAP-13 above).
+  Store only the hash, one secret per service, support per-service rotation (issue new while old still
+  valid briefly).
+- Adding `ActorType.Service` ripples into audit-log queries / any actor-type filtering, and likely a new
+  `EntityType.ServiceAccount`.
+- Not a quick win: new aggregate + migration + repository + token endpoint + command handlers +
+  `ActorResolver`/`CurrentActor` changes + validation hook + management endpoints. Tier-2 feature.

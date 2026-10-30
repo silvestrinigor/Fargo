@@ -62,6 +62,12 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("tracking_mode");
 
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Guid")
                         .HasName("pk_articles");
 
@@ -356,6 +362,65 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.Identity.ServiceAccount", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("guid");
+
+                    b.Property<Guid>("AuthVersion")
+                        .HasColumnType("uuid")
+                        .HasColumnName("auth_version");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("client_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.PrimitiveCollection<string>("PartitionAccessGuids")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("partition_access_guids");
+
+                    b.PrimitiveCollection<string>("Permissions")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("permissions");
+
+                    b.Property<string>("SecretHash")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("secret_hash");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Guid")
+                        .HasName("pk_service_accounts");
+
+                    b.HasIndex("ClientId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_service_accounts_client_id");
+
+                    b.ToTable("service_accounts", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Items.Events.ItemEvent", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -474,6 +539,12 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("parent_item_container_guid");
 
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Guid")
                         .HasName("pk_items");
 
@@ -555,6 +626,12 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("parent_partition_guid");
 
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Guid")
                         .HasName("pk_partitions");
 
@@ -595,6 +672,12 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("permissions");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Guid")
                         .HasName("pk_user_groups");
@@ -684,6 +767,12 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("permissions");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Guid")
                         .HasName("pk_users");

@@ -38,5 +38,10 @@ public enum EntityType
     /// <summary>
     /// Item event entity.
     /// </summary>
-    ItemEvent = 6
+    ItemEvent = 6,
+
+    /// <summary>
+    /// Service account entity (a non-interactive machine identity).
+    /// </summary>
+    ServiceAccount = 7
 }

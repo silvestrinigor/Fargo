@@ -163,6 +163,24 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     }
 
     /// <summary>
+    /// Creates an audit log for an action performed on a global, non-partitioned
+    /// entity (for example a service account). The audit log is associated with
+    /// the global partition, so only actors with global partition access can read
+    /// it.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the audited entity.</typeparam>
+    /// <param name="actor">The actor that performed the action.</param>
+    /// <param name="entity">The entity affected by the action.</param>
+    /// <param name="auditLogType">The type of change that occurred.</param>
+    public static AuditLog CreateAuditLogForGlobalEntity<TEntity>(Actor actor, TEntity entity, AuditLogType auditLogType)
+        where TEntity : IEntity, IEntityTyped
+    {
+        return new AuditLog(
+            actor.Guid, actor.ActorType, entity.Guid, entity.GetEntityType(), auditLogType,
+            [FargoCoreWellKnowGuids.GlobalPartitionGuid]);
+    }
+
+    /// <summary>
     /// Adds a partition through which the audit log can be accessed.
     /// </summary>
     /// <param name="partitionGuid">The identifier of the partition.</param>
