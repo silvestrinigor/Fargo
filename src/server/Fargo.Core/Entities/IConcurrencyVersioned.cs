@@ -1,4 +1,4 @@
-﻿namespace Fargo.Core.Entities;
+namespace Fargo.Core.Entities;
 
 /// <summary>
 /// Marks an aggregate root as participating in optimistic concurrency control.

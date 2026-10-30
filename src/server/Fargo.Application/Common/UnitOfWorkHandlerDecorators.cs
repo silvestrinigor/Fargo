@@ -29,6 +29,35 @@ public sealed class UnitOfWorkCommandHandlerDecorator<TCommand>(
     }
 }
 
+/// <summary>
+/// Transactional unit-of-work decorator for a no-response command handler.
+/// Unlike <see cref="UnitOfWorkCommandHandlerDecorator{TCommand}"/>, which saves
+/// once on success in autocommit mode, this decorator runs the inner handler
+/// inside a single explicit database transaction (begin → handler → save →
+/// commit, rolling back on failure).
+///
+/// <para>
+/// It is used for commands whose handler acquires a transaction-scoped database
+/// lock (for example a PostgreSQL advisory lock guarding a read-check-write such
+/// as the item containment-cycle check): the lock must be held until the commit,
+/// which requires the save to happen inside the same transaction the handler
+/// runs in. The handler therefore must NOT open its own transaction — this
+/// decorator owns the single commit for the command.
+/// </para>
+/// </summary>
+public sealed class TransactionalCommandHandlerDecorator<TCommand>(
+    ICommandHandler<TCommand> inner,
+    IUnitOfWork unitOfWork) : ICommandHandler<TCommand>
+    where TCommand : ICommand
+{
+    public async Task HandleAsync(TCommand command, CancellationToken cancellationToken = default)
+    {
+        await unitOfWork.ExecuteInTransactionAsync(
+            ct => inner.HandleAsync(command, ct),
+            cancellationToken);
+    }
+}
+
 /// <summary>Commit-on-success unit-of-work decorator for a command handler that returns a response.</summary>
 public sealed class UnitOfWorkCommandHandlerDecorator<TCommand, TResponse>(
     ICommandHandler<TCommand, TResponse> inner,

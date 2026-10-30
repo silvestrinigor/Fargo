@@ -1,4 +1,4 @@
-﻿using Fargo.Core.Articles;
+using Fargo.Core.Articles;
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;

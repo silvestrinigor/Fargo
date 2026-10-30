@@ -38,6 +38,31 @@ public static class HandlerRegistrationExtensions
         return services;
     }
 
+    /// <summary>
+    /// Registers a no-response command handler behind the logging decorator with
+    /// a transactional unit-of-work decorator instead of the default
+    /// commit-on-success one. The resolved chain is
+    /// <c>LoggingCommandHandlerDecorator(TransactionalCommandHandlerDecorator(concreteHandler))</c>,
+    /// so the handler runs inside a single explicit transaction (begin → handler
+    /// → save → commit). Use this for commands whose handler acquires a
+    /// transaction-scoped database lock that must be held until the commit.
+    /// </summary>
+    public static IServiceCollection AddFargoTransactionalCommandHandler<TCommand, THandler>(this IServiceCollection services)
+        where TCommand : ICommand
+        where THandler : class, ICommandHandler<TCommand>
+    {
+        services.TryAddScoped<THandler>();
+        services.AddScoped<ICommandHandler<TCommand>>(sp =>
+            new LoggingCommandHandlerDecorator<TCommand>(
+                new TransactionalCommandHandlerDecorator<TCommand>(
+                    sp.GetRequiredService<THandler>(),
+                    sp.GetRequiredService<IUnitOfWork>()),
+                sp,
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TCommand>>()));
+
+        return services;
+    }
+
     /// <summary>Registers a command handler with a response behind the logging decorator.</summary>
     public static IServiceCollection AddFargoCommandHandler<TCommand, TResponse, THandler>(this IServiceCollection services)
         where TCommand : ICommand<TResponse>

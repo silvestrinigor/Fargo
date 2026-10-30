@@ -21,4 +21,22 @@ public interface IUnitOfWork
     /// The number of state entries written to the database.
     /// </returns>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Runs <paramref name="work"/> inside an explicit database transaction,
+    /// persists the pending changes, and commits atomically. The transaction is
+    /// rolled back if <paramref name="work"/> or the save throws.
+    /// </summary>
+    /// <param name="work">
+    /// The operation to execute within the transaction. Any repository locks it
+    /// acquires (for example a transaction-scoped advisory lock) are held for the
+    /// full duration of the transaction, which is required to make a
+    /// read-check-write sequence atomic under concurrency.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Token used to cancel the operation.
+    /// </param>
+    Task ExecuteInTransactionAsync(
+        Func<CancellationToken, Task> work,
+        CancellationToken cancellationToken = default);
 }

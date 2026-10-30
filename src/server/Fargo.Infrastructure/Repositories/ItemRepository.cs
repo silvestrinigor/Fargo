@@ -62,6 +62,35 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return guids;
     }
 
+    public async Task AcquireContainmentLockAsync(Guid containerRootGuid, CancellationToken cancellationToken = default)
+    {
+        // Serialize concurrent containment mutations on the same subtree using a
+        // PostgreSQL transaction-scoped advisory lock. pg_advisory_xact_lock takes
+        // a 64-bit key and releases automatically at transaction end, so no manual
+        // unlock is needed. The key is a stable hash of the root container GUID;
+        // callers acting on the same root block one another, while unrelated
+        // subtrees proceed concurrently.
+        var lockKey = ToAdvisoryLockKey(containerRootGuid);
+
+        FormattableString query = $"SELECT pg_advisory_xact_lock({lockKey})";
+
+        await context.Database.ExecuteSqlInterpolatedAsync(query, cancellationToken);
+    }
+
+    // Folds a GUID into a signed 64-bit key for pg_advisory_xact_lock. Collisions
+    // only cause two unrelated subtrees to occasionally serialize, which is safe
+    // (never incorrect), so a simple fold of the 16 bytes is sufficient.
+    private static long ToAdvisoryLockKey(Guid guid)
+    {
+        Span<byte> bytes = stackalloc byte[16];
+        guid.TryWriteBytes(bytes);
+
+        var low = BitConverter.ToInt64(bytes[..8]);
+        var high = BitConverter.ToInt64(bytes[8..]);
+
+        return low ^ high;
+    }
+
     public void Add(Item item) => context.Items.Add(item);
 
     public void Remove(Item item) => context.Items.Remove(item);

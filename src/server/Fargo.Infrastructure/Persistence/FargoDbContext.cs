@@ -1,4 +1,4 @@
-﻿using Fargo.Core.Articles;
+using Fargo.Core.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Entities;

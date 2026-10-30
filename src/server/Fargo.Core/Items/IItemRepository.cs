@@ -80,4 +80,25 @@ public interface IItemRepository
     /// until the associated unit of work is completed.
     /// </remarks>
     void Remove(Item item);
+
+    /// <summary>
+    /// Acquires a transaction-scoped exclusive lock that serializes containment
+    /// mutations within the subtree rooted at the specified container item.
+    /// </summary>
+    /// <param name="containerRootGuid">
+    /// The identifier used as the lock key. Concurrent callers that pass the same
+    /// key block until the holding transaction commits or rolls back.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <remarks>
+    /// The lock protects the check-then-act in the item-move flow: validating
+    /// that a move does not create a circular containment hierarchy reads other
+    /// items, so two concurrent moves could each pass validation and together
+    /// create a cycle. Taking this lock before the validation forces such moves
+    /// to run one at a time. The lock is released automatically when the
+    /// surrounding transaction ends, so it must be called inside a transaction.
+    /// </remarks>
+    Task AcquireContainmentLockAsync(Guid containerRootGuid, CancellationToken cancellationToken = default);
 }
