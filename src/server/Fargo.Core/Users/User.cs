@@ -1,4 +1,4 @@
-using Fargo.Core.Actors;
+﻿using Fargo.Core.Actors;
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
@@ -22,7 +22,7 @@ namespace Fargo.Core.Users;
 /// global partition and is a member of the built-in administrators user group.
 /// These associations cannot be revoked.
 /// </remarks>
-public class User : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
+public class User : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
     /// <summary>
     /// Gets the unique identifier of the user.

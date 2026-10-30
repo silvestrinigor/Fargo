@@ -1,4 +1,4 @@
-using Fargo.Core.Common;
+﻿using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
@@ -18,7 +18,7 @@ namespace Fargo.Core.Articles;
 /// Every article is always associated with the global partition. Additional
 /// partitions may be associated with the article to define its partition scope.
 /// </remarks>
-public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
+public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
     /// <summary>
     /// Gets the unique identifier of the article.

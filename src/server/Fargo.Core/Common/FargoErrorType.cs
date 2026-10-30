@@ -1,4 +1,4 @@
-namespace Fargo.Core.Common;
+﻿namespace Fargo.Core.Common;
 
 /// <summary>
 /// Defines the categories of errors that can be associated with a <see cref="FargoCoreException"/>.
@@ -39,4 +39,10 @@ public enum FargoErrorType
     /// The operation is not authorized.
     /// </summary>
     NotAuthorized = 6,
+
+    /// <summary>
+    /// The operation conflicts with a concurrent modification of the same
+    /// resource (optimistic concurrency failure).
+    /// </summary>
+    Conflict = 7,
 }

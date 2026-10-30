@@ -1,4 +1,4 @@
-using Fargo.Core.Actors;
+﻿using Fargo.Core.Actors;
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
@@ -26,7 +26,7 @@ namespace Fargo.Core.UserGroups;
 /// The built-in administrators user group also has explicit partition access to
 /// the global partition. This access cannot be revoked.
 /// </remarks>
-public class UserGroup : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
+public class UserGroup : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
     /// <summary>
     /// Gets the unique identifier of the user group.

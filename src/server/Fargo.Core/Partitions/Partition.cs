@@ -1,4 +1,4 @@
-using Fargo.Core.Common;
+﻿using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 
@@ -22,7 +22,7 @@ namespace Fargo.Core.Partitions;
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : IEntity, IEntityTyped
+public class Partition : IEntity, IEntityTyped, IConcurrencyVersioned
 {
     /// <summary>
     /// Gets the unique identifier of the partition.

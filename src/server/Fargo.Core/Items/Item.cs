@@ -1,4 +1,4 @@
-using Fargo.Core.Articles;
+﻿using Fargo.Core.Articles;
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Partitions;
@@ -25,7 +25,7 @@ namespace Fargo.Core.Items;
 /// Every item is always associated with the global partition. The global
 /// partition defines the base partition scope of the item and cannot be removed.
 /// </remarks>
-public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
+public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
     /// <summary>
     /// Gets the unique identifier of the item.

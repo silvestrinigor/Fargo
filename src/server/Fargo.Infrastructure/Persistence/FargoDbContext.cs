@@ -1,6 +1,7 @@
-using Fargo.Core.Articles;
+﻿using Fargo.Core.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Barcodes;
+using Fargo.Core.Entities;
 using Fargo.Core.Identity;
 using Fargo.Core.Informations;
 using Fargo.Core.Items;
@@ -137,5 +138,24 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new ItemEventConfiguration())
         .ApplyConfiguration(new ItemMovimentEventConfiguration())
         .ApplyConfiguration(new ItemLifecycleEventConfiguration());
+
+        // Optimistic concurrency: map the PostgreSQL xmin system column as a
+        // concurrency token (shadow property) on every mutable aggregate root
+        // (those implementing IConcurrencyVersioned). xmin is maintained by
+        // PostgreSQL and bumped on each row update, so a load-mutate-save that
+        // races with a concurrent modification fails with a
+        // DbUpdateConcurrencyException instead of silently overwriting it. No
+        // schema column is added; the token requires no data migration.
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(IConcurrencyVersioned).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder
+                .Entity(entityType.ClrType)
+                .Property<uint>("xmin")
+                .HasColumnName("xmin")
+                .IsRowVersion();
+            }
+        }
     }
 }
