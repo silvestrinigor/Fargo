@@ -60,6 +60,8 @@
           href: cli/reference/user-group.md
         - name: User
           href: cli/reference/user.md
+        - name: Service Account
+          href: cli/reference/service-account.md
         - name: Audit
           href: cli/reference/audit.md
 - name: Web API

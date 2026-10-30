@@ -25,6 +25,7 @@ CLI_GROUPS=(
     "partition|Partition|list tree get create update delete"
     "user-group|User Group|list tree get create update delete"
     "user|User|list get create update delete"
+    "service-account|Service Account|list get create update rotate-secret delete"
     "audit|Audit|list get"
 )
 

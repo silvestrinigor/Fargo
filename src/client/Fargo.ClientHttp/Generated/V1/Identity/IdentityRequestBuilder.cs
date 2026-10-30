@@ -4,6 +4,7 @@ using Fargo.ClientHttp.V1.Identity.Login;
 using Fargo.ClientHttp.V1.Identity.Logout;
 using Fargo.ClientHttp.V1.Identity.Password;
 using Fargo.ClientHttp.V1.Identity.Refresh;
+using Fargo.ClientHttp.V1.Identity.ServiceToken;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -37,6 +38,11 @@ namespace Fargo.ClientHttp.V1.Identity
         public global::Fargo.ClientHttp.V1.Identity.Refresh.RefreshRequestBuilder Refresh
         {
             get => new global::Fargo.ClientHttp.V1.Identity.Refresh.RefreshRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The serviceToken property</summary>
+        public global::Fargo.ClientHttp.V1.Identity.ServiceToken.ServiceTokenRequestBuilder ServiceToken
+        {
+            get => new global::Fargo.ClientHttp.V1.Identity.ServiceToken.ServiceTokenRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.V1.Identity.IdentityRequestBuilder"/> and sets the default values.

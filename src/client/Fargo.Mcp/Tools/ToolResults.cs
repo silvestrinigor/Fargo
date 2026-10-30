@@ -46,6 +46,14 @@ public static class ToolResults
         dto.IsAdminUserGroup,
         dto.ParentUserGroup);
 
+    public static ServiceAccountSummary ToSummary(this ServiceAccountDto dto) => new(
+        dto.Guid,
+        dto.ClientId,
+        dto.Description,
+        dto.IsActive,
+        dto.Permissions?.Where(p => p.HasValue).Select(p => p!.Value).ToArray(),
+        dto.PartitionAccessGuids?.Where(g => g.HasValue).Select(g => g!.Value).ToArray());
+
     public static AuditLogSummary ToSummary(this AuditLogDto dto) => new(
         dto.Guid,
         dto.ActorGuid,
@@ -105,6 +113,14 @@ public sealed record UserSummary(
     string? Nameid,
     bool? IsActive,
     bool? IsAdmin);
+
+public sealed record ServiceAccountSummary(
+    Guid? Guid,
+    string? ClientId,
+    string? Description,
+    bool? IsActive,
+    int[]? Permissions,
+    Guid[]? PartitionAccessGuids);
 
 public sealed record UserGroupSummary(
     Guid? Guid,

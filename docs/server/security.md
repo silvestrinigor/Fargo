@@ -33,11 +33,19 @@ The identity endpoints (`/identity`) implement the standard flow:
 See the [Web API Overview](~/docs/web-api/overview.md#authentication) for the
 HTTP-level details.
 
+### Service accounts
+
+Non-interactive callers (integrations, scheduled jobs, other services) authenticate as **service accounts** rather than users. A service account has a client id and a client secret; the secret is generated server-side, returned **exactly once** at creation (or when rotated), and only ever stored hashed.
+
+A service exchanges its credentials for a short-lived access token at `POST /identity/service-token` (the client-credentials flow). Unlike user login, no refresh token is issued - a service simply requests a new token when the current one nears expiry. The issued token carries an actor-type claim marking it as a service, so it resolves to a service `Actor`.
+
+Service accounts are managed under `/service-accounts` (create, read, update, rotate secret, delete), each operation gated by a dedicated permission (`CreateServiceAccount`, `ReadServiceAccount`, `EditServiceAccount`, `DeleteServiceAccount`). Deactivating an account, or rotating its secret, invalidates all tokens previously issued to it.
+
 ## The actor
 
 Requests act on behalf of an `Actor` — the authenticated identity together with
 its resolved **permissions** and **partition access**. The current actor is
-provided by `ICurrentActor` (`CurrentUserActor`), and `ActorResolver` computes
+provided by `ICurrentActor` (`CurrentUserActor`), which reads the token's actor-type claim so a request resolves as either an `ActorType.User` or an `ActorType.Service` actor, and `ActorResolver` computes
 the actor's effective permissions and accessible partitions, aggregating what is
 granted directly to the user and what is inherited through the user's group
 hierarchy.
@@ -49,8 +57,8 @@ domain state.
 
 Permissions are values of [`ActionType`](xref:Fargo.Core.Actors.ActionType) — a
 create / delete / edit permission per resource plus a few specific actions such
-as `ChangeAnotherUserPassword`, `ChangeUserGroupMembers`, `ReadAuditLogs`, and
-`ReadItemEvents`.
+as `ChangeAnotherUserPassword`, `ChangeUserGroupMembers`, `ReadAuditLogs`,
+`ReadItemEvents`, and the service-account actions (`CreateServiceAccount`, `ReadServiceAccount`, `EditServiceAccount`, `DeleteServiceAccount`).
 
 Permissions can be granted directly to a user or to a user group; a user's
 effective permissions are the union of both (including permissions inherited

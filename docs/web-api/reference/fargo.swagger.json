@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.1",
+  "swagger": "2.0",
   "info": {
     "title": "GetDocument.Insider | v1",
     "description": "GetDocument Command-line Tool inside man",
@@ -14,26 +14,23 @@
         "summary": "Gets a single article by guid",
         "description": "Retrieves a single article by its unique identifier.",
         "operationId": "GetArticle",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "articleGuid",
             "in": "path",
+            "name": "articleGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ArticleDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/ArticleDto"
             }
           },
           "404": {
@@ -48,27 +45,26 @@
         "summary": "Updates part of an existing article",
         "description": "Updates only article fields included in the request body.",
         "operationId": "PatchArticle",
+        "consumes": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "articleGuid",
             "in": "path",
+            "name": "articleGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/definitions/ArticleUpdateDto"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ArticleUpdateDto"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "204": {
             "description": "No Content"
@@ -84,13 +80,11 @@
         "operationId": "DeleteArticle",
         "parameters": [
           {
-            "name": "articleGuid",
             "in": "path",
+            "name": "articleGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -108,27 +102,23 @@
         "summary": "Gets a single article by barcode",
         "description": "Retrieves a single article by barcode and barcode type using the {barcode}:{type} route value.",
         "operationId": "GetArticleByBarcode",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "articleBarcode",
             "in": "path",
+            "name": "articleBarcode",
             "required": true,
-            "schema": {
-              "pattern": ".+:(ean13)$",
-              "type": "string",
-              "example": "7891234567895:ean13"
-            }
+            "type": "string",
+            "pattern": ".+:(ean13)$"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ArticleDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/ArticleDto"
             }
           },
           "404": {
@@ -145,52 +135,44 @@
         "summary": "Gets a article inventory by guid",
         "description": "Retrieves the inventory count for an article. When 'at' is supplied, the count is reconstructed from the item containment history as it was at that instant.",
         "operationId": "GetArticleInventory",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "articleGuid",
             "in": "path",
+            "name": "articleGuid",
             "required": true,
-            "schema": {
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "insideItemContainerGuids",
+            "type": "array",
+            "items": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "collectionFormat": "multi"
           },
           {
-            "name": "insideItemContainerGuids",
             "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
-          },
-          {
             "name": "includeDescendents",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
+            "type": "boolean"
           },
           {
-            "name": "at",
             "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "name": "at",
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ArticleInventoryDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/ArticleInventoryDto"
             }
           },
           "404": {
@@ -207,47 +189,41 @@
         "summary": "Gets multiple articles",
         "description": "Retrieves a paginated list of articles, including the total number of matching entries.",
         "operationId": "GetArticles",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
+            "in": "query",
             "name": "page",
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 1
-            }
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
           },
           {
+            "in": "query",
             "name": "limit",
-            "in": "query",
-            "schema": {
-              "maximum": 1000,
-              "minimum": 1,
-              "type": "integer",
-              "default": 1000
-            }
+            "type": "integer",
+            "default": 1000,
+            "maximum": 1000,
+            "minimum": 1
           },
           {
-            "name": "childOfAnyOfThesePartitions",
             "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
+            "name": "childOfAnyOfThesePartitions",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "collectionFormat": "multi"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfArticleDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfArticleDto"
             }
           }
         }
@@ -259,26 +235,28 @@
         "summary": "Creates a new article",
         "description": "Creates a new article with optional partitions, barcodes, and active state. Returns the generated identifier.",
         "operationId": "CreateArticle",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ArticleCreateDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ArticleCreateDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         }
@@ -292,26 +270,23 @@
         "summary": "Gets a single item",
         "description": "Retrieves a single item by its unique identifier.",
         "operationId": "GetItem",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "itemGuid",
             "in": "path",
+            "name": "itemGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ItemDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/ItemDto"
             }
           },
           "404": {
@@ -326,27 +301,26 @@
         "summary": "Replaces an existing item",
         "description": "Replaces mutable item state including partitions and parent container.",
         "operationId": "UpdateItem",
+        "consumes": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "itemGuid",
             "in": "path",
+            "name": "itemGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/definitions/ItemUpdateDto"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ItemUpdateDto"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "204": {
             "description": "No Content"
@@ -362,13 +336,11 @@
         "operationId": "DeleteItem",
         "parameters": [
           {
-            "name": "itemGuid",
             "in": "path",
+            "name": "itemGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -386,36 +358,31 @@
         "summary": "Gets the item location",
         "description": "Retrieves the containment chain of an item: the item followed by each of its parent containers. The list is ordered from the item itself (first element) outward to its root container (last element). When 'at' is supplied, the chain is reconstructed from the containment history as it was at that instant.",
         "operationId": "GetItemLocation",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "itemGuid",
             "in": "path",
+            "name": "itemGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           },
           {
-            "name": "at",
             "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "name": "at",
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ItemDto"
-                  }
-                }
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ItemDto"
               }
             }
           },
@@ -433,28 +400,25 @@
         "summary": "Gets the item moviments",
         "description": "Retrieves a list of moviments that represents the moviment history of item.",
         "operationId": "GetItemMoviments",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "itemGuid",
             "in": "path",
+            "name": "itemGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ItemMovimentDto"
-                  }
-                }
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ItemMovimentDto"
               }
             }
           },
@@ -472,36 +436,31 @@
         "summary": "Gets the item container inventory",
         "description": "Retrieves the per-article inventory contained in the item container. When 'at' is supplied, the inventory is reconstructed from the containment history as it was at that instant.",
         "operationId": "GetItemContainerInventory",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "itemGuid",
             "in": "path",
+            "name": "itemGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           },
           {
-            "name": "at",
             "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "name": "at",
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ItemContainerInventoryDto"
-                  }
-                }
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ItemContainerInventoryDto"
               }
             }
           },
@@ -519,52 +478,40 @@
         "summary": "Gets multiple items",
         "description": "Retrieves a paginated list of items, including the total number of matching entries.",
         "operationId": "GetItems",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
+            "in": "query",
             "name": "page",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
-            }
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
           },
           {
+            "in": "query",
             "name": "limit",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
-            }
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
           },
           {
-            "name": "childOfAnyOfThesePartitions",
             "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
+            "name": "childOfAnyOfThesePartitions",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "collectionFormat": "multi"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfItemDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfItemDto"
             }
           }
         }
@@ -576,26 +523,28 @@
         "summary": "Creates a new item",
         "description": "Creates a new item with optional partitions. Returns the generated identifier.",
         "operationId": "CreateItem",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ItemCreateDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ItemCreateDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         }
@@ -609,67 +558,54 @@
         "summary": "Gets multiple item events",
         "description": "Retrieves a paginated list of item events, optionally filtered by article, event type, and time period, including the total number of matching entries. Requires the ReadItemEvents permission; only events whose article is accessible to the caller are returned.",
         "operationId": "GetItemEvents",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
+            "in": "query",
             "name": "page",
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 1
-            }
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
           },
           {
+            "in": "query",
             "name": "limit",
-            "in": "query",
-            "schema": {
-              "maximum": 1000,
-              "minimum": 1,
-              "type": "integer",
-              "default": 1000
-            }
+            "type": "integer",
+            "default": 1000,
+            "maximum": 1000,
+            "minimum": 1
           },
           {
+            "in": "query",
             "name": "articleGuid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           },
           {
+            "in": "query",
             "name": "eventType",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/ItemEventType"
-            }
+            "type": "integer"
           },
           {
+            "in": "query",
             "name": "periodStart",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "type": "string",
+            "format": "date-time"
           },
           {
-            "name": "periodEnd",
             "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "name": "periodEnd",
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfItemEventDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfItemEventDto"
             }
           }
         }
@@ -681,26 +617,28 @@
         "summary": "Records an item event",
         "description": "Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.",
         "operationId": "CreateItemEvent",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ItemEventCreateDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ItemEventCreateDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         }
@@ -714,26 +652,23 @@
         "summary": "Gets a single user",
         "description": "Retrieves a single user by its unique identifier.",
         "operationId": "GetUser",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "userGuid",
             "in": "path",
+            "name": "userGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/UserDto"
             }
           },
           "404": {
@@ -748,27 +683,26 @@
         "summary": "Replaces an existing user",
         "description": "Replaces all user state including partitions, user groups, and permissions.",
         "operationId": "UpdateUser",
+        "consumes": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "userGuid",
             "in": "path",
+            "name": "userGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/definitions/UserUpdateDto"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserUpdateDto"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "204": {
             "description": "No Content"
@@ -784,13 +718,11 @@
         "operationId": "DeleteUser",
         "parameters": [
           {
-            "name": "userGuid",
             "in": "path",
+            "name": "userGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -808,52 +740,40 @@
         "summary": "Gets multiple users",
         "description": "Retrieves a paginated list of users, including the total number of matching entries.",
         "operationId": "GetUsers",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
+            "in": "query",
             "name": "page",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
-            }
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
           },
           {
+            "in": "query",
             "name": "limit",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
-            }
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
           },
           {
-            "name": "childOfAnyOfThesePartitions",
             "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
+            "name": "childOfAnyOfThesePartitions",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "collectionFormat": "multi"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfUserDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfUserDto"
             }
           }
         }
@@ -865,26 +785,28 @@
         "summary": "Creates a new user",
         "description": "Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier.",
         "operationId": "CreateUser",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserCreateDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserCreateDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         }
@@ -898,26 +820,23 @@
         "summary": "Gets a single user group",
         "description": "Retrieves a single user group by its unique identifier.",
         "operationId": "GetUserGroup",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "userGroupGuid",
             "in": "path",
+            "name": "userGroupGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserGroupDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/UserGroupDto"
             }
           },
           "404": {
@@ -932,27 +851,26 @@
         "summary": "Replaces an existing user group",
         "description": "Replaces all user group state including partitions and permissions.",
         "operationId": "UpdateUserGroup",
+        "consumes": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "userGroupGuid",
             "in": "path",
+            "name": "userGroupGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/definitions/UserGroupUpdateDto"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserGroupUpdateDto"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "204": {
             "description": "No Content"
@@ -968,13 +886,11 @@
         "operationId": "DeleteUserGroup",
         "parameters": [
           {
-            "name": "userGroupGuid",
             "in": "path",
+            "name": "userGroupGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -992,52 +908,40 @@
         "summary": "Gets multiple user groups",
         "description": "Retrieves a paginated list of user groups, including the total number of matching entries.",
         "operationId": "GetUserGroups",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
+            "in": "query",
             "name": "page",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
-            }
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
           },
           {
+            "in": "query",
             "name": "limit",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
-            }
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
           },
           {
-            "name": "childOfAnyOfThesePartitions",
             "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
+            "name": "childOfAnyOfThesePartitions",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "collectionFormat": "multi"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfUserGroupDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfUserGroupDto"
             }
           }
         }
@@ -1049,26 +953,28 @@
         "summary": "Creates a new user group",
         "description": "Creates a new user group with optional partitions and permissions. Returns the generated identifier.",
         "operationId": "CreateUserGroup",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserGroupCreateDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserGroupCreateDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         }
@@ -1082,26 +988,23 @@
         "summary": "Gets a single partition",
         "description": "Retrieves a single partition by its unique identifier.",
         "operationId": "GetPartition",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "partitionGuid",
             "in": "path",
+            "name": "partitionGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PartitionDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/PartitionDto"
             }
           },
           "404": {
@@ -1116,27 +1019,26 @@
         "summary": "Updates an existing partition",
         "description": "Updates partition properties.",
         "operationId": "UpdatePartition",
+        "consumes": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "partitionGuid",
             "in": "path",
+            "name": "partitionGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/definitions/PartitionUpdateDto"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PartitionUpdateDto"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "204": {
             "description": "No Content"
@@ -1152,13 +1054,11 @@
         "operationId": "DeletePartition",
         "parameters": [
           {
-            "name": "partitionGuid",
             "in": "path",
+            "name": "partitionGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -1176,47 +1076,41 @@
         "summary": "Gets multiple partitions",
         "description": "Retrieves a paginated list of partitions, including the total number of matching entries.",
         "operationId": "GetPartitions",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
+            "in": "query",
             "name": "page",
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 1
-            }
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
           },
           {
+            "in": "query",
             "name": "limit",
-            "in": "query",
-            "schema": {
-              "maximum": 1000,
-              "minimum": 1,
-              "type": "integer",
-              "default": 1000
-            }
+            "type": "integer",
+            "default": 1000,
+            "maximum": 1000,
+            "minimum": 1
           },
           {
-            "name": "childOfAnyOfThesePartitions",
             "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
+            "name": "childOfAnyOfThesePartitions",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "collectionFormat": "multi"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfPartitionDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfPartitionDto"
             }
           }
         }
@@ -1228,26 +1122,28 @@
         "summary": "Creates a new partition",
         "description": "Creates a new partition under an parent. Returns the generated identifier.",
         "operationId": "CreatePartition",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PartitionCreateDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartitionCreateDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         }
@@ -1261,25 +1157,27 @@
         "summary": "Authenticates a user",
         "description": "Validates user credentials and returns an access token and refresh token.",
         "operationId": "Login",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IdentityLoginDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdentityLoginDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IdentityAuthResultDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/IdentityAuthResultDto"
             }
           },
           "401": {
@@ -1296,16 +1194,19 @@
         "summary": "Logs out the current user",
         "description": "Invalidates the current refresh token or session.",
         "operationId": "Logout",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IdentityLogOutDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdentityLogOutDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1324,25 +1225,27 @@
         "summary": "Refreshes the access token",
         "description": "Uses a valid refresh token to generate a new access token.",
         "operationId": "RefreshToken",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IdentityRefreshDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdentityRefreshDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IdentityAuthResultDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/IdentityAuthResultDto"
             }
           },
           "401": {
@@ -1359,16 +1262,19 @@
         "summary": "Changes the password of the authenticated user",
         "description": "Validates the current password and updates it with the new password.",
         "operationId": "ChangePassword",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IdentityPasswordUpdateDto"
-              }
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdentityPasswordUpdateDto"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "204": {
             "description": "No Content"
@@ -1382,6 +1288,46 @@
         }
       }
     },
+    "/v1/identity/service-token": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Authenticates a service account",
+        "description": "Validates service-account client credentials (client id + secret) and returns a short-lived access token. Services re-exchange their credentials for a new token when the current one nears expiry; no refresh token is issued.",
+        "operationId": "ServiceToken",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceTokenRequestDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ServiceTokenResultDto"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
     "/v1/audit-logs/{auditLogGuid}": {
       "get": {
         "tags": [
@@ -1390,26 +1336,23 @@
         "summary": "Gets a single audit log",
         "description": "Retrieves a single audit log by its unique identifier, including its metadata.",
         "operationId": "GetAuditLog",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "auditLogGuid",
             "in": "path",
+            "name": "auditLogGuid",
             "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuditLogDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/AuditLogDto"
             }
           },
           "404": {
@@ -1426,2378 +1369,2437 @@
         "summary": "Gets multiple audit logs",
         "description": "Retrieves a paginated list of audit logs, including the total number of matching entries.",
         "operationId": "GetAuditLogs",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
+            "in": "query",
             "name": "page",
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "default": 1
-            }
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
           },
           {
+            "in": "query",
             "name": "limit",
-            "in": "query",
-            "schema": {
-              "maximum": 1000,
-              "minimum": 1,
-              "type": "integer",
-              "default": 1000
-            }
+            "type": "integer",
+            "default": 1000,
+            "maximum": 1000,
+            "minimum": 1
           },
           {
+            "in": "query",
             "name": "actorGuid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           },
           {
+            "in": "query",
             "name": "actorType",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/ActorType"
-            }
+            "type": "integer"
           },
           {
+            "in": "query",
             "name": "entityGuid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+            "type": "string",
+            "format": "uuid"
           },
           {
+            "in": "query",
             "name": "entityType",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/EntityType"
-            }
+            "type": "integer"
           },
           {
+            "in": "query",
             "name": "periodStart",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
+            "type": "string",
+            "format": "date-time"
           },
           {
-            "name": "periodEnd",
             "in": "query",
+            "name": "periodEnd",
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "$ref": "#/definitions/PagedResultOfAuditLogDto"
+            }
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}": {
+      "get": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Gets a single service account",
+        "description": "Retrieves a single service account by its unique identifier. Never returns the secret.",
+        "operationId": "GetServiceAccount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountDto"
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Updates a service account",
+        "description": "Updates mutable service-account state: description, active flag, permissions and partition accesses.",
+        "operationId": "UpdateServiceAccount",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountUpdateDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Deletes a service account",
+        "description": "Deletes the specified service account. Any tokens it holds stop validating.",
+        "operationId": "DeleteServiceAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/service-accounts": {
+      "get": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Gets multiple service accounts",
+        "description": "Retrieves a paginated list of service accounts, including the total number of matching entries.",
+        "operationId": "GetServiceAccounts",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfServiceAccountDto"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Creates a new service account",
+        "description": "Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated).",
+        "operationId": "CreateServiceAccount",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountCreateDto"
             }
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfAuditLogDto"
-                }
-              }
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountCreatedDto"
             }
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}/rotate-secret": {
+      "post": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Rotates a service account's secret",
+        "description": "Generates a new client secret (returned EXACTLY ONCE) and invalidates all tokens previously issued to the account.",
+        "operationId": "RotateServiceAccountSecret",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountCreatedDto"
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
     }
   },
-  "components": {
-    "schemas": {
-      "ActionType": {
-        "type": "integer",
-        "description": "Represents the set of actions in the system."
-      },
-      "ActorType": {
-        "type": "integer",
-        "description": "Represents the type of actor responsible for performing an action\r\nwithin the system."
-      },
-      "ArticleBarcodeDto": {
-        "type": "object",
-        "properties": {
-          "ean13": {
-            "maxLength": 13,
-            "minLength": 13,
-            "pattern": "^\\d{13}$",
-            "type": "string",
-            "description": "The optional EAN-13 barcode of the article."
-          }
-        },
-        "description": "Represents the barcode information associated with an article."
-      },
-      "ArticleBarcodeUpdateDto": {
-        "type": "object",
-        "properties": {
-          "ean13": {
-            "maxLength": 13,
-            "minLength": 13,
-            "pattern": "^\\d{13}$",
-            "type": "string",
-            "description": "The new EAN-13 barcode to assign to the article. A `null` value\r\nleaves the existing EAN-13 barcode unchanged."
-          },
-          "removeEan13": {
-            "type": "boolean",
-            "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\r\nvalue to `null`.",
-            "default": false
-          }
-        },
-        "description": "Represents the barcode changes to apply to an article."
-      },
-      "ArticleContainerDto": {
-        "type": "object",
-        "properties": {
-          "maxMass": {
-            "required": [
-              "value",
-              "unit"
-            ],
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string",
-                "example": "g"
-              }
-            },
-            "description": "The optional maximum mass that the container can hold."
-          }
-        },
-        "description": "Represents the container information associated with an article."
-      },
-      "ArticleCreateDto": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the article.",
-            "$ref": "#/components/schemas/Name"
-          },
-          "description": {
-            "maxLength": 500,
-            "type": "string",
-            "description": "The optional description of the article."
-          },
-          "articleType": {
-            "description": "The type of article to create.",
-            "$ref": "#/components/schemas/ArticleType"
-          },
-          "variation": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The optional variation configuration. Required when ArticleType\r\nis ArticleType.Variation.",
-                "$ref": "#/components/schemas/ArticleVariationDto"
-              }
-            ]
-          },
-          "pack": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The optional pack configuration. Required when ArticleType\r\nis ArticleType.Pack.",
-                "$ref": "#/components/schemas/ArticlePackDto"
-              }
-            ]
-          },
-          "kitComponents": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ArticleKitComponentDto"
-            },
-            "description": "The optional components of the article. Required when ArticleType\r\nis ArticleType.Kit."
-          },
-          "container": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The optional container configuration when creating a container article.",
-                "$ref": "#/components/schemas/ArticleContainerDto"
-              }
-            ]
-          },
-          "shelfLife": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The optional shelf life of the article."
-          },
-          "color": {
-            "pattern": "^#[0-9a-fA-F]{6}$",
-            "type": "string",
-            "description": "The optional color of the article.",
-            "example": "#FFFFFF"
-          },
-          "mass": {
-            "required": [
-              "value",
-              "unit"
-            ],
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string",
-                "example": "g"
-              }
-            },
-            "description": "The optional mass of the article."
-          },
-          "dimension": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The optional physical dimensions of the article.",
-                "$ref": "#/components/schemas/ArticleDimensionDto"
-              }
-            ]
-          },
-          "barcode": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The optional barcode information of the article.",
-                "$ref": "#/components/schemas/ArticleBarcodeDto"
-              }
-            ]
-          },
-          "trackingMode": {
-            "description": "The stock tracking mode of the article. Defaults to\r\nArticleTrackingMode.Entity. Container articles are always\r\nentity-tracked regardless of this value.",
-            "$ref": "#/components/schemas/ArticleTrackingMode"
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The optional identifiers of partitions to associate with the article."
-          }
-        },
-        "description": "Represents the data required to create an article."
-      },
-      "ArticleDimensionDto": {
-        "type": "object",
-        "properties": {
-          "lengthX": {
-            "required": [
-              "value",
-              "unit"
-            ],
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string",
-                "example": "m"
-              }
-            },
-            "description": "The optional length along the X axis."
-          },
-          "lengthY": {
-            "required": [
-              "value",
-              "unit"
-            ],
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string",
-                "example": "m"
-              }
-            },
-            "description": "The optional length along the Y axis."
-          },
-          "lengthZ": {
-            "required": [
-              "value",
-              "unit"
-            ],
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string",
-                "example": "m"
-              }
-            },
-            "description": "The optional length along the Z axis."
-          }
-        },
-        "description": "Represents the physical dimensions of an article."
-      },
-      "ArticleDimensionUpdateDto": {
-        "type": "object",
-        "properties": {
-          "lengthX": {
-            "required": [
-              "value",
-              "unit"
-            ],
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string",
-                "example": "m"
-              }
-            },
-            "description": "The new length along the X axis. A `null` value leaves the\r\nexisting value unchanged."
-          },
-          "removeLengthX": {
-            "type": "boolean",
-            "description": "Indicates whether the existing X-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthX.",
-            "default": false
-          },
-          "lengthY": {
-            "required": [
-              "value",
-              "unit"
-            ],
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string",
-                "example": "m"
-              }
-            },
-            "description": "The new length along the Y axis. A `null` value leaves the\r\nexisting value unchanged."
-          },
-          "removeLengthY": {
-            "type": "boolean",
-            "description": "Indicates whether the existing Y-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthY.",
-            "default": false
-          },
-          "lengthZ": {
-            "required": [
-              "value",
-              "unit"
-            ],
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string",
-                "example": "m"
-              }
-            },
-            "description": "The new length along the Z axis. A `null` value leaves the\r\nexisting value unchanged."
-          },
-          "removeLengthZ": {
-            "type": "boolean",
-            "description": "Indicates whether the existing Z-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthZ.",
-            "default": false
-          }
-        },
-        "description": "Represents the dimensional changes to apply to an article."
-      },
-      "ArticleDto": {
-        "required": [
-          "guid",
-          "name",
-          "description",
-          "articleType",
-          "trackingMode",
-          "shelfLife",
-          "color",
-          "mass",
-          "dimension",
-          "variation",
-          "pack",
-          "kitComponents",
-          "container",
-          "barcodes",
-          "partitions"
-        ],
-        "type": "object",
-        "properties": {
-          "guid": {
-            "type": "string",
-            "description": "The unique identifier of the article.",
-            "format": "uuid"
-          },
-          "name": {
-            "description": "The name of the article.",
-            "$ref": "#/components/schemas/Name"
-          },
-          "description": {
-            "description": "The description of the article.",
-            "$ref": "#/components/schemas/Description"
-          },
-          "articleType": {
-            "description": "The type of the article.",
-            "$ref": "#/components/schemas/ArticleType"
-          },
-          "trackingMode": {
-            "description": "The stock tracking mode of the article (entity or event).",
-            "$ref": "#/components/schemas/ArticleTrackingMode"
-          },
-          "shelfLife": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The optional shelf life of the article."
-          },
-          "color": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The optional color of the article.",
-                "$ref": "#/components/schemas/Color"
-              }
-            ]
-          },
-          "mass": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The optional mass of the article.",
-                "$ref": "#/components/schemas/Mass"
-              }
-            ]
-          },
-          "dimension": {
-            "description": "The physical dimensions of the article.",
-            "$ref": "#/components/schemas/ArticleDimensionDto"
-          },
-          "variation": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The variation information when the article is a variation; otherwise, `null`.",
-                "$ref": "#/components/schemas/ArticleVariationDto"
-              }
-            ]
-          },
-          "pack": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The packaging information when the article is a pack; otherwise, `null`.",
-                "$ref": "#/components/schemas/ArticlePackDto"
-              }
-            ]
-          },
-          "kitComponents": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ArticleKitComponentDto"
-            },
-            "description": "The components that compose the article when it is a kit; otherwise, `null`."
-          },
-          "container": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The container information when the article is a container; otherwise, `null`.",
-                "$ref": "#/components/schemas/ArticleContainerDto"
-              }
-            ]
-          },
-          "barcodes": {
-            "description": "The barcodes associated with the article.",
-            "$ref": "#/components/schemas/ArticleBarcodeDto"
-          },
-          "partitions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The identifiers of the partitions associated with the article."
-          }
-        },
-        "description": "Represents the application-layer data transfer object for an article."
-      },
-      "ArticleInventoryDto": {
-        "required": [
-          "totalCount"
-        ],
-        "type": "object",
-        "properties": {
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "description": "The total quantity available in inventory for this article.\r\nFor entity-tracked articles this is a whole number of items; for\r\nevent-tracked articles it is the net quantity derived from movement events\r\n(received minus dispatched) and may be fractional.",
-            "format": "double"
-          }
-        },
-        "description": "Represents a summary of inventory information for a specific article."
-      },
-      "ArticleKitComponentDto": {
-        "required": [
-          "articleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "articleGuid": {
-            "type": "string",
-            "description": "The unique identifier of the article used as a component.",
-            "format": "uuid"
-          },
-          "quantity": {
-            "description": "The quantity of the article included in the kit.",
-            "$ref": "#/components/schemas/Scalar"
-          }
-        },
-        "description": "Represents a component of a kit article."
-      },
-      "ArticlePackDto": {
-        "required": [
-          "fromArticleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "fromArticleGuid": {
-            "type": "string",
-            "description": "The unique identifier of the article from which the pack is composed.",
-            "format": "uuid"
-          },
-          "quantity": {
-            "description": "The quantity of the source article contained in the pack.",
-            "$ref": "#/components/schemas/Scalar"
-          }
-        },
-        "description": "Represents the packaging information for an article pack."
-      },
-      "ArticleTrackingMode": {
-        "type": "integer",
-        "description": "Determines how the stock of an Article is tracked."
-      },
-      "ArticleType": {
-        "type": "integer",
-        "description": "Represents the classification of an article within the inventory system."
-      },
-      "ArticleUpdateDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "maxLength": 100,
-            "minLength": 1,
-            "type": "string",
-            "description": "The new name of the article. A `null` value leaves the existing name unchanged."
-          },
-          "description": {
-            "maxLength": 500,
-            "type": "string",
-            "description": "The new description of the article. A `null` value leaves the existing description unchanged."
-          },
-          "shelfLife": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The new shelf life of the article. A `null` value leaves the existing value unchanged."
-          },
-          "removeShelfLife": {
-            "type": "boolean",
-            "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over ShelfLife.",
-            "default": false
-          },
-          "mass": {
-            "required": [
-              "value",
-              "unit"
-            ],
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string",
-                "example": "g"
-              }
-            },
-            "description": "The new mass of the article. A `null` value leaves the existing value unchanged."
-          },
-          "removeMass": {
-            "type": "boolean",
-            "description": "Indicates whether the existing mass should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over Mass.",
-            "default": false
-          },
-          "dimension": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The optional dimensional changes to apply to the article.",
-                "$ref": "#/components/schemas/ArticleDimensionUpdateDto"
-              }
-            ]
-          },
-          "barcode": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The optional barcode changes to apply to the article.",
-                "$ref": "#/components/schemas/ArticleBarcodeUpdateDto"
-              }
-            ]
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The identifiers of partitions to associate with the article."
-          },
-          "partitionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The identifiers of partitions to disassociate from the article."
-          }
-        },
-        "description": "Represents the changes to apply to an existing article."
-      },
-      "ArticleVariationDto": {
-        "required": [
-          "fromArticleGuid"
-        ],
-        "type": "object",
-        "properties": {
-          "fromArticleGuid": {
-            "type": "string",
-            "description": "The unique identifier of the article from which the variation was created.",
-            "format": "uuid"
-          }
-        },
-        "description": "Represents the variation information of an article."
-      },
-      "AuditLogDto": {
-        "required": [
-          "guid",
-          "actorGuid",
-          "actorType",
-          "auditLogType",
-          "entityGuid",
-          "entityType",
-          "occurredAt",
-          "metadata",
-          "partitions"
-        ],
-        "type": "object",
-        "properties": {
-          "guid": {
-            "type": "string",
-            "description": "The unique identifier of the audit log entry",
-            "format": "uuid"
-          },
-          "actorGuid": {
-            "type": "string",
-            "description": "The unique identifier of the actor who performed the action",
-            "format": "uuid"
-          },
-          "actorType": {
-            "description": "The type of actor who performed the action (e.g., User, Application)",
-            "$ref": "#/components/schemas/ActorType"
-          },
-          "auditLogType": {
-            "description": "The type of change that was recorded (entity created, updated, or deleted)",
-            "$ref": "#/components/schemas/AuditLogType"
-          },
-          "entityGuid": {
-            "type": "string",
-            "description": "The unique identifier of the entity that was affected by the action",
-            "format": "uuid"
-          },
-          "entityType": {
-            "description": "The type of entity that was affected (e.g., Article, User)",
-            "$ref": "#/components/schemas/EntityType"
-          },
-          "occurredAt": {
-            "type": "string",
-            "description": "The date and time when the audit event occurred",
-            "format": "date-time"
-          },
-          "metadata": {
-            "type": "object",
-            "description": "A dictionary containing additional metadata about the audit event"
-          },
-          "partitions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The collection of partition GUIDs that this audit log entry belongs to"
-          }
-        },
-        "description": "Represents a data transfer object for audit log information.\r\nThis DTO contains all the essential details about an audit event, including\r\nthe actor who performed the action, the entity affected, the type of action,\r\nwhen it occurred, and any additional metadata."
-      },
-      "AuditLogType": {
-        "type": "integer",
-        "description": "Represents the kind of change an audit log records."
-      },
-      "Color": {
-        "pattern": "^#[0-9a-fA-F]{6}$",
-        "type": "string",
-        "example": "#FFFFFF"
-      },
-      "Description": {
-        "maxLength": 500,
-        "type": "string",
-        "description": "Represents a validated textual description."
-      },
-      "EntityType": {
-        "type": "integer",
-        "description": "Represents a entity type."
-      },
-      "FirstName": {
-        "maxLength": 50,
-        "minLength": 1,
-        "type": "string"
-      },
-      "IdentityAuthResultDto": {
-        "required": [
-          "accessToken",
-          "refreshToken",
-          "expiresAt"
-        ],
-        "type": "object",
-        "properties": {
-          "accessToken": {
-            "type": "string",
-            "description": "The generated access token used to authenticate API requests."
-          },
-          "refreshToken": {
-            "type": "string",
-            "description": "The refresh token used to obtain a new access token when the current one expires."
-          },
-          "expiresAt": {
-            "type": "string",
-            "description": "The date and time when the access token expires.",
-            "format": "date-time"
-          }
-        },
-        "description": "Represents the result of a successful authentication."
-      },
-      "IdentityLoginDto": {
-        "required": [
-          "nameid",
-          "password"
-        ],
-        "type": "object",
-        "properties": {
-          "nameid": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
+  "definitions": {
+    "ActionType": {
+      "type": "integer",
+      "description": "Represents the set of actions in the system."
+    },
+    "ActorType": {
+      "type": "integer",
+      "description": "Represents the type of actor responsible for performing an action\r\nwithin the system."
+    },
+    "ArticleBarcodeDto": {
+      "type": "object",
+      "description": "Represents the barcode information associated with an article.",
+      "properties": {
+        "ean13": {
+          "type": "string",
+          "description": "The optional EAN-13 barcode of the article.",
+          "maxLength": 13,
+          "minLength": 13,
+          "pattern": "^\\d{13}$"
         }
-      },
-      "IdentityLogOutDto": {
-        "required": [
-          "refreshToken"
-        ],
-        "type": "object",
-        "properties": {
-          "refreshToken": {
-            "description": "The refresh token to be revoked during logout",
-            "$ref": "#/components/schemas/Token"
-          }
+      }
+    },
+    "ArticleBarcodeUpdateDto": {
+      "type": "object",
+      "description": "Represents the barcode changes to apply to an article.",
+      "properties": {
+        "ean13": {
+          "type": "string",
+          "description": "The new EAN-13 barcode to assign to the article. A `null` value\r\nleaves the existing EAN-13 barcode unchanged.",
+          "maxLength": 13,
+          "minLength": 13,
+          "pattern": "^\\d{13}$"
         },
-        "description": "Represents the data transfer object for logging out by providing a refresh token.\r\nThis DTO is used as input when performing a logout operation to revoke the refresh token."
-      },
-      "IdentityPasswordUpdateDto": {
-        "required": [
-          "nameid",
-          "newPassword",
-          "currentPassword"
-        ],
-        "type": "object",
-        "properties": {
-          "nameid": {
-            "type": "string",
-            "description": "The unique identifier of the user whose password is being changed"
-          },
-          "newPassword": {
-            "description": "The new password value that will be validated against security rules",
-            "$ref": "#/components/schemas/Password"
-          },
-          "currentPassword": {
-            "type": "string",
-            "description": "The user's current password for verification purposes"
-          }
-        },
-        "description": "Represents the data transfer object for updating a user's password.\r\nThe NewPassword field uses the Password structure to enforce security validation rules\r\nincluding minimum character requirements, special character constraints, and other password policies."
-      },
-      "IdentityRefreshDto": {
-        "required": [
-          "refreshToken"
-        ],
-        "type": "object",
-        "properties": {
-          "refreshToken": {
-            "description": "The refresh token used to obtain a new access token",
-            "$ref": "#/components/schemas/Token"
-          }
-        },
-        "description": "Represents the data transfer object for refreshing authentication tokens.\r\nThis DTO is used as input when requesting a new access token using a refresh token."
-      },
-      "ItemContainerInventoryDto": {
-        "required": [
-          "articleGuid",
-          "totalCount"
-        ],
-        "type": "object",
-        "properties": {
-          "articleGuid": {
-            "type": "string",
-            "description": "The article the quantity belongs to.",
-            "format": "uuid"
-          },
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "description": "The total quantity of the article in the container. For entity-tracked\r\narticles this is a whole number of items; for event-tracked articles it is\r\nthe net quantity derived from movement events (received minus dispatched) and\r\nmay be fractional.",
-            "format": "double"
-          }
-        },
-        "description": "Represents the inventory of a single article contained in a container."
-      },
-      "ItemCreateDto": {
-        "required": [
-          "articleGuid"
-        ],
-        "type": "object",
-        "properties": {
-          "articleGuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "parentItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
+        "removeEan13": {
+          "type": "boolean",
+          "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\r\nvalue to `null`.",
+          "default": false
+        }
+      }
+    },
+    "ArticleContainerDto": {
+      "type": "object",
+      "description": "Represents the container information associated with an article.",
+      "properties": {
+        "maxMass": {
+          "type": "object",
+          "description": "The optional maximum mass that the container can hold.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
               "type": "string",
-              "format": "uuid"
+              "example": "g"
             }
           }
         }
-      },
-      "ItemDto": {
-        "required": [
-          "guid",
-          "articleGuid",
-          "parentContainerGuid",
-          "isFixed",
-          "partitions"
-        ],
-        "type": "object",
-        "properties": {
-          "guid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "articleGuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "parentContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "isFixed": {
-            "type": "boolean"
-          },
-          "partitions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
+      }
+    },
+    "ArticleCreateDto": {
+      "type": "object",
+      "description": "Represents the data required to create an article.",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "The optional description of the article.",
+          "maxLength": 500
+        },
+        "articleType": {
+          "$ref": "#/definitions/ArticleType"
+        },
+        "variation": {
+          "allOf": [
+            {
+              "x-nullable": true
             }
-          }
-        }
-      },
-      "ItemEventCreateDto": {
-        "required": [
-          "eventType",
-          "articleGuid",
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "eventType": {
-            "description": "The kind of event to record.",
-            "$ref": "#/components/schemas/ItemEventType"
-          },
-          "articleGuid": {
-            "type": "string",
-            "description": "The unique identifier of the event-tracked article the event concerns.",
-            "format": "uuid"
-          },
-          "quantity": {
-            "description": "The strictly positive quantity.",
-            "$ref": "#/components/schemas/Scalar"
-          },
-          "fromItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "For a movement, the origin container, or `null` for a receipt\r\nfrom outside any container.",
-            "format": "uuid"
-          },
-          "toItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "For a movement, the destination container, or `null` for a\r\ndispatch to outside any container.",
-            "format": "uuid"
-          },
-          "itemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "For a creation or deletion, the container the quantity was created in or\r\ndeleted from, or `null` when outside any container.",
-            "format": "uuid"
-          },
-          "occuredAt": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The instant, in UTC, at which the event occurred. When\r\n`null`, the server records the current instant.",
-            "format": "date-time"
-          }
+          ]
         },
-        "description": "Describes a new item event to record against an event-tracked article."
-      },
-      "ItemEventDto": {
-        "required": [
-          "guid",
-          "articleGuid",
-          "eventType",
-          "occuredAt",
-          "moviment",
-          "lifecycle"
-        ],
-        "type": "object",
-        "properties": {
-          "guid": {
-            "type": "string",
-            "description": "The unique identifier of the item event.",
-            "format": "uuid"
-          },
-          "articleGuid": {
-            "type": "string",
-            "description": "The unique identifier of the event-tracked article the event concerns.",
-            "format": "uuid"
-          },
-          "eventType": {
-            "description": "The kind of event recorded.",
-            "$ref": "#/components/schemas/ItemEventType"
-          },
-          "occuredAt": {
-            "type": "string",
-            "description": "The instant, in UTC, at which the event occurred.",
-            "format": "date-time"
-          },
-          "moviment": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The movement payload when EventType is\r\nItemEventType.Moviment; otherwise `null`.",
-                "$ref": "#/components/schemas/ItemMovimentEventDto"
-              }
-            ]
-          },
-          "lifecycle": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The creation/deletion payload when EventType is\r\nItemEventType.Creation or ItemEventType.Deletion;\r\notherwise `null`.",
-                "$ref": "#/components/schemas/ItemLifecycleEventDto"
-              }
-            ]
-          }
-        },
-        "description": "Represents a data transfer object for an item event recorded against an\r\nevent-tracked article."
-      },
-      "ItemEventType": {
-        "type": "integer",
-        "description": "Identifies the kind of event recorded against an event-tracked article."
-      },
-      "ItemLifecycleEventDto": {
-        "required": [
-          "quantity",
-          "itemContainerGuid",
-          "noContainer"
-        ],
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "description": "The strictly positive quantity created or deleted.",
-            "$ref": "#/components/schemas/Scalar"
-          },
-          "itemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The container the quantity was created in or deleted from, or\r\n`null` when outside any container, or when the container has\r\nsince been deleted.",
-            "format": "uuid"
-          },
-          "noContainer": {
-            "type": "boolean",
-            "description": "Whether the event originally had no container."
-          }
-        },
-        "description": "Represents the creation/deletion payload of an item event."
-      },
-      "ItemMovimentDto": {
-        "required": [
-          "movedToItemContainerGuid",
-          "occurredAt"
-        ],
-        "type": "object",
-        "properties": {
-          "movedToItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ItemMovimentEventDto": {
-        "required": [
-          "quantity",
-          "fromItemContainerGuid",
-          "fromNoContainer",
-          "toItemContainerGuid",
-          "toNoContainer"
-        ],
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "description": "The strictly positive quantity moved.",
-            "$ref": "#/components/schemas/Scalar"
-          },
-          "fromItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The origin container, or `null` when the movement originated\r\noutside any container, or when the origin container has since been deleted.",
-            "format": "uuid"
-          },
-          "fromNoContainer": {
-            "type": "boolean",
-            "description": "Whether the movement originally had no origin container."
-          },
-          "toItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The destination container, or `null` when the movement left\r\nthe quantity outside any container, or when the destination container has\r\nsince been deleted.",
-            "format": "uuid"
-          },
-          "toNoContainer": {
-            "type": "boolean",
-            "description": "Whether the movement originally had no destination container."
-          }
-        },
-        "description": "Represents the movement payload of an item event."
-      },
-      "ItemUpdateDto": {
-        "type": "object",
-        "properties": {
-          "parentItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "removeFromParentItemContainer": {
-            "type": "boolean",
-            "default": false
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
+        "pack": {
+          "allOf": [
+            {
+              "x-nullable": true
             }
-          },
-          "partitionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        }
-      },
-      "LastName": {
-        "maxLength": 100,
-        "minLength": 1,
-        "type": "string"
-      },
-      "Mass": {
-        "required": [
-          "value",
-          "unit"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "number"
-          },
-          "unit": {
-            "type": "string",
-            "example": "g"
-          }
-        }
-      },
-      "Name": {
-        "maxLength": 100,
-        "minLength": 1,
-        "type": "string",
-        "description": "Represents a validated name."
-      },
-      "Nameid": {
-        "maxLength": 100,
-        "minLength": 3,
-        "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$",
-        "type": "string",
-        "description": "Represents a nameid."
-      },
-      "PagedResultOfArticleDto": {
-        "required": [
-          "items",
-          "totalCount",
-          "page",
-          "limit"
-        ],
-        "type": "object",
-        "properties": {
+          ]
+        },
+        "kitComponents": {
+          "type": "array",
+          "description": "The optional components of the article. Required when ArticleType\r\nis ArticleType.Kit.",
           "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ArticleDto"
+            "$ref": "#/definitions/ArticleKitComponentDto"
+          },
+          "x-nullable": true
+        },
+        "container": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "shelfLife": {
+          "type": "string",
+          "description": "The optional shelf life of the article.",
+          "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+          "x-nullable": true
+        },
+        "color": {
+          "type": "string",
+          "description": "The optional color of the article.",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "example": "#FFFFFF"
+        },
+        "mass": {
+          "type": "object",
+          "description": "The optional mass of the article.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
             },
-            "description": "The items on the current page."
-          },
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
-            "format": "int32"
-          },
-          "page": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The 1-based index of the current page.",
-            "format": "int32"
-          },
-          "limit": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The maximum number of items per page.",
-            "format": "int32"
-          },
-          "totalPages": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
-            "format": "int32"
-          },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page after the current one exists."
-          },
-          "hasPreviousPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page before the current one exists."
+            "unit": {
+              "type": "string",
+              "example": "g"
+            }
           }
         },
-        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
-      },
-      "PagedResultOfAuditLogDto": {
-        "required": [
-          "items",
-          "totalCount",
-          "page",
-          "limit"
-        ],
-        "type": "object",
-        "properties": {
+        "dimension": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "barcode": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "trackingMode": {
+          "$ref": "#/definitions/ArticleTrackingMode"
+        },
+        "partitionsToAdd": {
+          "type": "array",
+          "description": "The optional identifiers of partitions to associate with the article.",
           "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AuditLogDto"
-            },
-            "description": "The items on the current page."
-          },
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
-            "format": "int32"
-          },
-          "page": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The 1-based index of the current page.",
-            "format": "int32"
-          },
-          "limit": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The maximum number of items per page.",
-            "format": "int32"
-          },
-          "totalPages": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
-            "format": "int32"
-          },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page after the current one exists."
-          },
-          "hasPreviousPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page before the current one exists."
-          }
-        },
-        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
-      },
-      "PagedResultOfItemDto": {
-        "required": [
-          "items",
-          "totalCount",
-          "page",
-          "limit"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ItemDto"
-            },
-            "description": "The items on the current page."
-          },
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
-            "format": "int32"
-          },
-          "page": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The 1-based index of the current page.",
-            "format": "int32"
-          },
-          "limit": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The maximum number of items per page.",
-            "format": "int32"
-          },
-          "totalPages": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
-            "format": "int32"
-          },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page after the current one exists."
-          },
-          "hasPreviousPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page before the current one exists."
-          }
-        },
-        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
-      },
-      "PagedResultOfItemEventDto": {
-        "required": [
-          "items",
-          "totalCount",
-          "page",
-          "limit"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ItemEventDto"
-            },
-            "description": "The items on the current page."
-          },
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
-            "format": "int32"
-          },
-          "page": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The 1-based index of the current page.",
-            "format": "int32"
-          },
-          "limit": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The maximum number of items per page.",
-            "format": "int32"
-          },
-          "totalPages": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
-            "format": "int32"
-          },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page after the current one exists."
-          },
-          "hasPreviousPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page before the current one exists."
-          }
-        },
-        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
-      },
-      "PagedResultOfPartitionDto": {
-        "required": [
-          "items",
-          "totalCount",
-          "page",
-          "limit"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PartitionDto"
-            },
-            "description": "The items on the current page."
-          },
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
-            "format": "int32"
-          },
-          "page": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The 1-based index of the current page.",
-            "format": "int32"
-          },
-          "limit": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The maximum number of items per page.",
-            "format": "int32"
-          },
-          "totalPages": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
-            "format": "int32"
-          },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page after the current one exists."
-          },
-          "hasPreviousPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page before the current one exists."
-          }
-        },
-        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
-      },
-      "PagedResultOfUserDto": {
-        "required": [
-          "items",
-          "totalCount",
-          "page",
-          "limit"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserDto"
-            },
-            "description": "The items on the current page."
-          },
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
-            "format": "int32"
-          },
-          "page": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The 1-based index of the current page.",
-            "format": "int32"
-          },
-          "limit": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The maximum number of items per page.",
-            "format": "int32"
-          },
-          "totalPages": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
-            "format": "int32"
-          },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page after the current one exists."
-          },
-          "hasPreviousPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page before the current one exists."
-          }
-        },
-        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
-      },
-      "PagedResultOfUserGroupDto": {
-        "required": [
-          "items",
-          "totalCount",
-          "page",
-          "limit"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserGroupDto"
-            },
-            "description": "The items on the current page."
-          },
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
-            "format": "int32"
-          },
-          "page": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The 1-based index of the current page.",
-            "format": "int32"
-          },
-          "limit": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "The maximum number of items per page.",
-            "format": "int32"
-          },
-          "totalPages": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
-            "format": "int32"
-          },
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page after the current one exists."
-          },
-          "hasPreviousPage": {
-            "type": "boolean",
-            "description": "Gets a value indicating whether a page before the current one exists."
-          }
-        },
-        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
-      },
-      "PartitionCreateDto": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "$ref": "#/components/schemas/Name"
-          },
-          "parentPartitionGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "description": {
-            "maxLength": 500,
-            "type": "string"
-          }
-        }
-      },
-      "PartitionDto": {
-        "required": [
-          "guid",
-          "name",
-          "description",
-          "parentPartitionGuid",
-          "isGlobalPartition"
-        ],
-        "type": "object",
-        "properties": {
-          "guid": {
             "type": "string",
             "format": "uuid"
           },
-          "name": {
-            "$ref": "#/components/schemas/Name"
-          },
-          "description": {
-            "$ref": "#/components/schemas/Description"
-          },
-          "parentPartitionGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "isGlobalPartition": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          }
+          "x-nullable": true
         }
-      },
-      "PartitionUpdateDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "maxLength": 100,
-            "minLength": 1,
-            "type": "string"
-          },
-          "description": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "parentPartitionGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          }
-        }
-      },
-      "Password": {
-        "maxLength": 512,
-        "minLength": 9,
-        "type": "string",
-        "description": "Represents a validated plaintext password.",
-        "format": "password"
-      },
-      "Scalar": {
-        "oneOf": [
-          {
-            "type": "number"
-          },
-          {
-            "type": "string"
-          }
-        ]
-      },
-      "Token": {
-        "maxLength": 4096,
-        "minLength": 50,
-        "type": "string",
-        "description": "Represents a security token used by the system."
-      },
-      "UserAuthenticationCreateDto": {
-        "type": "object",
-        "properties": {
-          "password": {
-            "maxLength": 512,
-            "minLength": 9,
-            "type": "string",
-            "description": "The initial password for the user's authentication credentials.",
-            "format": "password"
-          },
-          "defaultPasswordExpirationPeriod": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The period after which the user's password expires."
+      }
+    },
+    "ArticleDimensionDto": {
+      "type": "object",
+      "description": "Represents the physical dimensions of an article.",
+      "properties": {
+        "lengthX": {
+          "type": "object",
+          "description": "The optional length along the X axis.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string",
+              "example": "m"
+            }
           }
         },
-        "description": "Represents the data required to create authentication information for a user."
-      },
-      "UserAuthenticationDto": {
-        "type": "object",
-        "properties": {
-          "defaultPasswordExpirationPeriod": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The default period after which the user's password expires."
-          },
-          "requirePasswordChangeAt": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The date and time at which the user is required to change their password.",
-            "format": "date-time"
+        "lengthY": {
+          "type": "object",
+          "description": "The optional length along the Y axis.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string",
+              "example": "m"
+            }
           }
         },
-        "description": "Represents user authentication information."
-      },
-      "UserAuthenticationUpdateDto": {
-        "type": "object",
-        "properties": {
-          "password": {
-            "maxLength": 512,
-            "minLength": 9,
-            "type": "string",
-            "format": "password"
-          },
-          "defaultPasswordExpirationPeriod": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "removeDefaultPasswordExpirationPeriod": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          }
-        }
-      },
-      "UserCreateDto": {
-        "required": [
-          "nameid"
-        ],
-        "type": "object",
-        "properties": {
-          "nameid": {
-            "$ref": "#/components/schemas/Nameid"
-          },
-          "firstName": {
-            "maxLength": 50,
-            "minLength": 1,
-            "type": "string"
-          },
-          "lastName": {
-            "maxLength": 100,
-            "minLength": 1,
-            "type": "string"
-          },
-          "description": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "authentication": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UserAuthenticationCreateDto"
-              }
-            ]
-          },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
+        "lengthZ": {
+          "type": "object",
+          "description": "The optional length along the Z axis.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
               "type": "string",
-              "format": "uuid"
-            }
-          },
-          "userGroupsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
+              "example": "m"
             }
           }
         }
-      },
-      "UserDto": {
-        "required": [
-          "guid",
-          "nameid",
-          "firstName",
-          "lastName",
-          "description",
-          "isActive",
-          "isAdmin",
-          "authentication",
-          "permissions",
-          "partitions",
-          "partitionAccesses",
-          "userGroups"
-        ],
-        "type": "object",
-        "properties": {
-          "guid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "nameid": {
-            "$ref": "#/components/schemas/Nameid"
-          },
-          "firstName": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/FirstName"
-              }
-            ]
-          },
-          "lastName": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/LastName"
-              }
-            ]
-          },
-          "description": {
-            "$ref": "#/components/schemas/Description"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "isAdmin": {
-            "type": "boolean"
-          },
-          "authentication": {
-            "$ref": "#/components/schemas/UserAuthenticationDto"
-          },
-          "permissions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitions": {
-            "type": "array",
-            "items": {
+      }
+    },
+    "ArticleDimensionUpdateDto": {
+      "type": "object",
+      "description": "Represents the dimensional changes to apply to an article.",
+      "properties": {
+        "lengthX": {
+          "type": "object",
+          "description": "The new length along the X axis. A `null` value leaves the\r\nexisting value unchanged.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
               "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccesses": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "userGroups": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
+              "example": "m"
             }
           }
-        }
-      },
-      "UserGroupCreateDto": {
-        "required": [
-          "nameid"
-        ],
-        "type": "object",
-        "properties": {
-          "nameid": {
-            "$ref": "#/components/schemas/Nameid"
-          },
-          "description": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "parentUserGroup": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
+        },
+        "removeLengthX": {
+          "type": "boolean",
+          "description": "Indicates whether the existing X-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthX.",
+          "default": false
+        },
+        "lengthY": {
+          "type": "object",
+          "description": "The new length along the Y axis. A `null` value leaves the\r\nexisting value unchanged.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
               "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
+              "example": "m"
             }
           }
+        },
+        "removeLengthY": {
+          "type": "boolean",
+          "description": "Indicates whether the existing Y-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthY.",
+          "default": false
+        },
+        "lengthZ": {
+          "type": "object",
+          "description": "The new length along the Z axis. A `null` value leaves the\r\nexisting value unchanged.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string",
+              "example": "m"
+            }
+          }
+        },
+        "removeLengthZ": {
+          "type": "boolean",
+          "description": "Indicates whether the existing Z-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthZ.",
+          "default": false
         }
-      },
-      "UserGroupDto": {
-        "required": [
-          "guid",
-          "nameid",
-          "description",
-          "isActive",
-          "isAdminUserGroup",
-          "parentUserGroup",
-          "permissions",
-          "partitions",
-          "partitionAccesses"
-        ],
-        "type": "object",
-        "properties": {
-          "guid": {
+      }
+    },
+    "ArticleDto": {
+      "type": "object",
+      "description": "Represents the application-layer data transfer object for an article.",
+      "required": [
+        "guid",
+        "name",
+        "description",
+        "articleType",
+        "trackingMode",
+        "shelfLife",
+        "color",
+        "mass",
+        "dimension",
+        "variation",
+        "pack",
+        "kitComponents",
+        "container",
+        "barcodes",
+        "partitions"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "description": "The unique identifier of the article.",
+          "format": "uuid"
+        },
+        "name": {
+          "$ref": "#/definitions/Name"
+        },
+        "description": {
+          "$ref": "#/definitions/Description"
+        },
+        "articleType": {
+          "$ref": "#/definitions/ArticleType"
+        },
+        "trackingMode": {
+          "$ref": "#/definitions/ArticleTrackingMode"
+        },
+        "shelfLife": {
+          "type": "string",
+          "description": "The optional shelf life of the article.",
+          "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+          "x-nullable": true
+        },
+        "color": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "mass": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "dimension": {
+          "$ref": "#/definitions/ArticleDimensionDto"
+        },
+        "variation": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "pack": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "kitComponents": {
+          "type": "array",
+          "description": "The components that compose the article when it is a kit; otherwise, `null`.",
+          "items": {
+            "$ref": "#/definitions/ArticleKitComponentDto"
+          },
+          "x-nullable": true
+        },
+        "container": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "barcodes": {
+          "$ref": "#/definitions/ArticleBarcodeDto"
+        },
+        "partitions": {
+          "type": "array",
+          "description": "The identifiers of the partitions associated with the article.",
+          "items": {
             "type": "string",
             "format": "uuid"
-          },
-          "nameid": {
-            "$ref": "#/components/schemas/Nameid"
-          },
-          "description": {
-            "$ref": "#/components/schemas/Description"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "isAdminUserGroup": {
-            "type": "boolean"
-          },
-          "parentUserGroup": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "permissions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccesses": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         }
-      },
-      "UserGroupUpdateDto": {
-        "required": [
-          "nameid",
-          "description",
-          "isActive",
-          "parentUserGroup",
-          "removeParentUserGroup",
-          "permissionsToAdd",
-          "permissionsToRemove",
-          "partitionsToAdd",
-          "partitionsToRemove",
-          "partitionAccessesToAdd",
-          "partitionAccessesToRemove"
-        ],
-        "type": "object",
-        "properties": {
-          "nameid": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Nameid"
-              }
-            ]
-          },
-          "description": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Description"
-              }
-            ]
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "parentUserGroup": {
-            "type": [
-              "null",
-              "string"
-            ],
+      }
+    },
+    "ArticleInventoryDto": {
+      "type": "object",
+      "description": "Represents a summary of inventory information for a specific article.",
+      "required": [
+        "totalCount"
+      ],
+      "properties": {
+        "totalCount": {
+          "description": "The total quantity available in inventory for this article.\r\nFor entity-tracked articles this is a whole number of items; for\r\nevent-tracked articles it is the net quantity derived from movement events\r\n(received minus dispatched) and may be fractional.",
+          "format": "double",
+          "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"
+        }
+      }
+    },
+    "ArticleKitComponentDto": {
+      "type": "object",
+      "description": "Represents a component of a kit article.",
+      "required": [
+        "articleGuid",
+        "quantity"
+      ],
+      "properties": {
+        "articleGuid": {
+          "type": "string",
+          "description": "The unique identifier of the article used as a component.",
+          "format": "uuid"
+        },
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        }
+      }
+    },
+    "ArticlePackDto": {
+      "type": "object",
+      "description": "Represents the packaging information for an article pack.",
+      "required": [
+        "fromArticleGuid",
+        "quantity"
+      ],
+      "properties": {
+        "fromArticleGuid": {
+          "type": "string",
+          "description": "The unique identifier of the article from which the pack is composed.",
+          "format": "uuid"
+        },
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        }
+      }
+    },
+    "ArticleTrackingMode": {
+      "type": "integer",
+      "description": "Determines how the stock of an Article is tracked."
+    },
+    "ArticleType": {
+      "type": "integer",
+      "description": "Represents the classification of an article within the inventory system."
+    },
+    "ArticleUpdateDto": {
+      "type": "object",
+      "description": "Represents the changes to apply to an existing article.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The new name of the article. A `null` value leaves the existing name unchanged.",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "The new description of the article. A `null` value leaves the existing description unchanged.",
+          "maxLength": 500
+        },
+        "shelfLife": {
+          "type": "string",
+          "description": "The new shelf life of the article. A `null` value leaves the existing value unchanged.",
+          "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+          "x-nullable": true
+        },
+        "removeShelfLife": {
+          "type": "boolean",
+          "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over ShelfLife.",
+          "default": false
+        },
+        "mass": {
+          "type": "object",
+          "description": "The new mass of the article. A `null` value leaves the existing value unchanged.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string",
+              "example": "g"
+            }
+          }
+        },
+        "removeMass": {
+          "type": "boolean",
+          "description": "Indicates whether the existing mass should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over Mass.",
+          "default": false
+        },
+        "dimension": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "barcode": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "partitionsToAdd": {
+          "type": "array",
+          "description": "The identifiers of partitions to associate with the article.",
+          "items": {
+            "type": "string",
             "format": "uuid"
           },
-          "removeParentUserGroup": {
-            "type": [
-              "null",
-              "boolean"
-            ]
+          "x-nullable": true
+        },
+        "partitionsToRemove": {
+          "type": "array",
+          "description": "The identifiers of partitions to disassociate from the article.",
+          "items": {
+            "type": "string",
+            "format": "uuid"
           },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "permissionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
+          "x-nullable": true
+        }
+      }
+    },
+    "ArticleVariationDto": {
+      "type": "object",
+      "description": "Represents the variation information of an article.",
+      "required": [
+        "fromArticleGuid"
+      ],
+      "properties": {
+        "fromArticleGuid": {
+          "type": "string",
+          "description": "The unique identifier of the article from which the variation was created.",
+          "format": "uuid"
+        }
+      }
+    },
+    "AuditLogDto": {
+      "type": "object",
+      "description": "Represents a data transfer object for audit log information.\r\nThis DTO contains all the essential details about an audit event, including\r\nthe actor who performed the action, the entity affected, the type of action,\r\nwhen it occurred, and any additional metadata.",
+      "required": [
+        "guid",
+        "actorGuid",
+        "actorType",
+        "auditLogType",
+        "entityGuid",
+        "entityType",
+        "occurredAt",
+        "metadata",
+        "partitions"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "description": "The unique identifier of the audit log entry",
+          "format": "uuid"
+        },
+        "actorGuid": {
+          "type": "string",
+          "description": "The unique identifier of the actor who performed the action",
+          "format": "uuid"
+        },
+        "actorType": {
+          "$ref": "#/definitions/ActorType"
+        },
+        "auditLogType": {
+          "$ref": "#/definitions/AuditLogType"
+        },
+        "entityGuid": {
+          "type": "string",
+          "description": "The unique identifier of the entity that was affected by the action",
+          "format": "uuid"
+        },
+        "entityType": {
+          "$ref": "#/definitions/EntityType"
+        },
+        "occurredAt": {
+          "type": "string",
+          "description": "The date and time when the audit event occurred",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "A dictionary containing additional metadata about the audit event"
+        },
+        "partitions": {
+          "type": "array",
+          "description": "The collection of partition GUIDs that this audit log entry belongs to",
+          "items": {
+            "type": "string",
+            "format": "uuid"
           }
         }
-      },
-      "UserUpdateDto": {
-        "type": "object",
-        "properties": {
-          "nameid": {
-            "maxLength": 100,
-            "minLength": 3,
-            "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$",
-            "type": "string"
+      }
+    },
+    "AuditLogType": {
+      "type": "integer",
+      "description": "Represents the kind of change an audit log records."
+    },
+    "Color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "example": "#FFFFFF"
+    },
+    "Description": {
+      "type": "string",
+      "description": "Represents a validated textual description.",
+      "maxLength": 500
+    },
+    "EntityType": {
+      "type": "integer",
+      "description": "Represents a entity type."
+    },
+    "FirstName": {
+      "type": "string",
+      "maxLength": 50,
+      "minLength": 1
+    },
+    "IdentityAuthResultDto": {
+      "type": "object",
+      "description": "Represents the result of a successful authentication.",
+      "required": [
+        "accessToken",
+        "refreshToken",
+        "expiresAt"
+      ],
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "description": "The generated access token used to authenticate API requests."
+        },
+        "refreshToken": {
+          "type": "string",
+          "description": "The refresh token used to obtain a new access token when the current one expires."
+        },
+        "expiresAt": {
+          "type": "string",
+          "description": "The date and time when the access token expires.",
+          "format": "date-time"
+        }
+      }
+    },
+    "IdentityLoginDto": {
+      "type": "object",
+      "required": [
+        "nameid",
+        "password"
+      ],
+      "properties": {
+        "nameid": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "IdentityLogOutDto": {
+      "type": "object",
+      "description": "Represents the data transfer object for logging out by providing a refresh token.\r\nThis DTO is used as input when performing a logout operation to revoke the refresh token.",
+      "required": [
+        "refreshToken"
+      ],
+      "properties": {
+        "refreshToken": {
+          "$ref": "#/definitions/Token"
+        }
+      }
+    },
+    "IdentityPasswordUpdateDto": {
+      "type": "object",
+      "description": "Represents the data transfer object for updating a user's password.\r\nThe NewPassword field uses the Password structure to enforce security validation rules\r\nincluding minimum character requirements, special character constraints, and other password policies.",
+      "required": [
+        "nameid",
+        "newPassword",
+        "currentPassword"
+      ],
+      "properties": {
+        "nameid": {
+          "type": "string",
+          "description": "The unique identifier of the user whose password is being changed"
+        },
+        "newPassword": {
+          "$ref": "#/definitions/Password"
+        },
+        "currentPassword": {
+          "type": "string",
+          "description": "The user's current password for verification purposes"
+        }
+      }
+    },
+    "IdentityRefreshDto": {
+      "type": "object",
+      "description": "Represents the data transfer object for refreshing authentication tokens.\r\nThis DTO is used as input when requesting a new access token using a refresh token.",
+      "required": [
+        "refreshToken"
+      ],
+      "properties": {
+        "refreshToken": {
+          "$ref": "#/definitions/Token"
+        }
+      }
+    },
+    "ItemContainerInventoryDto": {
+      "type": "object",
+      "description": "Represents the inventory of a single article contained in a container.",
+      "required": [
+        "articleGuid",
+        "totalCount"
+      ],
+      "properties": {
+        "articleGuid": {
+          "type": "string",
+          "description": "The article the quantity belongs to.",
+          "format": "uuid"
+        },
+        "totalCount": {
+          "description": "The total quantity of the article in the container. For entity-tracked\r\narticles this is a whole number of items; for event-tracked articles it is\r\nthe net quantity derived from movement events (received minus dispatched) and\r\nmay be fractional.",
+          "format": "double",
+          "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"
+        }
+      }
+    },
+    "ItemCreateDto": {
+      "type": "object",
+      "required": [
+        "articleGuid"
+      ],
+      "properties": {
+        "articleGuid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "parentItemContainerGuid": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "partitionsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
           },
-          "firstName": {
-            "maxLength": 50,
-            "minLength": 1,
-            "type": "string"
-          },
-          "lastName": {
-            "maxLength": 100,
-            "minLength": 1,
-            "type": "string"
-          },
-          "description": {
-            "maxLength": 500,
-            "type": "string"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "authentication": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UserAuthenticationUpdateDto"
-              }
-            ]
-          },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "permissionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "userGroupsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "userGroupsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
+          "x-nullable": true
+        }
+      }
+    },
+    "ItemDto": {
+      "type": "object",
+      "required": [
+        "guid",
+        "articleGuid",
+        "parentContainerGuid",
+        "isFixed",
+        "partitions"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "articleGuid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "parentContainerGuid": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "isFixed": {
+          "type": "boolean"
+        },
+        "partitions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
           }
+        }
+      }
+    },
+    "ItemEventCreateDto": {
+      "type": "object",
+      "description": "Describes a new item event to record against an event-tracked article.",
+      "required": [
+        "eventType",
+        "articleGuid",
+        "quantity"
+      ],
+      "properties": {
+        "eventType": {
+          "$ref": "#/definitions/ItemEventType"
+        },
+        "articleGuid": {
+          "type": "string",
+          "description": "The unique identifier of the event-tracked article the event concerns.",
+          "format": "uuid"
+        },
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "fromItemContainerGuid": {
+          "type": "string",
+          "description": "For a movement, the origin container, or `null` for a receipt\r\nfrom outside any container.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "toItemContainerGuid": {
+          "type": "string",
+          "description": "For a movement, the destination container, or `null` for a\r\ndispatch to outside any container.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "itemContainerGuid": {
+          "type": "string",
+          "description": "For a creation or deletion, the container the quantity was created in or\r\ndeleted from, or `null` when outside any container.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "occuredAt": {
+          "type": "string",
+          "description": "The instant, in UTC, at which the event occurred. When\r\n`null`, the server records the current instant.",
+          "format": "date-time",
+          "x-nullable": true
+        }
+      }
+    },
+    "ItemEventDto": {
+      "type": "object",
+      "description": "Represents a data transfer object for an item event recorded against an\r\nevent-tracked article.",
+      "required": [
+        "guid",
+        "articleGuid",
+        "eventType",
+        "occuredAt",
+        "moviment",
+        "lifecycle"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "description": "The unique identifier of the item event.",
+          "format": "uuid"
+        },
+        "articleGuid": {
+          "type": "string",
+          "description": "The unique identifier of the event-tracked article the event concerns.",
+          "format": "uuid"
+        },
+        "eventType": {
+          "$ref": "#/definitions/ItemEventType"
+        },
+        "occuredAt": {
+          "type": "string",
+          "description": "The instant, in UTC, at which the event occurred.",
+          "format": "date-time"
+        },
+        "moviment": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "lifecycle": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        }
+      }
+    },
+    "ItemEventType": {
+      "type": "integer",
+      "description": "Identifies the kind of event recorded against an event-tracked article."
+    },
+    "ItemLifecycleEventDto": {
+      "type": "object",
+      "description": "Represents the creation/deletion payload of an item event.",
+      "required": [
+        "quantity",
+        "itemContainerGuid",
+        "noContainer"
+      ],
+      "properties": {
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "itemContainerGuid": {
+          "type": "string",
+          "description": "The container the quantity was created in or deleted from, or\r\n`null` when outside any container, or when the container has\r\nsince been deleted.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "noContainer": {
+          "type": "boolean",
+          "description": "Whether the event originally had no container."
+        }
+      }
+    },
+    "ItemMovimentDto": {
+      "type": "object",
+      "required": [
+        "movedToItemContainerGuid",
+        "occurredAt"
+      ],
+      "properties": {
+        "movedToItemContainerGuid": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ItemMovimentEventDto": {
+      "type": "object",
+      "description": "Represents the movement payload of an item event.",
+      "required": [
+        "quantity",
+        "fromItemContainerGuid",
+        "fromNoContainer",
+        "toItemContainerGuid",
+        "toNoContainer"
+      ],
+      "properties": {
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "fromItemContainerGuid": {
+          "type": "string",
+          "description": "The origin container, or `null` when the movement originated\r\noutside any container, or when the origin container has since been deleted.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "fromNoContainer": {
+          "type": "boolean",
+          "description": "Whether the movement originally had no origin container."
+        },
+        "toItemContainerGuid": {
+          "type": "string",
+          "description": "The destination container, or `null` when the movement left\r\nthe quantity outside any container, or when the destination container has\r\nsince been deleted.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "toNoContainer": {
+          "type": "boolean",
+          "description": "Whether the movement originally had no destination container."
+        }
+      }
+    },
+    "ItemUpdateDto": {
+      "type": "object",
+      "properties": {
+        "parentItemContainerGuid": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "removeFromParentItemContainer": {
+          "type": "boolean",
+          "default": false
+        },
+        "partitionsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionsToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "LastName": {
+      "type": "string",
+      "maxLength": 100,
+      "minLength": 1
+    },
+    "Mass": {
+      "type": "object",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "example": "g"
+        }
+      }
+    },
+    "Name": {
+      "type": "string",
+      "description": "Represents a validated name.",
+      "maxLength": 100,
+      "minLength": 1
+    },
+    "Nameid": {
+      "type": "string",
+      "description": "Represents a nameid.",
+      "maxLength": 100,
+      "minLength": 3,
+      "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$"
+    },
+    "PagedResultOfArticleDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/ArticleDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfAuditLogDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/AuditLogDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfItemDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/ItemDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfItemEventDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/ItemEventDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfPartitionDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/PartitionDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfServiceAccountDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/ServiceAccountDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfUserDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/UserDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfUserGroupDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/UserGroupDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PartitionCreateDto": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/Name"
+        },
+        "parentPartitionGuid": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "PartitionDto": {
+      "type": "object",
+      "required": [
+        "guid",
+        "name",
+        "description",
+        "parentPartitionGuid",
+        "isGlobalPartition"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "$ref": "#/definitions/Name"
+        },
+        "description": {
+          "$ref": "#/definitions/Description"
+        },
+        "parentPartitionGuid": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "isGlobalPartition": {
+          "type": "boolean",
+          "x-nullable": true
+        }
+      }
+    },
+    "PartitionUpdateDto": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "parentPartitionGuid": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        }
+      }
+    },
+    "Password": {
+      "type": "string",
+      "description": "Represents a validated plaintext password.",
+      "format": "password",
+      "maxLength": 512,
+      "minLength": 9
+    },
+    "Scalar": {
+      "allOf": [
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "ServiceAccountCreatedDto": {
+      "type": "object",
+      "description": "Result of creating (or rotating the secret of) a service account. The\r\nplaintext string ServiceAccountCreatedDto.ClientSecret is returned exactly once and is never\r\nretrievable again.",
+      "required": [
+        "guid",
+        "clientId",
+        "clientSecret"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "clientId": {
+          "type": "string"
+        },
+        "clientSecret": {
+          "type": "string"
+        }
+      }
+    },
+    "ServiceAccountCreateDto": {
+      "type": "object",
+      "description": "Data required to create a service account.",
+      "required": [
+        "clientId"
+      ],
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "description": "The unique client identifier."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional human-readable description.",
+          "x-nullable": true
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether the account is active on creation. Defaults to true.",
+          "default": true
+        },
+        "permissionsToAdd": {
+          "type": "array",
+          "description": "Permissions to grant on creation.",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToAdd": {
+          "type": "array",
+          "description": "Partition accesses to grant on creation.",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "ServiceAccountDto": {
+      "type": "object",
+      "description": "Read model for a service account. Never exposes the secret.",
+      "required": [
+        "guid",
+        "clientId",
+        "description",
+        "isActive",
+        "permissions",
+        "partitionAccessGuids"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "clientId": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "isActive": {
+          "type": "boolean"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          }
+        },
+        "partitionAccessGuids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    "ServiceAccountUpdateDto": {
+      "type": "object",
+      "description": "Mutable service-account state to apply in an update.",
+      "properties": {
+        "description": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "isActive": {
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "permissionsToAdd": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "permissionsToRemove": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "ServiceTokenRequestDto": {
+      "type": "object",
+      "description": "Request body for the service-account client-credentials token endpoint.",
+      "required": [
+        "clientId",
+        "clientSecret"
+      ],
+      "properties": {
+        "clientId": {
+          "type": "string"
+        },
+        "clientSecret": {
+          "type": "string"
+        }
+      }
+    },
+    "ServiceTokenResultDto": {
+      "type": "object",
+      "description": "Result of a successful service-account (client-credentials) authentication.",
+      "required": [
+        "accessToken",
+        "expiresAt"
+      ],
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "description": "The generated access token used to authenticate API requests."
+        },
+        "expiresAt": {
+          "type": "string",
+          "description": "The date and time when the access token expires.",
+          "format": "date-time"
+        }
+      }
+    },
+    "Token": {
+      "type": "string",
+      "description": "Represents a security token used by the system.",
+      "maxLength": 4096,
+      "minLength": 50
+    },
+    "UserAuthenticationCreateDto": {
+      "type": "object",
+      "description": "Represents the data required to create authentication information for a user.",
+      "properties": {
+        "password": {
+          "type": "string",
+          "description": "The initial password for the user's authentication credentials.",
+          "format": "password",
+          "maxLength": 512,
+          "minLength": 9
+        },
+        "defaultPasswordExpirationPeriod": {
+          "type": "string",
+          "description": "The period after which the user's password expires.",
+          "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+          "x-nullable": true
+        }
+      }
+    },
+    "UserAuthenticationDto": {
+      "type": "object",
+      "description": "Represents user authentication information.",
+      "properties": {
+        "defaultPasswordExpirationPeriod": {
+          "type": "string",
+          "description": "The default period after which the user's password expires.",
+          "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+          "x-nullable": true
+        },
+        "requirePasswordChangeAt": {
+          "type": "string",
+          "description": "The date and time at which the user is required to change their password.",
+          "format": "date-time",
+          "x-nullable": true
+        }
+      }
+    },
+    "UserAuthenticationUpdateDto": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "format": "password",
+          "maxLength": 512,
+          "minLength": 9
+        },
+        "defaultPasswordExpirationPeriod": {
+          "type": "string",
+          "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+          "x-nullable": true
+        },
+        "removeDefaultPasswordExpirationPeriod": {
+          "type": "boolean",
+          "x-nullable": true
+        }
+      }
+    },
+    "UserCreateDto": {
+      "type": "object",
+      "required": [
+        "nameid"
+      ],
+      "properties": {
+        "nameid": {
+          "$ref": "#/definitions/Nameid"
+        },
+        "firstName": {
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 1
+        },
+        "lastName": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "isActive": {
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "authentication": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "permissionsToAdd": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "partitionsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "userGroupsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "UserDto": {
+      "type": "object",
+      "required": [
+        "guid",
+        "nameid",
+        "firstName",
+        "lastName",
+        "description",
+        "isActive",
+        "isAdmin",
+        "authentication",
+        "permissions",
+        "partitions",
+        "partitionAccesses",
+        "userGroups"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "nameid": {
+          "$ref": "#/definitions/Nameid"
+        },
+        "firstName": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "lastName": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "description": {
+          "$ref": "#/definitions/Description"
+        },
+        "isActive": {
+          "type": "boolean"
+        },
+        "isAdmin": {
+          "type": "boolean"
+        },
+        "authentication": {
+          "$ref": "#/definitions/UserAuthenticationDto"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          }
+        },
+        "partitions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "partitionAccesses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "userGroups": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    "UserGroupCreateDto": {
+      "type": "object",
+      "required": [
+        "nameid"
+      ],
+      "properties": {
+        "nameid": {
+          "$ref": "#/definitions/Nameid"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "isActive": {
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "parentUserGroup": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "permissionsToAdd": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "partitionsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "UserGroupDto": {
+      "type": "object",
+      "required": [
+        "guid",
+        "nameid",
+        "description",
+        "isActive",
+        "isAdminUserGroup",
+        "parentUserGroup",
+        "permissions",
+        "partitions",
+        "partitionAccesses"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "nameid": {
+          "$ref": "#/definitions/Nameid"
+        },
+        "description": {
+          "$ref": "#/definitions/Description"
+        },
+        "isActive": {
+          "type": "boolean"
+        },
+        "isAdminUserGroup": {
+          "type": "boolean"
+        },
+        "parentUserGroup": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          }
+        },
+        "partitions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "partitionAccesses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    "UserGroupUpdateDto": {
+      "type": "object",
+      "required": [
+        "nameid",
+        "description",
+        "isActive",
+        "parentUserGroup",
+        "removeParentUserGroup",
+        "permissionsToAdd",
+        "permissionsToRemove",
+        "partitionsToAdd",
+        "partitionsToRemove",
+        "partitionAccessesToAdd",
+        "partitionAccessesToRemove"
+      ],
+      "properties": {
+        "nameid": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "description": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "isActive": {
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "parentUserGroup": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "removeParentUserGroup": {
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "permissionsToAdd": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "permissionsToRemove": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "partitionsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionsToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "UserUpdateDto": {
+      "type": "object",
+      "properties": {
+        "nameid": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 3,
+          "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$"
+        },
+        "firstName": {
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 1
+        },
+        "lastName": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "isActive": {
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "authentication": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "permissionsToAdd": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "permissionsToRemove": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "partitionsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionsToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "userGroupsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "userGroupsToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
         }
       }
     }
@@ -3826,6 +3828,9 @@
     },
     {
       "name": "AuditLogs"
+    },
+    {
+      "name": "ServiceAccounts"
     }
   ]
 }

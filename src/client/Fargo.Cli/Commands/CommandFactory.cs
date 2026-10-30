@@ -4,6 +4,7 @@ using Fargo.Cli.Commands.Config;
 using Fargo.Cli.Commands.Identity;
 using Fargo.Cli.Commands.Items;
 using Fargo.Cli.Commands.Partitions;
+using Fargo.Cli.Commands.ServiceAccounts;
 using Fargo.Cli.Commands.UserGroups;
 using Fargo.Cli.Commands.Users;
 using Fargo.Cli.Configurations;
@@ -65,6 +66,7 @@ public static class CommandFactory
             new PartitionsCommand(client),
             new UserGroupsCommand(client),
             new UsersCommand(client),
+            new ServiceAccountsCommand(client),
             new AuditLogsCommand(client),
         };
 
