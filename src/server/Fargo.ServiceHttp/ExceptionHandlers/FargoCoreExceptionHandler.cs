@@ -20,10 +20,15 @@ public sealed class FargoCoreExceptionHandler(
 
         var problem = new ProblemDetails
         {
-            Status = StatusCodes.Status400BadRequest,
-            Title = coreException.ErrorType == FargoErrorType.InvalidOperation
-                ? "Core invalid operation."
-                : "Core error.",
+            Status = coreException.ErrorType == FargoErrorType.Conflict
+                ? StatusCodes.Status409Conflict
+                : StatusCodes.Status400BadRequest,
+            Title = coreException.ErrorType switch
+            {
+                FargoErrorType.Conflict => "Conflict.",
+                FargoErrorType.InvalidOperation => "Core invalid operation.",
+                _ => "Core error.",
+            },
             Detail = coreException.Message,
         };
 

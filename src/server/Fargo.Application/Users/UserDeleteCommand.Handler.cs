@@ -31,7 +31,7 @@ public sealed class UserDeleteCommandHandler(
             throw new FargoApplicationException($"The user '{user.Guid}' cannot delete their own user.");
         }
 
-        UserService.ValidateUserCanBeDeleted(user);
+        user.ValidateCanBeDeleted();
 
         userRepository.Remove(user);
 

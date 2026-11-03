@@ -26,7 +26,7 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
 
         if (alreadyExistsWithName)
         {
-            throw new FargoCoreException($"A user group with Nameid '{nameid}' already exists.", FargoErrorType.InvalidOperation);
+            throw new FargoCoreException($"A user group with Nameid '{nameid}' already exists.", FargoErrorType.Conflict);
         }
     }
 

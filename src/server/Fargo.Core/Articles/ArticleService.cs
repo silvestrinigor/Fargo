@@ -65,7 +65,7 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         {
             throw new FargoCoreException(
                 $"The ean13 '{ean13}' is already assigned to another article.",
-                FargoErrorType.InvalidOperation);
+                FargoErrorType.Conflict);
         }
     }
 }

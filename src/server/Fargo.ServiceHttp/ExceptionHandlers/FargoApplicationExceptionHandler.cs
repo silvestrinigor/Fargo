@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Application.Identity;
+using Fargo.Core.Common;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -131,8 +132,12 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
                 problem = new ProblemDetails
                 {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Application error.",
+                    Status = appException.ErrorType == FargoErrorType.Conflict
+                        ? StatusCodes.Status409Conflict
+                        : StatusCodes.Status400BadRequest,
+                    Title = appException.ErrorType == FargoErrorType.Conflict
+                        ? "Conflict."
+                        : "Application error.",
                     Detail = appException.Message,
                 };
 

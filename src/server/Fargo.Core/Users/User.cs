@@ -438,6 +438,22 @@ public class User : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurren
         IsActive = false;
     }
 
+    /// <summary>
+    /// Validates that the user can be deleted.
+    /// </summary>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the user is the main administrator.
+    /// </exception>
+    public void ValidateCanBeDeleted()
+    {
+        if (IsAdmin)
+        {
+            throw new FargoCoreException(
+                $"The admin user '{Guid}' cannot be deleted.",
+                FargoErrorType.InvalidOperation);
+        }
+    }
+
     /// <inheritdoc/>
     public EntityType GetEntityType() => EntityType.User;
 }
