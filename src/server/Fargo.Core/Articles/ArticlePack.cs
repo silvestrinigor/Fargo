@@ -62,6 +62,9 @@ public sealed class ArticlePack
     /// </param>
     internal ArticlePack(Article packArticle, Article fromArticle, Scalar quantity)
     {
+        ArgumentNullException.ThrowIfNull(packArticle);
+        ArgumentNullException.ThrowIfNull(fromArticle);
+
         if (packArticle.Guid == fromArticle.Guid)
         {
             throw new FargoCoreException(

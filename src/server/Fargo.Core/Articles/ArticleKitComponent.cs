@@ -62,6 +62,9 @@ public sealed class ArticleKitComponent
     /// </param>
     internal ArticleKitComponent(Article kitArticle, Article fromArticle, Scalar quantity)
     {
+        ArgumentNullException.ThrowIfNull(kitArticle);
+        ArgumentNullException.ThrowIfNull(fromArticle);
+
         if (kitArticle.Guid == fromArticle.Guid)
         {
             throw new FargoCoreException(

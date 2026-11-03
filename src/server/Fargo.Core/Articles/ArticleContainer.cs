@@ -51,6 +51,8 @@ public sealed class ArticleContainer
     /// </param>
     internal ArticleContainer(Article article)
     {
+        ArgumentNullException.ThrowIfNull(article);
+
         Article = article;
         ArticleGuid = article.Guid;
     }

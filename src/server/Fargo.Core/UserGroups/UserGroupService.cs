@@ -45,6 +45,8 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
     /// </exception>
     public async Task ValidateUserGroupCanBeDeletedAsync(UserGroup userGroup, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(userGroup);
+
         userGroup.ValidateCanBeDeleted();
 
         var anyChildUserGroup = await userGroupRepository.HasChildrenUserGroupAsync(userGroup.Guid, cancellationToken);
@@ -86,6 +88,9 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
     public async Task ValidateParentUserGroupAssignmentHierarchyAsync(
         UserGroup parentUserGroup, UserGroup childUserGroup, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(parentUserGroup);
+        ArgumentNullException.ThrowIfNull(childUserGroup);
+
         var createsCircularHierarchy = await CreatesCircularHierarchyAsync(
             parentUserGroup, childUserGroup.Guid, cancellationToken);
 

@@ -51,6 +51,8 @@ public class UserAuthentication
 
     internal UserAuthentication(User user)
     {
+        ArgumentNullException.ThrowIfNull(user);
+
         User = user;
         UserGuid = user.Guid;
     }

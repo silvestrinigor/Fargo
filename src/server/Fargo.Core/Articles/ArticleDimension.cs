@@ -55,6 +55,8 @@ public class ArticleDimension
     /// </param>
     internal ArticleDimension(Article article)
     {
+        ArgumentNullException.ThrowIfNull(article);
+
         Article = article;
         ArticleGuid = article.Guid;
     }

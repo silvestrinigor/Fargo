@@ -51,6 +51,8 @@ public class ArticleBarcode
     /// </param>
     internal ArticleBarcode(Article article)
     {
+        ArgumentNullException.ThrowIfNull(article);
+
         Article = article;
         ArticleGuid = article.Guid;
     }
