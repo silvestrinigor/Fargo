@@ -14,11 +14,13 @@ public sealed class CreateServiceAccountCommand : Command
             rotated).
 
             Permissions are numeric ActionType codes (space-separated). Partition
-            accesses are partition GUIDs (space-separated).
+            memberships and partition accesses are partition GUIDs (space-separated).
+            Membership defines the partitions the account belongs to (its scope);
+            access defines the partitions the account is allowed to reach.
 
             Examples:
               fargo service-account create --client-id erp-importer
-              fargo service-account create --client-id erp-importer --permissions 1 4 6 --partitions 00000000-0000-0000-0000-000000000002
+              fargo service-account create --client-id erp-importer --permissions 1 4 6 --partition-memberships 00000000-0000-0000-0000-000000000002 --partition-accesses 00000000-0000-0000-0000-000000000002
             """)
     {
         var clientIdOption = new Option<string>("--client-id")
@@ -44,9 +46,15 @@ public sealed class CreateServiceAccountCommand : Command
             AllowMultipleArgumentsPerToken = true
         };
 
-        var partitionsOption = new Option<Guid[]?>("--partitions")
+        var partitionMembershipsOption = new Option<Guid[]?>("--partition-memberships")
         {
-            Description = "Partition GUIDs to grant access to (space-separated).",
+            Description = "Partition GUIDs the account belongs to - its partition membership (space-separated).",
+            AllowMultipleArgumentsPerToken = true
+        };
+
+        var partitionAccessesOption = new Option<Guid[]?>("--partition-accesses", "--partitions")
+        {
+            Description = "Partition GUIDs to grant access to (space-separated). Alias: --partitions.",
             AllowMultipleArgumentsPerToken = true
         };
 
@@ -54,7 +62,8 @@ public sealed class CreateServiceAccountCommand : Command
         Add(descriptionOption);
         Add(isActiveOption);
         Add(permissionsOption);
-        Add(partitionsOption);
+        Add(partitionMembershipsOption);
+        Add(partitionAccessesOption);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
@@ -62,7 +71,8 @@ public sealed class CreateServiceAccountCommand : Command
             var description = parseResult.GetValue(descriptionOption);
             var isActive = parseResult.GetValue(isActiveOption);
             var permissions = parseResult.GetValue(permissionsOption);
-            var partitions = parseResult.GetValue(partitionsOption);
+            var partitionMemberships = parseResult.GetValue(partitionMembershipsOption);
+            var partitionAccesses = parseResult.GetValue(partitionAccessesOption);
 
             var dto = new ServiceAccountCreateDto
             {
@@ -72,8 +82,11 @@ public sealed class CreateServiceAccountCommand : Command
                 PermissionsToAdd = permissions is { Length: > 0 }
                     ? permissions.Select(p => (int?)p).ToList()
                     : null,
-                PartitionAccessesToAdd = partitions is { Length: > 0 }
-                    ? partitions.Select(g => (Guid?)g).ToList()
+                PartitionsToAdd = partitionMemberships is { Length: > 0 }
+                    ? partitionMemberships.Select(g => (Guid?)g).ToList()
+                    : null,
+                PartitionAccessesToAdd = partitionAccesses is { Length: > 0 }
+                    ? partitionAccesses.Select(g => (Guid?)g).ToList()
                     : null
             };
 

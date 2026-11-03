@@ -9,5 +9,6 @@ public sealed record ServiceAccountDto(
     string Description,
     bool IsActive,
     IReadOnlyCollection<ActionType> Permissions,
+    IReadOnlyCollection<Guid> PartitionGuids,
     IReadOnlyCollection<Guid> PartitionAccessGuids
 );

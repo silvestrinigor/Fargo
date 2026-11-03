@@ -40,6 +40,7 @@ public sealed class GetServiceAccountCommand : Command
                 .Field("Description", account.Description)
                 .Field("Active", account.IsActive)
                 .Field("Permissions", FormatPermissions(account.Permissions))
+                .Field("Partition memberships", FormatGuids(account.PartitionGuids))
                 .Field("Partition accesses", FormatGuids(account.PartitionAccessGuids))
                 .Write();
 

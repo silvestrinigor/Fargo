@@ -15,6 +15,13 @@ public sealed class ServiceAccountsQueryHandler(
 
         actor.ThrowIfPermissionDenied(ActionType.ReadServiceAccount);
 
-        return await serviceAccountQueryRepository.GetManyInfoAsync(query.WithPagination, cancellationToken);
+        var partitionGuids = PartitionQueryFilter.ForPartitionedEntities(
+            actor.PartitionAccessGuids,
+            requestedPartitionGuids: null);
+
+        return await serviceAccountQueryRepository.GetManyInfoAsync(
+            query.WithPagination,
+            partitionGuids,
+            cancellationToken);
     }
 }

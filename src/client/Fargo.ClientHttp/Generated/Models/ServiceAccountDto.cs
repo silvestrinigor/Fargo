@@ -43,6 +43,14 @@ namespace Fargo.ClientHttp.Models
 #else
         public List<Guid?> PartitionAccessGuids { get; set; }
 #endif
+        /// <summary>The partitionGuids property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public List<Guid?>? PartitionGuids { get; set; }
+#nullable restore
+#else
+        public List<Guid?> PartitionGuids { get; set; }
+#endif
         /// <summary>The permissions property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -81,6 +89,7 @@ namespace Fargo.ClientHttp.Models
                 { "guid", n => { Guid = n.GetGuidValue(); } },
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "partitionAccessGuids", n => { PartitionAccessGuids = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
+                { "partitionGuids", n => { PartitionGuids = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "permissions", n => { Permissions = n.GetCollectionOfPrimitiveValues<int?>()?.AsList(); } },
             };
         }
@@ -96,6 +105,7 @@ namespace Fargo.ClientHttp.Models
             writer.WriteGuidValue("guid", Guid);
             writer.WriteBoolValue("isActive", IsActive);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessGuids", PartitionAccessGuids);
+            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionGuids", PartitionGuids);
             writer.WriteCollectionOfPrimitiveValues<int?>("permissions", Permissions);
             writer.WriteAdditionalData(AdditionalData);
         }

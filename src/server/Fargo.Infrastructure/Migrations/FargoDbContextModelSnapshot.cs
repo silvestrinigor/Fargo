@@ -362,65 +362,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Identity.ServiceAccount", b =>
-                {
-                    b.Property<Guid>("Guid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("guid");
-
-                    b.Property<Guid>("AuthVersion")
-                        .HasColumnType("uuid")
-                        .HasColumnName("auth_version");
-
-                    b.Property<string>("ClientId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("client_id");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("description");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
-                    b.PrimitiveCollection<string>("PartitionAccessGuids")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("partition_access_guids");
-
-                    b.PrimitiveCollection<string>("Permissions")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("permissions");
-
-                    b.Property<string>("SecretHash")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("secret_hash");
-
-                    b.Property<uint>("xmin")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid")
-                        .HasColumnName("xmin");
-
-                    b.HasKey("Guid")
-                        .HasName("pk_service_accounts");
-
-                    b.HasIndex("ClientId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_service_accounts_client_id");
-
-                    b.ToTable("service_accounts", (string)null);
-                });
-
             modelBuilder.Entity("Fargo.Core.Items.Events.ItemEvent", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -639,6 +580,84 @@ namespace Fargo.Infrastructure.Migrations
                         .HasDatabaseName("ix_partitions_parent_partition_guid");
 
                     b.ToTable("partitions", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.ServiceAccounts.ServiceAccount", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("guid");
+
+                    b.Property<Guid>("AuthVersion")
+                        .HasColumnType("uuid")
+                        .HasColumnName("auth_version");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("client_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.PrimitiveCollection<string>("PartitionAccessGuids")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("partition_access_guids");
+
+                    b.PrimitiveCollection<string>("Permissions")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("permissions");
+
+                    b.Property<string>("SecretHash")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("secret_hash");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Guid")
+                        .HasName("pk_service_accounts");
+
+                    b.HasIndex("ClientId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_service_accounts_client_id");
+
+                    b.ToTable("service_accounts", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.ServiceAccounts.ServiceAccountPartition", b =>
+                {
+                    b.Property<Guid>("ServiceAccountGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("service_account_guid");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("partition_guid");
+
+                    b.HasKey("ServiceAccountGuid", "PartitionGuid")
+                        .HasName("pk_service_account_partitions");
+
+                    b.HasIndex("PartitionGuid")
+                        .HasDatabaseName("ix_service_account_partitions_partition_guid");
+
+                    b.ToTable("service_account_partitions", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.UserGroups.UserGroup", b =>
@@ -1182,6 +1201,27 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("ParentPartition");
                 });
 
+            modelBuilder.Entity("Fargo.Core.ServiceAccounts.ServiceAccountPartition", b =>
+                {
+                    b.HasOne("Fargo.Core.Partitions.Partition", "Partition")
+                        .WithMany()
+                        .HasForeignKey("PartitionGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_service_account_partitions_partitions_partition_guid");
+
+                    b.HasOne("Fargo.Core.ServiceAccounts.ServiceAccount", "ServiceAccount")
+                        .WithMany("Partitions")
+                        .HasForeignKey("ServiceAccountGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_service_account_partitions_service_accounts_service_account");
+
+                    b.Navigation("Partition");
+
+                    b.Navigation("ServiceAccount");
+                });
+
             modelBuilder.Entity("Fargo.Core.UserGroups.UserGroup", b =>
                 {
                     b.HasOne("Fargo.Core.UserGroups.UserGroup", "ParentUserGroup")
@@ -1365,6 +1405,11 @@ namespace Fargo.Infrastructure.Migrations
                 {
                     b.Navigation("Moviments");
 
+                    b.Navigation("Partitions");
+                });
+
+            modelBuilder.Entity("Fargo.Core.ServiceAccounts.ServiceAccount", b =>
+                {
                     b.Navigation("Partitions");
                 });
 

@@ -8,6 +8,8 @@ public sealed record ServiceAccountUpdateDto(
     bool? IsActive = null,
     IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
     IReadOnlyCollection<ActionType>? PermissionsToRemove = null,
+    IReadOnlyCollection<Guid>? PartitionsToAdd = null,
+    IReadOnlyCollection<Guid>? PartitionsToRemove = null,
     IReadOnlyCollection<Guid>? PartitionAccessesToAdd = null,
     IReadOnlyCollection<Guid>? PartitionAccessesToRemove = null
 );

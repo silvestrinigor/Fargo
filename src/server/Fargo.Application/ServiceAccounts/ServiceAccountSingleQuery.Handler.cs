@@ -15,6 +15,9 @@ public sealed class ServiceAccountSingleQueryHandler(
 
         actor.ThrowIfPermissionDenied(ActionType.ReadServiceAccount);
 
-        return await serviceAccountQueryRepository.GetInfoByGuidAsync(query.ServiceAccountGuid, cancellationToken);
+        return await serviceAccountQueryRepository.GetInfoByGuidAsync(
+            query.ServiceAccountGuid,
+            actor.PartitionAccessGuids,
+            cancellationToken);
     }
 }

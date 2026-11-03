@@ -3,6 +3,7 @@ using Fargo.Core.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
+using Fargo.Core.Partitions;
 using Fargo.Core.ServiceAccounts;
 
 namespace Fargo.Application.ServiceAccounts;
@@ -10,6 +11,7 @@ namespace Fargo.Application.ServiceAccounts;
 public sealed class ServiceAccountUpdateCommandHandler(
     ActorResolver actorService,
     IServiceAccountRepository serviceAccountRepository,
+    IPartitionRepository partitionRepository,
     IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ServiceAccountUpdateCommand>
@@ -24,9 +26,15 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.ServiceAccount);
 
+        var audit = account.PartitionGuids.Count > 0
+            ? AuditLog.CreateAuditLog(actor, account, AuditLogType.EntityUpdated)
+            : AuditLog.CreateAuditLogForGlobalEntity(actor, account, AuditLogType.EntityUpdated);
+
         if (command.Update.Description is { } description)
         {
             account.Description = new Description(description);
+
+            audit.Metadata.AddDescription(account.Description);
         }
 
         if (command.Update.IsActive is { } isActive)
@@ -39,41 +47,97 @@ public sealed class ServiceAccountUpdateCommandHandler(
             {
                 account.Deactivate();
             }
+
+            audit.Metadata.AddIsActive(account.IsActive);
         }
 
         if (command.Update.PermissionsToAdd is { } permissionsToAdd)
         {
             foreach (var permission in permissionsToAdd)
             {
+                actor.ThrowIfPermissionDenied(permission);
+
                 account.AddPermission(permission);
             }
+
+            audit.Metadata.AddPermissionsAdded([.. permissionsToAdd]);
         }
 
         if (command.Update.PermissionsToRemove is { } permissionsToRemove)
         {
             foreach (var permission in permissionsToRemove)
             {
+                actor.ThrowIfPermissionDenied(permission);
+
                 account.RemovePermission(permission);
             }
+
+            audit.Metadata.AddPermissionsRemoved([.. permissionsToRemove]);
         }
 
-        if (command.Update.PartitionAccessesToAdd is { } partitionsToAdd)
+        if (command.Update.PartitionsToAdd is { } partitionMembershipsToAdd)
         {
-            foreach (var partitionGuid in partitionsToAdd)
+            foreach (var partitionGuid in partitionMembershipsToAdd)
             {
-                account.AddPartitionAccess(partitionGuid);
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                account.AddPartition(partition);
             }
+
+            audit.Metadata.AddPartitionsAdded([.. partitionMembershipsToAdd]);
         }
 
-        if (command.Update.PartitionAccessesToRemove is { } partitionsToRemove)
+        if (command.Update.PartitionsToRemove is { } partitionMembershipsToRemove)
         {
-            foreach (var partitionGuid in partitionsToRemove)
+            foreach (var partitionGuid in partitionMembershipsToRemove)
             {
-                account.RemovePartitionAccess(partitionGuid);
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                account.RemovePartition(partition.Guid);
             }
+
+            audit.Metadata.AddPartitionsRemoved([.. partitionMembershipsToRemove]);
         }
 
-        var audit = AuditLog.CreateAuditLogForGlobalEntity(actor, account, AuditLogType.EntityUpdated);
+        if (command.Update.PartitionAccessesToAdd is { } partitionAccessesToAdd)
+        {
+            foreach (var partitionGuid in partitionAccessesToAdd)
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                account.AddPartitionAccess(partition.Guid);
+            }
+
+            audit.Metadata.AddPartitionAccessesAdded([.. partitionAccessesToAdd]);
+        }
+
+        if (command.Update.PartitionAccessesToRemove is { } partitionAccessesToRemove)
+        {
+            foreach (var partitionGuid in partitionAccessesToRemove)
+            {
+                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
+
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+
+                actor.ThrowIfAccessDenied(partition);
+
+                account.RemovePartitionAccess(partition.Guid);
+            }
+
+            audit.Metadata.AddPartitionAccessesRemoved([.. partitionAccessesToRemove]);
+        }
 
         auditLogRepository.Add(audit);
     }

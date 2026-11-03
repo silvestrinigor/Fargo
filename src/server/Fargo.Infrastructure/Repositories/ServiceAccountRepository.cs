@@ -2,6 +2,7 @@ using Fargo.Application.Common;
 using Fargo.Application.ServiceAccounts;
 using Fargo.Core.Informations;
 using Fargo.Core.ServiceAccounts;
+using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,10 +14,14 @@ public sealed class ServiceAccountRepository(FargoDbContext context)
     private readonly DbSet<ServiceAccount> serviceAccounts = context.ServiceAccounts;
 
     public Task<ServiceAccount?> GetByGuidAsync(Guid guid, CancellationToken cancellationToken = default)
-        => serviceAccounts.SingleOrDefaultAsync(account => account.Guid == guid, cancellationToken);
+        => serviceAccounts
+            .Include(account => account.Partitions)
+            .SingleOrDefaultAsync(account => account.Guid == guid, cancellationToken);
 
     public Task<ServiceAccount?> GetByClientIdAsync(Nameid clientId, CancellationToken cancellationToken = default)
-        => serviceAccounts.SingleOrDefaultAsync(account => account.ClientId == clientId, cancellationToken);
+        => serviceAccounts
+            .Include(account => account.Partitions)
+            .SingleOrDefaultAsync(account => account.ClientId == clientId, cancellationToken);
 
     public async Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsAsync(
         Guid serviceGuid,
@@ -69,33 +74,53 @@ public sealed class ServiceAccountRepository(FargoDbContext context)
 
     public void Remove(ServiceAccount serviceAccount) => serviceAccounts.Remove(serviceAccount);
 
-    public async Task<ServiceAccountDto?> GetInfoByGuidAsync(Guid guid, CancellationToken cancellationToken = default)
+    public async Task<ServiceAccountDto?> GetInfoByGuidAsync(
+        Guid guid,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default)
     {
-        var account = await serviceAccounts
-            .AsNoTracking()
-            .SingleOrDefaultAsync(a => a.Guid == guid, cancellationToken);
+        var account = await ApplyPartitionFilter(
+                serviceAccounts.AsNoTracking(),
+                childOfAnyOfThesePartitions)
+            .Where(a => a.Guid == guid)
+            .Select(ServiceAccountDtoMappings.Projection)
+            .SingleOrDefaultAsync(cancellationToken);
 
-        return account?.ToDto();
+        return account;
     }
 
     public async Task<PagedResult<ServiceAccountDto>> GetManyInfoAsync(
         Pagination pagination,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default)
     {
-        var query = serviceAccounts.AsNoTracking();
+        var query = ApplyPartitionFilter(
+            serviceAccounts.AsNoTracking(),
+            childOfAnyOfThesePartitions);
 
         var totalCount = await query.CountAsync(cancellationToken);
 
         var accounts = await query
             .OrderBy(a => a.Guid)
-            .Skip(pagination.Skip)
-            .Take(pagination.Take)
+            .WithPagination(pagination)
+            .Select(ServiceAccountDtoMappings.Projection)
             .ToListAsync(cancellationToken);
 
         return new PagedResult<ServiceAccountDto>(
-            [.. accounts.Select(a => a.ToDto())],
+            accounts,
             totalCount,
             pagination.Page.Value,
             pagination.Limit.Value);
     }
+
+    // Restricts the query to service accounts whose partition membership
+    // intersects the actor's accessible partitions, mirroring how users are
+    // filtered. A null partition set means no filter (unscoped read).
+    private static IQueryable<ServiceAccount> ApplyPartitionFilter(
+        IQueryable<ServiceAccount> query,
+        IReadOnlyCollection<Guid>? partitionGuids)
+        => query.WherePartitionAccessible(
+            partitionGuids,
+            account => account.Partitions,
+            partition => partition.PartitionGuid);
 }

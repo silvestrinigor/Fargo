@@ -1,6 +1,7 @@
 using Fargo.Core.Actors;
 using Fargo.Core.Common;
 using Fargo.Core.Informations;
+using Fargo.Core.ServiceAccounts;
 using Fargo.Core.Users;
 using NSubstitute;
 
@@ -65,9 +66,20 @@ public static class ActorTestFactory
 
     /// <summary>
     /// Creates a real <see cref="ActorResolver"/> over the given repository.
+    /// A mocked <see cref="IServiceAccountRepository"/> is supplied because the
+    /// resolver requires one; user-actor tests do not exercise it.
     /// </summary>
     public static ActorResolver Resolver(IUserRepository userRepository)
-        => new(userRepository);
+        => new(userRepository, Substitute.For<IServiceAccountRepository>());
+
+    /// <summary>
+    /// Creates a real <see cref="ActorResolver"/> over the given user and
+    /// service-account repositories.
+    /// </summary>
+    public static ActorResolver Resolver(
+        IUserRepository userRepository,
+        IServiceAccountRepository serviceAccountRepository)
+        => new(userRepository, serviceAccountRepository);
 }
 
 /// <summary>

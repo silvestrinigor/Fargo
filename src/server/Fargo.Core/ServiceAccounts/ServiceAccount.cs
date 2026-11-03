@@ -1,6 +1,7 @@
 using Fargo.Core.Actors;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
+using Fargo.Core.Partitions;
 using Fargo.Core.Security;
 
 namespace Fargo.Core.ServiceAccounts;
@@ -11,13 +12,22 @@ namespace Fargo.Core.ServiceAccounts;
 /// </summary>
 /// <remarks>
 /// A service account is a first-class <see cref="Actor"/> (resolved as
-/// <see cref="ActorType.Service"/>), carrying its own permissions and partition
-/// accesses exactly like a user, so the existing authorization and audit
-/// machinery apply unchanged. The client secret is never stored in clear: only
-/// its hash is persisted. Rotating the secret bumps <see cref="AuthVersion"/>,
-/// which invalidates any tokens previously issued to the account.
+/// <see cref="ActorType.Service"/>), carrying its own permissions, partition
+/// memberships and partition accesses exactly like a user, so the existing
+/// authorization and audit machinery apply unchanged. The client secret is
+/// never stored in clear: only its hash is persisted. Rotating the secret bumps
+/// <see cref="AuthVersion"/>, which invalidates any tokens previously issued to
+/// the account.
+///
+/// Like a user, a service account is a partitioned entity: its
+/// <see cref="PartitionGuids"/> (partition membership) define the account's
+/// partition scope and drive partition-based listing filters and audit-log
+/// partition association. Unlike a user, a service account has no mandatory
+/// global-partition membership: a service account is a scoped machine identity
+/// whose memberships are assigned explicitly, so it is never implicitly a
+/// member of the global partition.
 /// </remarks>
-public sealed class ServiceAccount : IEntity, IEntityTyped, IConcurrencyVersioned
+public sealed class ServiceAccount : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
     /// <summary>Gets the unique identifier of the service account.</summary>
     public Guid Guid { get; private init; } = Guid.NewGuid();
@@ -50,6 +60,26 @@ public sealed class ServiceAccount : IEntity, IEntityTyped, IConcurrencyVersione
     public IReadOnlyCollection<Guid> PartitionAccessGuids => partitionAccessGuids;
 
     private readonly List<Guid> partitionAccessGuids = [];
+
+    /// <summary>
+    /// Gets the partitions to which the service account belongs (its partition
+    /// membership).
+    /// </summary>
+    /// <remarks>
+    /// Membership defines the account's partition scope and is distinct from
+    /// <see cref="PartitionAccessGuids"/> (which governs what the account may
+    /// reach). Unlike a user, a service account has no mandatory global-partition
+    /// membership.
+    /// </remarks>
+    public IReadOnlyCollection<ServiceAccountPartition> Partitions => partitions;
+
+    /// <summary>
+    /// Gets the unique identifiers of the partitions to which the service
+    /// account belongs.
+    /// </summary>
+    public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
+
+    private readonly List<ServiceAccountPartition> partitions = [];
 
     private ServiceAccount() { }
 
@@ -106,4 +136,35 @@ public sealed class ServiceAccount : IEntity, IEntityTyped, IConcurrencyVersione
 
     /// <summary>Revokes access to a partition if present.</summary>
     public void RemovePartitionAccess(Guid partitionGuid) => partitionAccessGuids.Remove(partitionGuid);
+
+    /// <summary>
+    /// Associates the service account with the specified partition (partition
+    /// membership). Idempotent.
+    /// </summary>
+    /// <param name="partition">The partition to associate.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
+    /// </exception>
+    public void AddPartition(Partition partition)
+    {
+        ArgumentNullException.ThrowIfNull(partition);
+
+        if (partitions.Any(p => p.PartitionGuid == partition.Guid))
+        {
+            return;
+        }
+
+        partitions.Add(new ServiceAccountPartition(this, partition));
+    }
+
+    /// <summary>
+    /// Removes the association between the service account and the specified
+    /// partition (partition membership). If the account is not associated with
+    /// the partition, no action is taken.
+    /// </summary>
+    /// <param name="partitionGuid">
+    /// The identifier of the partition to remove.
+    /// </param>
+    public void RemovePartition(Guid partitionGuid)
+        => partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
 }

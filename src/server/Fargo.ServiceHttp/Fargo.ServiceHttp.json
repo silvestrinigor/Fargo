@@ -3644,6 +3644,17 @@
             },
             "description": "Permissions to grant on creation."
           },
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Partition memberships to assign on creation (the partitions the account\r\nbelongs to). Distinct from PartitionAccessesToAdd."
+          },
           "partitionAccessesToAdd": {
             "type": [
               "null",
@@ -3665,6 +3676,7 @@
           "description",
           "isActive",
           "permissions",
+          "partitionGuids",
           "partitionAccessGuids"
         ],
         "type": "object",
@@ -3686,6 +3698,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ActionType"
+            }
+          },
+          "partitionGuids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
             }
           },
           "partitionAccessGuids": {
@@ -3729,6 +3748,26 @@
             ],
             "items": {
               "$ref": "#/components/schemas/ActionType"
+            }
+          },
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
             }
           },
           "partitionAccessesToAdd": {

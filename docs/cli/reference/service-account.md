@@ -38,16 +38,23 @@ Commands:
                         rotated).
   
                         Permissions are numeric ActionType codes (space-separated). Partition
-                        accesses are partition GUIDs (space-separated).
+                        memberships and partition accesses are partition GUIDs (space-separated).
+                        Membership defines the partitions the account belongs to (its scope);
+                        access defines the partitions the account is allowed to reach.
   
                         Examples:
                           fargo service-account create --client-id erp-importer
-                          fargo service-account create --client-id erp-importer --permissions 1 4 6 --partitions 00000000-0000-0000-0000-000000000002
+                          fargo service-account create --client-id erp-importer --permissions 1 4 6 --partition-memberships 00000000-0000-0000-0000-000000000002 --partition-accesses 00000000-0000-0000-0000-000000000002
   update <guid>         Update an existing service account. Only the options you pass are changed.
+  
+                        Partition membership (the partitions the account belongs to) and
+                        partition access (the partitions the account may reach) are managed
+                        independently.
   
                         Examples:
                           fargo service-account update 00000000-0000-0000-0000-000000000010 --active false
                           fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
+                          fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
   rotate-secret <guid>  Rotate a service account's secret. The new secret is printed EXACTLY
                         ONCE and all tokens previously issued to the account stop validating.
   
@@ -122,26 +129,29 @@ Description:
   rotated).
   
   Permissions are numeric ActionType codes (space-separated). Partition
-  accesses are partition GUIDs (space-separated).
+  memberships and partition accesses are partition GUIDs (space-separated).
+  Membership defines the partitions the account belongs to (its scope);
+  access defines the partitions the account is allowed to reach.
   
   Examples:
     fargo service-account create --client-id erp-importer
-    fargo service-account create --client-id erp-importer --permissions 1 4 6 --partitions 00000000-0000-0000-0000-000000000002
+    fargo service-account create --client-id erp-importer --permissions 1 4 6 --partition-memberships 00000000-0000-0000-0000-000000000002 --partition-accesses 00000000-0000-0000-0000-000000000002
 
 Usage:
   fargo service-account create [options]
 
 Options:
-  --client-id <client-id> (REQUIRED)  Unique client identifier (nameid format) for the service account.
-  --description <description>         Optional human-readable description.
-  --active                            Whether the account is active. Defaults to true.
-  --permissions <permissions>         ActionType permission codes to grant (space-separated).
-  --partitions <partitions>           Partition GUIDs to grant access to (space-separated).
-  --username <username>               Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
-  --password <password>               Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
-  -?, -h, --help                      Show help and usage information
-  --server <server>                   The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose                       Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+  --client-id <client-id> (REQUIRED)                       Unique client identifier (nameid format) for the service account.
+  --description <description>                              Optional human-readable description.
+  --active                                                 Whether the account is active. Defaults to true.
+  --permissions <permissions>                              ActionType permission codes to grant (space-separated).
+  --partition-memberships <partition-memberships>          Partition GUIDs the account belongs to - its partition membership (space-separated).
+  --partition-accesses, --partitions <partition-accesses>  Partition GUIDs to grant access to (space-separated). Alias: --partitions.
+  --username <username>                                    Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>                                    Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                                           Show help and usage information
+  --server <server>                                        The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                                            Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
@@ -151,9 +161,14 @@ Options:
 Description:
   Update an existing service account. Only the options you pass are changed.
   
+  Partition membership (the partitions the account belongs to) and
+  partition access (the partitions the account may reach) are managed
+  independently.
+  
   Examples:
     fargo service-account update 00000000-0000-0000-0000-000000000010 --active false
     fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
+    fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
 
 Usage:
   fargo service-account update <guid> [options]
@@ -162,17 +177,19 @@ Arguments:
   <guid>  The service account GUID.
 
 Options:
-  --description <description>                New description.
-  --active                                   Set the active state (true or false).
-  --add-permissions <add-permissions>        ActionType permission codes to grant (space-separated).
-  --remove-permissions <remove-permissions>  ActionType permission codes to revoke (space-separated).
-  --add-partitions <add-partitions>          Partition GUIDs to grant access to (space-separated).
-  --remove-partitions <remove-partitions>    Partition GUIDs to revoke access from (space-separated).
-  --username <username>                      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
-  --password <password>                      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
-  -?, -h, --help                             Show help and usage information
-  --server <server>                          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose                              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+  --description <description>                                                   New description.
+  --active                                                                      Set the active state (true or false).
+  --add-permissions <add-permissions>                                           ActionType permission codes to grant (space-separated).
+  --remove-permissions <remove-permissions>                                     ActionType permission codes to revoke (space-separated).
+  --add-partition-memberships <add-partition-memberships>                       Partition GUIDs to add to the account's membership (space-separated).
+  --remove-partition-memberships <remove-partition-memberships>                 Partition GUIDs to remove from the account's membership (space-separated).
+  --add-partition-accesses, --add-partitions <add-partition-accesses>           Partition GUIDs to grant access to (space-separated). Alias: --add-partitions.
+  --remove-partition-accesses, --remove-partitions <remove-partition-accesses>  Partition GUIDs to revoke access from (space-separated). Alias: --remove-partitions.
+  --username <username>                                                         Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>                                                         Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                                                                Show help and usage information
+  --server <server>                                                             The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                                                                 Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

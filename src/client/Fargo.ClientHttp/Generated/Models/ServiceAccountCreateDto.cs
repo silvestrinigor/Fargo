@@ -41,6 +41,14 @@ namespace Fargo.ClientHttp.Models
 #else
         public List<Guid?> PartitionAccessesToAdd { get; set; }
 #endif
+        /// <summary>Partition memberships to assign on creation (the partitions the accountbelongs to). Distinct from PartitionAccessesToAdd.</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public List<Guid?>? PartitionsToAdd { get; set; }
+#nullable restore
+#else
+        public List<Guid?> PartitionsToAdd { get; set; }
+#endif
         /// <summary>Permissions to grant on creation.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -79,6 +87,7 @@ namespace Fargo.ClientHttp.Models
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
+                { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "permissionsToAdd", n => { PermissionsToAdd = n.GetCollectionOfPrimitiveValues<int?>()?.AsList(); } },
             };
         }
@@ -93,6 +102,7 @@ namespace Fargo.ClientHttp.Models
             writer.WriteStringValue("description", Description);
             writer.WriteBoolValue("isActive", IsActive);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
+            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
             writer.WriteCollectionOfPrimitiveValues<int?>("permissionsToAdd", PermissionsToAdd);
             writer.WriteAdditionalData(AdditionalData);
         }

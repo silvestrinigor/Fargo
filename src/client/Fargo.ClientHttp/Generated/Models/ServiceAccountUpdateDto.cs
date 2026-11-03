@@ -41,6 +41,22 @@ namespace Fargo.ClientHttp.Models
 #else
         public List<Guid?> PartitionAccessesToRemove { get; set; }
 #endif
+        /// <summary>The partitionsToAdd property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public List<Guid?>? PartitionsToAdd { get; set; }
+#nullable restore
+#else
+        public List<Guid?> PartitionsToAdd { get; set; }
+#endif
+        /// <summary>The partitionsToRemove property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public List<Guid?>? PartitionsToRemove { get; set; }
+#nullable restore
+#else
+        public List<Guid?> PartitionsToRemove { get; set; }
+#endif
         /// <summary>The permissionsToAdd property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -86,6 +102,8 @@ namespace Fargo.ClientHttp.Models
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionAccessesToRemove", n => { PartitionAccessesToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
+                { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
+                { "partitionsToRemove", n => { PartitionsToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "permissionsToAdd", n => { PermissionsToAdd = n.GetCollectionOfPrimitiveValues<int?>()?.AsList(); } },
                 { "permissionsToRemove", n => { PermissionsToRemove = n.GetCollectionOfPrimitiveValues<int?>()?.AsList(); } },
             };
@@ -101,6 +119,8 @@ namespace Fargo.ClientHttp.Models
             writer.WriteBoolValue("isActive", IsActive);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToRemove", PartitionAccessesToRemove);
+            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
+            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToRemove", PartitionsToRemove);
             writer.WriteCollectionOfPrimitiveValues<int?>("permissionsToAdd", PermissionsToAdd);
             writer.WriteCollectionOfPrimitiveValues<int?>("permissionsToRemove", PermissionsToRemove);
             writer.WriteAdditionalData(AdditionalData);

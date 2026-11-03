@@ -1,9 +1,10 @@
 # Partitions
 
 A **partition** is a node in a hierarchy that scopes data. Every article, item,
-and audit log belongs to one or more partitions, and users and user groups are
-granted *access* to partitions. Partitions are how Fargo answers the question
-**"which data may this actor see and act on?"**
+and audit log belongs to one or more partitions, and users, user groups, and
+service accounts are granted *access* to partitions (and, like users, service
+accounts also belong to partitions as members). Partitions are how Fargo answers
+the question **"which data may this actor see and act on?"**
 
 Think of partitions as the organizational boundaries of your data — regions,
 branches, departments, teams — arranged as a tree.

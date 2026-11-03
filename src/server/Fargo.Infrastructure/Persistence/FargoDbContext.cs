@@ -139,6 +139,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new AuditLogPartitionConfiguration())
         .ApplyConfiguration(new AuthenticationAttemptConfiguration())
         .ApplyConfiguration(new ServiceAccountConfiguration())
+        .ApplyConfiguration(new ServiceAccountPartitionConfiguration())
         .ApplyConfiguration(new ItemEventConfiguration())
         .ApplyConfiguration(new ItemMovimentEventConfiguration())
         .ApplyConfiguration(new ItemLifecycleEventConfiguration());
