@@ -1,27 +1,41 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Common;
 
 /// <summary>
 /// Registration helpers that wire a handler together with its cross-cutting
 /// decorators so every command/query is observed uniformly (started / completed
-/// / failed with duration) and every command commits its unit of work on
-/// success, without per-handler logging or save code.
+/// / failed with duration) and every command commits its unit of work, without
+/// per-handler logging or save code.
 ///
 /// <para>
 /// Each helper registers the concrete handler as itself and registers the
 /// handler interface to resolve the decorator chain. For commands the resolved
 /// chain is
-/// <c>LoggingCommandHandlerDecorator(UnitOfWorkCommandHandlerDecorator(concreteHandler))</c>
-/// — logging outermost, the commit-on-success unit-of-work decorator in the
-/// middle, and the concrete handler innermost. Queries resolve only the logging
-/// decorator. All registrations are scoped, matching the previous lifetimes.
+/// <c>LoggingCommandHandlerDecorator(&lt;unit-of-work decorator&gt;(concreteHandler))</c>
+/// — logging outermost, the unit-of-work decorator in the middle, and the
+/// concrete handler innermost. The middle decorator is chosen automatically from
+/// the command type: a command implementing <see cref="ITransactionalCommand"/>
+/// gets the transactional (begin → handler → save → commit) decorator, every
+/// other command gets the commit-on-success decorator. Because the choice is
+/// driven by the command's own type it cannot be lost by registering with the
+/// wrong helper. Queries resolve only the logging decorator. All registrations
+/// are scoped.
+/// </para>
+///
+/// <para>
+/// The optional current actor used by the logging decorators is resolved from the
+/// scope via <see cref="ServiceProviderServiceExtensions.GetService{T}"/> — it is
+/// <see langword="null"/> in actor-less hosts (the seed worker) where
+/// <see cref="ICurrentActor"/> is not registered — and passed to the decorator as
+/// a typed dependency, so the decorator itself holds no service-provider reference.
 /// </para>
 /// </summary>
 public static class HandlerRegistrationExtensions
 {
-    /// <summary>Registers a no-response command handler behind the logging decorator.</summary>
+    /// <summary>Registers a no-response command handler behind the logging + unit-of-work chain.</summary>
     public static IServiceCollection AddFargoCommandHandler<TCommand, THandler>(this IServiceCollection services)
         where TCommand : ICommand
         where THandler : class, ICommandHandler<TCommand>
@@ -29,41 +43,14 @@ public static class HandlerRegistrationExtensions
         services.TryAddScoped<THandler>();
         services.AddScoped<ICommandHandler<TCommand>>(sp =>
             new LoggingCommandHandlerDecorator<TCommand>(
-                new UnitOfWorkCommandHandlerDecorator<TCommand>(
-                    sp.GetRequiredService<THandler>(),
-                    sp.GetRequiredService<IUnitOfWork>()),
-                sp,
-                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TCommand>>()));
+                BuildUnitOfWorkDecorator<TCommand>(sp.GetRequiredService<THandler>(), sp.GetRequiredService<IUnitOfWork>()),
+                sp.GetService<ICurrentActor>(),
+                sp.GetRequiredService<ILogger<TCommand>>()));
 
         return services;
     }
 
-    /// <summary>
-    /// Registers a no-response command handler behind the logging decorator with
-    /// a transactional unit-of-work decorator instead of the default
-    /// commit-on-success one. The resolved chain is
-    /// <c>LoggingCommandHandlerDecorator(TransactionalCommandHandlerDecorator(concreteHandler))</c>,
-    /// so the handler runs inside a single explicit transaction (begin → handler
-    /// → save → commit). Use this for commands whose handler acquires a
-    /// transaction-scoped database lock that must be held until the commit.
-    /// </summary>
-    public static IServiceCollection AddFargoTransactionalCommandHandler<TCommand, THandler>(this IServiceCollection services)
-        where TCommand : ICommand
-        where THandler : class, ICommandHandler<TCommand>
-    {
-        services.TryAddScoped<THandler>();
-        services.AddScoped<ICommandHandler<TCommand>>(sp =>
-            new LoggingCommandHandlerDecorator<TCommand>(
-                new TransactionalCommandHandlerDecorator<TCommand>(
-                    sp.GetRequiredService<THandler>(),
-                    sp.GetRequiredService<IUnitOfWork>()),
-                sp,
-                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TCommand>>()));
-
-        return services;
-    }
-
-    /// <summary>Registers a command handler with a response behind the logging decorator.</summary>
+    /// <summary>Registers a command handler with a response behind the logging + unit-of-work chain.</summary>
     public static IServiceCollection AddFargoCommandHandler<TCommand, TResponse, THandler>(this IServiceCollection services)
         where TCommand : ICommand<TResponse>
         where THandler : class, ICommandHandler<TCommand, TResponse>
@@ -74,8 +61,8 @@ public static class HandlerRegistrationExtensions
                 new UnitOfWorkCommandHandlerDecorator<TCommand, TResponse>(
                     sp.GetRequiredService<THandler>(),
                     sp.GetRequiredService<IUnitOfWork>()),
-                sp,
-                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TCommand>>()));
+                sp.GetService<ICurrentActor>(),
+                sp.GetRequiredService<ILogger<TCommand>>()));
 
         return services;
     }
@@ -89,9 +76,19 @@ public static class HandlerRegistrationExtensions
         services.AddScoped<IQueryHandler<TQuery, TResponse>>(sp =>
             new LoggingQueryHandlerDecorator<TQuery, TResponse>(
                 sp.GetRequiredService<THandler>(),
-                sp,
-                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TQuery>>()));
+                sp.GetService<ICurrentActor>(),
+                sp.GetRequiredService<ILogger<TQuery>>()));
 
         return services;
     }
+
+    // Selects the unit-of-work decorator for a no-response command from the command
+    // type itself: a transactional command (begin → handler → save → commit) when it
+    // implements ITransactionalCommand, otherwise the commit-on-success decorator.
+    private static ICommandHandler<TCommand> BuildUnitOfWorkDecorator<TCommand>(
+        ICommandHandler<TCommand> handler, IUnitOfWork unitOfWork)
+        where TCommand : ICommand
+        => typeof(ITransactionalCommand).IsAssignableFrom(typeof(TCommand))
+            ? new TransactionalCommandHandlerDecorator<TCommand>(handler, unitOfWork)
+            : new UnitOfWorkCommandHandlerDecorator<TCommand>(handler, unitOfWork);
 }

@@ -61,7 +61,7 @@ public static class DependencyInjectionServiceCollectionExtension
 
         public IServiceCollection AddFargoItemApplication() => services
         .AddFargoCommandHandler<ItemCreateCommand, Guid, ItemCreateCommandHandler>()
-        .AddFargoTransactionalCommandHandler<ItemUpdateCommand, ItemUpdateCommandHandler>()
+        .AddFargoCommandHandler<ItemUpdateCommand, ItemUpdateCommandHandler>()
         .AddFargoCommandHandler<ItemDeleteCommand, ItemDeleteCommandHandler>()
         .AddFargoCommandHandler<ItemEventCreateCommand, Guid, ItemEventCreateCommandHandler>()
         .AddFargoQueryHandler<ItemSingleQuery, ItemDto?, ItemSingleQueryHandler>()

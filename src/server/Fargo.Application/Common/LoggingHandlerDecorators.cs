@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Common;
@@ -10,11 +9,13 @@ namespace Fargo.Application.Common;
 /// handlers themselves contain no start/finish logging.
 ///
 /// <para>
-/// The current actor is resolved optionally from the request scope: it is
+/// The current actor is an optional dependency (<c>ICurrentActor?</c>): it is
 /// present in the HTTP host (where <c>ICurrentActor</c> is registered and the
 /// request is authenticated) and absent in actor-less contexts such as the seed
 /// worker or the login/refresh flows, in which case only the operation name is
-/// attached to the scope.
+/// attached to the scope. The registration layer supplies <see langword="null"/>
+/// when the service is not registered, so the decorator depends on the actor
+/// abstraction directly instead of reaching into the service provider.
 /// </para>
 /// </summary>
 internal static class LoggingHandlerDecorator
@@ -24,15 +25,12 @@ internal static class LoggingHandlerDecorator
     /// e.g. <c>ArticleDeleteCommand</c>).
     /// </summary>
     public static string OperationName<TMessage>() => typeof(TMessage).Name;
-
-    public static ICurrentActor? TryGetActor(IServiceProvider services)
-        => services.GetService<ICurrentActor>();
 }
 
 /// <summary>Logging decorator for a command handler with no response.</summary>
 public sealed class LoggingCommandHandlerDecorator<TCommand>(
     ICommandHandler<TCommand> inner,
-    IServiceProvider services,
+    ICurrentActor? currentActor,
     ILogger<TCommand> logger) : ICommandHandler<TCommand>
     where TCommand : ICommand
 {
@@ -40,7 +38,7 @@ public sealed class LoggingCommandHandlerDecorator<TCommand>(
     {
         using var op = logger.BeginOperation(
             LoggingHandlerDecorator.OperationName<TCommand>(),
-            LoggingHandlerDecorator.TryGetActor(services));
+            currentActor);
 
         try
         {
@@ -58,7 +56,7 @@ public sealed class LoggingCommandHandlerDecorator<TCommand>(
 /// <summary>Logging decorator for a command handler that returns a response.</summary>
 public sealed class LoggingCommandHandlerDecorator<TCommand, TResponse>(
     ICommandHandler<TCommand, TResponse> inner,
-    IServiceProvider services,
+    ICurrentActor? currentActor,
     ILogger<TCommand> logger) : ICommandHandler<TCommand, TResponse>
     where TCommand : ICommand<TResponse>
 {
@@ -66,7 +64,7 @@ public sealed class LoggingCommandHandlerDecorator<TCommand, TResponse>(
     {
         using var op = logger.BeginOperation(
             LoggingHandlerDecorator.OperationName<TCommand>(),
-            LoggingHandlerDecorator.TryGetActor(services));
+            currentActor);
 
         try
         {
@@ -85,7 +83,7 @@ public sealed class LoggingCommandHandlerDecorator<TCommand, TResponse>(
 /// <summary>Logging decorator for a query handler.</summary>
 public sealed class LoggingQueryHandlerDecorator<TQuery, TResponse>(
     IQueryHandler<TQuery, TResponse> inner,
-    IServiceProvider services,
+    ICurrentActor? currentActor,
     ILogger<TQuery> logger) : IQueryHandler<TQuery, TResponse>
     where TQuery : IQuery<TResponse>
 {
@@ -93,7 +91,7 @@ public sealed class LoggingQueryHandlerDecorator<TQuery, TResponse>(
     {
         using var op = logger.BeginOperation(
             LoggingHandlerDecorator.OperationName<TQuery>(),
-            LoggingHandlerDecorator.TryGetActor(services));
+            currentActor);
 
         try
         {
