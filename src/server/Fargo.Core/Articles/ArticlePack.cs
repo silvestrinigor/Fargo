@@ -82,7 +82,7 @@ public sealed class ArticlePack
         Quantity = quantity;
     }
 
-    internal void ValidateQuantity(Scalar quantity)
+    internal static void ValidateQuantity(Scalar quantity)
     {
         if (quantity <= 0.Amount())
         {
