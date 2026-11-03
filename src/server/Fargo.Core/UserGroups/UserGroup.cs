@@ -356,6 +356,29 @@ public class UserGroup : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConc
     }
 
     /// <summary>
+    /// Validates the invariants, intrinsic to this user group, that must hold
+    /// for it to be deleted.
+    /// </summary>
+    /// <remarks>
+    /// This method validates only invariants that can be enforced by this
+    /// <see cref="UserGroup"/> instance. It does <b>not</b> validate constraints
+    /// that require access to other user groups, such as the presence of child
+    /// user groups. Those must be validated through <see cref="UserGroupService"/>.
+    /// </remarks>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to delete the built-in administrators user group.
+    /// </exception>
+    public void ValidateCanBeDeleted()
+    {
+        if (IsAdministrators)
+        {
+            throw new FargoCoreException(
+                $"The administrators user group '{Guid}' cannot be deleted.",
+                FargoErrorType.InvalidOperation);
+        }
+    }
+
+    /// <summary>
     /// Assigns the specified user group as the parent of this user group.
     /// </summary>
     /// <param name="parentUserGroup">

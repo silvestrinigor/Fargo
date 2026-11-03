@@ -113,12 +113,7 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
     {
         ArgumentNullException.ThrowIfNull(partition);
 
-        if (partition.IsGlobalPartition)
-        {
-            throw new FargoCoreException(
-                $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' cannot be deleted.",
-                FargoErrorType.InvalidOperation);
-        }
+        partition.ValidateCanBeDeleted();
 
         var hasChildrenPartitions = await partitionRepository.HasChildrenAsync(partition.Guid, cancellationToken);
 

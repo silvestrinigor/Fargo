@@ -45,11 +45,7 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
     /// </exception>
     public async Task ValidateUserGroupCanBeDeletedAsync(UserGroup userGroup, CancellationToken cancellationToken = default)
     {
-        if (userGroup.IsAdministrators)
-        {
-            throw new FargoCoreException(
-                $"The administrators user group '{userGroup.Guid}' cannot be deleted.", FargoErrorType.InvalidOperation);
-        }
+        userGroup.ValidateCanBeDeleted();
 
         var anyChildUserGroup = await userGroupRepository.HasChildrenUserGroupAsync(userGroup.Guid, cancellationToken);
 

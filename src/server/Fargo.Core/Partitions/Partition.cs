@@ -147,6 +147,29 @@ public class Partition : IEntity, IEntityTyped, IConcurrencyVersioned
         ParentPartitionGuid = parentPartition.Guid;
     }
 
+    /// <summary>
+    /// Validates the invariants, intrinsic to this partition, that must hold for
+    /// it to be deleted.
+    /// </summary>
+    /// <remarks>
+    /// This method validates only invariants that can be enforced by this
+    /// <see cref="Partition"/> instance. It does <b>not</b> validate constraints
+    /// that require access to other partitions, such as the presence of child
+    /// partitions. Those must be validated through <see cref="PartitionService"/>.
+    /// </remarks>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when attempting to delete the global partition.
+    /// </exception>
+    public void ValidateCanBeDeleted()
+    {
+        if (IsGlobalPartition)
+        {
+            throw new FargoCoreException(
+                $"The global partition '{FargoCoreWellKnowGuids.GlobalPartitionGuid}' cannot be deleted.",
+                FargoErrorType.InvalidOperation);
+        }
+    }
+
     /// <inheritdoc/>
     public EntityType GetEntityType() => EntityType.Partition;
 }
