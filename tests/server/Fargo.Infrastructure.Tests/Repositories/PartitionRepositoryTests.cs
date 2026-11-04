@@ -1,7 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Core.Common;
 using Fargo.Core.Informations;
-using Fargo.Core.Partitions;
+using Fargo.Core.Entities.Partitions;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;

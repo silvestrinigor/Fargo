@@ -1,11 +1,11 @@
 using Fargo.Application.Common;
-using Fargo.Core.Actors;
-using Fargo.Core.Articles;
+using Fargo.Core.Entities.Actors;
+using Fargo.Core.Entities.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
 using Fargo.Core.Informations;
-using Fargo.Core.Partitions;
+using Fargo.Core.Entities.Partitions;
 using UnitsNet;
 
 namespace Fargo.Application.Articles;

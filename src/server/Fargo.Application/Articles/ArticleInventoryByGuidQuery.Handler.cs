@@ -1,6 +1,6 @@
 using Fargo.Application.Common;
-using Fargo.Core.Actors;
-using Fargo.Core.Articles;
+using Fargo.Core.Entities.Actors;
+using Fargo.Core.Entities.Articles;
 
 namespace Fargo.Application.Articles;
 

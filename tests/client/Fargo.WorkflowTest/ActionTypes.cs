@@ -2,7 +2,7 @@ namespace Fargo.WorkflowTest;
 
 /// <summary>
 /// The permission action codes as exposed by the API. These mirror
-/// <c>Fargo.Core.Actors.ActionType</c>; the generated client transmits them as
+/// <c>Fargo.Core.Entities.Actors.ActionType</c>; the generated client transmits them as
 /// plain integers (<c>List&lt;int?&gt;</c>), so the workflow references them by
 /// these named constants for readability.
 /// </summary>

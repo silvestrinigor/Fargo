@@ -1,4 +1,4 @@
-using Fargo.Core.Items;
+using Fargo.Core.Entities.Items;
 using NpgsqlTypes;
 
 namespace Fargo.Infrastructure.Entities;

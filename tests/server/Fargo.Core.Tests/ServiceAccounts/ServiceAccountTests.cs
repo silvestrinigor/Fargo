@@ -1,6 +1,6 @@
-using Fargo.Core.Actors;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Informations;
-using Fargo.Core.Partitions;
+using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Security;
 
 namespace Fargo.Core.Tests.ServiceAccounts;

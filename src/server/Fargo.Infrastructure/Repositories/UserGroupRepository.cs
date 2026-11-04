@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using Fargo.Application.Common;
 using Fargo.Application.UserGroups;
 using Fargo.Core.Informations;
-using Fargo.Core.UserGroups;
+using Fargo.Core.Entities.UserGroups;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

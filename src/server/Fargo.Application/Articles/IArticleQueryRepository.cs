@@ -197,10 +197,10 @@ public interface IArticleQueryRepository
     /// </param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>
-    /// The article's <see cref="Fargo.Core.Articles.ArticleTrackingMode"/>, or
+    /// The article's <see cref="Fargo.Core.Entities.Articles.ArticleTrackingMode"/>, or
     /// <see langword="null"/> when the article was not found.
     /// </returns>
-    Task<Fargo.Core.Articles.ArticleTrackingMode?> GetTrackingModeByGuidAsync(
+    Task<Fargo.Core.Entities.Articles.ArticleTrackingMode?> GetTrackingModeByGuidAsync(
         Guid articleGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default

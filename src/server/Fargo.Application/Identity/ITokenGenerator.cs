@@ -1,5 +1,5 @@
-using Fargo.Core.ServiceAccounts;
-using Fargo.Core.Users;
+using Fargo.Core.Entities.Actors.ServiceAccounts;
+using Fargo.Core.Entities.Actors.Users;
 
 namespace Fargo.Application.Identity;
 

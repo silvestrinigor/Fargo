@@ -23,190 +23,6 @@ namespace Fargo.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Fargo.Core.Actors.ActorPartition", b =>
-                {
-                    b.Property<Guid>("ActorGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("actor_guid");
-
-                    b.Property<Guid>("PartitionGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("partition_guid");
-
-                    b.HasKey("ActorGuid", "PartitionGuid")
-                        .HasName("pk_actor_partitions");
-
-                    b.HasIndex("PartitionGuid")
-                        .HasDatabaseName("ix_actor_partitions_partition_guid");
-
-                    b.ToTable("actor_partitions", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Actors.ActorPartitionAccess", b =>
-                {
-                    b.Property<Guid>("ActorGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("actor_guid");
-
-                    b.Property<Guid>("PartitionGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("partition_guid");
-
-                    b.HasKey("ActorGuid", "PartitionGuid")
-                        .HasName("pk_actor_partition_accesses");
-
-                    b.HasIndex("PartitionGuid")
-                        .HasDatabaseName("ix_actor_partition_accesses_partition_guid");
-
-                    b.ToTable("actor_partition_accesses", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleBarcode", b =>
-                {
-                    b.Property<Guid>("ArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_guid");
-
-                    b.Property<string>("Ean13")
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)")
-                        .HasColumnName("ean13");
-
-                    b.HasKey("ArticleGuid")
-                        .HasName("pk_article_barcodes");
-
-                    b.HasIndex("Ean13")
-                        .IsUnique()
-                        .HasDatabaseName("ix_article_barcodes_ean13")
-                        .HasFilter("ean13 IS NOT NULL");
-
-                    b.ToTable("article_barcodes", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleContainer", b =>
-                {
-                    b.Property<Guid>("ArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_guid");
-
-                    b.Property<string>("MaxMass")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("max_mass");
-
-                    b.HasKey("ArticleGuid")
-                        .HasName("pk_article_containers");
-
-                    b.ToTable("article_containers", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleDimension", b =>
-                {
-                    b.Property<Guid>("ArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_guid");
-
-                    b.Property<string>("X")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("x");
-
-                    b.Property<string>("Y")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("y");
-
-                    b.Property<string>("Z")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("z");
-
-                    b.HasKey("ArticleGuid")
-                        .HasName("pk_article_dimensions");
-
-                    b.ToTable("article_dimensions", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleKitComponent", b =>
-                {
-                    b.Property<Guid>("KitArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("kit_article_guid");
-
-                    b.Property<Guid>("FromArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("from_article_guid");
-
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double precision")
-                        .HasColumnName("quantity");
-
-                    b.HasKey("KitArticleGuid")
-                        .HasName("pk_article_kit_components");
-
-                    b.HasIndex("FromArticleGuid")
-                        .HasDatabaseName("ix_article_kit_components_from_article_guid");
-
-                    b.ToTable("article_kit_components", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticlePack", b =>
-                {
-                    b.Property<Guid>("PackArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("pack_article_guid");
-
-                    b.Property<Guid>("FromArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("from_article_guid");
-
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double precision")
-                        .HasColumnName("quantity");
-
-                    b.HasKey("PackArticleGuid")
-                        .HasName("pk_article_packs");
-
-                    b.HasIndex("FromArticleGuid")
-                        .HasDatabaseName("ix_article_packs_from_article_guid");
-
-                    b.ToTable("article_packs", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticlePartition", b =>
-                {
-                    b.Property<Guid>("ArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_guid");
-
-                    b.Property<Guid>("PartitionGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("partition_guid");
-
-                    b.HasKey("ArticleGuid", "PartitionGuid")
-                        .HasName("pk_article_partitions");
-
-                    b.HasIndex("PartitionGuid")
-                        .HasDatabaseName("ix_article_partitions_partition_guid");
-
-                    b.ToTable("article_partitions", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleVariation", b =>
-                {
-                    b.Property<Guid>("VariationArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("variation_article_guid");
-
-                    b.Property<Guid>("FromArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("from_article_guid");
-
-                    b.HasKey("VariationArticleGuid")
-                        .HasName("pk_article_variations");
-
-                    b.HasIndex("FromArticleGuid")
-                        .HasDatabaseName("ix_article_variations_from_article_guid");
-
-                    b.ToTable("article_variations", (string)null);
-                });
-
             modelBuilder.Entity("Fargo.Core.Audits.AuditLog", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -277,6 +93,282 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("audit_log_partitions", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.ActorPartition", b =>
+                {
+                    b.Property<Guid>("ActorGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_guid");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("partition_guid");
+
+                    b.HasKey("ActorGuid", "PartitionGuid")
+                        .HasName("pk_actor_partitions");
+
+                    b.HasIndex("PartitionGuid")
+                        .HasDatabaseName("ix_actor_partitions_partition_guid");
+
+                    b.ToTable("actor_partitions", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.ActorPartitionAccess", b =>
+                {
+                    b.Property<Guid>("ActorGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_guid");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("partition_guid");
+
+                    b.HasKey("ActorGuid", "PartitionGuid")
+                        .HasName("pk_actor_partition_accesses");
+
+                    b.HasIndex("PartitionGuid")
+                        .HasDatabaseName("ix_actor_partition_accesses_partition_guid");
+
+                    b.ToTable("actor_partition_accesses", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.ServiceAccounts.ServiceAccount", b =>
+                {
+                    b.Property<Guid>("ActorGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_guid");
+
+                    b.Property<Guid>("AuthVersion")
+                        .HasColumnType("uuid")
+                        .HasColumnName("auth_version");
+
+                    b.Property<string>("SecretHash")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("secret_hash");
+
+                    b.HasKey("ActorGuid")
+                        .HasName("pk_service_accounts");
+
+                    b.ToTable("service_accounts", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Users.User", b =>
+                {
+                    b.Property<Guid>("ActorGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_guid");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("first_name");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_name");
+
+                    b.HasKey("ActorGuid")
+                        .HasName("pk_users");
+
+                    b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Users.UserAuthentication", b =>
+                {
+                    b.Property<Guid>("UserGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_guid");
+
+                    b.Property<Guid>("AuthVersion")
+                        .HasColumnType("uuid")
+                        .HasColumnName("auth_version");
+
+                    b.Property<long?>("DefaultPasswordExpirationPeriod")
+                        .HasColumnType("bigint")
+                        .HasColumnName("default_password_expiration_period");
+
+                    b.Property<string>("PasswordHash")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<DateTimeOffset?>("RequirePasswordChangeAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("require_password_change_at");
+
+                    b.HasKey("UserGuid")
+                        .HasName("pk_user_authentications");
+
+                    b.ToTable("user_authentications", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Users.UserUserGroup", b =>
+                {
+                    b.Property<Guid>("UserGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_guid");
+
+                    b.Property<Guid>("UserGroupGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_group_guid");
+
+                    b.HasKey("UserGuid", "UserGroupGuid")
+                        .HasName("pk_user_user_groups");
+
+                    b.HasIndex("UserGroupGuid")
+                        .HasDatabaseName("ix_user_user_groups_user_group_guid");
+
+                    b.ToTable("user_user_groups", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleBarcode", b =>
+                {
+                    b.Property<Guid>("ArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_guid");
+
+                    b.Property<string>("Ean13")
+                        .HasMaxLength(13)
+                        .HasColumnType("character varying(13)")
+                        .HasColumnName("ean13");
+
+                    b.HasKey("ArticleGuid")
+                        .HasName("pk_article_barcodes");
+
+                    b.HasIndex("Ean13")
+                        .IsUnique()
+                        .HasDatabaseName("ix_article_barcodes_ean13")
+                        .HasFilter("ean13 IS NOT NULL");
+
+                    b.ToTable("article_barcodes", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleContainer", b =>
+                {
+                    b.Property<Guid>("ArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_guid");
+
+                    b.Property<string>("MaxMass")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("max_mass");
+
+                    b.HasKey("ArticleGuid")
+                        .HasName("pk_article_containers");
+
+                    b.ToTable("article_containers", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleDimension", b =>
+                {
+                    b.Property<Guid>("ArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_guid");
+
+                    b.Property<string>("X")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("x");
+
+                    b.Property<string>("Y")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("y");
+
+                    b.Property<string>("Z")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("z");
+
+                    b.HasKey("ArticleGuid")
+                        .HasName("pk_article_dimensions");
+
+                    b.ToTable("article_dimensions", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleKitComponent", b =>
+                {
+                    b.Property<Guid>("KitArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("kit_article_guid");
+
+                    b.Property<Guid>("FromArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_article_guid");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("quantity");
+
+                    b.HasKey("KitArticleGuid")
+                        .HasName("pk_article_kit_components");
+
+                    b.HasIndex("FromArticleGuid")
+                        .HasDatabaseName("ix_article_kit_components_from_article_guid");
+
+                    b.ToTable("article_kit_components", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticlePack", b =>
+                {
+                    b.Property<Guid>("PackArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("pack_article_guid");
+
+                    b.Property<Guid>("FromArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_article_guid");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("quantity");
+
+                    b.HasKey("PackArticleGuid")
+                        .HasName("pk_article_packs");
+
+                    b.HasIndex("FromArticleGuid")
+                        .HasDatabaseName("ix_article_packs_from_article_guid");
+
+                    b.ToTable("article_packs", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticlePartition", b =>
+                {
+                    b.Property<Guid>("ArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_guid");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("partition_guid");
+
+                    b.HasKey("ArticleGuid", "PartitionGuid")
+                        .HasName("pk_article_partitions");
+
+                    b.HasIndex("PartitionGuid")
+                        .HasDatabaseName("ix_article_partitions_partition_guid");
+
+                    b.ToTable("article_partitions", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleVariation", b =>
+                {
+                    b.Property<Guid>("VariationArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("variation_article_guid");
+
+                    b.Property<Guid>("FromArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_article_guid");
+
+                    b.HasKey("VariationArticleGuid")
+                        .HasName("pk_article_variations");
+
+                    b.HasIndex("FromArticleGuid")
+                        .HasDatabaseName("ix_article_variations_from_article_guid");
+
+                    b.ToTable("article_variations", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.Entity", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -297,6 +389,189 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("entities", (string)null);
 
                     b.UseTptMappingStrategy();
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Items.ItemMoviment", b =>
+                {
+                    b.Property<Guid>("ItemGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_guid");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<Guid?>("MovedToContainerGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("moved_to_container_guid");
+
+                    b.Property<bool>("RemovedFromContainers")
+                        .HasColumnType("boolean")
+                        .HasColumnName("removed_from_containers");
+
+                    b.HasKey("ItemGuid", "OccurredAt")
+                        .HasName("pk_item_moviments");
+
+                    b.HasIndex("MovedToContainerGuid")
+                        .HasDatabaseName("ix_item_moviments_moved_to_container_guid");
+
+                    b.ToTable("item_moviments", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Items.ItemPartition", b =>
+                {
+                    b.Property<Guid>("ItemGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_guid");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("partition_guid");
+
+                    b.HasKey("ItemGuid", "PartitionGuid")
+                        .HasName("pk_item_partitions");
+
+                    b.HasIndex("PartitionGuid")
+                        .HasDatabaseName("ix_item_partitions_partition_guid");
+
+                    b.ToTable("item_partitions", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroupPartition", b =>
+                {
+                    b.Property<Guid>("UserGroupGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_group_guid");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("partition_guid");
+
+                    b.HasKey("UserGroupGuid", "PartitionGuid")
+                        .HasName("pk_user_group_partitions");
+
+                    b.HasIndex("PartitionGuid")
+                        .HasDatabaseName("ix_user_group_partitions_partition_guid");
+
+                    b.ToTable("user_group_partitions", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroupPartitionAccess", b =>
+                {
+                    b.Property<Guid>("UserGroupGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_group_guid");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("partition_guid");
+
+                    b.HasKey("UserGroupGuid", "PartitionGuid")
+                        .HasName("pk_user_group_partition_accesses");
+
+                    b.HasIndex("PartitionGuid")
+                        .HasDatabaseName("ix_user_group_partition_accesses_partition_guid");
+
+                    b.ToTable("user_group_partition_accesses", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
+                {
+                    b.Property<Guid>("Guid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("guid");
+
+                    b.Property<Guid>("ArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_guid");
+
+                    b.Property<short>("EventType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("event_type");
+
+                    b.Property<DateTimeOffset>("OccuredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occured_at");
+
+                    b.HasKey("Guid")
+                        .HasName("pk_item_events");
+
+                    b.HasIndex("ArticleGuid")
+                        .HasDatabaseName("ix_item_events_article_guid");
+
+                    b.HasIndex("OccuredAt")
+                        .HasDatabaseName("ix_item_events_occured_at");
+
+                    b.HasIndex("ArticleGuid", "OccuredAt")
+                        .HasDatabaseName("ix_item_events_article_guid_occured_at");
+
+                    b.ToTable("item_events", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Events.ItemLifecycleEvent", b =>
+                {
+                    b.Property<Guid>("ItemEventGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_event_guid");
+
+                    b.Property<Guid?>("ItemContainerGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_container_guid");
+
+                    b.Property<bool>("NoContainer")
+                        .HasColumnType("boolean")
+                        .HasColumnName("no_container");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("quantity");
+
+                    b.HasKey("ItemEventGuid")
+                        .HasName("pk_item_lifecycle_events");
+
+                    b.HasIndex("ItemContainerGuid")
+                        .HasDatabaseName("ix_item_lifecycle_events_item_container_guid");
+
+                    b.ToTable("item_lifecycle_events", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Events.ItemMovimentEvent", b =>
+                {
+                    b.Property<Guid>("ItemEventGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_event_guid");
+
+                    b.Property<Guid?>("FromItemContainerGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_item_container_guid");
+
+                    b.Property<bool>("FromNoContainer")
+                        .HasColumnType("boolean")
+                        .HasColumnName("from_no_container");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid?>("ToItemContainerGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("to_item_container_guid");
+
+                    b.Property<bool>("ToNoContainer")
+                        .HasColumnType("boolean")
+                        .HasColumnName("to_no_container");
+
+                    b.HasKey("ItemEventGuid")
+                        .HasName("pk_item_moviment_events");
+
+                    b.HasIndex("FromItemContainerGuid")
+                        .HasDatabaseName("ix_item_moviment_events_from_item_container_guid");
+
+                    b.HasIndex("ToItemContainerGuid")
+                        .HasDatabaseName("ix_item_moviment_events_to_item_container_guid");
+
+                    b.ToTable("item_moviment_events", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Identity.AuthenticationAttempt", b =>
@@ -371,281 +646,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Items.Events.ItemEvent", b =>
-                {
-                    b.Property<Guid>("Guid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("guid");
-
-                    b.Property<Guid>("ArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_guid");
-
-                    b.Property<short>("EventType")
-                        .HasColumnType("smallint")
-                        .HasColumnName("event_type");
-
-                    b.Property<DateTimeOffset>("OccuredAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("occured_at");
-
-                    b.HasKey("Guid")
-                        .HasName("pk_item_events");
-
-                    b.HasIndex("ArticleGuid")
-                        .HasDatabaseName("ix_item_events_article_guid");
-
-                    b.HasIndex("OccuredAt")
-                        .HasDatabaseName("ix_item_events_occured_at");
-
-                    b.HasIndex("ArticleGuid", "OccuredAt")
-                        .HasDatabaseName("ix_item_events_article_guid_occured_at");
-
-                    b.ToTable("item_events", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.Events.ItemLifecycleEvent", b =>
-                {
-                    b.Property<Guid>("ItemEventGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("item_event_guid");
-
-                    b.Property<Guid?>("ItemContainerGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("item_container_guid");
-
-                    b.Property<bool>("NoContainer")
-                        .HasColumnType("boolean")
-                        .HasColumnName("no_container");
-
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double precision")
-                        .HasColumnName("quantity");
-
-                    b.HasKey("ItemEventGuid")
-                        .HasName("pk_item_lifecycle_events");
-
-                    b.HasIndex("ItemContainerGuid")
-                        .HasDatabaseName("ix_item_lifecycle_events_item_container_guid");
-
-                    b.ToTable("item_lifecycle_events", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.Events.ItemMovimentEvent", b =>
-                {
-                    b.Property<Guid>("ItemEventGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("item_event_guid");
-
-                    b.Property<Guid?>("FromItemContainerGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("from_item_container_guid");
-
-                    b.Property<bool>("FromNoContainer")
-                        .HasColumnType("boolean")
-                        .HasColumnName("from_no_container");
-
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double precision")
-                        .HasColumnName("quantity");
-
-                    b.Property<Guid?>("ToItemContainerGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("to_item_container_guid");
-
-                    b.Property<bool>("ToNoContainer")
-                        .HasColumnType("boolean")
-                        .HasColumnName("to_no_container");
-
-                    b.HasKey("ItemEventGuid")
-                        .HasName("pk_item_moviment_events");
-
-                    b.HasIndex("FromItemContainerGuid")
-                        .HasDatabaseName("ix_item_moviment_events_from_item_container_guid");
-
-                    b.HasIndex("ToItemContainerGuid")
-                        .HasDatabaseName("ix_item_moviment_events_to_item_container_guid");
-
-                    b.ToTable("item_moviment_events", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.ItemMoviment", b =>
-                {
-                    b.Property<Guid>("ItemGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("item_guid");
-
-                    b.Property<DateTimeOffset>("OccurredAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("occurred_at");
-
-                    b.Property<Guid?>("MovedToContainerGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("moved_to_container_guid");
-
-                    b.Property<bool>("RemovedFromContainers")
-                        .HasColumnType("boolean")
-                        .HasColumnName("removed_from_containers");
-
-                    b.HasKey("ItemGuid", "OccurredAt")
-                        .HasName("pk_item_moviments");
-
-                    b.HasIndex("MovedToContainerGuid")
-                        .HasDatabaseName("ix_item_moviments_moved_to_container_guid");
-
-                    b.ToTable("item_moviments", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.ItemPartition", b =>
-                {
-                    b.Property<Guid>("ItemGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("item_guid");
-
-                    b.Property<Guid>("PartitionGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("partition_guid");
-
-                    b.HasKey("ItemGuid", "PartitionGuid")
-                        .HasName("pk_item_partitions");
-
-                    b.HasIndex("PartitionGuid")
-                        .HasDatabaseName("ix_item_partitions_partition_guid");
-
-                    b.ToTable("item_partitions", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.ServiceAccounts.ServiceAccount", b =>
-                {
-                    b.Property<Guid>("ActorGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("actor_guid");
-
-                    b.Property<Guid>("AuthVersion")
-                        .HasColumnType("uuid")
-                        .HasColumnName("auth_version");
-
-                    b.Property<string>("SecretHash")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("secret_hash");
-
-                    b.HasKey("ActorGuid")
-                        .HasName("pk_service_accounts");
-
-                    b.ToTable("service_accounts", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroupPartition", b =>
-                {
-                    b.Property<Guid>("UserGroupGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_group_guid");
-
-                    b.Property<Guid>("PartitionGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("partition_guid");
-
-                    b.HasKey("UserGroupGuid", "PartitionGuid")
-                        .HasName("pk_user_group_partitions");
-
-                    b.HasIndex("PartitionGuid")
-                        .HasDatabaseName("ix_user_group_partitions_partition_guid");
-
-                    b.ToTable("user_group_partitions", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroupPartitionAccess", b =>
-                {
-                    b.Property<Guid>("UserGroupGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_group_guid");
-
-                    b.Property<Guid>("PartitionGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("partition_guid");
-
-                    b.HasKey("UserGroupGuid", "PartitionGuid")
-                        .HasName("pk_user_group_partition_accesses");
-
-                    b.HasIndex("PartitionGuid")
-                        .HasDatabaseName("ix_user_group_partition_accesses_partition_guid");
-
-                    b.ToTable("user_group_partition_accesses", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Users.User", b =>
-                {
-                    b.Property<Guid>("ActorGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("actor_guid");
-
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("first_name");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("last_name");
-
-                    b.HasKey("ActorGuid")
-                        .HasName("pk_users");
-
-                    b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Users.UserAuthentication", b =>
-                {
-                    b.Property<Guid>("UserGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_guid");
-
-                    b.Property<Guid>("AuthVersion")
-                        .HasColumnType("uuid")
-                        .HasColumnName("auth_version");
-
-                    b.Property<long?>("DefaultPasswordExpirationPeriod")
-                        .HasColumnType("bigint")
-                        .HasColumnName("default_password_expiration_period");
-
-                    b.Property<string>("PasswordHash")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("password_hash");
-
-                    b.Property<DateTimeOffset?>("RequirePasswordChangeAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("require_password_change_at");
-
-                    b.HasKey("UserGuid")
-                        .HasName("pk_user_authentications");
-
-                    b.ToTable("user_authentications", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Users.UserUserGroup", b =>
-                {
-                    b.Property<Guid>("UserGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_guid");
-
-                    b.Property<Guid>("UserGroupGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_group_guid");
-
-                    b.HasKey("UserGuid", "UserGroupGuid")
-                        .HasName("pk_user_user_groups");
-
-                    b.HasIndex("UserGroupGuid")
-                        .HasDatabaseName("ix_user_user_groups_user_group_guid");
-
-                    b.ToTable("user_user_groups", (string)null);
-                });
-
             modelBuilder.Entity("Fargo.Infrastructure.Entities.ItemParentContainerHistoryPostgresTemporal", b =>
                 {
                     b.Property<int>("Id")
@@ -685,7 +685,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("item_parent_container_history", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Actors.Actor", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Actor", b =>
                 {
                     b.HasBaseType("Fargo.Core.Entities.Entity");
 
@@ -727,7 +727,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("actors", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Articles.Article", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.Article", b =>
                 {
                     b.HasBaseType("Fargo.Core.Entities.Entity");
 
@@ -772,7 +772,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("articles", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Items.Item", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Items.Item", b =>
                 {
                     b.HasBaseType("Fargo.Core.Entities.Entity");
 
@@ -803,7 +803,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("items", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Partitions.Partition", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Partitions.Partition", b =>
                 {
                     b.HasBaseType("Fargo.Core.Entities.Entity");
 
@@ -835,7 +835,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("partitions", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroup", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroup", b =>
                 {
                     b.HasBaseType("Fargo.Core.Entities.Entity");
 
@@ -880,16 +880,35 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("user_groups", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Actors.ActorPartition", b =>
+            modelBuilder.Entity("Fargo.Core.Audits.AuditLogPartition", b =>
                 {
-                    b.HasOne("Fargo.Core.Actors.Actor", "Actor")
+                    b.HasOne("Fargo.Core.Audits.AuditLog", "AuditLog")
+                        .WithMany("Partitions")
+                        .HasForeignKey("AuditLogGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_audit_log_partitions_audit_logs_audit_log_guid");
+
+                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", null)
+                        .WithMany()
+                        .HasForeignKey("PartitionGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_audit_log_partitions_partitions_partition_guid");
+
+                    b.Navigation("AuditLog");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.ActorPartition", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Actors.Actor", "Actor")
                         .WithMany("Partitions")
                         .HasForeignKey("ActorGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_actor_partitions_actors_actor_guid");
 
-                    b.HasOne("Fargo.Core.Partitions.Partition", "Partition")
+                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", "Partition")
                         .WithMany()
                         .HasForeignKey("PartitionGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -901,16 +920,16 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Partition");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Actors.ActorPartitionAccess", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.ActorPartitionAccess", b =>
                 {
-                    b.HasOne("Fargo.Core.Actors.Actor", "Actor")
+                    b.HasOne("Fargo.Core.Entities.Actors.Actor", "Actor")
                         .WithMany("PartitionAccesses")
                         .HasForeignKey("ActorGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_actor_partition_accesses_actors_actor_guid");
 
-                    b.HasOne("Fargo.Core.Partitions.Partition", "Partition")
+                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", "Partition")
                         .WithMany()
                         .HasForeignKey("PartitionGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -922,253 +941,11 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Partition");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleBarcode", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.ServiceAccounts.ServiceAccount", b =>
                 {
-                    b.HasOne("Fargo.Core.Articles.Article", "Article")
-                        .WithOne("Barcode")
-                        .HasForeignKey("Fargo.Core.Articles.ArticleBarcode", "ArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_barcodes_articles_article_guid");
-
-                    b.Navigation("Article");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleContainer", b =>
-                {
-                    b.HasOne("Fargo.Core.Articles.Article", "Article")
-                        .WithOne("Container")
-                        .HasForeignKey("Fargo.Core.Articles.ArticleContainer", "ArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_containers_articles_article_guid");
-
-                    b.Navigation("Article");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleDimension", b =>
-                {
-                    b.HasOne("Fargo.Core.Articles.Article", "Article")
-                        .WithOne("Dimension")
-                        .HasForeignKey("Fargo.Core.Articles.ArticleDimension", "ArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_dimensions_articles_article_guid");
-
-                    b.Navigation("Article");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleKitComponent", b =>
-                {
-                    b.HasOne("Fargo.Core.Articles.Article", "FromArticle")
-                        .WithMany()
-                        .HasForeignKey("FromArticleGuid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_kit_components_articles_from_article_guid");
-
-                    b.HasOne("Fargo.Core.Articles.Article", "KitArticle")
-                        .WithMany("KitComponents")
-                        .HasForeignKey("KitArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_kit_components_articles_kit_article_guid");
-
-                    b.Navigation("FromArticle");
-
-                    b.Navigation("KitArticle");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticlePack", b =>
-                {
-                    b.HasOne("Fargo.Core.Articles.Article", "FromArticle")
-                        .WithMany()
-                        .HasForeignKey("FromArticleGuid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_packs_articles_from_article_guid");
-
-                    b.HasOne("Fargo.Core.Articles.Article", "PackArticle")
-                        .WithOne("Pack")
-                        .HasForeignKey("Fargo.Core.Articles.ArticlePack", "PackArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_packs_articles_pack_article_guid");
-
-                    b.Navigation("FromArticle");
-
-                    b.Navigation("PackArticle");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticlePartition", b =>
-                {
-                    b.HasOne("Fargo.Core.Articles.Article", "Article")
-                        .WithMany("Partitions")
-                        .HasForeignKey("ArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_partitions_articles_article_guid");
-
-                    b.HasOne("Fargo.Core.Partitions.Partition", "Partition")
-                        .WithMany()
-                        .HasForeignKey("PartitionGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_partitions_partitions_partition_guid");
-
-                    b.Navigation("Article");
-
-                    b.Navigation("Partition");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Articles.ArticleVariation", b =>
-                {
-                    b.HasOne("Fargo.Core.Articles.Article", "FromArticle")
-                        .WithMany()
-                        .HasForeignKey("FromArticleGuid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_variations_articles_from_article_guid");
-
-                    b.HasOne("Fargo.Core.Articles.Article", "VariationArticle")
-                        .WithOne("Variation")
-                        .HasForeignKey("Fargo.Core.Articles.ArticleVariation", "VariationArticleGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_article_variations_articles_variation_article_guid");
-
-                    b.Navigation("FromArticle");
-
-                    b.Navigation("VariationArticle");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Audits.AuditLogPartition", b =>
-                {
-                    b.HasOne("Fargo.Core.Audits.AuditLog", "AuditLog")
-                        .WithMany("Partitions")
-                        .HasForeignKey("AuditLogGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_audit_log_partitions_audit_logs_audit_log_guid");
-
-                    b.HasOne("Fargo.Core.Partitions.Partition", null)
-                        .WithMany()
-                        .HasForeignKey("PartitionGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_audit_log_partitions_partitions_partition_guid");
-
-                    b.Navigation("AuditLog");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
-                {
-                    b.HasOne("Fargo.Core.Users.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_refresh_tokens_users_user_guid");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.Events.ItemEvent", b =>
-                {
-                    b.HasOne("Fargo.Core.Articles.Article", "Article")
-                        .WithMany()
-                        .HasForeignKey("ArticleGuid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_events_articles_article_guid");
-
-                    b.Navigation("Article");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.Events.ItemLifecycleEvent", b =>
-                {
-                    b.HasOne("Fargo.Core.Items.Item", "ItemContainer")
-                        .WithMany()
-                        .HasForeignKey("ItemContainerGuid")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_item_lifecycle_events_items_item_container_guid");
-
-                    b.HasOne("Fargo.Core.Items.Events.ItemEvent", null)
-                        .WithOne("Lifecycle")
-                        .HasForeignKey("Fargo.Core.Items.Events.ItemLifecycleEvent", "ItemEventGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_lifecycle_events_item_events_item_event_guid");
-
-                    b.Navigation("ItemContainer");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.Events.ItemMovimentEvent", b =>
-                {
-                    b.HasOne("Fargo.Core.Items.Item", "FromItemContainer")
-                        .WithMany()
-                        .HasForeignKey("FromItemContainerGuid")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_item_moviment_events_items_from_item_container_guid");
-
-                    b.HasOne("Fargo.Core.Items.Events.ItemEvent", null)
-                        .WithOne("Moviment")
-                        .HasForeignKey("Fargo.Core.Items.Events.ItemMovimentEvent", "ItemEventGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_moviment_events_item_events_item_event_guid");
-
-                    b.HasOne("Fargo.Core.Items.Item", "ToItemContainer")
-                        .WithMany()
-                        .HasForeignKey("ToItemContainerGuid")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_item_moviment_events_items_to_item_container_guid");
-
-                    b.Navigation("FromItemContainer");
-
-                    b.Navigation("ToItemContainer");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.ItemMoviment", b =>
-                {
-                    b.HasOne("Fargo.Core.Items.Item", null)
-                        .WithMany("Moviments")
-                        .HasForeignKey("ItemGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_moviments_items_item_guid");
-
-                    b.HasOne("Fargo.Core.Items.Item", null)
-                        .WithMany()
-                        .HasForeignKey("MovedToContainerGuid")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_item_moviments_items_moved_to_container_guid");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Items.ItemPartition", b =>
-                {
-                    b.HasOne("Fargo.Core.Items.Item", "Item")
-                        .WithMany("Partitions")
-                        .HasForeignKey("ItemGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_partitions_items_item_guid");
-
-                    b.HasOne("Fargo.Core.Partitions.Partition", "Partition")
-                        .WithMany()
-                        .HasForeignKey("PartitionGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_partitions_partitions_partition_guid");
-
-                    b.Navigation("Item");
-
-                    b.Navigation("Partition");
-                });
-
-            modelBuilder.Entity("Fargo.Core.ServiceAccounts.ServiceAccount", b =>
-                {
-                    b.HasOne("Fargo.Core.Actors.Actor", "Actor")
+                    b.HasOne("Fargo.Core.Entities.Actors.Actor", "Actor")
                         .WithOne("ServiceAccount")
-                        .HasForeignKey("Fargo.Core.ServiceAccounts.ServiceAccount", "ActorGuid")
+                        .HasForeignKey("Fargo.Core.Entities.Actors.ServiceAccounts.ServiceAccount", "ActorGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_service_accounts_actors_actor_guid");
@@ -1176,53 +953,11 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Actor");
                 });
 
-            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroupPartition", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Users.User", b =>
                 {
-                    b.HasOne("Fargo.Core.Partitions.Partition", "Partition")
-                        .WithMany()
-                        .HasForeignKey("PartitionGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_group_partitions_partitions_partition_guid");
-
-                    b.HasOne("Fargo.Core.UserGroups.UserGroup", "UserGroup")
-                        .WithMany("Partitions")
-                        .HasForeignKey("UserGroupGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_group_partitions_user_groups_user_group_guid");
-
-                    b.Navigation("Partition");
-
-                    b.Navigation("UserGroup");
-                });
-
-            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroupPartitionAccess", b =>
-                {
-                    b.HasOne("Fargo.Core.Partitions.Partition", "Partition")
-                        .WithMany()
-                        .HasForeignKey("PartitionGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_group_partition_accesses_partitions_partition_guid");
-
-                    b.HasOne("Fargo.Core.UserGroups.UserGroup", "UserGroup")
-                        .WithMany("PartitionAccesses")
-                        .HasForeignKey("UserGroupGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_group_partition_accesses_user_groups_user_group_guid");
-
-                    b.Navigation("Partition");
-
-                    b.Navigation("UserGroup");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Users.User", b =>
-                {
-                    b.HasOne("Fargo.Core.Actors.Actor", "Actor")
+                    b.HasOne("Fargo.Core.Entities.Actors.Actor", "Actor")
                         .WithOne("User")
-                        .HasForeignKey("Fargo.Core.Users.User", "ActorGuid")
+                        .HasForeignKey("Fargo.Core.Entities.Actors.Users.User", "ActorGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_users_actors_actor_guid");
@@ -1230,11 +965,11 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Actor");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Users.UserAuthentication", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Users.UserAuthentication", b =>
                 {
-                    b.HasOne("Fargo.Core.Users.User", "User")
+                    b.HasOne("Fargo.Core.Entities.Actors.Users.User", "User")
                         .WithOne("Authentication")
-                        .HasForeignKey("Fargo.Core.Users.UserAuthentication", "UserGuid")
+                        .HasForeignKey("Fargo.Core.Entities.Actors.Users.UserAuthentication", "UserGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_authentications_users_user_guid");
@@ -1242,16 +977,16 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Users.UserUserGroup", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Users.UserUserGroup", b =>
                 {
-                    b.HasOne("Fargo.Core.UserGroups.UserGroup", "UserGroup")
+                    b.HasOne("Fargo.Core.Entities.UserGroups.UserGroup", "UserGroup")
                         .WithMany()
                         .HasForeignKey("UserGroupGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_user_groups_user_groups_user_group_guid");
 
-                    b.HasOne("Fargo.Core.Users.User", "User")
+                    b.HasOne("Fargo.Core.Entities.Actors.Users.User", "User")
                         .WithMany("UserGroupMemberships")
                         .HasForeignKey("UserGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1263,16 +998,281 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("UserGroup");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleBarcode", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
+                        .WithOne("Barcode")
+                        .HasForeignKey("Fargo.Core.Entities.Articles.ArticleBarcode", "ArticleGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_barcodes_articles_article_guid");
+
+                    b.Navigation("Article");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleContainer", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
+                        .WithOne("Container")
+                        .HasForeignKey("Fargo.Core.Entities.Articles.ArticleContainer", "ArticleGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_containers_articles_article_guid");
+
+                    b.Navigation("Article");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleDimension", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
+                        .WithOne("Dimension")
+                        .HasForeignKey("Fargo.Core.Entities.Articles.ArticleDimension", "ArticleGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_dimensions_articles_article_guid");
+
+                    b.Navigation("Article");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleKitComponent", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "FromArticle")
+                        .WithMany()
+                        .HasForeignKey("FromArticleGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_kit_components_articles_from_article_guid");
+
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "KitArticle")
+                        .WithMany("KitComponents")
+                        .HasForeignKey("KitArticleGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_kit_components_articles_kit_article_guid");
+
+                    b.Navigation("FromArticle");
+
+                    b.Navigation("KitArticle");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticlePack", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "FromArticle")
+                        .WithMany()
+                        .HasForeignKey("FromArticleGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_packs_articles_from_article_guid");
+
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "PackArticle")
+                        .WithOne("Pack")
+                        .HasForeignKey("Fargo.Core.Entities.Articles.ArticlePack", "PackArticleGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_packs_articles_pack_article_guid");
+
+                    b.Navigation("FromArticle");
+
+                    b.Navigation("PackArticle");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticlePartition", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
+                        .WithMany("Partitions")
+                        .HasForeignKey("ArticleGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_partitions_articles_article_guid");
+
+                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", "Partition")
+                        .WithMany()
+                        .HasForeignKey("PartitionGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_partitions_partitions_partition_guid");
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Partition");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleVariation", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "FromArticle")
+                        .WithMany()
+                        .HasForeignKey("FromArticleGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_variations_articles_from_article_guid");
+
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "VariationArticle")
+                        .WithOne("Variation")
+                        .HasForeignKey("Fargo.Core.Entities.Articles.ArticleVariation", "VariationArticleGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_variations_articles_variation_article_guid");
+
+                    b.Navigation("FromArticle");
+
+                    b.Navigation("VariationArticle");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Items.ItemMoviment", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Items.Item", null)
+                        .WithMany("Moviments")
+                        .HasForeignKey("ItemGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_moviments_items_item_guid");
+
+                    b.HasOne("Fargo.Core.Entities.Items.Item", null)
+                        .WithMany()
+                        .HasForeignKey("MovedToContainerGuid")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_item_moviments_items_moved_to_container_guid");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Items.ItemPartition", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "Item")
+                        .WithMany("Partitions")
+                        .HasForeignKey("ItemGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_partitions_items_item_guid");
+
+                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", "Partition")
+                        .WithMany()
+                        .HasForeignKey("PartitionGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_partitions_partitions_partition_guid");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Partition");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroupPartition", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", "Partition")
+                        .WithMany()
+                        .HasForeignKey("PartitionGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_group_partitions_partitions_partition_guid");
+
+                    b.HasOne("Fargo.Core.Entities.UserGroups.UserGroup", "UserGroup")
+                        .WithMany("Partitions")
+                        .HasForeignKey("UserGroupGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_group_partitions_user_groups_user_group_guid");
+
+                    b.Navigation("Partition");
+
+                    b.Navigation("UserGroup");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroupPartitionAccess", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", "Partition")
+                        .WithMany()
+                        .HasForeignKey("PartitionGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_group_partition_accesses_partitions_partition_guid");
+
+                    b.HasOne("Fargo.Core.Entities.UserGroups.UserGroup", "UserGroup")
+                        .WithMany("PartitionAccesses")
+                        .HasForeignKey("UserGroupGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_group_partition_accesses_user_groups_user_group_guid");
+
+                    b.Navigation("Partition");
+
+                    b.Navigation("UserGroup");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("ArticleGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_events_articles_article_guid");
+
+                    b.Navigation("Article");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Events.ItemLifecycleEvent", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "ItemContainer")
+                        .WithMany()
+                        .HasForeignKey("ItemContainerGuid")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_item_lifecycle_events_items_item_container_guid");
+
+                    b.HasOne("Fargo.Core.Events.ItemEvent", null)
+                        .WithOne("Lifecycle")
+                        .HasForeignKey("Fargo.Core.Events.ItemLifecycleEvent", "ItemEventGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_lifecycle_events_item_events_item_event_guid");
+
+                    b.Navigation("ItemContainer");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Events.ItemMovimentEvent", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "FromItemContainer")
+                        .WithMany()
+                        .HasForeignKey("FromItemContainerGuid")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_item_moviment_events_items_from_item_container_guid");
+
+                    b.HasOne("Fargo.Core.Events.ItemEvent", null)
+                        .WithOne("Moviment")
+                        .HasForeignKey("Fargo.Core.Events.ItemMovimentEvent", "ItemEventGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_moviment_events_item_events_item_event_guid");
+
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "ToItemContainer")
+                        .WithMany()
+                        .HasForeignKey("ToItemContainerGuid")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_item_moviment_events_items_to_item_container_guid");
+
+                    b.Navigation("FromItemContainer");
+
+                    b.Navigation("ToItemContainer");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Actors.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_refresh_tokens_users_user_guid");
+                });
+
             modelBuilder.Entity("Fargo.Infrastructure.Entities.ItemParentContainerHistoryPostgresTemporal", b =>
                 {
-                    b.HasOne("Fargo.Core.Items.Item", "Item")
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "Item")
                         .WithMany()
                         .HasForeignKey("ItemGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_item_parent_container_history_items_item_guid");
 
-                    b.HasOne("Fargo.Core.Items.Item", "ParentItemContainer")
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "ParentItemContainer")
                         .WithMany()
                         .HasForeignKey("ParentItemContainerGuid")
                         .OnDelete(DeleteBehavior.SetNull)
@@ -1283,29 +1283,29 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("ParentItemContainer");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Actors.Actor", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Actor", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Entity", null)
                         .WithOne()
-                        .HasForeignKey("Fargo.Core.Actors.Actor", "Guid")
+                        .HasForeignKey("Fargo.Core.Entities.Actors.Actor", "Guid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_actors_entities_guid");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Articles.Article", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.Article", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Entity", null)
                         .WithOne()
-                        .HasForeignKey("Fargo.Core.Articles.Article", "Guid")
+                        .HasForeignKey("Fargo.Core.Entities.Articles.Article", "Guid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_articles_entities_guid");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Items.Item", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Items.Item", b =>
                 {
-                    b.HasOne("Fargo.Core.Articles.Article", "Article")
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
                         .WithMany()
                         .HasForeignKey("ArticleGuid")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1314,12 +1314,12 @@ namespace Fargo.Infrastructure.Migrations
 
                     b.HasOne("Fargo.Core.Entities.Entity", null)
                         .WithOne()
-                        .HasForeignKey("Fargo.Core.Items.Item", "Guid")
+                        .HasForeignKey("Fargo.Core.Entities.Items.Item", "Guid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_items_entities_guid");
 
-                    b.HasOne("Fargo.Core.Items.Item", "ParentItemContainer")
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "ParentItemContainer")
                         .WithMany()
                         .HasForeignKey("ParentItemContainerGuid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1330,16 +1330,16 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("ParentItemContainer");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Partitions.Partition", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Partitions.Partition", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Entity", null)
                         .WithOne()
-                        .HasForeignKey("Fargo.Core.Partitions.Partition", "Guid")
+                        .HasForeignKey("Fargo.Core.Entities.Partitions.Partition", "Guid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_partitions_entities_guid");
 
-                    b.HasOne("Fargo.Core.Partitions.Partition", "ParentPartition")
+                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", "ParentPartition")
                         .WithMany()
                         .HasForeignKey("ParentPartitionGuid")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1348,16 +1348,16 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("ParentPartition");
                 });
 
-            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroup", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroup", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Entity", null)
                         .WithOne()
-                        .HasForeignKey("Fargo.Core.UserGroups.UserGroup", "Guid")
+                        .HasForeignKey("Fargo.Core.Entities.UserGroups.UserGroup", "Guid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_groups_entities_guid");
 
-                    b.HasOne("Fargo.Core.UserGroups.UserGroup", "ParentUserGroup")
+                    b.HasOne("Fargo.Core.Entities.UserGroups.UserGroup", "ParentUserGroup")
                         .WithMany()
                         .HasForeignKey("ParentUserGroupGuid")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1371,14 +1371,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Partitions");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Items.Events.ItemEvent", b =>
-                {
-                    b.Navigation("Lifecycle");
-
-                    b.Navigation("Moviment");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Users.User", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Users.User", b =>
                 {
                     b.Navigation("Authentication")
                         .IsRequired();
@@ -1386,7 +1379,14 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("UserGroupMemberships");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Actors.Actor", b =>
+            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
+                {
+                    b.Navigation("Lifecycle");
+
+                    b.Navigation("Moviment");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.Actor", b =>
                 {
                     b.Navigation("PartitionAccesses");
 
@@ -1397,7 +1397,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Articles.Article", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.Article", b =>
                 {
                     b.Navigation("Barcode")
                         .IsRequired();
@@ -1416,14 +1416,14 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Variation");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Items.Item", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.Items.Item", b =>
                 {
                     b.Navigation("Moviments");
 
                     b.Navigation("Partitions");
                 });
 
-            modelBuilder.Entity("Fargo.Core.UserGroups.UserGroup", b =>
+            modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroup", b =>
                 {
                     b.Navigation("PartitionAccesses");
 

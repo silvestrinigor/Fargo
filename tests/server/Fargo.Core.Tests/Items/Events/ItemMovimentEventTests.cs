@@ -1,8 +1,8 @@
-using Fargo.Core.Articles;
+using Fargo.Core.Entities.Articles;
 using Fargo.Core.Common;
 using Fargo.Core.Informations;
-using Fargo.Core.Items;
-using Fargo.Core.Items.Events;
+using Fargo.Core.Entities.Items;
+using Fargo.Core.Events;
 using UnitsNet;
 
 namespace Fargo.Core.Tests.Items.Events;

@@ -1,5 +1,5 @@
 using Fargo.Core.Common;
-using Fargo.Core.Partitions;
+using Fargo.Core.Entities.Partitions;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.Partitions;

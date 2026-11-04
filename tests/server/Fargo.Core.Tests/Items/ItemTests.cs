@@ -1,8 +1,8 @@
-using Fargo.Core.Articles;
+using Fargo.Core.Entities.Articles;
 using Fargo.Core.Common;
 using Fargo.Core.Informations;
-using Fargo.Core.Items;
-using Fargo.Core.Partitions;
+using Fargo.Core.Entities.Items;
+using Fargo.Core.Entities.Partitions;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.Items;

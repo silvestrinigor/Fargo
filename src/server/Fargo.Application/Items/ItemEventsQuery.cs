@@ -1,5 +1,5 @@
 using Fargo.Application.Common;
-using Fargo.Core.Items.Events;
+using Fargo.Core.Events;
 
 namespace Fargo.Application.Items;
 

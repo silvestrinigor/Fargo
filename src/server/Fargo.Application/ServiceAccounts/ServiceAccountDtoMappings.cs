@@ -1,4 +1,4 @@
-using Fargo.Core.ServiceAccounts;
+using Fargo.Core.Entities.Actors.ServiceAccounts;
 using System.Linq.Expressions;
 
 namespace Fargo.Application.ServiceAccounts;

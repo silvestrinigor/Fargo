@@ -1,5 +1,5 @@
 using Fargo.Core.Security;
-using Fargo.Core.ServiceAccounts;
+using Fargo.Core.Entities.Actors.ServiceAccounts;
 using System.Security.Cryptography;
 
 namespace Fargo.Infrastructure.Security;

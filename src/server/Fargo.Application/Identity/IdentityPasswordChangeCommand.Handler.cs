@@ -1,10 +1,10 @@
 using Fargo.Application.Common;
-using Fargo.Core.Actors;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Identity;
 using Fargo.Core.Informations;
 using Fargo.Core.Security;
-using Fargo.Core.Users;
+using Fargo.Core.Entities.Actors.Users;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;

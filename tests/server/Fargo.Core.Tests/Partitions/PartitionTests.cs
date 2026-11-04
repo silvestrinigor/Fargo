@@ -1,6 +1,6 @@
 using Fargo.Core.Common;
 using Fargo.Core.Informations;
-using Fargo.Core.Partitions;
+using Fargo.Core.Entities.Partitions;
 
 namespace Fargo.Core.Tests.Partitions;
 

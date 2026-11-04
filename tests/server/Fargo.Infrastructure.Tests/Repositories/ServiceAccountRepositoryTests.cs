@@ -1,9 +1,9 @@
 using Fargo.Application.Common;
-using Fargo.Core.Actors;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Informations;
-using Fargo.Core.Partitions;
+using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Security;
-using Fargo.Core.ServiceAccounts;
+using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 

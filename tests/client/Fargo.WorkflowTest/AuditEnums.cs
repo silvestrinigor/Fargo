@@ -2,7 +2,7 @@ namespace Fargo.WorkflowTest;
 
 /// <summary>
 /// The actor-type codes as exposed by the API. Mirrors
-/// <c>Fargo.Core.Actors.ActorType</c>; the generated client transmits them as
+/// <c>Fargo.Core.Entities.Actors.ActorType</c>; the generated client transmits them as
 /// plain integers.
 /// </summary>
 internal static class ActorTypes

@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Fargo.Application.Common;
 using Fargo.Application.Partitions;
-using Fargo.Core.Partitions;
+using Fargo.Core.Entities.Partitions;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

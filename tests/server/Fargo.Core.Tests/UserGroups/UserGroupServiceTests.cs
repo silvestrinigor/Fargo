@@ -1,5 +1,5 @@
 using Fargo.Core.Common;
-using Fargo.Core.UserGroups;
+using Fargo.Core.Entities.UserGroups;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.UserGroups;

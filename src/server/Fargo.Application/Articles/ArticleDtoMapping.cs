@@ -1,4 +1,4 @@
-using Fargo.Core.Articles;
+using Fargo.Core.Entities.Articles;
 using System.Linq.Expressions;
 
 namespace Fargo.Application.Articles;

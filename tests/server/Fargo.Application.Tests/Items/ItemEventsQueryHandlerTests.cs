@@ -1,9 +1,9 @@
 using Fargo.Application.Common;
 using Fargo.Application.Items;
 using Fargo.Application.Tests.Common;
-using Fargo.Core.Actors;
-using Fargo.Core.Items.Events;
-using Fargo.Core.Users;
+using Fargo.Core.Entities.Actors;
+using Fargo.Core.Events;
+using Fargo.Core.Entities.Actors.Users;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;

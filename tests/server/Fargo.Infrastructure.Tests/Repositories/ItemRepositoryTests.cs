@@ -1,7 +1,7 @@
 using Fargo.Application.Common;
-using Fargo.Core.Articles;
+using Fargo.Core.Entities.Articles;
 using Fargo.Core.Informations;
-using Fargo.Core.Items;
+using Fargo.Core.Entities.Items;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 

@@ -1,9 +1,9 @@
 using Fargo.Application.Common;
-using Fargo.Core.Actors;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Security;
-using Fargo.Core.ServiceAccounts;
+using Fargo.Core.Entities.Actors.ServiceAccounts;
 
 namespace Fargo.Application.ServiceAccounts;
 

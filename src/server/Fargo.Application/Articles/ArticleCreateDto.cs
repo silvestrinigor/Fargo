@@ -1,4 +1,4 @@
-using Fargo.Core.Articles;
+using Fargo.Core.Entities.Articles;
 using Fargo.Core.Informations;
 using System.Drawing;
 using UnitsNet;

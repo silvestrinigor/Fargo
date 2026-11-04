@@ -1,8 +1,8 @@
-using Fargo.Core.Actors;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Common;
 using Fargo.Core.Informations;
-using Fargo.Core.Partitions;
-using Fargo.Core.UserGroups;
+using Fargo.Core.Entities.Partitions;
+using Fargo.Core.Entities.UserGroups;
 
 namespace Fargo.Core.Tests.Users;
 

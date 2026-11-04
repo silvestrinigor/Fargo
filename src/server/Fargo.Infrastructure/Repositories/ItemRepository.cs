@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
 using Fargo.Application.Common;
 using Fargo.Application.Items;
-using Fargo.Core.Articles;
-using Fargo.Core.Items;
+using Fargo.Core.Entities.Articles;
+using Fargo.Core.Entities.Items;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

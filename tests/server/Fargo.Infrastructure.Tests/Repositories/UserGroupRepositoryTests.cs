@@ -1,6 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Core.Informations;
-using Fargo.Core.UserGroups;
+using Fargo.Core.Entities.UserGroups;
 using Fargo.Infrastructure.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 

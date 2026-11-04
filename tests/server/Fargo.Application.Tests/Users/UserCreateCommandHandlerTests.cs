@@ -1,14 +1,14 @@
 using Fargo.Application.Common;
 using Fargo.Application.Tests.Common;
 using Fargo.Application.Users;
-using Fargo.Core.Actors;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Common;
 using Fargo.Core.Informations;
-using Fargo.Core.Partitions;
+using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Security;
-using Fargo.Core.UserGroups;
-using Fargo.Core.Users;
+using Fargo.Core.Entities.UserGroups;
+using Fargo.Core.Entities.Actors.Users;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Users;

@@ -1,4 +1,4 @@
-using Fargo.Core.Actors;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Informations;
 
 namespace Fargo.Application.UserGroups;

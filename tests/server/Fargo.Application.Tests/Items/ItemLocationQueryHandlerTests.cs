@@ -1,7 +1,7 @@
 using Fargo.Application.Common;
 using Fargo.Application.Items;
 using Fargo.Application.Tests.Common;
-using Fargo.Core.Users;
+using Fargo.Core.Entities.Actors.Users;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;

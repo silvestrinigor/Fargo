@@ -1,4 +1,4 @@
-using Fargo.Core.Users;
+using Fargo.Core.Entities.Actors.Users;
 using System.Linq.Expressions;
 
 namespace Fargo.Application.Users;

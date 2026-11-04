@@ -20,7 +20,7 @@ namespace Fargo.WorkflowTest;
 /// </summary>
 public sealed class WorkflowRunner
 {
-    // ArticleType enum values as exposed by the API (see Fargo.Core.Articles.ArticleType).
+    // ArticleType enum values as exposed by the API (see Fargo.Core.Entities.Articles.ArticleType).
     private const int ArticleTypeDefault = 1;
     private const int ArticleTypeContainer = 5;
 

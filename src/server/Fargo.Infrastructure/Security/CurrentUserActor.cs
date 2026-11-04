@@ -1,5 +1,5 @@
 using Fargo.Application.Common;
-using Fargo.Core.Actors;
+using Fargo.Core.Entities.Actors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;

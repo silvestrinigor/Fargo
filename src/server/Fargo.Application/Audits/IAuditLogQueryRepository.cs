@@ -1,5 +1,5 @@
 using Fargo.Application.Common;
-using Fargo.Core.Actors;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities;
 
 namespace Fargo.Application.Audits;

@@ -1,4 +1,4 @@
-using Fargo.Core.ServiceAccounts;
+using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
