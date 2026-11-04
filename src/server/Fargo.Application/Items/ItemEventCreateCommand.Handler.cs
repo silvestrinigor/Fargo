@@ -1,7 +1,5 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
 using Fargo.Core.Common;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
@@ -24,7 +22,6 @@ public sealed class ItemEventCreateCommandHandler(
     IArticleRepository articleRepository,
     IItemRepository itemRepository,
     IItemEventRepository itemEventRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ItemEventCreateCommand, Guid>
 {
@@ -61,16 +58,7 @@ public sealed class ItemEventCreateCommandHandler(
                 $"Unsupported item event type '{create.EventType}'.", FargoErrorType.InvalidOperation),
         };
 
-        // The event is recorded against the article. The audit is recorded
-        // against that article, inheriting its partition scope.
-        var audit = AuditLog.CreateAuditLog(actor, article, AuditLogType.ItemEventRecorded);
-
-        audit.Metadata.AddArticleGuid(article.Guid);
-        audit.Metadata.AddPackQuantity(create.Quantity);
-
         itemEventRepository.Add(itemEvent);
-
-        auditLogRepository.Add(audit);
 
         return itemEvent.Guid;
     }

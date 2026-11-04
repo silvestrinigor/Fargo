@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.UserGroups;
 
@@ -10,7 +8,6 @@ public sealed class UserGroupDeleteCommandHandler(
     ActorResolver actorService,
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<UserGroupDeleteCommand>
 {
@@ -31,9 +28,5 @@ public sealed class UserGroupDeleteCommandHandler(
         await userGroupService.ValidateUserGroupCanBeDeletedAsync(userGroup, cancellationToken);
 
         userGroupRepository.Remove(userGroup);
-
-        var audit = AuditLog.CreateAuditLog(actor, userGroup, AuditLogType.EntityDeleted);
-
-        auditLogRepository.Add(audit);
     }
 }

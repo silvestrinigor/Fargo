@@ -21,7 +21,6 @@ public class ItemEventCreateCommandHandlerTests
     private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
     private readonly IItemRepository itemRepository = Substitute.For<IItemRepository>();
     private readonly IItemEventRepository itemEventRepository = Substitute.For<IItemEventRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -31,7 +30,6 @@ public class ItemEventCreateCommandHandlerTests
             articleRepository,
             itemRepository,
             itemEventRepository,
-            auditLogRepository,
             currentActor);
 
     private static Scalar Qty(double amount) => Scalar.FromAmount(amount);
@@ -68,8 +66,6 @@ public class ItemEventCreateCommandHandlerTests
                  && e.Moviment != null
                  && e.Moviment.Quantity.Amount == 50
                  && e.Moviment.ToItemContainerGuid == container.Guid));
-        auditLogRepository.Received(1).Add(Arg.Is<AuditLog>(
-            a => a.AuditLogType == AuditLogType.ItemEventRecorded && a.EntityType == EntityType.Article));
     }
 
     [Fact]

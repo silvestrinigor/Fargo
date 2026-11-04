@@ -1,9 +1,7 @@
 using Fargo.Application.Audits;
 using Fargo.Application.Common;
 using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
-using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,33 +16,25 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
 
     public async Task<AuditLogDto?> GetInfoByGuidAsync(
         Guid auditLogGuid,
-        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        AuditLogAccessScope accessScope,
         CancellationToken cancellationToken = default)
     {
-        var auditLog = await ApplyPartitionFilter(
-                context.AuditLogs.AsNoTracking(),
-                childOfAnyOfThesePartitions)
+        var auditLog = await ApplyAccessScope(context, context.AuditLogs.AsNoTracking(), accessScope)
             .Where(a => a.Guid == auditLogGuid)
-            .Include(a => a.Partitions)
             .SingleOrDefaultAsync(cancellationToken);
 
         return auditLog?.ToDto();
     }
-
     public async Task<PagedResult<AuditLogDto>> GetManyInfoOrderedByOccurredAtAsync(
         Pagination pagination,
-        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        AuditLogAccessScope accessScope,
         Guid? actorGuid = null,
         ActorType? actorType = null,
-        Guid? entityGuid = null,
-        EntityType? entityType = null,
         DateTimeOffset? periodStart = null,
         DateTimeOffset? periodEnd = null,
         CancellationToken cancellationToken = default)
     {
-        var queryFiltered = ApplyPartitionFilter(
-            context.AuditLogs.AsNoTracking(),
-            childOfAnyOfThesePartitions);
+        var queryFiltered = ApplyAccessScope(context, context.AuditLogs.AsNoTracking(), accessScope);
 
         if (actorGuid is not null)
         {
@@ -54,16 +44,6 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
         if (actorType is not null)
         {
             queryFiltered = queryFiltered.Where(a => a.ActorType == actorType);
-        }
-
-        if (entityGuid is not null)
-        {
-            queryFiltered = queryFiltered.Where(a => a.EntityGuid == entityGuid);
-        }
-
-        if (entityType is not null)
-        {
-            queryFiltered = queryFiltered.Where(a => a.EntityType == entityType);
         }
 
         if (periodStart is not null)
@@ -79,10 +59,9 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
         var totalCount = await queryFiltered.CountAsync(cancellationToken);
 
         var auditLogs = await queryFiltered
-        .OrderBy(a => a.OccurredAt)
-        .Include(a => a.Partitions)
-        .WithPagination(pagination)
-        .ToListAsync(cancellationToken);
+            .OrderBy(a => a.OccurredAt)
+            .WithPagination(pagination)
+            .ToListAsync(cancellationToken);
 
         var items = auditLogs.Select(a => a.ToDto()).ToList();
 
@@ -93,11 +72,31 @@ public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogReposi
             pagination.Limit.Value);
     }
 
-    private static IQueryable<AuditLog> ApplyPartitionFilter(
+    // Restricts the query to audits of actors the reader can access. A reader
+    // with global-partition access sees everything. Otherwise an audit is visible
+    // when it was recorded by the reader itself, or by an actor that belongs to
+    // one of the reader's accessible partitions. The accessible actors are
+    // expressed as a subquery over the actors/actor_partitions so the whole
+    // filter stays a single translated SQL statement (no actor set round-trip).
+    private static IQueryable<AuditLog> ApplyAccessScope(
+        FargoDbContext context,
         IQueryable<AuditLog> query,
-        IReadOnlyCollection<Guid>? partitionGuids)
-        => query.WherePartitionAccessible(
-            partitionGuids,
-            auditLog => auditLog.Partitions,
-            partition => partition.PartitionGuid);
+        AuditLogAccessScope accessScope)
+    {
+        if (accessScope.HasGlobalAccess)
+        {
+            return query;
+        }
+
+        var selfActorGuid = accessScope.SelfActorGuid;
+        var accessiblePartitionGuids = accessScope.AccessiblePartitionGuids;
+
+        var accessibleActorGuids = context.Actors
+            .Where(actor =>
+                actor.Guid == selfActorGuid
+                || actor.Partitions.Any(p => accessiblePartitionGuids.Contains(p.PartitionGuid)))
+            .Select(actor => actor.Guid);
+
+        return query.Where(a => accessibleActorGuids.Contains(a.ActorGuid));
+    }
 }

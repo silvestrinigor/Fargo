@@ -16,7 +16,6 @@ public class ServiceAccountUpdateCommandHandlerTests
 {
     private readonly IServiceAccountRepository serviceAccountRepository = Substitute.For<IServiceAccountRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -25,7 +24,6 @@ public class ServiceAccountUpdateCommandHandlerTests
             ActorTestFactory.Resolver(userRepository, serviceAccountRepository),
             serviceAccountRepository,
             partitionRepository,
-            auditLogRepository,
             currentActor);
 
     private static ServiceAccount ExistingAccount()
@@ -56,7 +54,6 @@ public class ServiceAccountUpdateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         Assert.Contains(partition.Guid, account.Actor.PartitionGuids);
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

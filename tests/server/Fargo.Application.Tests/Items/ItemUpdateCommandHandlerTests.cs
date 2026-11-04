@@ -18,7 +18,6 @@ public class ItemUpdateCommandHandlerTests
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IItemRepository itemRepository = Substitute.For<IItemRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -28,7 +27,6 @@ public class ItemUpdateCommandHandlerTests
             ActorTestFactory.Resolver(userRepository),
             itemRepository,
             partitionRepository,
-            auditLogRepository,
             currentActor);
 
     private static Item NewItem()
@@ -54,7 +52,6 @@ public class ItemUpdateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         Assert.Equal(parentContainer.Guid, item.ParentItemContainerGuid);
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

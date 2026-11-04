@@ -15,7 +15,6 @@ public class PartitionCreateCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -23,7 +22,6 @@ public class PartitionCreateCommandHandlerTests
         => new(
             ActorTestFactory.Resolver(userRepository),
             partitionRepository,
-            auditLogRepository,
             currentActor);
 
     private static Partition GlobalPartition()
@@ -41,7 +39,6 @@ public class PartitionCreateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         partitionRepository.Received(1).Add(Arg.Any<Partition>());
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

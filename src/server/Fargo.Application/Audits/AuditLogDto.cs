@@ -1,32 +1,24 @@
 using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 
 namespace Fargo.Application.Audits;
 
 /// <summary>
-/// Represents a data transfer object for audit log information.
-/// This DTO contains all the essential details about an audit event, including
-/// the actor who performed the action, the entity affected, the type of action,
-/// when it occurred, and any additional metadata.
+/// Represents a data transfer object for a command audit log entry.
 /// </summary>
-/// <param name="Guid">The unique identifier of the audit log entry</param>
-/// <param name="ActorGuid">The unique identifier of the actor who performed the action</param>
-/// <param name="ActorType">The type of actor who performed the action (e.g., User, Application)</param>
-/// <param name="AuditLogType">The type of change that was recorded (entity created, updated, or deleted)</param>
-/// <param name="EntityGuid">The unique identifier of the entity that was affected by the action</param>
-/// <param name="EntityType">The type of entity that was affected (e.g., Article, User)</param>
-/// <param name="OccurredAt">The date and time when the audit event occurred</param>
-/// <param name="Metadata">A dictionary containing additional metadata about the audit event</param>
-/// <param name="Partitions">The collection of partition GUIDs that this audit log entry belongs to</param>
+/// <param name="Guid">The unique identifier of the audit log entry.</param>
+/// <param name="ActorGuid">The unique identifier of the actor that executed the command.</param>
+/// <param name="ActorType">The type of actor that executed the command.</param>
+/// <param name="AuditLogType">The kind of command that was executed.</param>
+/// <param name="CommandName">The type name of the executed command.</param>
+/// <param name="OccurredAt">The date and time when the command was executed.</param>
+/// <param name="Metadata">A snapshot of the executed command's data.</param>
 public sealed record AuditLogDto(
     Guid Guid,
     Guid ActorGuid,
     ActorType ActorType,
     AuditLogType AuditLogType,
-    Guid EntityGuid,
-    EntityType EntityType,
+    string CommandName,
     DateTimeOffset OccurredAt,
-    IReadOnlyDictionary<string, AuditValue> Metadata,
-    IReadOnlyCollection<Guid> Partitions
+    IReadOnlyDictionary<string, AuditValue> Metadata
 );

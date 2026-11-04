@@ -1,5 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
@@ -12,7 +11,6 @@ public sealed class ServiceAccountUpdateCommandHandler(
     ActorResolver actorService,
     IServiceAccountRepository serviceAccountRepository,
     IPartitionRepository partitionRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ServiceAccountUpdateCommand>
 {
@@ -28,15 +26,9 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
         var accountActor = account.Actor;
 
-        var audit = accountActor.PartitionGuids.Count > 0
-            ? AuditLog.CreateAuditLog(actor, accountActor, AuditLogType.EntityUpdated)
-            : AuditLog.CreateAuditLogForGlobalEntity(actor, accountActor, AuditLogType.EntityUpdated);
-
         if (command.Update.Description is { } description)
         {
             accountActor.Description = new Description(description);
-
-            audit.Metadata.AddDescription(accountActor.Description);
         }
 
         if (command.Update.IsActive is { } isActive)
@@ -50,8 +42,6 @@ public sealed class ServiceAccountUpdateCommandHandler(
                 accountActor.Deactivate();
                 account.RotateAuthVersion();
             }
-
-            audit.Metadata.AddIsActive(accountActor.IsActive);
         }
 
         if (command.Update.PermissionsToAdd is { } permissionsToAdd)
@@ -62,8 +52,6 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 accountActor.AddPermission(permission);
             }
-
-            audit.Metadata.AddPermissionsAdded([.. permissionsToAdd]);
         }
 
         if (command.Update.PermissionsToRemove is { } permissionsToRemove)
@@ -74,8 +62,6 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 accountActor.RemovePermission(permission);
             }
-
-            audit.Metadata.AddPermissionsRemoved([.. permissionsToRemove]);
         }
 
         if (command.Update.PartitionsToAdd is { } partitionMembershipsToAdd)
@@ -90,8 +76,6 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 accountActor.AddPartition(partition);
             }
-
-            audit.Metadata.AddPartitionsAdded([.. partitionMembershipsToAdd]);
         }
 
         if (command.Update.PartitionsToRemove is { } partitionMembershipsToRemove)
@@ -106,8 +90,6 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 accountActor.RemovePartition(partition.Guid);
             }
-
-            audit.Metadata.AddPartitionsRemoved([.. partitionMembershipsToRemove]);
         }
 
         if (command.Update.PartitionAccessesToAdd is { } partitionAccessesToAdd)
@@ -122,8 +104,6 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 accountActor.AddPartitionAccess(partition);
             }
-
-            audit.Metadata.AddPartitionAccessesAdded([.. partitionAccessesToAdd]);
         }
 
         if (command.Update.PartitionAccessesToRemove is { } partitionAccessesToRemove)
@@ -138,10 +118,6 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 accountActor.RemovePartitionAccess(partition.Guid);
             }
-
-            audit.Metadata.AddPartitionAccessesRemoved([.. partitionAccessesToRemove]);
         }
-
-        auditLogRepository.Add(audit);
     }
 }

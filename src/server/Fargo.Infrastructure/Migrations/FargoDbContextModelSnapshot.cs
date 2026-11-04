@@ -42,13 +42,10 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("audit_log_type");
 
-                    b.Property<Guid>("EntityGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("entity_guid");
-
-                    b.Property<int>("EntityType")
-                        .HasColumnType("integer")
-                        .HasColumnName("entity_type");
+                    b.Property<string>("CommandName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("command_name");
 
                     b.Property<string>("Metadata")
                         .IsRequired()
@@ -68,29 +65,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.HasIndex("ActorGuid", "OccurredAt")
                         .HasDatabaseName("ix_audit_logs_actor_guid_occurred_at");
 
-                    b.HasIndex("EntityGuid", "OccurredAt")
-                        .HasDatabaseName("ix_audit_logs_entity_guid_occurred_at");
-
                     b.ToTable("audit_logs", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Audits.AuditLogPartition", b =>
-                {
-                    b.Property<Guid>("AuditLogGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("audit_log_guid");
-
-                    b.Property<Guid>("PartitionGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("partition_guid");
-
-                    b.HasKey("AuditLogGuid", "PartitionGuid")
-                        .HasName("pk_audit_log_partitions");
-
-                    b.HasIndex("PartitionGuid")
-                        .HasDatabaseName("ix_audit_log_partitions_partition_guid");
-
-                    b.ToTable("audit_log_partitions", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.ActorPartition", b =>
@@ -569,7 +544,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("item_moviment_events", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Identity.AuthenticationAttempt", b =>
+            modelBuilder.Entity("Fargo.Core.Identity.Authentication.AuthenticationAttempt", b =>
                 {
                     b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
@@ -603,7 +578,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("authentication_attempt", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
+            modelBuilder.Entity("Fargo.Core.Identity.Tokens.RefreshToken", b =>
                 {
                     b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
@@ -893,23 +868,14 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("item_events", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Audits.AuditLogPartition", b =>
+            modelBuilder.Entity("Fargo.Core.Audits.AuditLog", b =>
                 {
-                    b.HasOne("Fargo.Core.Audits.AuditLog", "AuditLog")
-                        .WithMany("Partitions")
-                        .HasForeignKey("AuditLogGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_audit_log_partitions_audit_logs_audit_log_guid");
-
-                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", null)
+                    b.HasOne("Fargo.Core.Entities.Actors.Actor", null)
                         .WithMany()
-                        .HasForeignKey("PartitionGuid")
+                        .HasForeignKey("ActorGuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_audit_log_partitions_partitions_partition_guid");
-
-                    b.Navigation("AuditLog");
+                        .HasConstraintName("fk_audit_logs_actors_actor_guid");
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.ActorPartition", b =>
@@ -1254,7 +1220,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("ToItemContainer");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Identity.RefreshToken", b =>
+            modelBuilder.Entity("Fargo.Core.Identity.Tokens.RefreshToken", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Actors.Users.User", null)
                         .WithMany()
@@ -1384,11 +1350,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasConstraintName("fk_item_events_events_guid");
 
                     b.Navigation("Article");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Audits.AuditLog", b =>
-                {
-                    b.Navigation("Partitions");
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.Users.User", b =>

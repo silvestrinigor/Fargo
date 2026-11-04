@@ -15,7 +15,6 @@ public class ItemDeleteCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IItemRepository itemRepository = Substitute.For<IItemRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -23,7 +22,6 @@ public class ItemDeleteCommandHandlerTests
         => new(
             ActorTestFactory.Resolver(userRepository),
             itemRepository,
-            auditLogRepository,
             currentActor);
 
     private static Item NewItem()
@@ -40,7 +38,6 @@ public class ItemDeleteCommandHandlerTests
         await CreateHandler().HandleAsync(new ItemDeleteCommand(item.Guid));
 
         itemRepository.Received(1).Remove(item);
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

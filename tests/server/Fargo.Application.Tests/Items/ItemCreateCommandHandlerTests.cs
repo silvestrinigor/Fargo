@@ -19,7 +19,6 @@ public class ItemCreateCommandHandlerTests
     private readonly IItemRepository itemRepository = Substitute.For<IItemRepository>();
     private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -29,7 +28,6 @@ public class ItemCreateCommandHandlerTests
             itemRepository,
             articleRepository,
             partitionRepository,
-            auditLogRepository,
             currentActor);
 
     [Fact]
@@ -44,7 +42,6 @@ public class ItemCreateCommandHandlerTests
             new ItemCreateCommand(new ItemCreateDto(article.Guid)));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(i => i.Guid == result && i.ArticleGuid == article.Guid));
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

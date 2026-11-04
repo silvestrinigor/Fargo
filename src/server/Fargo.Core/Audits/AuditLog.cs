@@ -1,27 +1,23 @@
-using Fargo.Core.Common;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
-using Fargo.Core.Entities.Partitions;
 
 namespace Fargo.Core.Audits;
 
 /// <summary>
-/// Represents an immutable record of an action performed by an actor on an entity.
+/// Represents an immutable record of a command an actor executed.
 /// </summary>
 /// <remarks>
-/// Audit logs are partition-controlled in the same way as other partitioned
-/// entities. The difference is that their partition access is derived from the
-/// entity being audited rather than being assigned independently.
+/// An audit log describes the intended command an actor ran: which actor
+/// (<see cref="ActorGuid"/>/<see cref="ActorType"/>), the kind of command
+/// (<see cref="AuditLogType"/>), the command's type name
+/// (<see cref="CommandName"/>), and a snapshot of the command's data
+/// (<see cref="Metadata"/>).
 ///
-/// An audit log is associated with every partition that provides access to the
-/// audited entity at the time the log is created. Consequently, access to an
-/// audit log follows the access scope of the entity whose action it records.
-///
-/// For partition actions, the audit log is associated with the affected
-/// partition's parent partition, or with the global partition when the affected
-/// partition has no parent.
+/// Audit logs relate directly to the acting actor and are removed when that
+/// actor is deleted. Read access is actor-scoped: only an actor with access to
+/// the acting actor can read that actor's command audit logs. Audit logs are not
+/// associated with partitions.
 /// </remarks>
-public class AuditLog : IPartitionedGuidsReadOnly
+public class AuditLog
 {
     /// <summary>
     /// Gets the unique identifier of the audit log.
@@ -29,143 +25,65 @@ public class AuditLog : IPartitionedGuidsReadOnly
     public Guid Guid { get; private set; } = Guid.NewGuid();
 
     /// <summary>
-    /// Gets the identifier of the actor that performed the action.
+    /// Gets the identifier of the actor that executed the command.
     /// </summary>
     public Guid ActorGuid { get; private init; }
 
     /// <summary>
-    /// Gets the type of actor that performed the action.
+    /// Gets the type of actor that executed the command.
     /// </summary>
     public ActorType ActorType { get; private init; }
 
     /// <summary>
-    /// Gets the type of change recorded by this audit log.
+    /// Gets the kind of command recorded by this audit log.
     /// </summary>
     public AuditLogType AuditLogType { get; private init; }
 
     /// <summary>
-    /// Gets the identifier of the entity affected by the action.
+    /// Gets the type name of the command that was executed.
     /// </summary>
-    public Guid EntityGuid { get; private init; }
+    public string CommandName { get; private init; } = null!;
 
     /// <summary>
-    /// Gets the type of entity affected by the action.
-    /// </summary>
-    public EntityType EntityType { get; private init; }
-
-    /// <summary>
-    /// Gets the date and time at which the action occurred.
+    /// Gets the date and time at which the command was executed.
     /// </summary>
     public DateTimeOffset OccurredAt { get; private init; } = DateTimeOffset.UtcNow;
 
     /// <summary>
-    /// Gets the metadata associated with the audited action.
+    /// Gets a snapshot of the executed command's data.
     /// </summary>
     public AuditMetadata Metadata { get; private init; } = new();
 
-    /// <summary>
-    /// Gets the partitions through which this audit log is accessible.
-    /// </summary>
-    /// <remarks>
-    /// These partitions are derived from the partitions associated with the
-    /// audited entity when the audit log is created.
-    /// </remarks>
-    public IReadOnlyCollection<AuditLogPartition> Partitions => partitions;
-
-    private readonly List<AuditLogPartition> partitions = [];
-
-    /// <summary>
-    /// Gets the identifiers of the partitions through which this audit log
-    /// is accessible.
-    /// </summary>
-    public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
-
     private AuditLog() { }
 
-    private AuditLog(Guid actorGuid, ActorType actorType, Guid entityGuid, EntityType entityType, AuditLogType auditLogType, IReadOnlyCollection<Guid> partitions)
+    private AuditLog(Guid actorGuid, ActorType actorType, AuditLogType auditLogType, string commandName, AuditMetadata metadata)
     {
         ActorGuid = actorGuid;
         ActorType = actorType;
-        EntityGuid = entityGuid;
-        EntityType = entityType;
         AuditLogType = auditLogType;
-
-        foreach (var p in partitions)
-        {
-            AddPartition(p);
-        }
+        CommandName = commandName;
+        Metadata = metadata;
     }
 
     /// <summary>
-    /// Creates an audit log for an action performed on a partitioned entity.
+    /// Creates an audit log describing a command executed by an actor.
     /// </summary>
-    /// <typeparam name="TEntity">The type of the audited entity.</typeparam>
-    /// <param name="actor">The actor that performed the action.</param>
-    /// <param name="entity">The entity affected by the action.</param>
-    /// <param name="auditLogType">The type of change that occurred.</param>
-    /// <returns>A new audit log associated with the partitions of the entity.</returns>
-    /// <remarks>
-    /// The audit log inherits its partition access from the audited entity.
-    /// Every partition associated with the entity at the time of the action
-    /// is copied to the audit log.
-    /// </remarks>
-    public static AuditLog CreateAuditLog<TEntity>(SecurityPrincipal actor, TEntity entity, AuditLogType auditLogType)
-        where TEntity : Entity, IPartitionedGuidsReadOnly
+    /// <param name="actorGuid">The identifier of the actor that executed the command.</param>
+    /// <param name="actorType">The type of actor that executed the command.</param>
+    /// <param name="auditLogType">The kind of command executed.</param>
+    /// <param name="commandName">The type name of the executed command.</param>
+    /// <param name="metadata">A snapshot of the command's data.</param>
+    /// <returns>A new <see cref="AuditLog"/> instance.</returns>
+    public static AuditLog ForCommand(
+        Guid actorGuid,
+        ActorType actorType,
+        AuditLogType auditLogType,
+        string commandName,
+        AuditMetadata metadata)
     {
-        return new AuditLog(actor.Guid, actor.ActorType, entity.Guid, entity.EntityType, auditLogType, entity.PartitionGuids);
-    }
+        ArgumentException.ThrowIfNullOrWhiteSpace(commandName);
+        ArgumentNullException.ThrowIfNull(metadata);
 
-    /// <summary>
-    /// Creates an audit log for an action performed on a partition.
-    /// </summary>
-    /// <param name="actor">The actor that performed the action.</param>
-    /// <param name="partition">The partition affected by the action.</param>
-    /// <param name="auditLogType">The type of change that occurred.</param>
-    /// <returns>A new audit log associated with the appropriate parent partition.</returns>
-    /// <remarks>
-    /// A partition action is associated with its parent partition. If the
-    /// affected partition has no parent, the audit log is associated with the
-    /// global partition.
-    /// </remarks>
-    public static AuditLog CreateAuditLog(SecurityPrincipal actor, Partition partition, AuditLogType auditLogType)
-    {
-        return new AuditLog(
-            actor.Guid, actor.ActorType, partition.Guid, partition.EntityType, auditLogType,
-            [partition.ParentPartitionGuid ?? FargoCoreWellKnowGuids.GlobalPartitionGuid]);
-    }
-
-    /// <summary>
-    /// Creates an audit log for an action performed on a global, non-partitioned
-    /// entity (for example a service account). The audit log is associated with
-    /// the global partition, so only actors with global partition access can read
-    /// it.
-    /// </summary>
-    /// <typeparam name="TEntity">The type of the audited entity.</typeparam>
-    /// <param name="actor">The actor that performed the action.</param>
-    /// <param name="entity">The entity affected by the action.</param>
-    /// <param name="auditLogType">The type of change that occurred.</param>
-    public static AuditLog CreateAuditLogForGlobalEntity<TEntity>(SecurityPrincipal actor, TEntity entity, AuditLogType auditLogType)
-        where TEntity : Entity
-    {
-        return new AuditLog(
-            actor.Guid, actor.ActorType, entity.Guid, entity.EntityType, auditLogType,
-            [FargoCoreWellKnowGuids.GlobalPartitionGuid]);
-    }
-
-    /// <summary>
-    /// Adds a partition through which the audit log can be accessed.
-    /// </summary>
-    /// <param name="partitionGuid">The identifier of the partition.</param>
-    /// <remarks>
-    /// Duplicate partition associations are ignored.
-    /// </remarks>
-    private void AddPartition(Guid partitionGuid)
-    {
-        if (partitions.Any(p => p.PartitionGuid == partitionGuid))
-        {
-            return;
-        }
-
-        partitions.Add(new AuditLogPartition(this, partitionGuid));
+        return new AuditLog(actorGuid, actorType, auditLogType, commandName, metadata);
     }
 }

@@ -15,7 +15,6 @@ public class ArticleDeleteCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -24,7 +23,6 @@ public class ArticleDeleteCommandHandlerTests
             new ArticleService(articleRepository),
             ActorTestFactory.Resolver(userRepository),
             articleRepository,
-            auditLogRepository,
             currentActor);
 
     [Fact]
@@ -42,7 +40,6 @@ public class ArticleDeleteCommandHandlerTests
         await CreateHandler().HandleAsync(new ArticleDeleteCommand(article.Guid));
 
         articleRepository.Received(1).Remove(article);
-        auditLogRepository.Received(1).Add(Arg.Any<Fargo.Core.Audits.AuditLog>());
     }
 
     [Fact]

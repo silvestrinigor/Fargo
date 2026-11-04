@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Partitions;
@@ -13,7 +11,6 @@ public sealed class ServiceAccountCreateCommandHandler(
     ActorResolver actorService,
     IServiceAccountRepository serviceAccountRepository,
     IPartitionRepository partitionRepository,
-    IAuditLogRepository auditLogRepository,
     IClientSecretGenerator secretGenerator,
     IPasswordHasher passwordHasher,
     ICurrentActor currentActor
@@ -91,21 +88,6 @@ public sealed class ServiceAccountCreateCommandHandler(
         }
 
         serviceAccountRepository.Add(account);
-
-        // The audit log inherits the account's partition membership so it is
-        // only readable by actors with access to those partitions. When the
-        // account has no membership it has no partition scope, so the audit is
-        // recorded against the global partition (as before) to avoid an
-        // unpartitioned, globally-readable audit entry.
-        var audit = accountActor.PartitionGuids.Count > 0
-            ? AuditLog.CreateAuditLog(actor, accountActor, AuditLogType.EntityCreated)
-            : AuditLog.CreateAuditLogForGlobalEntity(actor, accountActor, AuditLogType.EntityCreated);
-
-        audit.Metadata.AddPermissions([.. accountActor.Permissions]);
-        audit.Metadata.AddPartitions(accountActor.PartitionGuids);
-        audit.Metadata.AddPartitionAccessesAdded([.. accountActor.PartitionAccesses.Select(a => a.PartitionGuid)]);
-
-        auditLogRepository.Add(audit);
 
         return new ServiceAccountCreatedDto(accountActor.Guid, accountActor.Nameid.ToString(), secret.Value);
     }

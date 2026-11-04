@@ -13,7 +13,6 @@ namespace Fargo.Application.Tests.Users;
 public class UserDeleteCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -21,7 +20,6 @@ public class UserDeleteCommandHandlerTests
         => new(
             ActorTestFactory.Resolver(userRepository),
             userRepository,
-            auditLogRepository,
             currentActor);
 
     [Fact]
@@ -35,7 +33,6 @@ public class UserDeleteCommandHandlerTests
         await CreateHandler().HandleAsync(new UserDeleteCommand(user.ActorGuid));
 
         userRepository.Received(1).Remove(user);
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

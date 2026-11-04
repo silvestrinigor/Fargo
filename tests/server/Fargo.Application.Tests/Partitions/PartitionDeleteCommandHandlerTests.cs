@@ -15,7 +15,6 @@ public class PartitionDeleteCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -24,7 +23,6 @@ public class PartitionDeleteCommandHandlerTests
             new PartitionService(partitionRepository),
             ActorTestFactory.Resolver(userRepository),
             partitionRepository,
-            auditLogRepository,
             currentActor);
 
     private static Partition GlobalPartition()
@@ -54,7 +52,6 @@ public class PartitionDeleteCommandHandlerTests
         await CreateHandler().HandleAsync(new PartitionDeleteCommand(partition.Guid));
 
         partitionRepository.Received(1).Remove(partition);
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

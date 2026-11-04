@@ -28,7 +28,7 @@ public sealed class AuditLogSingleQueryHandler(
 
         var auditLog = await auditLogQueryRepository.GetInfoByGuidAsync(
             query.AuditLogGuid,
-            actor.PartitionAccessGuids,
+            actor.ToAuditLogAccessScope(),
             cancellationToken);
 
         return auditLog;

@@ -18,7 +18,6 @@ public class ArticleCreateCommandHandlerTests
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -28,7 +27,6 @@ public class ArticleCreateCommandHandlerTests
             ActorTestFactory.Resolver(userRepository),
             articleRepository,
             partitionRepository,
-            auditLogRepository,
             currentActor);
 
     private static ArticleCreateCommand DefaultCommand()
@@ -42,7 +40,6 @@ public class ArticleCreateCommandHandlerTests
         var result = await CreateHandler().HandleAsync(DefaultCommand());
 
         articleRepository.Received(1).Add(Arg.Is<Article>(a => a.Guid == result));
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

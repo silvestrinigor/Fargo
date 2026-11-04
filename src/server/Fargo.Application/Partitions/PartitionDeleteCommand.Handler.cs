@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Partitions;
 
@@ -10,7 +8,6 @@ public sealed class PartitionDeleteCommandHandler(
     PartitionService partitionService,
     ActorResolver actorService,
     IPartitionRepository partitionRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<PartitionDeleteCommand>
 {
@@ -42,9 +39,5 @@ public sealed class PartitionDeleteCommandHandler(
         await partitionService.ValidatePartitionCanBeDeletedAsync(partitionToDelete, cancellationToken);
 
         partitionRepository.Remove(partitionToDelete);
-
-        var audit = AuditLog.CreateAuditLog(actor, partitionToDelete, AuditLogType.EntityDeleted);
-
-        auditLogRepository.Add(audit);
     }
 }

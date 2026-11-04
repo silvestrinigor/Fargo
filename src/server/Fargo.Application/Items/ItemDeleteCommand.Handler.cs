@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Items;
 
@@ -9,7 +7,6 @@ namespace Fargo.Application.Items;
 public sealed class ItemDeleteCommandHandler(
     ActorResolver actorService,
     IItemRepository itemRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ItemDeleteCommand>
 {
@@ -26,10 +23,6 @@ public sealed class ItemDeleteCommandHandler(
         EntityNotFoundFargoApplicationException.ThrowIfNull(item, command.ItemGuid);
 
         actor.ThrowIfAccessDenied(item);
-
-        var audit = AuditLog.CreateAuditLog(actor, item, AuditLogType.EntityDeleted);
-
-        auditLogRepository.Add(audit);
 
         itemRepository.Remove(item);
     }

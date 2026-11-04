@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
@@ -13,7 +11,6 @@ public sealed class ItemCreateCommandHandler(
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ItemCreateCommand, Guid>
 {
@@ -33,10 +30,6 @@ public sealed class ItemCreateCommandHandler(
         // recorded through item events instead (see the item events resource).
         var item = Item.CreateItem(article);
 
-        var itemAudit = AuditLog.CreateAuditLog(actor, item, AuditLogType.EntityCreated);
-
-        itemAudit.Metadata.AddArticleGuid(article.Guid);
-
         if (command.Create.ParentItemContainerGuid is { } parentItemContainerGuid)
         {
             var parentItemContainer = await itemRepository.GetByGuidAsync(parentItemContainerGuid, cancellationToken);
@@ -47,8 +40,6 @@ public sealed class ItemCreateCommandHandler(
 
             item.PlaceInsideContainer(parentItemContainer);
         }
-
-        itemAudit.Metadata.AddParentContainer(item.ParentItemContainerGuid);
 
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitionGuids)
         {
@@ -64,11 +55,7 @@ public sealed class ItemCreateCommandHandler(
             }
         }
 
-        itemAudit.Metadata.AddPartitions(item.PartitionGuids);
-
         itemRepository.Add(item);
-
-        auditLogRepository.Add(itemAudit);
 
         return item.Guid;
     }

@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Entities.UserGroups;
@@ -13,7 +11,6 @@ public sealed class UserGroupCreateCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<UserGroupCreateCommand, Guid>
 {
@@ -29,13 +26,7 @@ public sealed class UserGroupCreateCommandHandler(
 
         var userGroup = UserGroup.CreateUserGroup(command.Create.Nameid);
 
-        var userGroupAudit = AuditLog.CreateAuditLog(actor, userGroup, AuditLogType.EntityCreated);
-
-        userGroupAudit.Metadata.AddNameid(userGroup.Nameid);
-
         userGroup.Description = command.Create.Description ?? Description.Empty;
-
-        userGroupAudit.Metadata.AddDescription(userGroup.Description);
 
         if (command.Create.IsActive is true)
         {
@@ -45,8 +36,6 @@ public sealed class UserGroupCreateCommandHandler(
         {
             userGroup.Deactivate();
         }
-
-        userGroupAudit.Metadata.AddIsActive(userGroup.IsActive);
 
         if (command.Create.ParentUserGroup is { } parentUserGroupGuid)
         {
@@ -59,8 +48,6 @@ public sealed class UserGroupCreateCommandHandler(
             userGroup.SetParentUserGroup(parentUserGroup);
         }
 
-        userGroupAudit.Metadata.AddParentUserGroup(userGroup.ParentUserGroupGuid);
-
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
             var requestedActions = permissions.Distinct();
@@ -72,8 +59,6 @@ public sealed class UserGroupCreateCommandHandler(
                 userGroup.AddPermission(action);
             }
         }
-
-        userGroupAudit.Metadata.AddPermissions([.. userGroup.Permissions]);
 
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitions)
         {
@@ -89,8 +74,6 @@ public sealed class UserGroupCreateCommandHandler(
             }
         }
 
-        userGroupAudit.Metadata.AddPartitions(userGroup.PartitionGuids);
-
         if (command.Create.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
         {
             foreach (var partitionGuid in partitionAccessesToAdd.Distinct())
@@ -103,14 +86,9 @@ public sealed class UserGroupCreateCommandHandler(
 
                 userGroup.AddPartitionAccess(partition);
             }
-
-            userGroupAudit.Metadata.AddPartitionAccessesAdded(
-                [.. userGroup.PartitionAccesses.Select(p => p.PartitionGuid)]);
         }
 
         userGroupRepository.Add(userGroup);
-
-        auditLogRepository.Add(userGroupAudit);
 
         return userGroup.Guid;
     }

@@ -17,7 +17,6 @@ public class UserGroupCreateCommandHandlerTests
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IUserGroupRepository userGroupRepository = Substitute.For<IUserGroupRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -27,7 +26,6 @@ public class UserGroupCreateCommandHandlerTests
             new UserGroupService(userGroupRepository),
             userGroupRepository,
             partitionRepository,
-            auditLogRepository,
             currentActor);
 
     private static Partition GlobalPartition()
@@ -45,7 +43,6 @@ public class UserGroupCreateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         userGroupRepository.Received(1).Add(Arg.Any<UserGroup>());
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

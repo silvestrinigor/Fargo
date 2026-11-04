@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Partitions;
@@ -15,7 +13,6 @@ public sealed class UserCreateCommandHandler(
     IUserRepository userRepository,
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor,
     IPasswordHasher passwordHasher
 ) : ICommandHandler<UserCreateCommand, Guid>
@@ -32,29 +29,19 @@ public sealed class UserCreateCommandHandler(
         var user = Actor.NewUser(command.Create.Nameid).User!;
         var userActor = user.Actor;
 
-        var userAudit = AuditLog.CreateAuditLog(actor, userActor, AuditLogType.EntityCreated);
-
-        userAudit.Metadata.AddNameid(userActor.Nameid);
-
         if (command.Create.FirstName is { } firstName)
         {
             user.FirstName = firstName;
-
-            userAudit.Metadata.AddFirstName(firstName);
         }
 
         if (command.Create.LastName is { } lastName)
         {
             user.LastName = lastName;
-
-            userAudit.Metadata.AddLastName(lastName);
         }
 
         if (command.Create.Description is { } description)
         {
             userActor.Description = description;
-
-            userAudit.Metadata.AddDescription(userActor.Description);
         }
 
         if (command.Create.IsActive is true)
@@ -65,8 +52,6 @@ public sealed class UserCreateCommandHandler(
         {
             userActor.Deactivate();
         }
-
-        userAudit.Metadata.AddIsActive(userActor.IsActive);
 
         user.Authentication.DefaultPasswordExpirationPeriod = command.Create.Authentication?.DefaultPasswordExpirationPeriod ?? null;
 
@@ -91,8 +76,6 @@ public sealed class UserCreateCommandHandler(
             }
         }
 
-        userAudit.Metadata.AddPermissions([.. userActor.Permissions]);
-
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitions)
         {
             foreach (var partitionGuid in partitions.Distinct())
@@ -107,8 +90,6 @@ public sealed class UserCreateCommandHandler(
             }
         }
 
-        userAudit.Metadata.AddPartitions(userActor.PartitionGuids);
-
         if (command.Create.UserGroupsToAdd is { Count: > 0 } userGroups)
         {
             foreach (var userGroupGuid in userGroups.Distinct())
@@ -121,9 +102,6 @@ public sealed class UserCreateCommandHandler(
 
                 user.AddUserGroup(userGroup);
             }
-
-            userAudit.Metadata.AddUserGroupsAdded(
-                [.. user.UserGroupMemberships.Select(m => m.UserGroupGuid)]);
         }
 
         if (command.Create.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
@@ -138,14 +116,9 @@ public sealed class UserCreateCommandHandler(
 
                 userActor.AddPartitionAccess(partition);
             }
-
-            userAudit.Metadata.AddPartitionAccessesAdded(
-                [.. userActor.PartitionAccesses.Select(p => p.PartitionGuid)]);
         }
 
         userRepository.Add(user);
-
-        auditLogRepository.Add(userAudit);
 
         return user.ActorGuid;
     }

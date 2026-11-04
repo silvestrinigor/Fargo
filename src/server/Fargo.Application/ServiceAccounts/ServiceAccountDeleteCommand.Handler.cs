@@ -1,5 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
@@ -9,7 +8,6 @@ namespace Fargo.Application.ServiceAccounts;
 public sealed class ServiceAccountDeleteCommandHandler(
     ActorResolver actorService,
     IServiceAccountRepository serviceAccountRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ServiceAccountDeleteCommand>
 {
@@ -23,10 +21,6 @@ public sealed class ServiceAccountDeleteCommandHandler(
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.Actor);
 
-        var audit = AuditLog.CreateAuditLogForGlobalEntity(actor, account.Actor, AuditLogType.EntityDeleted);
-
         serviceAccountRepository.Remove(account);
-
-        auditLogRepository.Add(audit);
     }
 }

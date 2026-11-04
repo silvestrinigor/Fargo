@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
@@ -13,7 +11,6 @@ public sealed class ItemUpdateCommandHandler(
     ActorResolver actorService,
     IItemRepository itemRepository,
     IPartitionRepository partitionRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ItemUpdateCommand>
 {
@@ -32,8 +29,6 @@ public sealed class ItemUpdateCommandHandler(
         var item = await itemRepository.GetByGuidAsync(command.ItemGuid, cancellationToken);
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(item, command.ItemGuid);
-
-        var itemAudit = AuditLog.CreateAuditLog(actor, item, AuditLogType.EntityUpdated);
 
         actor.ThrowIfAccessDenied(item);
 
@@ -64,14 +59,10 @@ public sealed class ItemUpdateCommandHandler(
             }
 
             item.PlaceInsideContainer(parentItemContainer);
-
-            itemAudit.Metadata.AddParentContainer(item.ParentItemContainerGuid);
         }
         else if (command.Update.RemoveFromParentItemContainer is true)
         {
             item.RemoveFromContainers();
-
-            itemAudit.Metadata.AddParentContainer(null);
         }
 
         if (command.Update.PartitionsToAdd is { Count: > 0 } partitionGuidsToAdd)
@@ -86,8 +77,6 @@ public sealed class ItemUpdateCommandHandler(
 
                 item.AddPartition(partition);
             }
-
-            itemAudit.Metadata.AddPartitionsAdded(partitionGuidsToAdd);
         }
 
         if (command.Update.PartitionsToRemove is { Count: > 0 } partitionGuidsToRemove)
@@ -102,10 +91,6 @@ public sealed class ItemUpdateCommandHandler(
 
                 item.RemovePartition(partition.Guid);
             }
-
-            itemAudit.Metadata.AddPartitionsRemoved(partitionGuidsToRemove);
         }
-
-        auditLogRepository.Add(itemAudit);
     }
 }

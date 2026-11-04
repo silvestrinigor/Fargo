@@ -15,7 +15,6 @@ public class PartitionUpdateCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -24,7 +23,6 @@ public class PartitionUpdateCommandHandlerTests
             ActorTestFactory.Resolver(userRepository),
             new PartitionService(partitionRepository),
             partitionRepository,
-            auditLogRepository,
             currentActor);
 
     private static Partition GlobalPartition()
@@ -52,7 +50,6 @@ public class PartitionUpdateCommandHandlerTests
 
         Assert.Equal("Renamed", partition.Name.Value);
         Assert.Equal("Updated", partition.Description.Value);
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

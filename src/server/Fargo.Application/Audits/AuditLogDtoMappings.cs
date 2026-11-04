@@ -20,11 +20,9 @@ public static class AuditLogDtoMappings
             auditLog.ActorGuid,
             auditLog.ActorType,
             auditLog.AuditLogType,
-            auditLog.EntityGuid,
-            auditLog.EntityType,
+            auditLog.CommandName,
             auditLog.OccurredAt,
-            auditLog.Metadata.Values,
-            [.. auditLog.Partitions.Select(p => p.PartitionGuid)]
+            auditLog.Metadata.Values
         );
     }
 }

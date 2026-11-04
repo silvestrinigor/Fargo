@@ -15,7 +15,6 @@ public class ServiceAccountCreateCommandHandlerTests
 {
     private readonly IServiceAccountRepository serviceAccountRepository = Substitute.For<IServiceAccountRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IClientSecretGenerator secretGenerator = Substitute.For<IClientSecretGenerator>();
     private readonly IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
@@ -32,7 +31,6 @@ public class ServiceAccountCreateCommandHandlerTests
             ActorTestFactory.Resolver(userRepository, serviceAccountRepository),
             serviceAccountRepository,
             partitionRepository,
-            auditLogRepository,
             secretGenerator,
             passwordHasher,
             currentActor);
@@ -47,7 +45,6 @@ public class ServiceAccountCreateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         serviceAccountRepository.Received(1).Add(Arg.Any<ServiceAccount>());
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

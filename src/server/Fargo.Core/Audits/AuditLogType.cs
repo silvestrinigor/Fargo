@@ -1,33 +1,69 @@
 namespace Fargo.Core.Audits;
 
 /// <summary>
-/// Represents the kind of change an audit log records.
+/// Represents the kind of command an audit log records.
 /// </summary>
 /// <remarks>
-/// Audit log types describe the lifecycle event that occurred on the audited
-/// entity. The specific entity affected is captured separately by the audit
-/// log's entity type, so these values stay generic (created, updated, deleted).
+/// An audit log describes the command an actor executed. These values classify
+/// that command into a coarse action family; the exact command is additionally
+/// captured by the audit log's command name, and the command's data is captured
+/// in its metadata.
 /// </remarks>
 public enum AuditLogType
 {
     /// <summary>
-    /// The entity was created.
+    /// A command that created an entity.
     /// </summary>
     EntityCreated = 1,
 
     /// <summary>
-    /// The entity was updated.
+    /// A command that updated an entity.
     /// </summary>
     EntityUpdated = 2,
 
     /// <summary>
-    /// The entity was deleted.
+    /// A command that deleted an entity.
     /// </summary>
     EntityDeleted = 3,
 
     /// <summary>
-    /// An event was recorded against an event-tracked entity, such as a
-    /// movement of a quantity of an event-tracked article.
+    /// A command that recorded an event against an event-tracked entity, such as
+    /// a movement of a quantity of an event-tracked article.
     /// </summary>
     ItemEventRecorded = 4,
+
+    /// <summary>
+    /// A command that authenticated an actor (login).
+    /// </summary>
+    Authenticated = 5,
+
+    /// <summary>
+    /// A command that logged an actor out.
+    /// </summary>
+    LoggedOut = 6,
+
+    /// <summary>
+    /// A command that refreshed an authentication token.
+    /// </summary>
+    TokenRefreshed = 7,
+
+    /// <summary>
+    /// A command that issued a service-account access token.
+    /// </summary>
+    ServiceTokenIssued = 8,
+
+    /// <summary>
+    /// A command that changed an actor's password.
+    /// </summary>
+    PasswordChanged = 9,
+
+    /// <summary>
+    /// A command that rotated a service account's secret.
+    /// </summary>
+    ServiceAccountSecretRotated = 10,
+
+    /// <summary>
+    /// A command that initialized the system.
+    /// </summary>
+    SystemInitialized = 11,
 }

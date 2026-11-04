@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Entities.UserGroups;
@@ -12,7 +10,6 @@ public sealed class UserGroupUpdateCommandHandler(
     UserGroupService userGroupService,
     IUserGroupRepository userGroupRepository,
     IPartitionRepository partitionRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<UserGroupUpdateCommand>
 {
@@ -30,35 +27,25 @@ public sealed class UserGroupUpdateCommandHandler(
 
         actor.ThrowIfAccessDenied(userGroup);
 
-        var userGroupAudit = AuditLog.CreateAuditLog(actor, userGroup, AuditLogType.EntityUpdated);
-
         if (command.Update.Nameid is not null && userGroup.Nameid != command.Update.Nameid)
         {
             await userGroupService.ValidateUserGroupNameidIsAvailableAsync(command.Update.Nameid.Value, cancellationToken);
 
             userGroup.Nameid = command.Update.Nameid.Value;
-
-            userGroupAudit.Metadata.AddNameid(userGroup.Nameid);
         }
 
         if (command.Update.Description is { } description)
         {
             userGroup.Description = description;
-
-            userGroupAudit.Metadata.AddDescription(userGroup.Description);
         }
 
         if (command.Update.IsActive is true)
         {
             userGroup.Activate();
-
-            userGroupAudit.Metadata.AddIsActive(userGroup.IsActive);
         }
         else if (command.Update.IsActive is false)
         {
             userGroup.Deactivate();
-
-            userGroupAudit.Metadata.AddIsActive(userGroup.IsActive);
         }
 
         if (command.Update.ParentUserGroup is { } parentUserGroupGuid)
@@ -72,14 +59,10 @@ public sealed class UserGroupUpdateCommandHandler(
             await userGroupService.ValidateParentUserGroupAssignmentHierarchyAsync(parentUserGroup, userGroup, cancellationToken);
 
             userGroup.SetParentUserGroup(parentUserGroup);
-
-            userGroupAudit.Metadata.AddParentUserGroup(userGroup.ParentUserGroupGuid);
         }
         else if (command.Update.RemoveParentUserGroup is true)
         {
             userGroup.RemoveFromParentUserGroup();
-
-            userGroupAudit.Metadata.AddParentUserGroup(userGroup.ParentUserGroupGuid);
         }
 
         if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
@@ -90,8 +73,6 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 userGroup.AddPermission(permission);
             }
-
-            userGroupAudit.Metadata.AddPermissionsAdded([.. permissionsToAdd.Distinct()]);
         }
 
         if (command.Update.PermissionsToRemove is { Count: > 0 } permissionsToRemove)
@@ -102,8 +83,6 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 userGroup.RemovePermission(permission);
             }
-
-            userGroupAudit.Metadata.AddPermissionsRemoved([.. permissionsToRemove.Distinct()]);
         }
 
         if (command.Update.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
@@ -118,8 +97,6 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 userGroup.AddPartition(partition);
             }
-
-            userGroupAudit.Metadata.AddPartitionsAdded([.. partitionsToAdd.Distinct()]);
         }
 
         if (command.Update.PartitionsToRemove is { Count: > 0 } partitionsToRemove)
@@ -134,8 +111,6 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 userGroup.RemovePartition(partition.Guid);
             }
-
-            userGroupAudit.Metadata.AddPartitionsRemoved([.. partitionsToRemove.Distinct()]);
         }
 
         if (command.Update.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
@@ -150,8 +125,6 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 userGroup.AddPartitionAccess(partition);
             }
-
-            userGroupAudit.Metadata.AddPartitionAccessesAdded([.. partitionAccessesToAdd]);
         }
 
         if (command.Update.PartitionAccessesToRemove is { Count: > 0 } partitionAccessesToRemove)
@@ -166,10 +139,6 @@ public sealed class UserGroupUpdateCommandHandler(
 
                 userGroup.RemovePartitionAccess(partition.Guid);
             }
-
-            userGroupAudit.Metadata.AddPartitionAccessesRemoved([.. partitionAccessesToRemove]);
         }
-
-        auditLogRepository.Add(userGroupAudit);
     }
 }

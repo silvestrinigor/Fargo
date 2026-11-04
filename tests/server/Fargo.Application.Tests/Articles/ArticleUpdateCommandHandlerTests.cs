@@ -18,7 +18,6 @@ public class ArticleUpdateCommandHandlerTests
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -28,7 +27,6 @@ public class ArticleUpdateCommandHandlerTests
             new ArticleService(articleRepository),
             articleRepository,
             partitionRepository,
-            auditLogRepository,
             currentActor);
 
     [Fact]
@@ -44,7 +42,6 @@ public class ArticleUpdateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         Assert.Equal(new Name("Renamed"), article.Name);
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

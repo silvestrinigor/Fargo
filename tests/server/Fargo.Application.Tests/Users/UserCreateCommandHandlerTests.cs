@@ -18,7 +18,6 @@ public class UserCreateCommandHandlerTests
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
     private readonly IUserGroupRepository userGroupRepository = Substitute.For<IUserGroupRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
@@ -30,7 +29,6 @@ public class UserCreateCommandHandlerTests
             userRepository,
             partitionRepository,
             userGroupRepository,
-            auditLogRepository,
             currentActor,
             passwordHasher);
 
@@ -47,7 +45,6 @@ public class UserCreateCommandHandlerTests
         await CreateHandler().HandleAsync(SimpleCommand());
 
         userRepository.Received(1).Add(Arg.Any<User>());
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]

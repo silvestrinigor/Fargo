@@ -1,3 +1,4 @@
+using Fargo.Core.Audits;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -43,7 +44,12 @@ public static class HandlerRegistrationExtensions
         services.TryAddScoped<THandler>();
         services.AddScoped<ICommandHandler<TCommand>>(sp =>
             new LoggingCommandHandlerDecorator<TCommand>(
-                BuildUnitOfWorkDecorator<TCommand>(sp.GetRequiredService<THandler>(), sp.GetRequiredService<IUnitOfWork>()),
+                BuildUnitOfWorkDecorator<TCommand>(
+                    new AuditCommandHandlerDecorator<TCommand>(
+                        sp.GetRequiredService<THandler>(),
+                        sp.GetService<ICurrentActor>(),
+                        sp.GetRequiredService<IAuditLogRepository>()),
+                    sp.GetRequiredService<IUnitOfWork>()),
                 sp.GetService<ICurrentActor>(),
                 sp.GetRequiredService<ILogger<TCommand>>()));
 
@@ -59,7 +65,10 @@ public static class HandlerRegistrationExtensions
         services.AddScoped<ICommandHandler<TCommand, TResponse>>(sp =>
             new LoggingCommandHandlerDecorator<TCommand, TResponse>(
                 new UnitOfWorkCommandHandlerDecorator<TCommand, TResponse>(
-                    sp.GetRequiredService<THandler>(),
+                    new AuditCommandHandlerDecorator<TCommand, TResponse>(
+                        sp.GetRequiredService<THandler>(),
+                        sp.GetService<ICurrentActor>(),
+                        sp.GetRequiredService<IAuditLogRepository>()),
                     sp.GetRequiredService<IUnitOfWork>()),
                 sp.GetService<ICurrentActor>(),
                 sp.GetRequiredService<ILogger<TCommand>>()));

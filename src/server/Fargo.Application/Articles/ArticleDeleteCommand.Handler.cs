@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
 
@@ -12,20 +10,17 @@ namespace Fargo.Application.Articles;
 /// <param name="articleService">Provides article domain operations and validation.</param>
 /// <param name="actorService">Resolves the current actor and its permissions.</param>
 /// <param name="articleRepository">Provides access to article entities.</param>
-/// <param name="auditLogRepository">Persists audit logs for article operations.</param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
 public sealed class ArticleDeleteCommandHandler(
     ArticleService articleService,
     ActorResolver actorService,
     IArticleRepository articleRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
     ) : ICommandHandler<ArticleDeleteCommand>
 {
     /// <summary>
     /// Deletes an article after validating the current actor's permissions and access,
-    /// validating that the article can be deleted, and recording the operation in the
-    /// audit log.
+    /// and validating that the article can be deleted.
     /// </summary>
     /// <param name="command">The command containing the identifier of the article to delete.</param>
     /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
@@ -50,9 +45,5 @@ public sealed class ArticleDeleteCommandHandler(
         await articleService.ValidateArticleCanBeDeletedAsync(article, cancellationToken);
 
         articleRepository.Remove(article);
-
-        var audit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityDeleted);
-
-        auditLogRepository.Add(audit);
     }
 }

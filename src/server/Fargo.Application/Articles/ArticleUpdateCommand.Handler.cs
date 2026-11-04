@@ -1,6 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Audits;
-using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Partitions;
@@ -13,13 +11,11 @@ namespace Fargo.Application.Articles;
 /// <param name="actorService">Resolves the current actor and its permissions.</param>
 /// <param name="articleService">Provides article-specific operations and validation.</param>
 /// <param name="articleRepository">Provides access to article entities.</param>
-/// <param name="partitionRepository">Persists the audit log generated for the article update.</param>
-/// <param name="auditLogRepository"></param>
+/// <param name="partitionRepository">Provides access to partitions referenced by the update.</param>
 /// <param name="currentActor">Provides information about the currently authenticated actor.</param>
 public sealed class ArticleUpdateCommandHandler(
     ActorResolver actorService, ArticleService articleService,
     IArticleRepository articleRepository, IPartitionRepository partitionRepository,
-    IAuditLogRepository auditLogRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ArticleUpdateCommand>
 {
@@ -53,33 +49,23 @@ public sealed class ArticleUpdateCommandHandler(
 
         var articleUpdateDto = command.Article;
 
-        var articleAudit = AuditLog.CreateAuditLog(actor, article, AuditLogType.EntityUpdated);
-
         if (articleUpdateDto.Name is { } name)
         {
             article.Name = name;
-
-            articleAudit.Metadata.AddName(name);
         }
 
         if (articleUpdateDto.Description is { } description)
         {
             article.Description = description;
-
-            articleAudit.Metadata.AddDescription(description);
         }
 
         if (articleUpdateDto.RemoveShelfLife is true)
         {
             article.ShelfLife = null;
-
-            articleAudit.Metadata.AddShelfLife(null);
         }
         else if (articleUpdateDto.ShelfLife is { } shelfLife)
         {
             article.ShelfLife = shelfLife;
-
-            articleAudit.Metadata.AddShelfLife(shelfLife);
         }
 
         if (
@@ -104,25 +90,17 @@ public sealed class ArticleUpdateCommandHandler(
 
                 articleUpdateDto.Dimension?.RemoveLengthZ is true
                     ? null : articleUpdateDto.Dimension?.LengthZ ?? article.Dimension.Z);
-
-            articleAudit.Metadata.AddMass(article.Mass);
-
-            articleAudit.Metadata.AddDimension(article.Dimension.X, article.Dimension.Y, article.Dimension.Z);
         }
 
         if (articleUpdateDto.Barcode?.RemoveEan13 is true)
         {
             article.Barcode.Ean13 = null;
-
-            articleAudit.Metadata.AddEan13(null);
         }
         else if (articleUpdateDto.Barcode?.Ean13 is { } ean13)
         {
             await articleService.ValidateEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Barcode.Ean13 = ean13;
-
-            articleAudit.Metadata.AddEan13(article.Barcode.Ean13);
         }
 
         if (articleUpdateDto.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
@@ -137,8 +115,6 @@ public sealed class ArticleUpdateCommandHandler(
 
                 article.AddPartition(partition);
             }
-
-            articleAudit.Metadata.AddPartitionsAdded(partitionsToAdd);
         }
 
         if (articleUpdateDto.PartitionsToRemove is { Count: > 0 } partitionsToRemove)
@@ -153,10 +129,6 @@ public sealed class ArticleUpdateCommandHandler(
 
                 article.RemovePartition(partition.Guid);
             }
-
-            articleAudit.Metadata.AddPartitionsRemoved(partitionsToRemove);
         }
-
-        auditLogRepository.Add(articleAudit);
     }
 }

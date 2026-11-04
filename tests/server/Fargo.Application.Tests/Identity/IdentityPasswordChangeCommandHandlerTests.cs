@@ -18,7 +18,6 @@ public class IdentityPasswordChangeCommandHandlerTests
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IPasswordHasher passwordHasher = Substitute.For<IPasswordHasher>();
     private readonly IRefreshTokenRepository refreshTokenRepository = Substitute.For<IRefreshTokenRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
 
     private const string ValidNameid = "jdoe";
@@ -31,8 +30,6 @@ public class IdentityPasswordChangeCommandHandlerTests
             userRepository,
             passwordHasher,
             refreshTokenRepository,
-            ActorTestFactory.Resolver(userRepository),
-            auditLogRepository,
             Substitute.For<ILogger<IdentityPasswordChangeCommandHandler>>());
 
     private static IdentityPasswordChangeCommand Command(
@@ -81,7 +78,6 @@ public class IdentityPasswordChangeCommandHandlerTests
 
         Assert.Equal("new-hash", user.Authentication.PasswordHash!.Value.Value);
         Assert.False(activeToken.IsUsable);
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]
@@ -137,27 +133,6 @@ public class IdentityPasswordChangeCommandHandlerTests
         passwordHasher.Verify(Arg.Any<PasswordHash>(), Arg.Any<Password>()).Returns(false);
 
         await Assert.ThrowsAsync<InvalidCredentialsFargoApplicationException>(
-            () => CreateHandler().HandleAsync(Command()));
-
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task HandleAsync_WhenActorCannotBeResolved_ShouldThrowActorNotFound()
-    {
-        var user = Actor.NewUser(new Nameid(ValidNameid)).User!;
-        user.Authentication.SetPasswordHash(new PasswordHash("stored-hash"));
-        userRepository.GetByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<User?>(user));
-        passwordHasher.Verify(Arg.Any<PasswordHash>(), Arg.Any<Password>()).Returns(true);
-        passwordHasher.Hash(Arg.Any<Password>()).Returns(new PasswordHash("new-hash"));
-
-        // Actor resolution returns null (resolver's GetByGuidAsync not configured
-        // to return the user).
-        userRepository.GetByGuidAsync(user.ActorGuid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<User?>(null));
-
-        await Assert.ThrowsAsync<ActorNotFoundFargoApplicationException>(
             () => CreateHandler().HandleAsync(Command()));
 
         await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());

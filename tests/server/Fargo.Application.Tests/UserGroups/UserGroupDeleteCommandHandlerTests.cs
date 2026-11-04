@@ -15,7 +15,6 @@ public class UserGroupDeleteCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IUserGroupRepository userGroupRepository = Substitute.For<IUserGroupRepository>();
-    private readonly IAuditLogRepository auditLogRepository = Substitute.For<IAuditLogRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -24,7 +23,6 @@ public class UserGroupDeleteCommandHandlerTests
             ActorTestFactory.Resolver(userRepository),
             new UserGroupService(userGroupRepository),
             userGroupRepository,
-            auditLogRepository,
             currentActor);
 
     private static UserGroup NewUserGroup()
@@ -43,7 +41,6 @@ public class UserGroupDeleteCommandHandlerTests
         await CreateHandler().HandleAsync(new UserGroupDeleteCommand(userGroup.Guid));
 
         userGroupRepository.Received(1).Remove(userGroup);
-        auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
     [Fact]
