@@ -16,6 +16,7 @@ public sealed class UserAuthenticationConfiguration : IEntityTypeConfiguration<U
         .HasOne(x => x.User)
         .WithOne(x => x.Authentication)
         .HasForeignKey<UserAuthentication>(x => x.UserGuid)
+        .HasPrincipalKey<User>(x => x.ActorGuid)
         .OnDelete(DeleteBehavior.Cascade);
     }
 }

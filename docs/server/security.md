@@ -1,8 +1,8 @@
 # Security
 
 Fargo authenticates callers with JWT bearer tokens and authorizes them with a
-combination of **permissions** and **partition access**, resolved into an
-`Actor`. Every state change is recorded in an audit log.
+combination of **permissions** and **partition access**, resolved into a
+`SecurityPrincipal`. Every state change is recorded in an audit log.
 
 ## Authentication
 
@@ -37,23 +37,24 @@ HTTP-level details.
 
 Non-interactive callers (integrations, scheduled jobs, other services) authenticate as **service accounts** rather than users. A service account has a client id and a client secret; the secret is generated server-side, returned **exactly once** at creation (or when rotated), and only ever stored hashed.
 
-A service exchanges its credentials for a short-lived access token at `POST /identity/service-token` (the client-credentials flow). Unlike user login, no refresh token is issued - a service simply requests a new token when the current one nears expiry. The issued token carries an actor-type claim marking it as a service, so it resolves to a service `Actor`.
+A service exchanges its credentials for a short-lived access token at `POST /identity/service-token` (the client-credentials flow). Unlike user login, no refresh token is issued - a service simply requests a new token when the current one nears expiry. The issued token carries an actor-type claim marking it as a service, so it resolves to a service principal.
 
 Service accounts are managed under `/service-accounts` (create, read, update, rotate secret, delete), each operation gated by a dedicated permission (`CreateServiceAccount`, `ReadServiceAccount`, `EditServiceAccount`, `DeleteServiceAccount`). Deactivating an account, or rotating its secret, invalidates all tokens previously issued to it.
 
 Like a user, a service account is a **partitioned** entity: it carries both a **partition membership** (the partitions it belongs to, which define its scope and drive partition-filtered listings and audit-log partition association) and **partition access** (the partitions it is allowed to reach, expanded down the partition hierarchy). When creating or updating an account, the granting actor must itself have access to every partition it assigns as membership or access. Unlike a user, a service account has no mandatory global-partition membership — it is a scoped machine identity whose memberships are assigned explicitly.
 
-## The actor
+## The security principal
 
-Requests act on behalf of an `Actor` — the authenticated identity together with
-its resolved **permissions** and **partition access**. The current actor is
-provided by `ICurrentActor` (`CurrentUserActor`), which reads the token's actor-type claim so a request resolves as either an `ActorType.User` or an `ActorType.Service` actor, and `ActorResolver` computes
-the actor's effective permissions and accessible partitions, aggregating what is
-granted directly to the user and what is inherited through the user's group
-hierarchy.
+Requests act on behalf of a `SecurityPrincipal` — the authenticated identity
+together with its resolved **permissions** and **partition access**. The current
+identity is provided by `ICurrentActor` (`CurrentUserActor`), which reads the
+token's actor-type claim so a request resolves as either an `ActorType.User` or
+an `ActorType.Service` principal, and `ActorResolver` computes the principal's
+effective permissions and accessible partitions, aggregating what is granted
+directly to the actor and what is inherited through the user's group hierarchy.
 
-Application handlers resolve the actor and enforce authorization before touching
-domain state.
+Application handlers resolve the principal and enforce authorization before
+touching domain state.
 
 ## Permissions
 
@@ -84,7 +85,7 @@ Access to a partitioned resource is granted when the resource has no partitions,
 or when any of its partitions is in the actor's accessible set:
 
 ```csharp
-// Fargo.Core.Actors.Actor
+// Fargo.Core.Actors.SecurityPrincipal
 public bool HasAccess(IPartitionedGuidsReadOnly partitioned)
 {
     if (partitioned.PartitionGuids.Count == 0)

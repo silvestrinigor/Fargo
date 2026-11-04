@@ -49,7 +49,7 @@ public sealed class ServiceTokenCommandHandler(
 
         var service = await serviceAccountRepository.GetByClientIdAsync(clientId, cancellationToken);
 
-        if (service is null || !service.IsActive)
+        if (service is null || !service.Actor.IsActive)
         {
             await RegisterFailureAndSaveAsync(command.ClientId, cancellationToken);
             throw new InvalidCredentialsFargoApplicationException();

@@ -57,9 +57,9 @@ public sealed class IdentityPasswordChangeCommandHandler(
             throw new InvalidCredentialsFargoApplicationException();
         }
 
-        if (!user.IsActive)
+        if (!user.Actor.IsActive)
         {
-            logger.IdentityPasswordChangeUserInactive(user.Guid);
+            logger.IdentityPasswordChangeUserInactive(user.ActorGuid);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
@@ -71,7 +71,7 @@ public sealed class IdentityPasswordChangeCommandHandler(
 
         if (!isValid)
         {
-            logger.IdentityPasswordChangeInvalidPassword(user.Guid);
+            logger.IdentityPasswordChangeInvalidPassword(user.ActorGuid);
 
             throw new InvalidCredentialsFargoApplicationException();
         }
@@ -85,15 +85,15 @@ public sealed class IdentityPasswordChangeCommandHandler(
         // The user changing their own password is both the actor and the audited
         // entity. Resolve the actor from the validated, active user so the audit
         // log inherits the user's partition access scope.
-        var actor = await actorResolver.GetActorByGuidAndTypeAsync(user.Guid, ActorType.User, cancellationToken);
+        var actor = await actorResolver.GetActorByGuidAndTypeAsync(user.ActorGuid, ActorType.User, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, user.Guid, ActorType.User);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actor, user.ActorGuid, ActorType.User);
 
-        var passwordChangeAudit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityUpdated);
+        var passwordChangeAudit = AuditLog.CreateAuditLog(actor, user.Actor, AuditLogType.EntityUpdated);
 
         passwordChangeAudit.Metadata.AddPasswordChanged();
 
-        var refreshTokens = await refreshTokenRepository.GetByUserGuidAsync(user.Guid, cancellationToken);
+        var refreshTokens = await refreshTokenRepository.GetByUserGuidAsync(user.ActorGuid, cancellationToken);
 
         var revokedCount = 0;
 

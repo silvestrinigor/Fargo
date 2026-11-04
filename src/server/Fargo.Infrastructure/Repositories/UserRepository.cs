@@ -12,25 +12,26 @@ namespace Fargo.Infrastructure.Repositories;
 
 public sealed class UserRepository(FargoDbContext context) : IUserRepository, IUserQueryRepository
 {
-    private readonly DbSet<User> users = context.Users;
+    private readonly DbSet<User> users = context.Set<User>();
+    private readonly DbSet<Actor> actors = context.Actors;
 
     public Task<bool> AnyAsync(CancellationToken cancellationToken = default)
         => users.AnyAsync(cancellationToken);
 
-    public void Add(User user) => users.Add(user);
+    public void Add(User user) => actors.Add(user.Actor);
 
-    public void Remove(User user) => users.Remove(user);
+    public void Remove(User user) => actors.Remove(user.Actor);
 
     public Task<User?> GetByGuidAsync(Guid userGuid, CancellationToken cancellationToken = default)
         => IncludeAggregate(users)
-            .SingleOrDefaultAsync(user => user.Guid == userGuid, cancellationToken);
+            .SingleOrDefaultAsync(user => user.ActorGuid == userGuid, cancellationToken);
 
     public Task<User?> GetByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
         => IncludeAggregate(users)
-            .SingleOrDefaultAsync(user => user.Nameid == nameid, cancellationToken);
+            .SingleOrDefaultAsync(user => user.Actor.Nameid == nameid, cancellationToken);
 
     public Task<bool> ExistsByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
-        => users.AnyAsync(user => user.Nameid == nameid, cancellationToken);
+        => users.AnyAsync(user => user.Actor.Nameid == nameid, cancellationToken);
 
     public async Task<UserDto?> GetInfoByGuidAsync(
         Guid entityGuid,
@@ -41,7 +42,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
                 users
                     .AsNoTracking(),
                 childOfAnyOfThesePartitions)
-            .Where(user => user.Guid == entityGuid)
+            .Where(user => user.ActorGuid == entityGuid)
             .Select(UserDtoMappings.Projection)
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -51,11 +52,11 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
     private static readonly IReadOnlyDictionary<string, Expression<Func<User, object?>>> UserSortFields =
         new Dictionary<string, Expression<Func<User, object?>>>
         {
-            ["guid"] = u => u.Guid,
-            ["nameid"] = u => u.Nameid,
+            ["guid"] = u => u.ActorGuid,
+            ["nameid"] = u => u.Actor.Nameid,
             ["firstname"] = u => u.FirstName,
             ["lastname"] = u => u.LastName,
-            ["isactive"] = u => u.IsActive,
+            ["isactive"] = u => u.Actor.IsActive,
         };
 
     public async Task<PagedResult<UserDto>> GetManyInfoAsync(
@@ -75,7 +76,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         var totalCount = await queryFiltered.CountAsync(cancellationToken);
 
         var result = await queryFiltered
-            .ApplySort(sort, UserSortFields, u => u.Nameid, u => u.Guid)
+            .ApplySort(sort, UserSortFields, u => u.Actor.Nameid, u => u.ActorGuid)
             .WithPagination(pagination)
             .Select(UserDtoMappings.Projection)
             .ToListAsync(cancellationToken);
@@ -96,14 +97,14 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
 
         var pattern = $"%{SearchPattern.Escape(search.Trim())}%";
 
-        return query.Where(u => EF.Functions.ILike((string)u.Nameid, pattern, SearchPattern.EscapeChar));
+        return query.Where(u => EF.Functions.ILike((string)u.Actor.Nameid, pattern, SearchPattern.EscapeChar));
     }
 
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
         => query
         .Include(user => user.UserGroupMemberships)
-        .Include(user => user.PartitionAccesses)
-        .Include(user => user.Partitions)
+        .Include(user => user.Actor).ThenInclude(actor => actor.PartitionAccesses)
+        .Include(user => user.Actor).ThenInclude(actor => actor.Partitions)
         .Include(user => user.Authentication)
         .AsSplitQuery();
 
@@ -112,7 +113,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         IReadOnlyCollection<Guid>? partitionGuids)
         => query.WherePartitionAccessible(
             partitionGuids,
-            user => user.Partitions,
+            user => user.Actor.Partitions,
             partition => partition.PartitionGuid);
 
     public async Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsFromUserAsync(
@@ -128,10 +129,10 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             FROM user_groups ug
             INNER JOIN user_user_groups uug
                 ON uug.user_group_guid = ug.guid
-            INNER JOIN users u
-                ON u.guid = uug.user_guid
-            WHERE u.guid = {userGuid}
-            AND u.is_active = true
+            INNER JOIN actors a
+                ON a.guid = uug.user_guid
+            WHERE a.guid = {userGuid}
+            AND a.is_active = true
             AND ug.is_active = true
 
             UNION ALL
@@ -146,12 +147,12 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         ),
         granted_partitions AS
         (
-            SELECT upa.partition_guid
-            FROM user_partition_accesses upa
-            INNER JOIN users u
-                ON u.guid = upa.user_guid
-            WHERE upa.user_guid = {userGuid}
-            AND u.is_active = true
+            SELECT apa.partition_guid
+            FROM actor_partition_accesses apa
+            INNER JOIN actors a
+                ON a.guid = apa.actor_guid
+            WHERE apa.actor_guid = {userGuid}
+            AND a.is_active = true
 
             UNION
 
@@ -204,10 +205,10 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             FROM user_groups ug
             INNER JOIN user_user_groups uug
                 ON uug.user_group_guid = ug.guid
-            INNER JOIN users u
-                ON u.guid = uug.user_guid
-            WHERE u.guid = {userGuid}
-              AND u.is_active = true
+            INNER JOIN actors a
+                ON a.guid = uug.user_guid
+            WHERE a.guid = {userGuid}
+              AND a.is_active = true
               AND ug.is_active = true
 
             UNION ALL
@@ -225,10 +226,10 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         all_permissions AS
         (
             -- Direct user permissions
-            SELECT jsonb_array_elements_text(u.permissions)::integer AS permission
-            FROM users u
-            WHERE u.guid = {userGuid}
-              AND u.is_active = true
+            SELECT jsonb_array_elements_text(a.permissions)::integer AS permission
+            FROM actors a
+            WHERE a.guid = {userGuid}
+              AND a.is_active = true
 
             UNION ALL
 

@@ -10,15 +10,15 @@ public sealed class ServiceAccountConfiguration : IEntityTypeConfiguration<Servi
     {
         builder.ToTable("service_accounts");
 
-        builder.HasKey(x => x.Guid);
+        // The service account is an owned satellite of its actor, keyed and
+        // joined 1:1 by the owning actor's identifier (mirroring
+        // Article/ArticlePack). Its shared authorization state lives on the actor.
+        builder.HasKey(x => x.ActorGuid);
 
-        builder.HasIndex(x => x.ClientId).IsUnique();
-
-        // Permissions and partition accesses are small primitive collections, so
-        // they are stored as jsonb on the row (matching how User.Permissions is
-        // persisted) rather than as separate join tables.
-        builder.Property(x => x.Permissions).HasColumnType("jsonb");
-
-        builder.Property(x => x.PartitionAccessGuids).HasColumnType("jsonb");
+        builder
+        .HasOne(x => x.Actor)
+        .WithOne(a => a.ServiceAccount)
+        .HasForeignKey<ServiceAccount>(x => x.ActorGuid)
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }

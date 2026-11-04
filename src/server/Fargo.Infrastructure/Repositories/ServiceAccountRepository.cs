@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Application.ServiceAccounts;
+using Fargo.Core.Actors;
 using Fargo.Core.Informations;
 using Fargo.Core.ServiceAccounts;
 using Fargo.Infrastructure.Extensions;
@@ -11,17 +12,22 @@ namespace Fargo.Infrastructure.Repositories;
 public sealed class ServiceAccountRepository(FargoDbContext context)
     : IServiceAccountRepository, IServiceAccountQueryRepository
 {
-    private readonly DbSet<ServiceAccount> serviceAccounts = context.ServiceAccounts;
+    private readonly DbSet<ServiceAccount> serviceAccounts = context.Set<ServiceAccount>();
+    private readonly DbSet<Actor> actors = context.Actors;
 
     public Task<ServiceAccount?> GetByGuidAsync(Guid guid, CancellationToken cancellationToken = default)
-        => serviceAccounts
-            .Include(account => account.Partitions)
-            .SingleOrDefaultAsync(account => account.Guid == guid, cancellationToken);
+        => IncludeAggregate(serviceAccounts)
+            .SingleOrDefaultAsync(account => account.ActorGuid == guid, cancellationToken);
 
     public Task<ServiceAccount?> GetByClientIdAsync(Nameid clientId, CancellationToken cancellationToken = default)
-        => serviceAccounts
-            .Include(account => account.Partitions)
-            .SingleOrDefaultAsync(account => account.ClientId == clientId, cancellationToken);
+        => IncludeAggregate(serviceAccounts)
+            .SingleOrDefaultAsync(account => account.Actor.Nameid == clientId, cancellationToken);
+
+    private static IQueryable<ServiceAccount> IncludeAggregate(IQueryable<ServiceAccount> query)
+        => query
+            .Include(account => account.Actor).ThenInclude(actor => actor.Partitions)
+            .Include(account => account.Actor).ThenInclude(actor => actor.PartitionAccesses)
+            .AsSplitQuery();
 
     public async Task<IReadOnlyCollection<Guid>> GetAllActivePartitionAccessGuidsAsync(
         Guid serviceGuid,
@@ -31,16 +37,16 @@ public sealed class ServiceAccountRepository(FargoDbContext context)
         // accounts grant nothing), then expand downward through the partition
         // hierarchy so access to a partition implies access to all of its
         // descendants — mirroring the user partition-access resolution.
-        var account = await serviceAccounts
+        var account = await IncludeAggregate(serviceAccounts)
             .AsNoTracking()
-            .SingleOrDefaultAsync(a => a.Guid == serviceGuid, cancellationToken);
+            .SingleOrDefaultAsync(a => a.ActorGuid == serviceGuid, cancellationToken);
 
-        if (account is null || !account.IsActive || account.PartitionAccessGuids.Count == 0)
+        if (account is null || !account.Actor.IsActive || account.Actor.PartitionAccesses.Count == 0)
         {
             return [];
         }
 
-        var grantedPartitionGuids = account.PartitionAccessGuids.ToArray();
+        var grantedPartitionGuids = account.Actor.PartitionAccesses.Select(a => a.PartitionGuid).ToArray();
 
         FormattableString query = $"""
         WITH RECURSIVE partition_tree AS
@@ -70,9 +76,9 @@ public sealed class ServiceAccountRepository(FargoDbContext context)
         return guids;
     }
 
-    public void Add(ServiceAccount serviceAccount) => serviceAccounts.Add(serviceAccount);
+    public void Add(ServiceAccount serviceAccount) => actors.Add(serviceAccount.Actor);
 
-    public void Remove(ServiceAccount serviceAccount) => serviceAccounts.Remove(serviceAccount);
+    public void Remove(ServiceAccount serviceAccount) => actors.Remove(serviceAccount.Actor);
 
     public async Task<ServiceAccountDto?> GetInfoByGuidAsync(
         Guid guid,
@@ -82,7 +88,7 @@ public sealed class ServiceAccountRepository(FargoDbContext context)
         var account = await ApplyPartitionFilter(
                 serviceAccounts.AsNoTracking(),
                 childOfAnyOfThesePartitions)
-            .Where(a => a.Guid == guid)
+            .Where(a => a.ActorGuid == guid)
             .Select(ServiceAccountDtoMappings.Projection)
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -101,7 +107,7 @@ public sealed class ServiceAccountRepository(FargoDbContext context)
         var totalCount = await query.CountAsync(cancellationToken);
 
         var accounts = await query
-            .OrderBy(a => a.Guid)
+            .OrderBy(a => a.ActorGuid)
             .WithPagination(pagination)
             .Select(ServiceAccountDtoMappings.Projection)
             .ToListAsync(cancellationToken);
@@ -121,6 +127,6 @@ public sealed class ServiceAccountRepository(FargoDbContext context)
         IReadOnlyCollection<Guid>? partitionGuids)
         => query.WherePartitionAccessible(
             partitionGuids,
-            account => account.Partitions,
+            account => account.Actor.Partitions,
             partition => partition.PartitionGuid);
 }

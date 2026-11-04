@@ -67,17 +67,18 @@ public sealed class InitializeSystemCommandHandler(
             administratorsGroupCreated = true;
         }
 
-        var admin = User.CreateAdministratorUser(command.UserAdminNameid);
+        var adminActor = Actor.NewAdministratorUser(command.UserAdminNameid);
+        var admin = adminActor.User!;
 
         var passwordHash = passwordHasher.Hash(command.UserAdminPassword);
 
         admin.Authentication.SetPasswordHash(passwordHash);
 
-        admin.Description = command.UserAdminDescription;
+        adminActor.Description = command.UserAdminDescription;
 
         foreach (var action in allActions)
         {
-            admin.AddPermission(action);
+            adminActor.AddPermission(action);
         }
 
         userRepository.Add(admin);

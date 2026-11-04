@@ -45,7 +45,7 @@ public class ActorNotFoundFargoApplicationException : FargoApplicationException
     /// <exception cref="ActorNotFoundFargoApplicationException">
     /// Thrown when the <paramref name="actor"/> parameter is null.
     /// </exception>
-    public static void ThrowIfNull([NotNull] Actor? actor, Guid actorGuid, ActorType actorType)
+    public static void ThrowIfNull([NotNull] SecurityPrincipal? actor, Guid actorGuid, ActorType actorType)
     {
         if (actor is null)
         {

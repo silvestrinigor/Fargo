@@ -59,7 +59,7 @@ public sealed class IdentityRefreshCommandHandler(
             throw new InvalidCredentialException();
         }
 
-        if (!user.IsActive)
+        if (!user.Actor.IsActive)
         {
             storedOldRefreshToken.Revoke();
 
@@ -68,7 +68,7 @@ public sealed class IdentityRefreshCommandHandler(
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            logger.IdentityRefreshRejectedUserNotActive(user.Guid);
+            logger.IdentityRefreshRejectedUserNotActive(user.ActorGuid);
 
             throw new InvalidCredentialException();
         }
@@ -82,16 +82,16 @@ public sealed class IdentityRefreshCommandHandler(
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            logger.IdentityRefreshPasswordChangeRequired(user.Guid);
+            logger.IdentityRefreshPasswordChangeRequired(user.ActorGuid);
 
-            throw new UserPasswordChangeRequiredFargoApplicationException(user.Guid);
+            throw new UserPasswordChangeRequiredFargoApplicationException(user.ActorGuid);
         }
 
         var rawNewRefreshToken = refreshTokenGenerator.Generate();
 
         var newRefreshTokenHash = tokenHasher.Hash(rawNewRefreshToken);
 
-        var storedNewRefreshToken = RefreshToken.Create(user.Guid, newRefreshTokenHash);
+        var storedNewRefreshToken = RefreshToken.Create(user.ActorGuid, newRefreshTokenHash);
 
         refreshTokenRepository.Add(storedNewRefreshToken);
 
@@ -101,9 +101,9 @@ public sealed class IdentityRefreshCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var actorUser = await actorService.GetActorByGuidAndTypeAsync(user.Guid, ActorType.User, cancellationToken);
+        var actorUser = await actorService.GetActorByGuidAndTypeAsync(user.ActorGuid, ActorType.User, cancellationToken);
 
-        ActorNotFoundFargoApplicationException.ThrowIfNull(actorUser, user.Guid, ActorType.User);
+        ActorNotFoundFargoApplicationException.ThrowIfNull(actorUser, user.ActorGuid, ActorType.User);
 
         return new IdentityAuthResultDto(
             newAccessTokenResult.AccessToken.Value,

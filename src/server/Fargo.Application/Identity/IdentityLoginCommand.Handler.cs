@@ -107,7 +107,7 @@ public sealed class IdentityLoginCommandHandler(
             throw new InvalidCredentialsFargoApplicationException();
         }
 
-        if (!user.IsActive)
+        if (!user.Actor.IsActive)
         {
             logger.IdentityLoginRejectedUserNotActive(command.Nameid);
 
@@ -129,7 +129,7 @@ public sealed class IdentityLoginCommandHandler(
         }
         catch (ArgumentException)
         {
-            logger.IdentityLoginRejectedInvalidPasswordFormat(user.Guid);
+            logger.IdentityLoginRejectedInvalidPasswordFormat(user.ActorGuid);
 
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
@@ -146,7 +146,7 @@ public sealed class IdentityLoginCommandHandler(
 
         if (!isValid)
         {
-            logger.IdentityLoginRejectedInvalidPassword(user.Guid);
+            logger.IdentityLoginRejectedInvalidPassword(user.ActorGuid);
 
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
@@ -160,7 +160,7 @@ public sealed class IdentityLoginCommandHandler(
 
         if (user.Authentication.IsPasswordChangeRequired)
         {
-            logger.IdentityLoginRejectedPasswordChangeRequired(user.Guid);
+            logger.IdentityLoginRejectedPasswordChangeRequired(user.ActorGuid);
 
             await attemptService.RegisterSuccessAsync(
                 command.Nameid,
@@ -172,7 +172,7 @@ public sealed class IdentityLoginCommandHandler(
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            throw new UserPasswordChangeRequiredFargoApplicationException(user.Guid);
+            throw new UserPasswordChangeRequiredFargoApplicationException(user.ActorGuid);
         }
 
         var accessTokenResult = tokenGenerator.Generate(user);
@@ -181,7 +181,7 @@ public sealed class IdentityLoginCommandHandler(
 
         var refreshTokenHash = tokenHasher.Hash(rawRefreshToken);
 
-        var refreshToken = RefreshToken.Create(user.Guid, refreshTokenHash);
+        var refreshToken = RefreshToken.Create(user.ActorGuid, refreshTokenHash);
 
         refreshTokenRepository.Add(refreshToken);
 

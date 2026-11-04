@@ -1,4 +1,5 @@
 using Fargo.Core.Articles;
+using Fargo.Core.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Entities;
@@ -32,6 +33,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<ItemLifecycleEvent> ItemLifecycleEvents { get; set; }
 
     public DbSet<User> Users { get; set; }
+
+    public DbSet<Actor> Actors { get; set; }
 
     public DbSet<UserGroup> UserGroups { get; set; }
 
@@ -125,11 +128,12 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new ItemMovimentConfiguration())
         .ApplyConfiguration(new ItemPartitionConfiguration())
         .ApplyConfiguration(new ItemParentContainerHistoryPostgresTemporalConfiguration())
+        .ApplyConfiguration(new ActorConfiguration())
+        .ApplyConfiguration(new ActorPartitionConfiguration())
+        .ApplyConfiguration(new ActorPartitionAccessConfiguration())
         .ApplyConfiguration(new UserConfiguration())
         .ApplyConfiguration(new UserAuthenticationConfiguration())
         .ApplyConfiguration(new UserUserGroupConfiguration())
-        .ApplyConfiguration(new UserPartitionConfiguration())
-        .ApplyConfiguration(new UserPartitionAccessConfiguration())
         .ApplyConfiguration(new UserGroupConfiguration())
         .ApplyConfiguration(new UserGroupPartitionConfiguration())
         .ApplyConfiguration(new UserGroupPartitionAccessConfiguration())
@@ -139,7 +143,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new AuditLogPartitionConfiguration())
         .ApplyConfiguration(new AuthenticationAttemptConfiguration())
         .ApplyConfiguration(new ServiceAccountConfiguration())
-        .ApplyConfiguration(new ServiceAccountPartitionConfiguration())
         .ApplyConfiguration(new ItemEventConfiguration())
         .ApplyConfiguration(new ItemMovimentEventConfiguration())
         .ApplyConfiguration(new ItemLifecycleEventConfiguration());

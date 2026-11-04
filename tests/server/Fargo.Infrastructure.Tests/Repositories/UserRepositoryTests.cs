@@ -1,4 +1,5 @@
 using Fargo.Application.Common;
+using Fargo.Core.Actors;
 using Fargo.Core.Informations;
 using Fargo.Core.Users;
 using Fargo.Infrastructure.Repositories;
@@ -23,7 +24,7 @@ public class UserRepositoryTests
         await using var context = TestDbContextFactory.Create();
         var repo = new UserRepository(context);
 
-        repo.Add(User.CreateUser(new Nameid("alice")));
+        repo.Add(Actor.NewUser(new Nameid("alice")).User!);
         await context.SaveChangesAsync();
 
         Assert.True(await repo.AnyAsync());
@@ -34,14 +35,46 @@ public class UserRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new UserRepository(context);
-        var user = User.CreateUser(new Nameid("bob"));
+        var user = Actor.NewUser(new Nameid("bob")).User!;
         repo.Add(user);
         await context.SaveChangesAsync();
 
-        var found = await repo.GetByGuidAsync(user.Guid);
+        var found = await repo.GetByGuidAsync(user.ActorGuid);
 
         Assert.NotNull(found);
-        Assert.Equal(user.Guid, found!.Guid);
+        Assert.Equal(user.ActorGuid, found!.ActorGuid);
+    }
+
+    [Fact]
+    public async Task GetByGuid_AfterReload_ShouldLoadActorAndAuthentication()
+    {
+        // Reproduces exactly what the JWT OnTokenValidated path touches: load the
+        // user by actor guid in a FRESH context and read Actor.IsActive and
+        // Authentication.AuthVersion.
+        var dbName = Guid.NewGuid().ToString();
+
+        Guid actorGuid;
+        Guid authVersion;
+
+        await using (var seedContext = TestDbContextFactory.Create(dbName))
+        {
+            var seedRepo = new UserRepository(seedContext);
+            var created = Actor.NewAdministratorUser(new Nameid("admin")).User!;
+            actorGuid = created.ActorGuid;
+            authVersion = created.Authentication.AuthVersion;
+            seedRepo.Add(created);
+            await seedContext.SaveChangesAsync();
+        }
+
+        await using var readContext = TestDbContextFactory.Create(dbName);
+        var readRepo = new UserRepository(readContext);
+
+        var found = await readRepo.GetByGuidAsync(actorGuid);
+
+        Assert.NotNull(found);
+        Assert.NotNull(found!.Actor);
+        Assert.True(found.Actor.IsActive);
+        Assert.Equal(authVersion, found.Authentication.AuthVersion);
     }
 
     [Fact]
@@ -49,7 +82,7 @@ public class UserRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new UserRepository(context);
-        repo.Add(User.CreateUser(new Nameid("carol")));
+        repo.Add(Actor.NewUser(new Nameid("carol")).User!);
         await context.SaveChangesAsync();
 
         var found = await repo.GetByNameidAsync(new Nameid("CAROL"));
@@ -62,7 +95,7 @@ public class UserRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new UserRepository(context);
-        repo.Add(User.CreateUser(new Nameid("dave")));
+        repo.Add(Actor.NewUser(new Nameid("dave")).User!);
         await context.SaveChangesAsync();
 
         Assert.True(await repo.ExistsByNameidAsync(new Nameid("dave")));
@@ -74,14 +107,14 @@ public class UserRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new UserRepository(context);
-        var user = User.CreateUser(new Nameid("erin"));
+        var user = Actor.NewUser(new Nameid("erin")).User!;
         repo.Add(user);
         await context.SaveChangesAsync();
 
-        var dto = await repo.GetInfoByGuidAsync(user.Guid);
+        var dto = await repo.GetInfoByGuidAsync(user.ActorGuid);
 
         Assert.NotNull(dto);
-        Assert.Equal(user.Guid, dto!.Guid);
+        Assert.Equal(user.ActorGuid, dto!.Guid);
     }
 
     [Fact]
@@ -89,9 +122,9 @@ public class UserRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new UserRepository(context);
-        repo.Add(User.CreateUser(new Nameid("usr1")));
-        repo.Add(User.CreateUser(new Nameid("usr2")));
-        repo.Add(User.CreateUser(new Nameid("usr3")));
+        repo.Add(Actor.NewUser(new Nameid("usr1")).User!);
+        repo.Add(Actor.NewUser(new Nameid("usr2")).User!);
+        repo.Add(Actor.NewUser(new Nameid("usr3")).User!);
         await context.SaveChangesAsync();
 
         var page = await repo.GetManyInfoAsync(new Pagination(new Page(1), new Limit(2)));
@@ -105,13 +138,13 @@ public class UserRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new UserRepository(context);
-        var user = User.CreateUser(new Nameid("frank"));
+        var user = Actor.NewUser(new Nameid("frank")).User!;
         repo.Add(user);
         await context.SaveChangesAsync();
 
         repo.Remove(user);
         await context.SaveChangesAsync();
 
-        Assert.Null(await repo.GetByGuidAsync(user.Guid));
+        Assert.Null(await repo.GetByGuidAsync(user.ActorGuid));
     }
 }

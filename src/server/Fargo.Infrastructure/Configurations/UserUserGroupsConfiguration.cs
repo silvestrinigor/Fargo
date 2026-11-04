@@ -20,6 +20,7 @@ public sealed class UserUserGroupConfiguration : IEntityTypeConfiguration<UserUs
         .HasOne(x => x.User)
         .WithMany(x => x.UserGroupMemberships)
         .HasForeignKey(x => x.UserGuid)
+        .HasPrincipalKey(u => u.ActorGuid)
         .OnDelete(DeleteBehavior.Cascade);
 
         builder

@@ -30,7 +30,7 @@ public sealed class ActorResolver(IUserRepository userRepository, IServiceAccoun
     /// The actor if an active actor of the specified type exists;
     /// otherwise, <see langword="null"/>.
     /// </returns>
-    public async Task<Actor?> GetActorByGuidAndTypeAsync(Guid actorGuid, ActorType actorType, CancellationToken cancellationToken = default)
+    public async Task<SecurityPrincipal?> GetActorByGuidAndTypeAsync(Guid actorGuid, ActorType actorType, CancellationToken cancellationToken = default)
     {
         if (actorType == ActorType.User)
         {
@@ -50,11 +50,11 @@ public sealed class ActorResolver(IUserRepository userRepository, IServiceAccoun
     /// context (its own permissions and partition accesses), or null when the
     /// account does not exist or is inactive.
     /// </summary>
-    private async Task<Actor?> GetServiceActorByGuidAsync(Guid serviceGuid, CancellationToken cancellationToken = default)
+    private async Task<SecurityPrincipal?> GetServiceActorByGuidAsync(Guid serviceGuid, CancellationToken cancellationToken = default)
     {
         var service = await serviceAccountRepository.GetByGuidAsync(serviceGuid, cancellationToken);
 
-        if (service is null || !service.IsActive)
+        if (service is null || !service.Actor.IsActive)
         {
             return null;
         }
@@ -63,12 +63,12 @@ public sealed class ActorResolver(IUserRepository userRepository, IServiceAccoun
         // (access to a partition implies access to its descendants), exactly as
         // the user actor does, so service and user authorization are consistent.
         var partitionAccessGuids = await serviceAccountRepository
-            .GetAllActivePartitionAccessGuidsAsync(service.Guid, cancellationToken);
+            .GetAllActivePartitionAccessGuidsAsync(service.ActorGuid, cancellationToken);
 
-        var actor = new Actor(
-            service.Guid,
+        var actor = new SecurityPrincipal(
+            service.ActorGuid,
             ActorType.Service,
-            service.Permissions.ToHashSet(),
+            service.Actor.Permissions.ToHashSet(),
             partitionAccessGuids.ToHashSet());
 
         return actor;
@@ -87,20 +87,20 @@ public sealed class ActorResolver(IUserRepository userRepository, IServiceAccoun
     /// An actor containing the user's permissions and partition accesses if
     /// the user exists and is active; otherwise, <see langword="null"/>.
     /// </returns>
-    private async Task<Actor?> GetUserActorByGuidAsync(Guid userGuid, CancellationToken cancellationToken = default)
+    private async Task<SecurityPrincipal?> GetUserActorByGuidAsync(Guid userGuid, CancellationToken cancellationToken = default)
     {
         var user = await userRepository.GetByGuidAsync(userGuid, cancellationToken);
 
-        if (user is null || !user.IsActive)
+        if (user is null || !user.Actor.IsActive)
         {
             return null;
         }
 
-        var partitionAccessGuids = await userRepository.GetAllActivePartitionAccessGuidsFromUserAsync(user.Guid, cancellationToken);
+        var partitionAccessGuids = await userRepository.GetAllActivePartitionAccessGuidsFromUserAsync(user.ActorGuid, cancellationToken);
 
-        var permissions = await userRepository.GetAllActivePermissionsFromUserAsync(user.Guid, cancellationToken);
+        var permissions = await userRepository.GetAllActivePermissionsFromUserAsync(user.ActorGuid, cancellationToken);
 
-        var actor = new Actor(user.Guid, ActorType.User, permissions.ToHashSet(), partitionAccessGuids.ToHashSet());
+        var actor = new SecurityPrincipal(user.ActorGuid, ActorType.User, permissions.ToHashSet(), partitionAccessGuids.ToHashSet());
 
         return actor;
     }

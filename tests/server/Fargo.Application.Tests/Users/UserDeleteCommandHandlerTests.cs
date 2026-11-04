@@ -28,11 +28,11 @@ public class UserDeleteCommandHandlerTests
     public async Task HandleAsync_WhenValid_ShouldRemoveUserAndAuditAndSave()
     {
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.DeleteUser]);
-        var user = User.CreateUser(new Nameid("target"));
-        userRepository.GetByGuidAsync(user.Guid, Arg.Any<CancellationToken>())
+        var user = Actor.NewUser(new Nameid("target")).User!;
+        userRepository.GetByGuidAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<User?>(user));
 
-        await CreateHandler().HandleAsync(new UserDeleteCommand(user.Guid));
+        await CreateHandler().HandleAsync(new UserDeleteCommand(user.ActorGuid));
 
         userRepository.Received(1).Remove(user);
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
@@ -73,12 +73,12 @@ public class UserDeleteCommandHandlerTests
     {
         ActorTestFactory.ConfigureUserActor(
             userRepository, currentActor.Guid, [ActionType.DeleteUser], partitionAccesses: [Guid.NewGuid()]);
-        var user = User.CreateUser(new Nameid("target"));
-        userRepository.GetByGuidAsync(user.Guid, Arg.Any<CancellationToken>())
+        var user = Actor.NewUser(new Nameid("target")).User!;
+        userRepository.GetByGuidAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<User?>(user));
 
         await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
-            () => CreateHandler().HandleAsync(new UserDeleteCommand(user.Guid)));
+            () => CreateHandler().HandleAsync(new UserDeleteCommand(user.ActorGuid)));
 
         userRepository.DidNotReceive().Remove(Arg.Any<User>());
         await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -88,12 +88,12 @@ public class UserDeleteCommandHandlerTests
     public async Task HandleAsync_WhenDeletingAdminUser_ShouldThrowDomainValidation()
     {
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.DeleteUser]);
-        var admin = User.CreateAdministratorUser(new Nameid("admin"));
-        userRepository.GetByGuidAsync(admin.Guid, Arg.Any<CancellationToken>())
+        var admin = Actor.NewAdministratorUser(new Nameid("admin")).User!;
+        userRepository.GetByGuidAsync(admin.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<User?>(admin));
 
         await Assert.ThrowsAsync<FargoCoreException>(
-            () => CreateHandler().HandleAsync(new UserDeleteCommand(admin.Guid)));
+            () => CreateHandler().HandleAsync(new UserDeleteCommand(admin.ActorGuid)));
 
         userRepository.DidNotReceive().Remove(Arg.Any<User>());
         await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());

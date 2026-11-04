@@ -19,9 +19,12 @@ namespace Fargo.Infrastructure.Tests.Common;
 public static class TestDbContextFactory
 {
     public static FargoDbContext Create()
+        => Create(Guid.NewGuid().ToString());
+
+    public static FargoDbContext Create(string databaseName)
     {
         var options = new DbContextOptionsBuilder<FargoDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(databaseName: databaseName)
             .Options;
 
         return new FargoDbContext(options);

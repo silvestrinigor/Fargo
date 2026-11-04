@@ -29,11 +29,12 @@ public sealed class UserCreateCommandHandler(
 
         await userService.ValidateUserNameidIsAvailableAsync(command.Create.Nameid, cancellationToken);
 
-        var user = User.CreateUser(command.Create.Nameid);
+        var user = Actor.NewUser(command.Create.Nameid).User!;
+        var userActor = user.Actor;
 
-        var userAudit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityCreated);
+        var userAudit = AuditLog.CreateAuditLog(actor, userActor, AuditLogType.EntityCreated);
 
-        userAudit.Metadata.AddNameid(user.Nameid);
+        userAudit.Metadata.AddNameid(userActor.Nameid);
 
         if (command.Create.FirstName is { } firstName)
         {
@@ -51,21 +52,21 @@ public sealed class UserCreateCommandHandler(
 
         if (command.Create.Description is { } description)
         {
-            user.Description = description;
+            userActor.Description = description;
 
-            userAudit.Metadata.AddDescription(user.Description);
+            userAudit.Metadata.AddDescription(userActor.Description);
         }
 
         if (command.Create.IsActive is true)
         {
-            user.Activate();
+            userActor.Activate();
         }
         else if (command.Create.IsActive is false)
         {
-            user.Deactivate();
+            userActor.Deactivate();
         }
 
-        userAudit.Metadata.AddIsActive(user.IsActive);
+        userAudit.Metadata.AddIsActive(userActor.IsActive);
 
         user.Authentication.DefaultPasswordExpirationPeriod = command.Create.Authentication?.DefaultPasswordExpirationPeriod ?? null;
 
@@ -86,11 +87,11 @@ public sealed class UserCreateCommandHandler(
             {
                 actor.ThrowIfPermissionDenied(action);
 
-                user.AddPermission(action);
+                userActor.AddPermission(action);
             }
         }
 
-        userAudit.Metadata.AddPermissions([.. user.Permissions]);
+        userAudit.Metadata.AddPermissions([.. userActor.Permissions]);
 
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitions)
         {
@@ -102,11 +103,11 @@ public sealed class UserCreateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.AddPartition(partition);
+                userActor.AddPartition(partition);
             }
         }
 
-        userAudit.Metadata.AddPartitions(user.PartitionGuids);
+        userAudit.Metadata.AddPartitions(userActor.PartitionGuids);
 
         if (command.Create.UserGroupsToAdd is { Count: > 0 } userGroups)
         {
@@ -135,17 +136,17 @@ public sealed class UserCreateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.AddPartitionAccess(partition);
+                userActor.AddPartitionAccess(partition);
             }
 
             userAudit.Metadata.AddPartitionAccessesAdded(
-                [.. user.PartitionAccesses.Select(p => p.PartitionGuid)]);
+                [.. userActor.PartitionAccesses.Select(p => p.PartitionGuid)]);
         }
 
         userRepository.Add(user);
 
         auditLogRepository.Add(userAudit);
 
-        return user.Guid;
+        return user.ActorGuid;
     }
 }

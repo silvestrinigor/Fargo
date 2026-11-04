@@ -24,31 +24,34 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
         var account = await serviceAccountRepository.GetByGuidAsync(command.ServiceAccountGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.ServiceAccount);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.Actor);
 
-        var audit = account.PartitionGuids.Count > 0
-            ? AuditLog.CreateAuditLog(actor, account, AuditLogType.EntityUpdated)
-            : AuditLog.CreateAuditLogForGlobalEntity(actor, account, AuditLogType.EntityUpdated);
+        var accountActor = account.Actor;
+
+        var audit = accountActor.PartitionGuids.Count > 0
+            ? AuditLog.CreateAuditLog(actor, accountActor, AuditLogType.EntityUpdated)
+            : AuditLog.CreateAuditLogForGlobalEntity(actor, accountActor, AuditLogType.EntityUpdated);
 
         if (command.Update.Description is { } description)
         {
-            account.Description = new Description(description);
+            accountActor.Description = new Description(description);
 
-            audit.Metadata.AddDescription(account.Description);
+            audit.Metadata.AddDescription(accountActor.Description);
         }
 
         if (command.Update.IsActive is { } isActive)
         {
             if (isActive)
             {
-                account.Activate();
+                accountActor.Activate();
             }
             else
             {
-                account.Deactivate();
+                accountActor.Deactivate();
+                account.RotateAuthVersion();
             }
 
-            audit.Metadata.AddIsActive(account.IsActive);
+            audit.Metadata.AddIsActive(accountActor.IsActive);
         }
 
         if (command.Update.PermissionsToAdd is { } permissionsToAdd)
@@ -57,7 +60,7 @@ public sealed class ServiceAccountUpdateCommandHandler(
             {
                 actor.ThrowIfPermissionDenied(permission);
 
-                account.AddPermission(permission);
+                accountActor.AddPermission(permission);
             }
 
             audit.Metadata.AddPermissionsAdded([.. permissionsToAdd]);
@@ -69,7 +72,7 @@ public sealed class ServiceAccountUpdateCommandHandler(
             {
                 actor.ThrowIfPermissionDenied(permission);
 
-                account.RemovePermission(permission);
+                accountActor.RemovePermission(permission);
             }
 
             audit.Metadata.AddPermissionsRemoved([.. permissionsToRemove]);
@@ -85,7 +88,7 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                account.AddPartition(partition);
+                accountActor.AddPartition(partition);
             }
 
             audit.Metadata.AddPartitionsAdded([.. partitionMembershipsToAdd]);
@@ -101,7 +104,7 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                account.RemovePartition(partition.Guid);
+                accountActor.RemovePartition(partition.Guid);
             }
 
             audit.Metadata.AddPartitionsRemoved([.. partitionMembershipsToRemove]);
@@ -117,7 +120,7 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                account.AddPartitionAccess(partition.Guid);
+                accountActor.AddPartitionAccess(partition);
             }
 
             audit.Metadata.AddPartitionAccessesAdded([.. partitionAccessesToAdd]);
@@ -133,7 +136,7 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                account.RemovePartitionAccess(partition.Guid);
+                accountActor.RemovePartitionAccess(partition.Guid);
             }
 
             audit.Metadata.AddPartitionAccessesRemoved([.. partitionAccessesToRemove]);

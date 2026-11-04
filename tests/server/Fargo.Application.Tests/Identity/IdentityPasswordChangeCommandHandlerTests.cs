@@ -44,7 +44,7 @@ public class IdentityPasswordChangeCommandHandlerTests
     /// </summary>
     private User ConfigureExistingUser(bool withPasswordHash = true)
     {
-        var user = User.CreateUser(new Nameid(ValidNameid));
+        var user = Actor.NewUser(new Nameid(ValidNameid)).User!;
 
         if (withPasswordHash)
         {
@@ -55,11 +55,11 @@ public class IdentityPasswordChangeCommandHandlerTests
             .Returns(Task.FromResult<User?>(user));
 
         // Actor resolution reads the same active user by its own guid.
-        userRepository.GetByGuidAsync(user.Guid, Arg.Any<CancellationToken>())
+        userRepository.GetByGuidAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<User?>(user));
-        userRepository.GetAllActivePermissionsFromUserAsync(user.Guid, Arg.Any<CancellationToken>())
+        userRepository.GetAllActivePermissionsFromUserAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<ActionType>>([]));
-        userRepository.GetAllActivePartitionAccessGuidsFromUserAsync(user.Guid, Arg.Any<CancellationToken>())
+        userRepository.GetAllActivePartitionAccessGuidsFromUserAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([]));
 
         return user;
@@ -72,8 +72,8 @@ public class IdentityPasswordChangeCommandHandlerTests
         passwordHasher.Verify(Arg.Any<PasswordHash>(), Arg.Any<Password>()).Returns(true);
         passwordHasher.Hash(Arg.Any<Password>()).Returns(new PasswordHash("new-hash"));
 
-        var activeToken = RefreshToken.Create(user.Guid, new TokenHash(new string('a', 64)));
-        refreshTokenRepository.GetByUserGuidAsync(user.Guid, Arg.Any<CancellationToken>())
+        var activeToken = RefreshToken.Create(user.ActorGuid, new TokenHash(new string('a', 64)));
+        refreshTokenRepository.GetByUserGuidAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<RefreshToken>>([activeToken]));
 
         await CreateHandler().HandleAsync(Command());
@@ -107,8 +107,8 @@ public class IdentityPasswordChangeCommandHandlerTests
     [Fact]
     public async Task HandleAsync_WhenUserInactive_ShouldThrowInvalidCredentials()
     {
-        var user = User.CreateUser(new Nameid(ValidNameid));
-        user.Deactivate();
+        var user = Actor.NewUser(new Nameid(ValidNameid)).User!;
+        user.Actor.Deactivate();
         userRepository.GetByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<User?>(user));
 
@@ -144,7 +144,7 @@ public class IdentityPasswordChangeCommandHandlerTests
     [Fact]
     public async Task HandleAsync_WhenActorCannotBeResolved_ShouldThrowActorNotFound()
     {
-        var user = User.CreateUser(new Nameid(ValidNameid));
+        var user = Actor.NewUser(new Nameid(ValidNameid)).User!;
         user.Authentication.SetPasswordHash(new PasswordHash("stored-hash"));
         userRepository.GetByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<User?>(user));
@@ -153,7 +153,7 @@ public class IdentityPasswordChangeCommandHandlerTests
 
         // Actor resolution returns null (resolver's GetByGuidAsync not configured
         // to return the user).
-        userRepository.GetByGuidAsync(user.Guid, Arg.Any<CancellationToken>())
+        userRepository.GetByGuidAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<User?>(null));
 
         await Assert.ThrowsAsync<ActorNotFoundFargoApplicationException>(

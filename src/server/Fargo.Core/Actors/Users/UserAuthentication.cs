@@ -54,7 +54,7 @@ public class UserAuthentication
         ArgumentNullException.ThrowIfNull(user);
 
         User = user;
-        UserGuid = user.Guid;
+        UserGuid = user.ActorGuid;
     }
 
     /// <summary>

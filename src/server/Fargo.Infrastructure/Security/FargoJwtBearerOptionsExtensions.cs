@@ -36,7 +36,7 @@ public static class FargoJwtBearerOptionsExtensions
                     var service = await serviceAccountRepository.GetByGuidAsync(
                         subjectGuid, context.HttpContext.RequestAborted);
 
-                    if (service is null || !service.IsActive || service.AuthVersion != authVersion)
+                    if (service is null || !service.Actor.IsActive || service.AuthVersion != authVersion)
                     {
                         context.Fail("Token is no longer valid.");
                     }
@@ -47,7 +47,7 @@ public static class FargoJwtBearerOptionsExtensions
                 var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
                 var user = await userRepository.GetByGuidAsync(subjectGuid, context.HttpContext.RequestAborted);
 
-                if (user is null || !user.IsActive || user.Authentication.AuthVersion != authVersion)
+                if (user is null || !user.Actor.IsActive || user.Authentication.AuthVersion != authVersion)
                 {
                     context.Fail("Token is no longer valid.");
                 }

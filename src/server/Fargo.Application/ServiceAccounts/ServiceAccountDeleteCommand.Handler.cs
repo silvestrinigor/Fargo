@@ -21,9 +21,9 @@ public sealed class ServiceAccountDeleteCommandHandler(
 
         var account = await serviceAccountRepository.GetByGuidAsync(command.ServiceAccountGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.ServiceAccount);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.Actor);
 
-        var audit = AuditLog.CreateAuditLogForGlobalEntity(actor, account, AuditLogType.EntityDeleted);
+        var audit = AuditLog.CreateAuditLogForGlobalEntity(actor, account.Actor, AuditLogType.EntityDeleted);
 
         serviceAccountRepository.Remove(account);
 

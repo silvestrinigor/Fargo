@@ -109,7 +109,7 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// Every partition associated with the entity at the time of the action
     /// is copied to the audit log.
     /// </remarks>
-    public static AuditLog CreateAuditLog<TEntity>(Actor actor, TEntity entity, AuditLogType auditLogType)
+    public static AuditLog CreateAuditLog<TEntity>(SecurityPrincipal actor, TEntity entity, AuditLogType auditLogType)
         where TEntity : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     {
         return new AuditLog(actor.Guid, actor.ActorType, entity.Guid, entity.GetEntityType(), auditLogType, entity.PartitionGuids);
@@ -137,7 +137,7 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// an item event is recorded against an event-tracked article but has no
     /// partitions of its own, so the audit log inherits the article's partitions.
     /// </remarks>
-    public static AuditLog CreateAuditLog<TEntity>(Actor actor, TEntity entity, IPartitionedGuidsReadOnly partitionSource, AuditLogType auditLogType)
+    public static AuditLog CreateAuditLog<TEntity>(SecurityPrincipal actor, TEntity entity, IPartitionedGuidsReadOnly partitionSource, AuditLogType auditLogType)
         where TEntity : IEntity, IEntityTyped
     {
         return new AuditLog(actor.Guid, actor.ActorType, entity.Guid, entity.GetEntityType(), auditLogType, partitionSource.PartitionGuids);
@@ -155,7 +155,7 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// affected partition has no parent, the audit log is associated with the
     /// global partition.
     /// </remarks>
-    public static AuditLog CreateAuditLog(Actor actor, Partition partition, AuditLogType auditLogType)
+    public static AuditLog CreateAuditLog(SecurityPrincipal actor, Partition partition, AuditLogType auditLogType)
     {
         return new AuditLog(
             actor.Guid, actor.ActorType, partition.Guid, partition.GetEntityType(), auditLogType,
@@ -172,7 +172,7 @@ public class AuditLog : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     /// <param name="actor">The actor that performed the action.</param>
     /// <param name="entity">The entity affected by the action.</param>
     /// <param name="auditLogType">The type of change that occurred.</param>
-    public static AuditLog CreateAuditLogForGlobalEntity<TEntity>(Actor actor, TEntity entity, AuditLogType auditLogType)
+    public static AuditLog CreateAuditLogForGlobalEntity<TEntity>(SecurityPrincipal actor, TEntity entity, AuditLogType auditLogType)
         where TEntity : IEntity, IEntityTyped
     {
         return new AuditLog(

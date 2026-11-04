@@ -6,19 +6,19 @@ namespace Fargo.Application.Users;
 public static class UserDtoMappings
 {
     public static readonly Expression<Func<User, UserDto>> Projection = user => new UserDto(
-        user.Guid,
-        user.Nameid,
+        user.ActorGuid,
+        user.Actor.Nameid,
         user.FirstName,
         user.LastName,
-        user.Description,
-        user.IsActive,
-        user.IsAdmin,
+        user.Actor.Description,
+        user.Actor.IsActive,
+        user.ActorGuid == Fargo.Core.Common.FargoCoreWellKnowGuids.AdminUserGuid,
         new UserAuthenticationDto(
             user.Authentication.DefaultPasswordExpirationPeriod,
             user.Authentication.RequirePasswordChangeAt),
-        user.Permissions,
-        user.Partitions.Select(partition => partition.PartitionGuid).ToArray(),
-        user.PartitionAccesses.Select(partition => partition.PartitionGuid).ToArray(),
+        user.Actor.Permissions,
+        user.Actor.Partitions.Select(partition => partition.PartitionGuid).ToArray(),
+        user.Actor.PartitionAccesses.Select(access => access.PartitionGuid).ToArray(),
         user.UserGroupMemberships.Select(group => group.UserGroupGuid).ToArray()
     );
 }

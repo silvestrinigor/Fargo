@@ -84,7 +84,7 @@ public class ServiceAccountCreateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         Assert.NotNull(added);
-        Assert.Contains(partition.Guid, added!.PartitionGuids);
+        Assert.Contains(partition.Guid, added!.Actor.PartitionGuids);
     }
 
     [Fact]

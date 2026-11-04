@@ -1,131 +1,137 @@
+using Fargo.Core.Actors;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
-using Fargo.Core.ServiceAccounts;
 
 namespace Fargo.Core.Tests.ServiceAccounts;
 
 public class ServiceAccountTests
 {
-    private static ServiceAccount NewAccount()
-        => ServiceAccount.Create(new Nameid("svc-tester"), new PasswordHash("hash"));
+    private static Actor NewAccountActor()
+        => Actor.NewServiceAccount(new Nameid("svc-tester"), new PasswordHash("hash"));
 
     [Fact]
     public void Create_ShouldBeActiveWithNoPartitionMembership()
     {
-        var account = NewAccount();
+        var actor = NewAccountActor();
 
-        Assert.True(account.IsActive);
+        Assert.True(actor.IsActive);
         // Unlike a user, a service account is NOT implicitly a member of the
         // global partition; memberships are assigned explicitly.
-        Assert.Empty(account.Partitions);
-        Assert.Empty(account.PartitionGuids);
+        Assert.Empty(actor.Partitions);
+        Assert.Empty(actor.PartitionGuids);
     }
 
     [Fact]
     public void AddPartition_ShouldAddMembershipAndSurfaceInPartitionGuids()
     {
-        var account = NewAccount();
+        var actor = NewAccountActor();
         var global = Partition.CreateGlobalPartition(default);
         var partition = Partition.CreatePartition(new Name("P"), global);
 
-        account.AddPartition(partition);
+        actor.AddPartition(partition);
 
-        Assert.Contains(partition.Guid, account.PartitionGuids);
-        Assert.Contains(account.Partitions, p => p.PartitionGuid == partition.Guid);
+        Assert.Contains(partition.Guid, actor.PartitionGuids);
+        Assert.Contains(actor.Partitions, p => p.PartitionGuid == partition.Guid);
     }
 
     [Fact]
     public void AddPartition_ShouldBeIdempotent()
     {
-        var account = NewAccount();
+        var actor = NewAccountActor();
         var global = Partition.CreateGlobalPartition(default);
         var partition = Partition.CreatePartition(new Name("P"), global);
 
-        account.AddPartition(partition);
-        account.AddPartition(partition);
+        actor.AddPartition(partition);
+        actor.AddPartition(partition);
 
-        Assert.Single(account.Partitions, p => p.PartitionGuid == partition.Guid);
+        Assert.Single(actor.Partitions, p => p.PartitionGuid == partition.Guid);
     }
 
     [Fact]
     public void AddPartition_WhenNull_ShouldThrow()
     {
-        var account = NewAccount();
+        var actor = NewAccountActor();
 
-        Assert.Throws<ArgumentNullException>(() => account.AddPartition(null!));
+        Assert.Throws<ArgumentNullException>(() => actor.AddPartition(null!));
     }
 
     [Fact]
     public void RemovePartition_ShouldRemoveMembership()
     {
-        var account = NewAccount();
+        var actor = NewAccountActor();
         var global = Partition.CreateGlobalPartition(default);
         var partition = Partition.CreatePartition(new Name("P"), global);
-        account.AddPartition(partition);
+        actor.AddPartition(partition);
 
-        account.RemovePartition(partition.Guid);
+        actor.RemovePartition(partition.Guid);
 
-        Assert.DoesNotContain(partition.Guid, account.PartitionGuids);
-        Assert.Empty(account.Partitions);
+        Assert.DoesNotContain(partition.Guid, actor.PartitionGuids);
+        Assert.Empty(actor.Partitions);
     }
 
     [Fact]
     public void RemovePartition_WhenNotAMember_ShouldDoNothing()
     {
-        var account = NewAccount();
+        var actor = NewAccountActor();
 
         // Must not throw when the account is not a member of the partition.
-        account.RemovePartition(Guid.NewGuid());
+        actor.RemovePartition(Guid.NewGuid());
 
-        Assert.Empty(account.Partitions);
+        Assert.Empty(actor.Partitions);
     }
 
     [Fact]
     public void PartitionMembership_ShouldBeIndependentFromPartitionAccess()
     {
-        var account = NewAccount();
+        var actor = NewAccountActor();
         var global = Partition.CreateGlobalPartition(default);
         var membership = Partition.CreatePartition(new Name("Member"), global);
-        var accessGuid = Guid.NewGuid();
+        var access = Partition.CreatePartition(new Name("Access"), global);
 
-        account.AddPartition(membership);
-        account.AddPartitionAccess(accessGuid);
+        actor.AddPartition(membership);
+        actor.AddPartitionAccess(access);
 
-        // Membership drives PartitionGuids; access drives PartitionAccessGuids.
-        Assert.Equal([membership.Guid], account.PartitionGuids);
-        Assert.Equal([accessGuid], account.PartitionAccessGuids);
+        // Membership drives PartitionGuids; access drives PartitionAccesses.
+        Assert.Equal([membership.Guid], actor.PartitionGuids);
+        Assert.Equal([access.Guid], actor.PartitionAccesses.Select(a => a.PartitionGuid));
     }
 
     [Fact]
     public void AddPartitionAccess_ShouldBeIdempotent()
     {
-        var account = NewAccount();
-        var accessGuid = Guid.NewGuid();
+        var actor = NewAccountActor();
+        var global = Partition.CreateGlobalPartition(default);
+        var access = Partition.CreatePartition(new Name("Access"), global);
 
-        account.AddPartitionAccess(accessGuid);
-        account.AddPartitionAccess(accessGuid);
+        actor.AddPartitionAccess(access);
+        actor.AddPartitionAccess(access);
 
-        Assert.Single(account.PartitionAccessGuids, g => g == accessGuid);
+        Assert.Single(actor.PartitionAccesses, a => a.PartitionGuid == access.Guid);
     }
 
     [Fact]
-    public void Deactivate_ShouldDeactivateAndBumpAuthVersion()
+    public void Deactivate_ShouldDeactivateActorAndRotateAuthVersion()
     {
-        var account = NewAccount();
+        var actor = NewAccountActor();
+        var account = actor.ServiceAccount!;
         var before = account.AuthVersion;
 
-        account.Deactivate();
+        // Deactivation of a service account is a two-part operation: the actor is
+        // deactivated and the account's auth version is rotated so previously
+        // issued tokens stop validating.
+        actor.Deactivate();
+        account.RotateAuthVersion();
 
-        Assert.False(account.IsActive);
+        Assert.False(actor.IsActive);
         Assert.NotEqual(before, account.AuthVersion);
     }
 
     [Fact]
-    public void GetEntityType_ShouldBeServiceAccount()
+    public void GetEntityType_ShouldBeActor()
     {
-        var account = NewAccount();
+        var actor = NewAccountActor();
 
-        Assert.Equal(Fargo.Core.Entities.EntityType.ServiceAccount, account.GetEntityType());
+        Assert.Equal(Fargo.Core.Entities.EntityType.Actor, actor.GetEntityType());
     }
 }

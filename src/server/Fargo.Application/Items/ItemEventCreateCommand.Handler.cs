@@ -75,7 +75,7 @@ public sealed class ItemEventCreateCommandHandler(
         return itemEvent.Guid;
     }
 
-    private async Task<ItemEvent> BuildMovimentAsync(ItemEventCreateDto create, Actor actor, Article article, CancellationToken cancellationToken)
+    private async Task<ItemEvent> BuildMovimentAsync(ItemEventCreateDto create, SecurityPrincipal actor, Article article, CancellationToken cancellationToken)
     {
         var fromContainer = await ResolveContainerAsync(create.FromItemContainerGuid, actor, cancellationToken);
         var toContainer = await ResolveContainerAsync(create.ToItemContainerGuid, actor, cancellationToken);
@@ -83,7 +83,7 @@ public sealed class ItemEventCreateCommandHandler(
         return ItemEvent.NewMovimentEvent(article, fromContainer, toContainer, create.Quantity, create.OccuredAt);
     }
 
-    private async Task<Item?> ResolveContainerAsync(Guid? containerGuid, Actor actor, CancellationToken cancellationToken)
+    private async Task<Item?> ResolveContainerAsync(Guid? containerGuid, SecurityPrincipal actor, CancellationToken cancellationToken)
     {
         if (containerGuid is not { } guid)
         {

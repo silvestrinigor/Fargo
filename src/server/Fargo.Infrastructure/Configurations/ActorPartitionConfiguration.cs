@@ -1,25 +1,25 @@
-using Fargo.Core.ServiceAccounts;
+using Fargo.Core.Actors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Configurations;
 
-public sealed class ServiceAccountPartitionConfiguration : IEntityTypeConfiguration<ServiceAccountPartition>
+public sealed class ActorPartitionConfiguration : IEntityTypeConfiguration<ActorPartition>
 {
-    public void Configure(EntityTypeBuilder<ServiceAccountPartition> builder)
+    public void Configure(EntityTypeBuilder<ActorPartition> builder)
     {
-        builder.ToTable("service_account_partitions");
+        builder.ToTable("actor_partitions");
 
         builder.HasKey(x => new
         {
-            x.ServiceAccountGuid,
+            x.ActorGuid,
             x.PartitionGuid
         });
 
         builder
-        .HasOne(x => x.ServiceAccount)
+        .HasOne(x => x.Actor)
         .WithMany(x => x.Partitions)
-        .HasForeignKey(x => x.ServiceAccountGuid)
+        .HasForeignKey(x => x.ActorGuid)
         .OnDelete(DeleteBehavior.Cascade);
 
         builder

@@ -10,10 +10,10 @@ namespace Fargo.Application.Tests.Common;
 /// <summary>
 /// Builds a real <see cref="ActorResolver"/> backed by a mocked
 /// <see cref="IUserRepository"/> so handler tests can obtain a resolved
-/// <see cref="Actor"/> with precise permissions and partition access.
+/// <see cref="SecurityPrincipal"/> with precise permissions and partition access.
 /// </summary>
 /// <remarks>
-/// The <see cref="Actor"/> type has an internal constructor, so tests cannot
+/// The <see cref="SecurityPrincipal"/> type has an internal constructor, so tests cannot
 /// construct one directly. Instead they configure the repository the resolver
 /// reads from; the resolver then produces a genuine actor.
 /// </remarks>
@@ -35,18 +35,18 @@ public static class ActorTestFactory
         // CreateUser yields an active user; the resolver only requires the user
         // to exist and be active. The user's own GUID is irrelevant to the actor
         // GUID that the resolver reports, but GetByGuidAsync must return non-null.
-        var user = User.CreateUser(new Nameid("tester"));
+        var user = Actor.NewUser(new Nameid("tester")).User!;
 
         userRepository
             .GetByGuidAsync(guid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<User?>(user));
 
         userRepository
-            .GetAllActivePermissionsFromUserAsync(user.Guid, Arg.Any<CancellationToken>())
+            .GetAllActivePermissionsFromUserAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<ActionType>>(permissions ?? []));
 
         userRepository
-            .GetAllActivePartitionAccessGuidsFromUserAsync(user.Guid, Arg.Any<CancellationToken>())
+            .GetAllActivePartitionAccessGuidsFromUserAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<Guid>>(
                 partitionAccesses ?? [FargoCoreWellKnowGuids.GlobalPartitionGuid]));
 

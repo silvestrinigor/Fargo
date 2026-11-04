@@ -24,16 +24,16 @@ public sealed class ServiceAccountRotateSecretCommandHandler(
 
         var account = await serviceAccountRepository.GetByGuidAsync(command.ServiceAccountGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.ServiceAccount);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.Actor);
 
         var secret = secretGenerator.Generate();
 
         account.RotateSecret(passwordHasher.Hash(secret));
 
-        var audit = AuditLog.CreateAuditLogForGlobalEntity(actor, account, AuditLogType.EntityUpdated);
+        var audit = AuditLog.CreateAuditLogForGlobalEntity(actor, account.Actor, AuditLogType.EntityUpdated);
 
         auditLogRepository.Add(audit);
 
-        return new ServiceAccountCreatedDto(account.Guid, account.ClientId.ToString(), secret.Value);
+        return new ServiceAccountCreatedDto(account.ActorGuid, account.Actor.Nameid.ToString(), secret.Value);
     }
 }

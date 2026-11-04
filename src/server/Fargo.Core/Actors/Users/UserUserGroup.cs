@@ -65,7 +65,7 @@ public class UserUserGroup
         ArgumentNullException.ThrowIfNull(userGroup);
 
         User = user;
-        UserGuid = user.Guid;
+        UserGuid = user.ActorGuid;
 
         UserGroup = userGroup;
         UserGroupGuid = userGroup.Guid;
@@ -104,7 +104,7 @@ public class UserUserGroup
         }
 
         User = user;
-        UserGuid = user.Guid;
+        UserGuid = user.ActorGuid;
 
         UserGroupGuid = userGroupGuid;
     }

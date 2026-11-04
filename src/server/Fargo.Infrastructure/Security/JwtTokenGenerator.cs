@@ -57,9 +57,9 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions) : ITokenG
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, user.Guid.ToString()),
-            new(ClaimTypes.Name, user.Nameid.ToString() ?? string.Empty),
-            new(JwtRegisteredClaimNames.Sub, user.Guid.ToString()),
+            new(ClaimTypes.NameIdentifier, user.ActorGuid.ToString()),
+            new(ClaimTypes.Name, user.Actor.Nameid.ToString() ?? string.Empty),
+            new(JwtRegisteredClaimNames.Sub, user.ActorGuid.ToString()),
             new(FargoJwtClaims.AuthVersion, user.Authentication.AuthVersion.ToString()),
         };
 
@@ -93,9 +93,9 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions) : ITokenG
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, serviceAccount.Guid.ToString()),
-            new(ClaimTypes.Name, serviceAccount.ClientId.ToString() ?? string.Empty),
-            new(JwtRegisteredClaimNames.Sub, serviceAccount.Guid.ToString()),
+            new(ClaimTypes.NameIdentifier, serviceAccount.ActorGuid.ToString()),
+            new(ClaimTypes.Name, serviceAccount.Actor.Nameid.ToString() ?? string.Empty),
+            new(JwtRegisteredClaimNames.Sub, serviceAccount.ActorGuid.ToString()),
             new(FargoJwtClaims.AuthVersion, serviceAccount.AuthVersion.ToString()),
             new(FargoJwtClaims.ActorType, FargoJwtClaims.ActorTypeService),
         };

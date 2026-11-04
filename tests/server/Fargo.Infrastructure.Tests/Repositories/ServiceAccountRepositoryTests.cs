@@ -1,4 +1,5 @@
 using Fargo.Application.Common;
+using Fargo.Core.Actors;
 using Fargo.Core.Informations;
 using Fargo.Core.Partitions;
 using Fargo.Core.Security;
@@ -11,7 +12,7 @@ namespace Fargo.Infrastructure.Tests.Repositories;
 public class ServiceAccountRepositoryTests
 {
     private static ServiceAccount NewAccount(string clientId)
-        => ServiceAccount.Create(new Nameid(clientId), new PasswordHash("hash"));
+        => Actor.NewServiceAccount(new Nameid(clientId), new PasswordHash("hash")).ServiceAccount!;
 
     [Fact]
     public async Task GetByGuid_ShouldReturnAccountWithPartitionMembership()
@@ -24,14 +25,14 @@ public class ServiceAccountRepositoryTests
         context.Partitions.AddRange(global, partition);
 
         var account = NewAccount("svc");
-        account.AddPartition(partition);
+        account.Actor.AddPartition(partition);
         repo.Add(account);
         await context.SaveChangesAsync();
 
-        var found = await repo.GetByGuidAsync(account.Guid);
+        var found = await repo.GetByGuidAsync(account.ActorGuid);
 
         Assert.NotNull(found);
-        Assert.Contains(partition.Guid, found!.PartitionGuids);
+        Assert.Contains(partition.Guid, found!.Actor.PartitionGuids);
     }
 
     [Fact]
@@ -45,14 +46,14 @@ public class ServiceAccountRepositoryTests
         context.Partitions.AddRange(global, partition);
 
         var account = NewAccount("svc");
-        account.AddPartition(partition);
+        account.Actor.AddPartition(partition);
         repo.Add(account);
         await context.SaveChangesAsync();
 
-        var dto = await repo.GetInfoByGuidAsync(account.Guid, [partition.Guid]);
+        var dto = await repo.GetInfoByGuidAsync(account.ActorGuid, [partition.Guid]);
 
         Assert.NotNull(dto);
-        Assert.Equal(account.Guid, dto!.Guid);
+        Assert.Equal(account.ActorGuid, dto!.Guid);
         Assert.Equal("svc", dto.ClientId);
         Assert.Contains(partition.Guid, dto.PartitionGuids);
     }
@@ -68,12 +69,12 @@ public class ServiceAccountRepositoryTests
         context.Partitions.AddRange(global, partition);
 
         var account = NewAccount("svc");
-        account.AddPartition(partition);
+        account.Actor.AddPartition(partition);
         repo.Add(account);
         await context.SaveChangesAsync();
 
         // Actor can only reach an unrelated partition -> the account is not visible.
-        var dto = await repo.GetInfoByGuidAsync(account.Guid, [Guid.NewGuid()]);
+        var dto = await repo.GetInfoByGuidAsync(account.ActorGuid, [Guid.NewGuid()]);
 
         Assert.Null(dto);
     }
@@ -89,10 +90,10 @@ public class ServiceAccountRepositoryTests
         await context.SaveChangesAsync();
 
         // Null filter = unscoped read: returns the account regardless of membership.
-        var dto = await repo.GetInfoByGuidAsync(account.Guid, childOfAnyOfThesePartitions: null);
+        var dto = await repo.GetInfoByGuidAsync(account.ActorGuid, childOfAnyOfThesePartitions: null);
 
         Assert.NotNull(dto);
-        Assert.Equal(account.Guid, dto!.Guid);
+        Assert.Equal(account.ActorGuid, dto!.Guid);
     }
 
     [Fact]
@@ -107,9 +108,9 @@ public class ServiceAccountRepositoryTests
         context.Partitions.AddRange(global, a, b);
 
         var inA = NewAccount("in-a");
-        inA.AddPartition(a);
+        inA.Actor.AddPartition(a);
         var inB = NewAccount("in-b");
-        inB.AddPartition(b);
+        inB.Actor.AddPartition(b);
         repo.Add(inA);
         repo.Add(inB);
         await context.SaveChangesAsync();
@@ -120,6 +121,6 @@ public class ServiceAccountRepositoryTests
 
         Assert.Equal(1, page.TotalCount);
         Assert.Single(page.Items);
-        Assert.Equal(inA.Guid, page.Items.First().Guid);
+        Assert.Equal(inA.ActorGuid, page.Items.First().Guid);
     }
 }

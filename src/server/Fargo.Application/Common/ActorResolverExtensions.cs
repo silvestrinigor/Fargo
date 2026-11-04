@@ -15,11 +15,11 @@ public static class ActorResolverExtensions
     /// <param name="resolver">The actor resolver.</param>
     /// <param name="currentActor">The current authenticated actor context.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The resolved, non-null <see cref="Actor"/>.</returns>
+    /// <returns>The resolved, non-null <see cref="SecurityPrincipal"/>.</returns>
     /// <exception cref="ActorNotFoundFargoApplicationException">
     /// Thrown when no active actor matches the current actor context.
     /// </exception>
-    public static async Task<Actor> ResolveCurrentActorOrThrowAsync(
+    public static async Task<SecurityPrincipal> ResolveCurrentActorOrThrowAsync(
         this ActorResolver resolver,
         ICurrentActor currentActor,
         CancellationToken cancellationToken = default)

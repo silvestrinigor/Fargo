@@ -10,10 +10,17 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.ToTable("users");
 
-        builder.HasKey(x => x.Guid);
+        // The user is an owned satellite of its actor, keyed and joined 1:1 by
+        // the owning actor's identifier (mirroring Article/ArticleVariation).
+        builder.HasKey(x => x.ActorGuid);
 
-        builder.HasIndex(x => x.Nameid).IsUnique();
+        builder
+        .HasOne(x => x.Actor)
+        .WithOne(a => a.User)
+        .HasForeignKey<User>(x => x.ActorGuid)
+        .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(x => x.Permissions).HasColumnType("jsonb");
+        // Derived from the owning actor's identifier; not separately persisted.
+        builder.Ignore(x => x.IsAdmin);
     }
 }

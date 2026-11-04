@@ -16,7 +16,7 @@ public static class ActorPermissionVerificationExtension
     /// <exception cref="ActorPermissionDeniedFargoApplicationException">
     /// Thrown when the actor does not have permission to perform the specified action.
     /// </exception>
-    public static void ThrowIfPermissionDenied(this Actor actor, ActionType action)
+    public static void ThrowIfPermissionDenied(this SecurityPrincipal actor, ActionType action)
     {
         if (!actor.HasPermission(action))
         {

@@ -29,7 +29,7 @@ public class ServiceAccountUpdateCommandHandlerTests
             currentActor);
 
     private static ServiceAccount ExistingAccount()
-        => ServiceAccount.Create(new Nameid("svc"), new PasswordHash("hash"));
+        => Actor.NewServiceAccount(new Nameid("svc"), new PasswordHash("hash")).ServiceAccount!;
 
     private void Existing(ServiceAccount account)
         => serviceAccountRepository.GetByGuidAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
@@ -51,11 +51,11 @@ public class ServiceAccountUpdateCommandHandlerTests
             .Returns(Task.FromResult<Partition?>(partition));
 
         var command = new ServiceAccountUpdateCommand(
-            account.Guid, new ServiceAccountUpdateDto(PartitionsToAdd: [partition.Guid]));
+            account.ActorGuid, new ServiceAccountUpdateDto(PartitionsToAdd: [partition.Guid]));
 
         await CreateHandler().HandleAsync(command);
 
-        Assert.Contains(partition.Guid, account.PartitionGuids);
+        Assert.Contains(partition.Guid, account.Actor.PartitionGuids);
         auditLogRepository.Received(1).Add(Arg.Any<AuditLog>());
     }
 
@@ -66,7 +66,7 @@ public class ServiceAccountUpdateCommandHandlerTests
         var partition = Partition.CreatePartition(new Name("branch"), global);
 
         var account = ExistingAccount();
-        account.AddPartition(partition);
+        account.Actor.AddPartition(partition);
         Existing(account);
 
         ActorTestFactory.ConfigureUserActor(
@@ -76,11 +76,11 @@ public class ServiceAccountUpdateCommandHandlerTests
             .Returns(Task.FromResult<Partition?>(partition));
 
         var command = new ServiceAccountUpdateCommand(
-            account.Guid, new ServiceAccountUpdateDto(PartitionsToRemove: [partition.Guid]));
+            account.ActorGuid, new ServiceAccountUpdateDto(PartitionsToRemove: [partition.Guid]));
 
         await CreateHandler().HandleAsync(command);
 
-        Assert.DoesNotContain(partition.Guid, account.PartitionGuids);
+        Assert.DoesNotContain(partition.Guid, account.Actor.PartitionGuids);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class ServiceAccountUpdateCommandHandlerTests
             .Returns(Task.FromResult<Partition?>(restricted));
 
         var command = new ServiceAccountUpdateCommand(
-            account.Guid, new ServiceAccountUpdateDto(PartitionsToAdd: [restricted.Guid]));
+            account.ActorGuid, new ServiceAccountUpdateDto(PartitionsToAdd: [restricted.Guid]));
 
         await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
             () => CreateHandler().HandleAsync(command));

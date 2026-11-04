@@ -38,16 +38,18 @@ public sealed class ServiceAccountCreateCommandHandler(
 
         var secretHash = passwordHasher.Hash(secret);
 
-        var account = ServiceAccount.Create(clientId, secretHash);
+        var account = Actor.NewServiceAccount(clientId, secretHash).ServiceAccount!;
+        var accountActor = account.Actor;
 
         if (command.Create.Description is { } description)
         {
-            account.Description = new Description(description);
+            accountActor.Description = new Description(description);
         }
 
         if (command.Create.IsActive is false)
         {
-            account.Deactivate();
+            accountActor.Deactivate();
+            account.RotateAuthVersion();
         }
 
         if (command.Create.PermissionsToAdd is { } permissions)
@@ -56,7 +58,7 @@ public sealed class ServiceAccountCreateCommandHandler(
             {
                 actor.ThrowIfPermissionDenied(permission);
 
-                account.AddPermission(permission);
+                accountActor.AddPermission(permission);
             }
         }
 
@@ -70,7 +72,7 @@ public sealed class ServiceAccountCreateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                account.AddPartition(partition);
+                accountActor.AddPartition(partition);
             }
         }
 
@@ -84,7 +86,7 @@ public sealed class ServiceAccountCreateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                account.AddPartitionAccess(partition.Guid);
+                accountActor.AddPartitionAccess(partition);
             }
         }
 
@@ -95,16 +97,16 @@ public sealed class ServiceAccountCreateCommandHandler(
         // account has no membership it has no partition scope, so the audit is
         // recorded against the global partition (as before) to avoid an
         // unpartitioned, globally-readable audit entry.
-        var audit = account.PartitionGuids.Count > 0
-            ? AuditLog.CreateAuditLog(actor, account, AuditLogType.EntityCreated)
-            : AuditLog.CreateAuditLogForGlobalEntity(actor, account, AuditLogType.EntityCreated);
+        var audit = accountActor.PartitionGuids.Count > 0
+            ? AuditLog.CreateAuditLog(actor, accountActor, AuditLogType.EntityCreated)
+            : AuditLog.CreateAuditLogForGlobalEntity(actor, accountActor, AuditLogType.EntityCreated);
 
-        audit.Metadata.AddPermissions([.. account.Permissions]);
-        audit.Metadata.AddPartitions(account.PartitionGuids);
-        audit.Metadata.AddPartitionAccessesAdded([.. account.PartitionAccessGuids]);
+        audit.Metadata.AddPermissions([.. accountActor.Permissions]);
+        audit.Metadata.AddPartitions(accountActor.PartitionGuids);
+        audit.Metadata.AddPartitionAccessesAdded([.. accountActor.PartitionAccesses.Select(a => a.PartitionGuid)]);
 
         auditLogRepository.Add(audit);
 
-        return new ServiceAccountCreatedDto(account.Guid, account.ClientId.ToString(), secret.Value);
+        return new ServiceAccountCreatedDto(accountActor.Guid, accountActor.Nameid.ToString(), secret.Value);
     }
 }

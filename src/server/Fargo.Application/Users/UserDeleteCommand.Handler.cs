@@ -22,20 +22,20 @@ public sealed class UserDeleteCommandHandler(
 
         var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(user, command.UserGuid, EntityType.User);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(user, command.UserGuid, EntityType.Actor);
 
-        actor.ThrowIfAccessDenied(user);
+        actor.ThrowIfAccessDenied(user.Actor);
 
-        if (actor.Guid == user.Guid && actor.ActorType == ActorType.User)
+        if (actor.Guid == user.ActorGuid && actor.ActorType == ActorType.User)
         {
-            throw new FargoApplicationException($"The user '{user.Guid}' cannot delete their own user.");
+            throw new FargoApplicationException($"The user '{user.ActorGuid}' cannot delete their own user.");
         }
 
-        user.ValidateCanBeDeleted();
+        user.Actor.ValidateCanBeDeleted();
 
         userRepository.Remove(user);
 
-        var audit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityDeleted);
+        var audit = AuditLog.CreateAuditLog(actor, user.Actor, AuditLogType.EntityDeleted);
 
         auditLogRepository.Add(audit);
     }

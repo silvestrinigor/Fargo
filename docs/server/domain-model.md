@@ -19,10 +19,15 @@ Every domain entity has a `Guid` identity (`IEntity`) and reports its kind
 | **ItemEvent** | The base record of a change recorded against an **event-tracked** article: which article, the event kind, and when it occurred. |
 | **ItemMovimentEvent** | A movement event: a positive quantity of an event-tracked article moved between containers (or into/out of no container). The source of event-based inventory. |
 | **Partition** | A node in the access hierarchy. Scopes which actors can see which entities. |
-| **User** | An account that authenticates and acts. Has partition access, group memberships, and permissions. |
+| **Actor** | An identity that authenticates and acts, carrying the authorization state shared by every kind of identity: directly granted **permissions**, partition **membership**, and partition **access**. Its kind (`ActorType`) is either a **User** or a **ServiceAccount**. |
+| **User** | The user-specific data owned by a user actor: its nameid, optional profile fields, authentication details, and user-group memberships. |
+| **ServiceAccount** | The service-account-specific data owned by a service-account actor: its client id, hashed secret, and token-invalidation version. A non-interactive machine identity. |
 | **UserGroup** | A collection of users that share permissions and partition access. Groups can be nested. |
 | **AuditLog** | An immutable record of a change to an entity. |
-| **Actor** | The authenticated identity performing an operation, with its resolved permissions and partition access. |
+
+> At runtime, authorization is evaluated against a `SecurityPrincipal` — the
+> resolved view of an actor's effective permissions and accessible partitions,
+> produced by `ActorResolver`. It is distinct from the persisted `Actor` entity.
 
 ## Relationships
 
@@ -32,7 +37,9 @@ flowchart TD
     Article["Article"]
     Item["Item"]
     ItemMovimentEvent["ItemMovimentEvent"]
+    Actor["Actor"]
     User["User"]
+    ServiceAccount["ServiceAccount"]
     UserGroup["UserGroup"]
     AuditLog["AuditLog"]
 
@@ -43,7 +50,10 @@ flowchart TD
     Item -->|contained in| Item
     ItemMovimentEvent -->|records a move of| Article
     ItemMovimentEvent -->|from / to| Item
-    User -->|has access to| Partition
+    Actor -->|is a| User
+    Actor -->|is a| ServiceAccount
+    Actor -->|has access to| Partition
+    Actor -->|member of| Partition
     User -->|member of| UserGroup
     UserGroup -->|parent of| UserGroup
     UserGroup -->|has access to| Partition

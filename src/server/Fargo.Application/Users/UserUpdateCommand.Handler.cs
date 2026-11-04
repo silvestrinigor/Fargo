@@ -30,19 +30,21 @@ public sealed class UserUpdateCommandHandler(
 
         var user = await userRepository.GetByGuidAsync(command.UserGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(user, command.UserGuid, EntityType.User);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(user, command.UserGuid, EntityType.Actor);
 
-        actor.ThrowIfAccessDenied(user);
+        actor.ThrowIfAccessDenied(user.Actor);
 
-        var userAudit = AuditLog.CreateAuditLog(actor, user, AuditLogType.EntityUpdated);
+        var userActor = user.Actor;
+
+        var userAudit = AuditLog.CreateAuditLog(actor, userActor, AuditLogType.EntityUpdated);
 
         if (command.Update.Nameid is not null)
         {
             await userService.ValidateUserNameidIsAvailableAsync(command.Update.Nameid.Value, cancellationToken);
 
-            user.Nameid = command.Update.Nameid.Value;
+            userActor.Nameid = command.Update.Nameid.Value;
 
-            userAudit.Metadata.AddNameid(user.Nameid);
+            userAudit.Metadata.AddNameid(userActor.Nameid);
         }
 
         if (command.Update.FirstName is { } firstName)
@@ -61,24 +63,24 @@ public sealed class UserUpdateCommandHandler(
 
         if (command.Update.Description is { } description)
         {
-            user.Description = description;
+            userActor.Description = description;
 
-            userAudit.Metadata.AddDescription(user.Description);
+            userAudit.Metadata.AddDescription(userActor.Description);
         }
 
         if (command.Update.IsActive is { } isActive)
         {
             if (isActive is true)
             {
-                user.Activate();
+                userActor.Activate();
             }
 
             else if (isActive is false)
             {
-                user.Deactivate();
+                userActor.Deactivate();
             }
 
-            userAudit.Metadata.AddIsActive(user.IsActive);
+            userAudit.Metadata.AddIsActive(userActor.IsActive);
         }
 
         if (command.Update.Authentication is { } auth)
@@ -110,7 +112,7 @@ public sealed class UserUpdateCommandHandler(
             {
                 actor.ThrowIfPermissionDenied(permission);
 
-                user.AddPermission(permission);
+                user.Actor.AddPermission(permission);
             }
 
             userAudit.Metadata.AddPermissionsAdded([.. permissionsToAdd.Distinct()]);
@@ -122,7 +124,7 @@ public sealed class UserUpdateCommandHandler(
             {
                 actor.ThrowIfPermissionDenied(permission);
 
-                user.RemovePermission(permission);
+                user.Actor.RemovePermission(permission);
             }
 
             userAudit.Metadata.AddPermissionsRemoved([.. permissionsToRemove.Distinct()]);
@@ -138,7 +140,7 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.AddPartition(partition);
+                user.Actor.AddPartition(partition);
             }
 
             userAudit.Metadata.AddPartitionsAdded(partitionsToAdd);
@@ -154,7 +156,7 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.RemovePartition(partition.Guid);
+                user.Actor.RemovePartition(partition.Guid);
             }
 
             userAudit.Metadata.AddPartitionsRemoved(partitionsToRemove);
@@ -202,7 +204,7 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.AddPartitionAccess(partition);
+                user.Actor.AddPartitionAccess(partition);
             }
 
             userAudit.Metadata.AddPartitionAccessesAdded([.. partitionAccessesToAdd]);
@@ -218,7 +220,7 @@ public sealed class UserUpdateCommandHandler(
 
                 actor.ThrowIfAccessDenied(partition);
 
-                user.RemovePartitionAccess(partition.Guid);
+                user.Actor.RemovePartitionAccess(partition.Guid);
             }
 
             userAudit.Metadata.AddPartitionAccessesRemoved([.. partitionAccessesToRemove]);

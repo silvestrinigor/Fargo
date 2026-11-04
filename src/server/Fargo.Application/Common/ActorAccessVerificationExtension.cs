@@ -19,7 +19,7 @@ public static class ActorAccessVerificationExtension
     /// <exception cref="ActorAccessDeniedFargoApplicationException">
     /// Thrown when the actor does not have access to the specified entity.
     /// </exception>
-    public static void ThrowIfAccessDenied<TEntity>(this Actor actor, TEntity entity)
+    public static void ThrowIfAccessDenied<TEntity>(this SecurityPrincipal actor, TEntity entity)
         where TEntity : IEntity, IEntityTyped, IPartitionedGuidsReadOnly
     {
         if (!actor.HasAccess(entity))
@@ -37,7 +37,7 @@ public static class ActorAccessVerificationExtension
     /// <exception cref="ActorAccessDeniedFargoApplicationException">
     /// Thrown when the actor does not have access to the specified partition.
     /// </exception>
-    public static void ThrowIfAccessDenied(this Actor actor, Partition entity)
+    public static void ThrowIfAccessDenied(this SecurityPrincipal actor, Partition entity)
     {
         if (!actor.HasAccess(entity))
         {

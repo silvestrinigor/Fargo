@@ -25,4 +25,19 @@ public class EntityNotFoundFargoApplicationException : FargoApplicationException
             throw new EntityNotFoundFargoApplicationException(entityGuid, type);
         }
     }
+
+    /// <summary>
+    /// Throws when <paramref name="entity"/> is null. Overload for objects that
+    /// are not themselves <see cref="IEntity"/> (for example the <c>User</c> and
+    /// <c>ServiceAccount</c> satellites, whose identity lives on their owning
+    /// actor).
+    /// </summary>
+    public static void ThrowIfNull<T>([NotNull] T? entity, Guid entityGuid, EntityType type)
+        where T : class
+    {
+        if (entity is null)
+        {
+            throw new EntityNotFoundFargoApplicationException(entityGuid, type);
+        }
+    }
 }

@@ -20,6 +20,7 @@ public enum ArticleType
 public enum ActorType
 {
     User = 1,
+    Service = 2,
 }
 
 /// <summary>
@@ -40,7 +41,7 @@ public enum EntityType
 {
     Article = 0,
     Item = 1,
-    User = 2,
+    Actor = 2,
     UserGroup = 3,
     Partition = 4,
     AuditLog = 5,
