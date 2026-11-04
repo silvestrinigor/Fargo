@@ -44,7 +44,7 @@ public sealed class ItemEventCreateCommandHandler(
 
         var article = await articleRepository.GetByGuidAsync(create.ArticleGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(article, create.ArticleGuid, EntityType.Article);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(article, create.ArticleGuid);
 
         actor.ThrowIfAccessDenied(article);
 
@@ -92,7 +92,7 @@ public sealed class ItemEventCreateCommandHandler(
 
         var container = await itemRepository.GetByGuidAsync(guid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(container, guid, EntityType.Item);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(container, guid);
 
         actor.ThrowIfAccessDenied(container);
 

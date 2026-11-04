@@ -97,7 +97,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     var fromArticle = await articleRepository.GetByGuidAsync(command.Create.Variation.FromArticleGuid, cancellationToken);
 
-                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.Create.Variation.FromArticleGuid, EntityType.Article);
+                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.Create.Variation.FromArticleGuid);
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
@@ -126,7 +126,7 @@ public sealed class ArticleCreateCommandHandler(
 
                     var fromArticle = await articleRepository.GetByGuidAsync(command.Create.Pack!.FromArticleGuid, cancellationToken);
 
-                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.Create.Pack.FromArticleGuid, EntityType.Article);
+                    EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, command.Create.Pack.FromArticleGuid);
 
                     actor.ThrowIfAccessDenied(fromArticle);
 
@@ -155,7 +155,7 @@ public sealed class ArticleCreateCommandHandler(
                     {
                         var fromArticle = await articleRepository.GetByGuidAsync(kdo.ArticleGuid, cancellationToken);
 
-                        EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, kdo.ArticleGuid, EntityType.Article);
+                        EntityNotFoundFargoApplicationException.ThrowIfNull(fromArticle, kdo.ArticleGuid);
 
                         actor.ThrowIfAccessDenied(fromArticle);
 
@@ -236,7 +236,7 @@ public sealed class ArticleCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 

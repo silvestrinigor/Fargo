@@ -22,7 +22,7 @@ public sealed class PartitionUpdateCommandHandler(
 
         var partitionToEdit = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(partitionToEdit, command.PartitionGuid, EntityType.Partition);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(partitionToEdit, command.PartitionGuid);
 
         actor.ThrowIfAccessDenied(partitionToEdit);
 
@@ -46,7 +46,7 @@ public sealed class PartitionUpdateCommandHandler(
         {
             var parentPartitionToSet = await partitionRepository.GetByGuidAsync(parentPartitionGuidToSet, cancellationToken);
 
-            EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartitionToSet, parentPartitionGuidToSet, EntityType.Partition);
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartitionToSet, parentPartitionGuidToSet);
 
             actor.ThrowIfAccessDenied(parentPartitionToSet);
 

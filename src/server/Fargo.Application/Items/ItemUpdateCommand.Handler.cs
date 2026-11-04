@@ -31,7 +31,7 @@ public sealed class ItemUpdateCommandHandler(
 
         var item = await itemRepository.GetByGuidAsync(command.ItemGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(item, command.ItemGuid, EntityType.Item);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(item, command.ItemGuid);
 
         var itemAudit = AuditLog.CreateAuditLog(actor, item, AuditLogType.EntityUpdated);
 
@@ -41,7 +41,7 @@ public sealed class ItemUpdateCommandHandler(
         {
             var parentItemContainer = await itemRepository.GetByGuidAsync(parentItemContainerGuid, cancellationToken);
 
-            EntityNotFoundFargoApplicationException.ThrowIfNull(parentItemContainer, parentItemContainerGuid, EntityType.Item);
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentItemContainer, parentItemContainerGuid);
 
             actor.ThrowIfAccessDenied(parentItemContainer);
 
@@ -80,7 +80,7 @@ public sealed class ItemUpdateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 
@@ -96,7 +96,7 @@ public sealed class ItemUpdateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 

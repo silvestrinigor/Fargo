@@ -26,7 +26,7 @@ public sealed class UserGroupUpdateCommandHandler(
 
         var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(userGroup, command.UserGroupGuid);
 
         actor.ThrowIfAccessDenied(userGroup);
 
@@ -65,7 +65,7 @@ public sealed class UserGroupUpdateCommandHandler(
         {
             var parentUserGroup = await userGroupRepository.GetByGuidAsync(parentUserGroupGuid, cancellationToken);
 
-            EntityNotFoundFargoApplicationException.ThrowIfNull(parentUserGroup, parentUserGroupGuid, EntityType.UserGroup);
+            EntityNotFoundFargoApplicationException.ThrowIfNull(parentUserGroup, parentUserGroupGuid);
 
             actor.ThrowIfAccessDenied(parentUserGroup);
 
@@ -112,7 +112,7 @@ public sealed class UserGroupUpdateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 
@@ -128,7 +128,7 @@ public sealed class UserGroupUpdateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 
@@ -144,7 +144,7 @@ public sealed class UserGroupUpdateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 
@@ -160,7 +160,7 @@ public sealed class UserGroupUpdateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 

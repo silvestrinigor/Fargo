@@ -24,7 +24,7 @@ public sealed class UserGroupDeleteCommandHandler(
 
         var userGroup = await userGroupRepository.GetByGuidAsync(command.UserGroupGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(userGroup, command.UserGroupGuid, EntityType.UserGroup);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(userGroup, command.UserGroupGuid);
 
         actor.ThrowIfAccessDenied(userGroup);
 

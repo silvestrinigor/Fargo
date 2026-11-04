@@ -31,7 +31,7 @@ public sealed class PartitionCreateCommandHandler(
 
         var parentPartition = await partitionRepository.GetByGuidAsync(parentPartitionGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, parentPartitionGuid, EntityType.Partition);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, parentPartitionGuid);
 
         if (command.Create.ParentPartitionGuid is null && !actor.HasAccess(parentPartition))
         {

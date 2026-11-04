@@ -99,7 +99,7 @@ public sealed class UserCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 
@@ -115,7 +115,7 @@ public sealed class UserCreateCommandHandler(
             {
                 var userGroup = await userGroupRepository.GetByGuidAsync(userGroupGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(userGroup, userGroupGuid, EntityType.UserGroup);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(userGroup, userGroupGuid);
 
                 actor.ThrowIfAccessDenied(userGroup);
 
@@ -132,7 +132,7 @@ public sealed class UserCreateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 

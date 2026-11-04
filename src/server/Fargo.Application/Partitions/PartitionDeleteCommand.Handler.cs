@@ -24,7 +24,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         var partitionToDelete = await partitionRepository.GetByGuidAsync(command.PartitionGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(partitionToDelete, command.PartitionGuid, EntityType.Partition);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(partitionToDelete, command.PartitionGuid);
 
         actor.ThrowIfAccessDenied(partitionToDelete);
 
@@ -35,7 +35,7 @@ public sealed class PartitionDeleteCommandHandler(
 
         var parentPartition = await partitionRepository.GetByGuidAsync(partitionToDelete.ParentPartitionGuid.Value, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, partitionToDelete.ParentPartitionGuid.Value, EntityType.Partition);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartition, partitionToDelete.ParentPartitionGuid.Value);
 
         actor.ThrowIfAccessDenied(parentPartition);
 

@@ -23,7 +23,7 @@ public sealed class ItemDeleteCommandHandler(
 
         var item = await itemRepository.GetByGuidAsync(command.ItemGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(item, command.ItemGuid, EntityType.Item);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(item, command.ItemGuid);
 
         actor.ThrowIfAccessDenied(item);
 

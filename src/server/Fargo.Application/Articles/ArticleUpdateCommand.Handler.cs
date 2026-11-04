@@ -47,7 +47,7 @@ public sealed class ArticleUpdateCommandHandler(
 
         var article = await articleRepository.GetByGuidAsync(command.ArticleGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(article, command.ArticleGuid, EntityType.Article);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(article, command.ArticleGuid);
 
         actor.ThrowIfAccessDenied(article);
 
@@ -131,7 +131,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 
@@ -147,7 +147,7 @@ public sealed class ArticleUpdateCommandHandler(
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
 
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid, EntityType.Partition);
+                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
 
                 actor.ThrowIfAccessDenied(partition);
 

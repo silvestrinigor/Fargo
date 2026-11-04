@@ -43,7 +43,7 @@ public sealed class ArticleDeleteCommandHandler(
 
         var article = await articleRepository.GetByGuidAsync(command.ArticleGuid, cancellationToken);
 
-        EntityNotFoundFargoApplicationException.ThrowIfNull(article, command.ArticleGuid, EntityType.Article);
+        EntityNotFoundFargoApplicationException.ThrowIfNull(article, command.ArticleGuid);
 
         actor.ThrowIfAccessDenied(article);
 
