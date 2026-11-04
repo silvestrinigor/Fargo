@@ -101,7 +101,8 @@ public class ItemUpdateCommandHandlerTests
     public async Task HandleAsync_WhenParentContainerWouldCreateCircularHierarchy_ShouldThrowDomainException()
     {
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.EditItem]);
-        var item = NewItem();
+
+        var item = Item.CreateItem(Article.NewArticleContainer(new Name("Crate")));
         itemRepository.GetByGuidAsync(item.Guid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<Item?>(item));
 
