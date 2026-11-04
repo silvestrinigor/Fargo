@@ -128,10 +128,10 @@ public class ServiceAccountTests
     }
 
     [Fact]
-    public void GetEntityType_ShouldBeActor()
+    public void EntityType_ShouldBeActor()
     {
         var actor = NewAccountActor();
 
-        Assert.Equal(Fargo.Core.Entities.EntityType.Actor, actor.GetEntityType());
+        Assert.Equal(Fargo.Core.Entities.EntityType.Actor, actor.EntityType);
     }
 }

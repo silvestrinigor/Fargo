@@ -145,10 +145,10 @@ public class ArticleTests
     }
 
     [Fact]
-    public void GetEntityType_ShouldBeArticle()
+    public void EntityType_ShouldBeArticle()
     {
         var article = Article.NewArticle(Aname);
 
-        Assert.Equal(Fargo.Core.Entities.EntityType.Article, article.GetEntityType());
+        Assert.Equal(Fargo.Core.Entities.EntityType.Article, article.EntityType);
     }
 }

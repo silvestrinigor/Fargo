@@ -28,15 +28,5 @@ public enum EntityType
     /// <summary>
     /// Partition entity.
     /// </summary>
-    Partition = 4,
-
-    /// <summary>
-    /// Audit log entity.
-    /// </summary>
-    AuditLog = 5,
-
-    /// <summary>
-    /// Item event entity.
-    /// </summary>
-    ItemEvent = 6
+    Partition = 4
 }

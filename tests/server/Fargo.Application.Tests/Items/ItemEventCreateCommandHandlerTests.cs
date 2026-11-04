@@ -69,7 +69,7 @@ public class ItemEventCreateCommandHandlerTests
                  && e.Moviment.Quantity.Amount == 50
                  && e.Moviment.ToItemContainerGuid == container.Guid));
         auditLogRepository.Received(1).Add(Arg.Is<AuditLog>(
-            a => a.AuditLogType == AuditLogType.ItemEventRecorded && a.EntityType == EntityType.ItemEvent));
+            a => a.AuditLogType == AuditLogType.ItemEventRecorded && a.EntityType == EntityType.Article));
     }
 
     [Fact]

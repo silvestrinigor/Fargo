@@ -61,9 +61,9 @@ public sealed class ItemEventCreateCommandHandler(
                 $"Unsupported item event type '{create.EventType}'.", FargoErrorType.InvalidOperation),
         };
 
-        // The event is recorded against the article. The audit is recorded against
-        // the item event itself, inheriting the partition scope from the article.
-        var audit = AuditLog.CreateAuditLog(actor, itemEvent, article, AuditLogType.ItemEventRecorded);
+        // The event is recorded against the article. The audit is recorded
+        // against that article, inheriting its partition scope.
+        var audit = AuditLog.CreateAuditLog(actor, article, AuditLogType.ItemEventRecorded);
 
         audit.Metadata.AddArticleGuid(article.Guid);
         audit.Metadata.AddPackQuantity(create.Quantity);
