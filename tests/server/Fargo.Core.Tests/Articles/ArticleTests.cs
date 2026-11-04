@@ -1,7 +1,7 @@
-using Fargo.Core.Entities.Articles;
 using Fargo.Core.Common;
-using Fargo.Core.Informations;
+using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Partitions;
+using Fargo.Core.Informations;
 using UnitsNet;
 
 namespace Fargo.Core.Tests.Articles;

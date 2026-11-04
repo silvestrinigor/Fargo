@@ -1,5 +1,4 @@
 using Fargo.Core.Common;
-using Fargo.Core.Entities;
 using Fargo.Core.Informations;
 
 namespace Fargo.Core.Entities.Partitions;

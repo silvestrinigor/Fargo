@@ -2,8 +2,8 @@ using Fargo.Application.Common;
 using Fargo.Application.Items;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Entities.Actors;
-using Fargo.Core.Events;
 using Fargo.Core.Entities.Actors.Users;
+using Fargo.Core.Events;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Items;

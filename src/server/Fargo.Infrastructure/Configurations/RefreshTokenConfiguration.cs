@@ -1,5 +1,5 @@
-using Fargo.Core.Identity;
 using Fargo.Core.Entities.Actors.Users;
+using Fargo.Core.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

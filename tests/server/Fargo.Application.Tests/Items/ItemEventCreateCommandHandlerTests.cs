@@ -1,15 +1,15 @@
 using Fargo.Application.Common;
 using Fargo.Application.Items;
 using Fargo.Application.Tests.Common;
-using Fargo.Core.Entities.Actors;
-using Fargo.Core.Entities.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
-using Fargo.Core.Informations;
+using Fargo.Core.Entities.Actors;
+using Fargo.Core.Entities.Actors.Users;
+using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Events;
-using Fargo.Core.Entities.Actors.Users;
+using Fargo.Core.Informations;
 using NSubstitute;
 using UnitsNet;
 

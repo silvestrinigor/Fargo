@@ -1,6 +1,6 @@
+using Fargo.Core.Barcodes;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
-using Fargo.Core.Barcodes;
 using Fargo.Core.Informations;
 using System.Drawing;
 using UnitsNet;

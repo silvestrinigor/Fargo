@@ -1,4 +1,3 @@
-using Fargo.Core.Entities.Actors;
 using Fargo.Core.Informations;
 
 namespace Fargo.Core.Entities.Actors.Users;

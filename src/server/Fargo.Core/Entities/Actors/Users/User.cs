@@ -1,7 +1,6 @@
-using Fargo.Core.Entities.Actors;
 using Fargo.Core.Common;
-using Fargo.Core.Informations;
 using Fargo.Core.Entities.UserGroups;
+using Fargo.Core.Informations;
 
 namespace Fargo.Core.Entities.Actors.Users;
 

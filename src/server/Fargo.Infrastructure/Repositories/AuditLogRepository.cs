@@ -1,8 +1,8 @@
 using Fargo.Application.Audits;
 using Fargo.Application.Common;
-using Fargo.Core.Entities.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
+using Fargo.Core.Entities.Actors;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

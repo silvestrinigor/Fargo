@@ -9,12 +9,12 @@ using Fargo.Application.System;
 using Fargo.Application.UserGroups;
 using Fargo.Application.Users;
 using Fargo.Core.Entities.Actors;
+using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Articles;
-using Fargo.Core.Identity;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Entities.UserGroups;
-using Fargo.Core.Entities.Actors.Users;
+using Fargo.Core.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Extensions;

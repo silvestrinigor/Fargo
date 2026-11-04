@@ -1,6 +1,6 @@
-using System.Linq.Expressions;
 using Fargo.Application.Common;
 using Fargo.Infrastructure.Extensions;
+using System.Linq.Expressions;
 
 namespace Fargo.Infrastructure.Persistence;
 

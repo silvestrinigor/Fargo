@@ -1,7 +1,7 @@
 using Fargo.Application.Common;
-using Fargo.Core.Entities.Actors;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.UserGroups;
 
 namespace Fargo.Application.UserGroups;

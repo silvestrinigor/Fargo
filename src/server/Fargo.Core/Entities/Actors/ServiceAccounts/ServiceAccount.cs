@@ -1,5 +1,3 @@
-using Fargo.Core.Entities.Actors;
-using Fargo.Core.Informations;
 using Fargo.Core.Security;
 
 namespace Fargo.Core.Entities.Actors.ServiceAccounts;

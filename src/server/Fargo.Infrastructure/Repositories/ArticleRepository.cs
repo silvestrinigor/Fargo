@@ -1,11 +1,11 @@
-using System.Linq.Expressions;
 using Fargo.Application.Articles;
 using Fargo.Application.Common;
-using Fargo.Core.Entities.Articles;
 using Fargo.Core.Barcodes;
+using Fargo.Core.Entities.Articles;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Fargo.Infrastructure.Repositories;
 

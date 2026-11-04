@@ -1,7 +1,7 @@
-using Fargo.Core.Entities.Articles;
-using Fargo.Core.Entities.Items;
 using Fargo.Core.Common;
 using Fargo.Core.Entities;
+using Fargo.Core.Entities.Articles;
+using Fargo.Core.Entities.Items;
 using UnitsNet;
 
 namespace Fargo.Core.Events;
