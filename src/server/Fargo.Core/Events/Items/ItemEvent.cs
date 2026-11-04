@@ -23,7 +23,7 @@ namespace Fargo.Core.Events;
 /// An <see cref="ItemEvent"/> can only be created for an article whose
 /// <see cref="Article.TrackingMode"/> is <see cref="ArticleTrackingMode.Event"/>.
 /// </remarks>
-public class ItemEvent : IEntity
+public class ItemEvent
 {
     /// <summary>
     /// Gets the unique identifier of the event.

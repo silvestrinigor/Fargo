@@ -21,7 +21,7 @@ namespace Fargo.Core.Audits;
 /// partition's parent partition, or with the global partition when the affected
 /// partition has no parent.
 /// </remarks>
-public class AuditLog : IEntity, IPartitionedGuidsReadOnly
+public class AuditLog : IPartitionedGuidsReadOnly
 {
     /// <summary>
     /// Gets the unique identifier of the audit log.

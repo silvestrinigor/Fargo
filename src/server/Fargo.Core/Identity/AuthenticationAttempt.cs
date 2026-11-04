@@ -9,7 +9,7 @@ namespace Fargo.Core.Identity;
 /// Authentication attempts are recorded to support rate limiting and to detect
 /// suspicious activity such as repeated failed logins.
 /// </remarks>
-public sealed class AuthenticationAttempt : IEntity
+public sealed class AuthenticationAttempt
 {
     /// <summary>
     /// Gets the unique identifier of the authentication attempt.

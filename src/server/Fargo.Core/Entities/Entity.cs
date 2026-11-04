@@ -21,7 +21,7 @@ namespace Fargo.Core.Entities;
 /// such as audit logs and item events are intentionally kept outside this
 /// hierarchy and therefore have no row in <c>entities</c>.
 /// </remarks>
-public abstract class Entity : IEntity
+public abstract class Entity
 {
     /// <summary>
     /// Gets the unique identifier of the entity.

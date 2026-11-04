@@ -13,7 +13,7 @@ namespace Fargo.Core.Identity;
 ///
 /// A refresh token can become unusable when it expires or is revoked.
 /// </remarks>
-public sealed class RefreshToken : IEntity
+public sealed class RefreshToken
 {
     /// <summary>
     /// Default number of days before a refresh token expires.
