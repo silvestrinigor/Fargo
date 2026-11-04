@@ -9,7 +9,5 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
     public void Configure(EntityTypeBuilder<Article> builder)
     {
         builder.ToTable("articles");
-
-        builder.HasKey(x => x.Guid);
     }
 }

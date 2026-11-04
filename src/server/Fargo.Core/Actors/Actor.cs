@@ -26,13 +26,8 @@ namespace Fargo.Core.Actors;
 /// and its direct <see cref="PartitionAccesses">partition accesses</see> — lives
 /// on the actor itself rather than being duplicated across each kind.
 /// </remarks>
-public class Actor : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurrencyVersioned
+public class Actor : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
-    /// <summary>
-    /// Gets the unique identifier of the actor.
-    /// </summary>
-    public Guid Guid { get; private init; } = Guid.NewGuid();
-
     /// <summary>
     /// Gets the kind of actor (user or service account).
     /// </summary>
@@ -117,10 +112,12 @@ public class Actor : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurre
     /// <remarks>Required by Entity Framework.</remarks>
     private Actor()
     {
+        EntityType = EntityType.Actor;
     }
 
     private Actor(ActorType actorType, Guid guid, Nameid nameid)
     {
+        EntityType = EntityType.Actor;
         ActorType = actorType;
         Guid = guid;
         Nameid = nameid;
@@ -185,9 +182,6 @@ public class Actor : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurre
 
         return actor;
     }
-
-    /// <inheritdoc/>
-    public EntityType GetEntityType() => EntityType.Actor;
 
     /// <summary>
     /// Activates the actor.

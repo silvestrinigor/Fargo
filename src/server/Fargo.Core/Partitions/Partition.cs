@@ -22,13 +22,8 @@ namespace Fargo.Core.Partitions;
 /// The global partition has access to all entities contained in its descendant
 /// partitions. Access to this partition is restricted to highly privileged users.
 /// </remarks>
-public class Partition : IEntity, IEntityTyped, IConcurrencyVersioned
+public class Partition : Entity, IConcurrencyVersioned
 {
-    /// <summary>
-    /// Gets the unique identifier of the partition.
-    /// </summary>
-    public Guid Guid { get; private init; } = Guid.NewGuid();
-
     /// <summary>
     /// Gets a value indicating whether this is the global partition.
     /// </summary>
@@ -68,6 +63,7 @@ public class Partition : IEntity, IEntityTyped, IConcurrencyVersioned
     /// </summary>
     private Partition()
     {
+        EntityType = EntityType.Partition;
     }
 
     /// <summary>
@@ -169,7 +165,4 @@ public class Partition : IEntity, IEntityTyped, IConcurrencyVersioned
                 FargoErrorType.InvalidOperation);
         }
     }
-
-    /// <inheritdoc/>
-    public EntityType GetEntityType() => EntityType.Partition;
 }

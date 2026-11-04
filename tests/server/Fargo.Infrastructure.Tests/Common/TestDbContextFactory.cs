@@ -14,7 +14,10 @@ namespace Fargo.Infrastructure.Tests.Common;
 /// recursive CTEs, or PostgreSQL range operators. Repository methods that rely
 /// on those (descendant walks, temporal inventory/location, permission/partition
 /// trees) are therefore covered by the PostgreSQL integration checks elsewhere,
-/// not here.
+/// not here. The same applies to ordered list paging over the Table-Per-Type
+/// (TPT) entity hierarchy: the InMemory provider cannot shape the base/derived
+/// join under an <c>OrderBy</c>, so those repository list tests are skipped here
+/// and covered by the PostgreSQL checks instead.
 /// </remarks>
 public static class TestDbContextFactory
 {

@@ -10,8 +10,6 @@ public sealed class ActorConfiguration : IEntityTypeConfiguration<Actor>
     {
         builder.ToTable("actors");
 
-        builder.HasKey(x => x.Guid);
-
         builder.Property(x => x.ActorType);
 
         builder.Property(x => x.IsActive);

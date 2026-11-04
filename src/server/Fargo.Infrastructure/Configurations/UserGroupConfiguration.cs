@@ -10,8 +10,6 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
     {
         builder.ToTable("user_groups");
 
-        builder.HasKey(x => x.Guid);
-
         builder.HasIndex(x => x.Nameid).IsUnique();
 
         builder.Property(x => x.Permissions).HasColumnType("jsonb");

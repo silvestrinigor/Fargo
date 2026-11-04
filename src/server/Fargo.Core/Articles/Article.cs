@@ -18,13 +18,8 @@ namespace Fargo.Core.Articles;
 /// Every article is always associated with the global partition. Additional
 /// partitions may be associated with the article to define its partition scope.
 /// </remarks>
-public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurrencyVersioned
+public class Article : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
-    /// <summary>
-    /// Gets the unique identifier of the article.
-    /// </summary>
-    public Guid Guid { get; private init; } = Guid.NewGuid();
-
     /// <summary>
     /// Gets or sets the name of the article.
     /// </summary>
@@ -135,6 +130,8 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcur
 
     private Article()
     {
+        EntityType = EntityType.Article;
+
         Barcode = new ArticleBarcode(this);
         Dimension = new ArticleDimension(this);
 
@@ -359,7 +356,4 @@ public class Article : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcur
 
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
-
-    /// <inheritdoc/>
-    public EntityType GetEntityType() => EntityType.Article;
 }

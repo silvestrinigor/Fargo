@@ -10,8 +10,6 @@ public class PartitionConfiguration : IEntityTypeConfiguration<Partition>
     {
         builder.ToTable("partitions");
 
-        builder.HasKey(x => x.Guid);
-
         builder
         .HasOne(x => x.ParentPartition)
         .WithMany()

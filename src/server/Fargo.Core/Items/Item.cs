@@ -25,13 +25,8 @@ namespace Fargo.Core.Items;
 /// Every item is always associated with the global partition. The global
 /// partition defines the base partition scope of the item and cannot be removed.
 /// </remarks>
-public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurrencyVersioned
+public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
-    /// <summary>
-    /// Gets the unique identifier of the item.
-    /// </summary>
-    public Guid Guid { get; private init; } = Guid.NewGuid();
-
     /// <summary>
     /// Gets the unique identifier of the associated <see cref="Article"/>.
     /// </summary>
@@ -115,6 +110,7 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurren
     private Item()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
+        EntityType = EntityType.Item;
     }
 
     /// <summary>
@@ -128,6 +124,8 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurren
     private Item(Article article)
     {
         ArgumentNullException.ThrowIfNull(article);
+
+        EntityType = EntityType.Item;
 
         if (article.TrackingMode != ArticleTrackingMode.Entity)
         {
@@ -314,7 +312,4 @@ public class Item : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurren
 
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
-
-    /// <inheritdoc/>
-    public EntityType GetEntityType() => EntityType.Item;
 }

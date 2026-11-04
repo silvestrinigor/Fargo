@@ -26,13 +26,8 @@ namespace Fargo.Core.UserGroups;
 /// The built-in administrators user group also has explicit partition access to
 /// the global partition. This access cannot be revoked.
 /// </remarks>
-public class UserGroup : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConcurrencyVersioned
+public class UserGroup : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
-    /// <summary>
-    /// Gets the unique identifier of the user group.
-    /// </summary>
-    public Guid Guid { get; private init; } = Guid.NewGuid();
-
     /// <summary>
     /// Gets or sets the value indicating whether the user group is active.
     /// </summary>
@@ -113,6 +108,8 @@ public class UserGroup : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConc
     /// </remarks>
     private UserGroup()
     {
+        EntityType = EntityType.UserGroup;
+
         partitions.Add(new UserGroupPartition(this, FargoCoreWellKnowGuids.GlobalPartitionGuid));
     }
 
@@ -438,7 +435,4 @@ public class UserGroup : IEntity, IEntityTyped, IPartitionedGuidsReadOnly, IConc
         ParentUserGroup = null;
         ParentUserGroupGuid = null;
     }
-
-    /// <inheritdoc/>
-    public EntityType GetEntityType() => EntityType.UserGroup;
 }

@@ -10,8 +10,6 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
     {
         builder.ToTable("items");
 
-        builder.HasKey(x => x.Guid);
-
         builder.HasIndex(x => x.ArticleGuid);
 
         builder.HasIndex(x => x.ParentItemContainerGuid);
