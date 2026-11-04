@@ -28,7 +28,7 @@ public class ItemLifecycleEventTests
         var itemEvent = ItemEvent.NewCreationEvent(article, null, Qty(100));
 
         Assert.Equal(article.Guid, itemEvent.ArticleGuid);
-        Assert.Equal(ItemEventType.Creation, itemEvent.EventType);
+        Assert.Equal(ItemEventType.Creation, itemEvent.ItemEventType);
         Assert.Null(itemEvent.Moviment);
 
         var lifecycle = itemEvent.Lifecycle;
@@ -46,7 +46,7 @@ public class ItemLifecycleEventTests
 
         var itemEvent = ItemEvent.NewCreationEvent(EventArticle(), container, Qty(5));
 
-        Assert.Equal(ItemEventType.Creation, itemEvent.EventType);
+        Assert.Equal(ItemEventType.Creation, itemEvent.ItemEventType);
         Assert.Equal(container.Guid, itemEvent.Lifecycle!.ItemContainerGuid);
         Assert.False(itemEvent.Lifecycle.NoContainer);
     }
@@ -60,7 +60,7 @@ public class ItemLifecycleEventTests
         var itemEvent = ItemEvent.NewDeletionEvent(article, container, Qty(3));
 
         Assert.Equal(article.Guid, itemEvent.ArticleGuid);
-        Assert.Equal(ItemEventType.Deletion, itemEvent.EventType);
+        Assert.Equal(ItemEventType.Deletion, itemEvent.ItemEventType);
         Assert.Equal(3, itemEvent.Lifecycle!.Quantity.Amount);
         Assert.Equal(container.Guid, itemEvent.Lifecycle.ItemContainerGuid);
     }

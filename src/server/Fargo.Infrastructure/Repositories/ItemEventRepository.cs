@@ -33,7 +33,7 @@ public sealed class ItemEventRepository(FargoDbContext context) : IItemEventRepo
 
         if (eventType is not null)
         {
-            queryFiltered = queryFiltered.Where(e => e.EventType == eventType);
+            queryFiltered = queryFiltered.Where(e => e.ItemEventType == eventType);
         }
 
         if (periodStart is not null)

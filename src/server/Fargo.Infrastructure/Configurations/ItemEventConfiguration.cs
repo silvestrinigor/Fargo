@@ -10,13 +10,7 @@ public class ItemEventConfiguration : IEntityTypeConfiguration<ItemEvent>
     {
         builder.ToTable("item_events");
 
-        builder.HasKey(x => x.Guid);
-
         builder.HasIndex(x => x.ArticleGuid);
-
-        builder.HasIndex(x => x.OccuredAt);
-
-        builder.HasIndex(x => new { x.ArticleGuid, x.OccuredAt });
 
         builder
         .HasOne(x => x.Article)

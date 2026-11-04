@@ -475,19 +475,15 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("user_group_partition_accesses", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
+            modelBuilder.Entity("Fargo.Core.Events.Event", b =>
                 {
                     b.Property<Guid>("Guid")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("guid");
 
-                    b.Property<Guid>("ArticleGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_guid");
-
-                    b.Property<short>("EventType")
-                        .HasColumnType("smallint")
+                    b.Property<int>("EventType")
+                        .HasColumnType("integer")
                         .HasColumnName("event_type");
 
                     b.Property<DateTimeOffset>("OccuredAt")
@@ -495,18 +491,17 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnName("occured_at");
 
                     b.HasKey("Guid")
-                        .HasName("pk_item_events");
+                        .HasName("pk_events");
 
-                    b.HasIndex("ArticleGuid")
-                        .HasDatabaseName("ix_item_events_article_guid");
+                    b.HasIndex("EventType")
+                        .HasDatabaseName("ix_events_event_type");
 
                     b.HasIndex("OccuredAt")
-                        .HasDatabaseName("ix_item_events_occured_at");
+                        .HasDatabaseName("ix_events_occured_at");
 
-                    b.HasIndex("ArticleGuid", "OccuredAt")
-                        .HasDatabaseName("ix_item_events_article_guid_occured_at");
+                    b.ToTable("events", (string)null);
 
-                    b.ToTable("item_events", (string)null);
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("Fargo.Core.Events.ItemLifecycleEvent", b =>
@@ -880,6 +875,24 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("user_groups", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
+                {
+                    b.HasBaseType("Fargo.Core.Events.Event");
+
+                    b.Property<Guid>("ArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_guid");
+
+                    b.Property<short>("ItemEventType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("item_event_type");
+
+                    b.HasIndex("ArticleGuid")
+                        .HasDatabaseName("ix_item_events_article_guid");
+
+                    b.ToTable("item_events", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Audits.AuditLogPartition", b =>
                 {
                     b.HasOne("Fargo.Core.Audits.AuditLog", "AuditLog")
@@ -1197,18 +1210,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("UserGroup");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
-                {
-                    b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
-                        .WithMany()
-                        .HasForeignKey("ArticleGuid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_events_articles_article_guid");
-
-                    b.Navigation("Article");
-                });
-
             modelBuilder.Entity("Fargo.Core.Events.ItemLifecycleEvent", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Items.Item", "ItemContainer")
@@ -1366,6 +1367,25 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("ParentUserGroup");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("ArticleGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_events_articles_article_guid");
+
+                    b.HasOne("Fargo.Core.Events.Event", null)
+                        .WithOne()
+                        .HasForeignKey("Fargo.Core.Events.ItemEvent", "Guid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_events_events_guid");
+
+                    b.Navigation("Article");
+                });
+
             modelBuilder.Entity("Fargo.Core.Audits.AuditLog", b =>
                 {
                     b.Navigation("Partitions");
@@ -1377,13 +1397,6 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("UserGroupMemberships");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
-                {
-                    b.Navigation("Lifecycle");
-
-                    b.Navigation("Moviment");
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.Actor", b =>
@@ -1428,6 +1441,13 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("PartitionAccesses");
 
                     b.Navigation("Partitions");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
+                {
+                    b.Navigation("Lifecycle");
+
+                    b.Navigation("Moviment");
                 });
 #pragma warning restore 612, 618
         }

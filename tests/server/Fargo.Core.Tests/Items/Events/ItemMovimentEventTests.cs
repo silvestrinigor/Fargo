@@ -29,7 +29,7 @@ public class ItemMovimentEventTests
         var itemEvent = ItemEvent.NewMovimentEvent(article, null, to, Qty(50));
 
         Assert.Equal(article.Guid, itemEvent.ArticleGuid);
-        Assert.Equal(ItemEventType.Moviment, itemEvent.EventType);
+        Assert.Equal(ItemEventType.Moviment, itemEvent.ItemEventType);
 
         var moviment = itemEvent.Moviment;
         Assert.NotNull(moviment);

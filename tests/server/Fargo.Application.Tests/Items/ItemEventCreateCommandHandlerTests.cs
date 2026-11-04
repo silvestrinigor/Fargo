@@ -64,7 +64,7 @@ public class ItemEventCreateCommandHandlerTests
 
         itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
             e => e.Guid == result
-                 && e.EventType == ItemEventType.Moviment
+                 && e.ItemEventType == ItemEventType.Moviment
                  && e.Moviment != null
                  && e.Moviment.Quantity.Amount == 50
                  && e.Moviment.ToItemContainerGuid == container.Guid));
@@ -83,7 +83,7 @@ public class ItemEventCreateCommandHandlerTests
 
         itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
             e => e.Guid == result
-                 && e.EventType == ItemEventType.Creation
+                 && e.ItemEventType == ItemEventType.Creation
                  && e.Lifecycle != null
                  && e.Lifecycle.Quantity.Amount == 120
                  && e.Lifecycle.ItemContainerGuid == container.Guid
@@ -100,7 +100,7 @@ public class ItemEventCreateCommandHandlerTests
 
         itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
             e => e.Guid == result
-                 && e.EventType == ItemEventType.Deletion
+                 && e.ItemEventType == ItemEventType.Deletion
                  && e.Lifecycle != null
                  && e.Lifecycle.Quantity.Amount == 7
                  && e.Lifecycle.NoContainer));

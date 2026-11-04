@@ -21,7 +21,7 @@ public static class ItemEventDtoMapping
         return new ItemEventDto(
             itemEvent.Guid,
             itemEvent.ArticleGuid,
-            itemEvent.EventType,
+            itemEvent.ItemEventType,
             itemEvent.OccuredAt,
             moviment is null
                 ? null

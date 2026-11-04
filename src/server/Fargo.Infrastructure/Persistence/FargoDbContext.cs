@@ -24,6 +24,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
 {
     public DbSet<Entity> Entities { get; set; }
 
+    public DbSet<Event> Events { get; set; }
+
     public DbSet<Article> Articles { get; set; }
 
     public DbSet<Item> Items { get; set; }
@@ -119,6 +121,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     {
         modelBuilder
         .ApplyConfiguration(new EntityConfiguration())
+        .ApplyConfiguration(new EventConfiguration())
         .ApplyConfiguration(new ArticleConfiguration())
         .ApplyConfiguration(new ArticleBarcodeConfiguration())
         .ApplyConfiguration(new ArticleDimensionConfiguration())

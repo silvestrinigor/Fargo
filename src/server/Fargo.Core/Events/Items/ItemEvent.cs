@@ -23,13 +23,8 @@ namespace Fargo.Core.Events;
 /// An <see cref="ItemEvent"/> can only be created for an article whose
 /// <see cref="Article.TrackingMode"/> is <see cref="ArticleTrackingMode.Event"/>.
 /// </remarks>
-public class ItemEvent
+public class ItemEvent : Event
 {
-    /// <summary>
-    /// Gets the unique identifier of the event.
-    /// </summary>
-    public Guid Guid { get; private init; } = Guid.NewGuid();
-
     /// <summary>
     /// Gets the unique identifier of the <see cref="Article"/> the event concerns.
     /// </summary>
@@ -45,34 +40,22 @@ public class ItemEvent
     public Article Article { get; private init; }
 
     /// <summary>
-    /// Gets the kind of event represented by this record.
+    /// Gets the kind of item event represented by this record.
     /// </summary>
-    public ItemEventType EventType { get; private init; }
+    public ItemEventType ItemEventType { get; private init; }
 
     /// <summary>
-    /// Gets the movement payload of this event, when its <see cref="EventType"/>
-    /// is <see cref="ItemEventType.Moviment"/>; otherwise <see langword="null"/>.
+    /// Gets the movement payload of this event, when its <see cref="ItemEventType"/>
+    /// is <see cref="Events.ItemEventType.Moviment"/>; otherwise <see langword="null"/>.
     /// </summary>
     public ItemMovimentEvent? Moviment { get; private set; }
 
     /// <summary>
     /// Gets the creation/deletion payload of this event, when its
-    /// <see cref="EventType"/> is <see cref="ItemEventType.Creation"/> or
-    /// <see cref="ItemEventType.Deletion"/>; otherwise <see langword="null"/>.
+    /// <see cref="ItemEventType"/> is <see cref="Events.ItemEventType.Creation"/> or
+    /// <see cref="Events.ItemEventType.Deletion"/>; otherwise <see langword="null"/>.
     /// </summary>
     public ItemLifecycleEvent? Lifecycle { get; private set; }
-
-    /// <summary>
-    /// Gets the instant, in UTC, at which the event occurred.
-    /// </summary>
-    /// <remarks>
-    /// This value drives point-in-time inventory reconstruction: an
-    /// event-based inventory evaluated at an instant considers only events whose
-    /// <see cref="OccuredAt"/> is at or before that instant. It defaults to the
-    /// moment the event is created but may be set explicitly to back-date an
-    /// event (for example, when importing historical movements).
-    /// </remarks>
-    public DateTimeOffset OccuredAt { get; private init; } = DateTimeOffset.UtcNow;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     /// <summary>
@@ -83,7 +66,6 @@ public class ItemEvent
     /// </remarks>
     private ItemEvent() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-
     /// <summary>
     /// Initializes a new event for the specified event-tracked article.
     /// </summary>
@@ -111,10 +93,12 @@ public class ItemEvent
                 FargoErrorType.InvalidOperation);
         }
 
+        EventType = EventType.Item;
+
         ArticleGuid = article.Guid;
         Article = article;
 
-        EventType = eventType;
+        ItemEventType = eventType;
 
         if (occuredAt is { } instant)
         {
