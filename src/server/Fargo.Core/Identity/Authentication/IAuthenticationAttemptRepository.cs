@@ -1,4 +1,4 @@
-namespace Fargo.Core.Identity;
+namespace Fargo.Core.Identity.Authentication;
 
 /// <summary>
 /// Defines the repository contract for managing <see cref="AuthenticationAttempt"/> entities.

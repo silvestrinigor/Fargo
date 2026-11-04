@@ -1,4 +1,4 @@
-namespace Fargo.Core.Identity;
+namespace Fargo.Core.Identity.Authentication;
 
 /// <summary>
 /// Represents the result of evaluating whether an authentication attempt is allowed.

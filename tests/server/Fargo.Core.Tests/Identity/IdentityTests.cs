@@ -1,4 +1,5 @@
-using Fargo.Core.Identity;
+using Fargo.Core.Identity.Authentication;
+using Fargo.Core.Identity.Tokens;
 using NSubstitute;
 
 namespace Fargo.Core.Tests.Identity;

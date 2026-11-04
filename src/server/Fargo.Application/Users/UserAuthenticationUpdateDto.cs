@@ -1,4 +1,4 @@
-using Fargo.Core.Security;
+using Fargo.Core.Identity.Credentials;
 
 namespace Fargo.Application.Users;
 

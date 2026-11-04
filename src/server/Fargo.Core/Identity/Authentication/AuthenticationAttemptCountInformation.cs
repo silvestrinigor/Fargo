@@ -1,4 +1,4 @@
-namespace Fargo.Core.Identity;
+namespace Fargo.Core.Identity.Authentication;
 
 /// <summary>
 /// Represents the number of failed authentication attempts grouped by the

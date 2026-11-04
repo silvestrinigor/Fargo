@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
-using Fargo.Core.Identity;
+using Fargo.Core.Identity.Authentication;
+using Fargo.Core.Identity.Tokens;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Identity;

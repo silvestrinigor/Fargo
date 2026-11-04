@@ -5,7 +5,7 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Entities.UserGroups;
-using Fargo.Core.Security;
+using Fargo.Core.Identity.Credentials;
 
 namespace Fargo.Application.Users;
 

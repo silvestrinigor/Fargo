@@ -1,4 +1,4 @@
-namespace Fargo.Core.Identity;
+namespace Fargo.Core.Identity.Authentication;
 
 /// <summary>
 /// Defines the contract for tracking authentication attempts and enforcing

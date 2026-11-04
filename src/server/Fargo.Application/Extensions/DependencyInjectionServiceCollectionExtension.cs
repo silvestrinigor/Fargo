@@ -14,7 +14,8 @@ using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Entities.UserGroups;
-using Fargo.Core.Identity;
+using Fargo.Core.Identity.Authentication;
+using Fargo.Core.Identity.Tokens;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Extensions;

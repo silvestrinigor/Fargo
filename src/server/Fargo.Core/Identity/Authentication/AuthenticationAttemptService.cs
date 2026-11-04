@@ -1,4 +1,4 @@
-namespace Fargo.Core.Identity;
+namespace Fargo.Core.Identity.Authentication;
 
 /// <summary>
 /// Provides authentication attempt tracking and rate limiting.

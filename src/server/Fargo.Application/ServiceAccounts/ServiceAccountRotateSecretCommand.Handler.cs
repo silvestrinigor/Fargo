@@ -3,7 +3,7 @@ using Fargo.Core.Audits;
 using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
-using Fargo.Core.Security;
+using Fargo.Core.Identity.Credentials;
 
 namespace Fargo.Application.ServiceAccounts;
 

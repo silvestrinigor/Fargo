@@ -1,6 +1,6 @@
 using Fargo.Core.Entities;
 
-namespace Fargo.Core.Identity;
+namespace Fargo.Core.Identity.Authentication;
 
 /// <summary>
 /// Represents a single authentication attempt, either successful or failed.

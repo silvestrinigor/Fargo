@@ -1,4 +1,4 @@
-namespace Fargo.Core.Identity;
+namespace Fargo.Core.Identity.Tokens;
 
 /// <summary>
 /// Defines the contract for hashing sensitive token values.

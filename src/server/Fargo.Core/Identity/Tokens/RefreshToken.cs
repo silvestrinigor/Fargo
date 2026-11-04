@@ -1,6 +1,6 @@
 using Fargo.Core.Entities;
 
-namespace Fargo.Core.Identity;
+namespace Fargo.Core.Identity.Tokens;
 
 /// <summary>
 /// Represents a refresh token used to obtain a new access token

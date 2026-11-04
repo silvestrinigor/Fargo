@@ -7,7 +7,7 @@ using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
-using Fargo.Core.Security;
+using Fargo.Core.Identity.Credentials;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.ServiceAccounts;
