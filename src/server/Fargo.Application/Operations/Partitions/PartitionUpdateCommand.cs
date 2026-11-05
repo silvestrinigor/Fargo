@@ -8,10 +8,15 @@ namespace Fargo.Application.Operations.Partitions;
 /// <summary>
 /// Command used to update an existing partition from an API update payload.
 /// </summary>
+/// <remarks>
+/// Implements <see cref="ITransactionalCommand"/>: on the re-parent path the
+/// handler acquires a hierarchy advisory lock that must be held until commit, so
+/// it runs inside a single explicit transaction owned by the pipeline.
+/// </remarks>
 public sealed record PartitionUpdateCommand(
     Guid PartitionGuid,
     PartitionUpdateDto Update
-) : ICommand;
+) : ITransactionalCommand;
 
 public sealed class PartitionUpdateCommandHandler(
     ActorResolver actorService,
@@ -20,6 +25,12 @@ public sealed class PartitionUpdateCommandHandler(
     ICurrentActor currentActor
 ) : ICommandHandler<PartitionUpdateCommand>
 {
+    // This handler's command implements ITransactionalCommand, so the registration
+    // layer wraps it in the transactional unit-of-work decorator: its whole body runs
+    // inside one explicit transaction that the decorator commits once on success. It
+    // must therefore NOT open its own transaction; it simply acquires the hierarchy
+    // advisory lock on the re-parent path, and the ambient transaction keeps that lock
+    // held until the decorator commits.
     public async Task HandleAsync(PartitionUpdateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
@@ -49,6 +60,12 @@ public sealed class PartitionUpdateCommandHandler(
             EntityNotFoundFargoApplicationException.ThrowIfNull(parentPartitionToSet, parentPartitionGuidToSet);
 
             actor.ThrowIfAccessDenied(parentPartitionToSet);
+
+            // Acquire the global partition-hierarchy lock before the cycle check so
+            // the read-check-write (validate no cycle -> set parent) is atomic: the
+            // lock is held until the decorator's transaction commits, so concurrent
+            // re-parents cannot each pass the check and together form a cycle.
+            await partitionRepository.AcquireHierarchyLockAsync(cancellationToken);
 
             await partitionService.ValidateParentPartitionHierarchyAssignmentAsync(parentPartitionToSet, partitionToEdit, cancellationToken);
 

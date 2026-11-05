@@ -65,7 +65,7 @@ public sealed class UserCreateCommandHandler(
 
         if (command.Create.Authentication?.Password is { } password)
         {
-            var passwordHash = passwordHasher.Hash(new(command.Create.Authentication.Password));
+            var passwordHash = passwordHasher.Hash(password);
 
             user.Authentication.SetPasswordHash(passwordHash);
         }
