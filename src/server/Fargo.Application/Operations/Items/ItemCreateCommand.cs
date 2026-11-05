@@ -10,6 +10,7 @@ namespace Fargo.Application.Operations.Items;
 public sealed record ItemCreateCommand(ItemCreateDto Create) : ICommand<Guid>;
 
 public sealed class ItemCreateCommandHandler(
+    ItemService itemService,
     ActorResolver actorService,
     IItemRepository itemRepository,
     IArticleRepository articleRepository,
@@ -40,6 +41,8 @@ public sealed class ItemCreateCommandHandler(
             EntityNotFoundFargoApplicationException.ThrowIfNull(parentItemContainer, parentItemContainerGuid);
 
             actor.ThrowIfAccessDenied(parentItemContainer);
+
+            await itemService.ValidateAllowedInContainerAsync(parentItemContainer, item, cancellationToken);
 
             item.PlaceInsideContainer(parentItemContainer);
         }

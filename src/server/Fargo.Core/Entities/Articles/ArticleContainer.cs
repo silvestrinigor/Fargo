@@ -34,6 +34,20 @@ public sealed class ArticleContainer
     public Mass? MaxMass { get; private set; }
 
     /// <summary>
+    /// Gets the articles that are allowed to be inserted into the container,
+    /// together with the maximum quantity of each.
+    /// </summary>
+    /// <remarks>
+    /// When the collection is empty, the container imposes no allow-list
+    /// constraint and may hold any article (subject to other constraints such
+    /// as <see cref="MaxMass"/>). When the collection is non-empty, only the
+    /// listed articles may be inserted, each bounded by its maximum quantity.
+    /// </remarks>
+    public IReadOnlyCollection<ArticleContainerAllowedArticle> AllowedArticles => allowedArticles;
+
+    private readonly List<ArticleContainerAllowedArticle> allowedArticles = [];
+
+    /// <summary>
     /// Initializes a new <see cref="ArticleContainer"/> instance.
     /// </summary>
     /// <remarks>
@@ -76,5 +90,42 @@ public sealed class ArticleContainer
         }
 
         MaxMass = maxMass;
+    }
+
+    /// <summary>
+    /// Adds an article to the container's allow-list, optionally constrained by
+    /// a maximum quantity.
+    /// </summary>
+    /// <param name="allowedArticle">
+    /// The article allowed inside the container.
+    /// </param>
+    /// <param name="maxQuantity">
+    /// The maximum quantity of the allowed article the container may hold, or
+    /// <see langword="null"/> to impose no quantity cap. A maximum quantity may
+    /// only be supplied for an entity-tracked allowed article.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="allowedArticle"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="FargoCoreException">
+    /// Thrown when the container allows itself, when the article has already
+    /// been added to the allow-list, or when a maximum quantity is supplied for
+    /// an allowed article that is not entity-tracked.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="maxQuantity"/> is less than or equal to zero.
+    /// </exception>
+    internal void AddAllowedArticle(Article allowedArticle, Scalar? maxQuantity)
+    {
+        ArgumentNullException.ThrowIfNull(allowedArticle);
+
+        if (allowedArticles.Any(a => a.AllowedArticleGuid == allowedArticle.Guid))
+        {
+            throw new FargoCoreException(
+                $"The article '{allowedArticle.Guid}' is already in the container's allowed articles.",
+                FargoErrorType.InvalidOperation);
+        }
+
+        allowedArticles.Add(new ArticleContainerAllowedArticle(this, allowedArticle, maxQuantity));
     }
 }

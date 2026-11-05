@@ -273,16 +273,37 @@ public class Article : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
     /// <summary>
     /// Creates a new article container.
     /// </summary>
-    /// <param name="name"></param>
+    /// <param name="name">The name of the article.</param>
+    /// <param name="maxMass">
+    /// The optional maximum mass the container may hold.
+    /// </param>
+    /// <param name="allowedArticles">
+    /// The optional articles allowed inside the container, each paired with the
+    /// optional maximum quantity the container may hold. When empty, the
+    /// container imposes no allow-list constraint.
+    /// </param>
     /// <returns>
     /// A new <see cref="Article"/> instance.
     /// </returns>
-    public static Article NewArticleContainer(Name name)
+    public static Article NewArticleContainer(
+        Name name,
+        Mass? maxMass = null,
+        IReadOnlyCollection<(Article Article, Scalar? MaxQuantity)>? allowedArticles = null)
     {
         var articleContainer = new Article(isContainer: true)
         {
             Name = name,
         };
+
+        articleContainer.Container!.SetMaxMass(maxMass);
+
+        if (allowedArticles is not null)
+        {
+            foreach (var (article, maxQuantity) in allowedArticles)
+            {
+                articleContainer.Container!.AddAllowedArticle(article, maxQuantity);
+            }
+        }
 
         return articleContainer;
     }

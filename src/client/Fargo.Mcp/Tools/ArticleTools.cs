@@ -3,6 +3,7 @@ using Fargo.ClientHttp.Models;
 using Fargo.Mcp.Authentication;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+using System.Globalization;
 
 namespace Fargo.Mcp.Tools;
 
@@ -71,6 +72,8 @@ public static class ArticleTools
         [Description("An optional description of the article.")] string? description = null,
         [Description("The numeric article type. Defaults to the API's default when omitted.")] int? articleType = null,
         [Description("How stock is tracked: 1 = Entity (each unit is an individual item; the default), 2 = Event (aggregate quantities recorded as movement events). Container articles are always entity-tracked.")] int? trackingMode = null,
+        [Description("For container articles, the maximum mass the container can hold, as value+unit, e.g. '25kg'. Implies the article is a container.")] string? containerMaxMass = null,
+        [Description("For container articles, the articles allowed inside the container, each as '<article-guid>' or '<article-guid>:<max-quantity>'. When any are given, only those articles may be inserted. The max quantity is optional and only valid for an entity-tracked article. Implies the article is a container.")] string[]? allowedArticles = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -83,7 +86,134 @@ public static class ArticleTools
             TrackingMode = trackingMode
         };
 
+        var container = BuildContainer(containerMaxMass, allowedArticles);
+        if (container is not null)
+        {
+            body.Container = container;
+        }
+
         return await client.V1.Articles.PostAsync(body, cancellationToken: cancellationToken);
+    }
+
+    /// <summary>
+    /// Builds the container portion of an article-create request from the
+    /// compact MCP parameters, or returns <see langword="null"/> when no
+    /// container constraints were supplied.
+    /// </summary>
+    private static ArticleContainerDto? BuildContainer(string? containerMaxMass, string[]? allowedArticles)
+    {
+        var hasMaxMass = !string.IsNullOrWhiteSpace(containerMaxMass);
+        var hasAllowed = allowedArticles is { Length: > 0 };
+
+        if (!hasMaxMass && !hasAllowed)
+        {
+            return null;
+        }
+
+        var container = new ArticleContainerDto();
+
+        if (hasMaxMass)
+        {
+            var (value, unit) = ParseMeasure(containerMaxMass!);
+            container.MaxMass = new ArticleContainerDto_maxMass { Value = value, Unit = unit };
+        }
+
+        if (hasAllowed)
+        {
+            container.AllowedArticles = allowedArticles!
+                .Select(token =>
+                {
+                    var (articleGuid, maxQuantity) = ParseAllowedArticle(token);
+                    return new ArticleContainerAllowedArticleDto
+                    {
+                        ArticleGuid = articleGuid,
+                        MaxQuantity = maxQuantity is { } q
+                            ? new ArticleContainerAllowedArticleDto.ArticleContainerAllowedArticleDto_maxQuantity { Double = q }
+                            : null
+                    };
+                })
+                .ToList();
+        }
+
+        return container;
+    }
+
+    /// <summary>
+    /// Splits a measure token such as <c>25kg</c> into its numeric value and
+    /// unit abbreviation.
+    /// </summary>
+    private static (double Value, string Unit) ParseMeasure(string token)
+    {
+        token = token.Trim();
+
+        var index = 0;
+        while (index < token.Length)
+        {
+            var c = token[index];
+            var isNumeric = char.IsDigit(c) || c == '.' || c == '-' || c == '+' || c == ',';
+            if (!isNumeric)
+            {
+                break;
+            }
+
+            index++;
+        }
+
+        var numberPart = token[..index];
+        var unitPart = token[index..].Trim();
+
+        if (index == 0 || unitPart.Length == 0 ||
+            !double.TryParse(numberPart, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+        {
+            throw new ArgumentException(
+                $"Invalid measure '{token}'. Expected a number followed by a unit, e.g. '25kg'.");
+        }
+
+        return (value, unitPart);
+    }
+
+    /// <summary>
+    /// Parses a container allowed-article token of the form
+    /// <c>&lt;article-guid&gt;</c> or <c>&lt;article-guid&gt;:&lt;max-quantity&gt;</c>.
+    /// The maximum quantity is optional.
+    /// </summary>
+    private static (Guid ArticleGuid, double? MaxQuantity) ParseAllowedArticle(string token)
+    {
+        token = (token ?? string.Empty).Trim();
+
+        var separator = token.LastIndexOf(':');
+
+        string guidPart;
+        double? maxQuantity = null;
+
+        if (separator < 0)
+        {
+            guidPart = token;
+        }
+        else
+        {
+            guidPart = token[..separator].Trim();
+            var quantityPart = token[(separator + 1)..].Trim();
+
+            if (quantityPart.Length > 0)
+            {
+                if (!double.TryParse(quantityPart, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) || parsed <= 0)
+                {
+                    throw new ArgumentException(
+                        $"Invalid allowed article maximum quantity '{quantityPart}' in '{token}'. Expected a positive number.");
+                }
+
+                maxQuantity = parsed;
+            }
+        }
+
+        if (!Guid.TryParse(guidPart, out var articleGuid))
+        {
+            throw new ArgumentException(
+                $"Invalid allowed article '{token}'. Expected '<article-guid>' or '<article-guid>:<max-quantity>'.");
+        }
+
+        return (articleGuid, maxQuantity);
     }
 
     [McpServerTool(Name = "fargo_articles_delete_by_barcode")]

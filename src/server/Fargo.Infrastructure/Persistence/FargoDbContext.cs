@@ -135,6 +135,7 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new ArticlePackConfiguration())
         .ApplyConfiguration(new ArticleKitComponentConfiguration())
         .ApplyConfiguration(new ArticleContainerConfiguration())
+        .ApplyConfiguration(new ArticleContainerAllowedArticleConfiguration())
         .ApplyConfiguration(new ArticlePartitionConfiguration())
         .ApplyConfiguration(new ItemConfiguration())
         .ApplyConfiguration(new ItemMovimentConfiguration())

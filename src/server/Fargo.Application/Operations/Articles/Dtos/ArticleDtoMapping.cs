@@ -43,7 +43,11 @@ public static class ArticleDtoMapping
                     .Select(k => new ArticleKitComponentDto(k.FromArticleGuid, k.Quantity)).ToArray()
                 : null,
             article.Container != null
-                ? new ArticleContainerDto(article.Container.MaxMass)
+                ? new ArticleContainerDto(
+                    article.Container.MaxMass,
+                    article.Container.AllowedArticles
+                        .Select(a => new ArticleContainerAllowedArticleDto(a.AllowedArticleGuid, a.MaxQuantity))
+                        .ToArray())
                 : null,
             Barcodes: new ArticleBarcodeDto(
                 article.Barcode.Ean13),

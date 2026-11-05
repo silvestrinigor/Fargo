@@ -72,6 +72,8 @@ public sealed class ItemUpdateCommandHandler(
                 await itemService.ValidateParentItemContainerHierarchyAssignmentAsync(parentItemContainer, item, cancellationToken);
             }
 
+            await itemService.ValidateAllowedInContainerAsync(parentItemContainer, item, cancellationToken);
+
             item.PlaceInsideContainer(parentItemContainer);
         }
         else if (command.Update.RemoveFromParentItemContainer is true)

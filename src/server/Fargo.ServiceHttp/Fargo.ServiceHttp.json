@@ -2245,6 +2245,31 @@
         },
         "description": "Represents the barcode changes to apply to an article."
       },
+      "ArticleContainerAllowedArticleDto": {
+        "required": [
+          "articleGuid"
+        ],
+        "type": "object",
+        "properties": {
+          "articleGuid": {
+            "type": "string",
+            "description": "The unique identifier of the article allowed inside the container.",
+            "format": "uuid"
+          },
+          "maxQuantity": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "The optional maximum quantity of the allowed article the container may hold.\r\nWhen `null`, no quantity cap applies. A maximum quantity may\r\nonly be supplied for an entity-tracked allowed article."
+          }
+        },
+        "description": "Represents an article allowed inside a container, optionally constrained by\r\nthe maximum quantity of that article the container may hold."
+      },
       "ArticleContainerDto": {
         "type": "object",
         "properties": {
@@ -2264,6 +2289,16 @@
               }
             },
             "description": "The optional maximum mass that the container can hold."
+          },
+          "allowedArticles": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ArticleContainerAllowedArticleDto"
+            },
+            "description": "The optional list of articles allowed inside the container, each paired with\r\nthe maximum quantity the container may hold. When omitted or empty, the\r\ncontainer imposes no allow-list constraint."
           }
         },
         "description": "Represents the container information associated with an article."

@@ -141,4 +141,62 @@ internal static class MeasureParser
 
         return (articleGuid, quantity);
     }
+
+    /// <summary>
+    /// Parses a container allowed-article token of the form
+    /// <c>&lt;article-guid&gt;</c> or <c>&lt;article-guid&gt;:&lt;max-quantity&gt;</c>.
+    /// The maximum quantity is optional; when omitted the article is allowed with
+    /// no quantity cap. When present it must be a positive number.
+    /// </summary>
+    public static (Guid ArticleGuid, double? MaxQuantity) ParseAllowedArticle(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            throw new FormatException("An allowed article cannot be empty.");
+        }
+
+        token = token.Trim();
+
+        var separator = token.LastIndexOf(':');
+
+        string guidPart;
+        double? maxQuantity = null;
+
+        if (separator < 0)
+        {
+            guidPart = token;
+        }
+        else
+        {
+            guidPart = token[..separator].Trim();
+            var quantityPart = token[(separator + 1)..].Trim();
+
+            if (quantityPart.Length > 0)
+            {
+                if (!double.TryParse(quantityPart, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
+                {
+                    throw new FormatException(
+                        $"Invalid allowed article maximum quantity '{quantityPart}' in '{token}'. "
+                        + "Expected a number, e.g. '{guid}:10'.");
+                }
+
+                if (parsed <= 0)
+                {
+                    throw new FormatException(
+                        $"The allowed article maximum quantity in '{token}' must be greater than zero.");
+                }
+
+                maxQuantity = parsed;
+            }
+        }
+
+        if (!Guid.TryParse(guidPart, out var articleGuid))
+        {
+            throw new FormatException(
+                $"Invalid allowed article '{token}'. "
+                + "Expected '<article-guid>' or '<article-guid>:<max-quantity>'.");
+        }
+
+        return (articleGuid, maxQuantity);
+    }
 }

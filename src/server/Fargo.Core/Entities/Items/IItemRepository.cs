@@ -58,6 +58,31 @@ public interface IItemRepository
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Counts the number of items of the specified article that are currently
+    /// placed directly inside the specified container item.
+    /// </summary>
+    /// <param name="itemContainerGuid">
+    /// The identifier of the container item whose direct contents are counted.
+    /// </param>
+    /// <param name="articleGuid">
+    /// The identifier of the article whose items are counted.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token used to cancel the asynchronous operation.
+    /// </param>
+    /// <returns>
+    /// The number of items of the article directly contained by the container.
+    /// </returns>
+    /// <remarks>
+    /// Only items whose immediate parent is the specified container are counted;
+    /// items nested in descendant containers are not included.
+    /// </remarks>
+    Task<int> CountDirectChildrenByArticleAsync(
+        Guid itemContainerGuid,
+        Guid articleGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Adds a new item to the persistence context.
     /// </summary>
     /// <param name="item">

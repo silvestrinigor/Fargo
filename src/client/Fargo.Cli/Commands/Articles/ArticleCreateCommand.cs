@@ -36,6 +36,11 @@ public sealed class ArticleCreateCommand : Command
             '10cm'. Units are standard abbreviations (mass: g, kg, mg, lb, oz;
             length: mm, cm, m, in, ft). Kit components are written as
             '<article-guid>' or '<article-guid>:<quantity>' and may be repeated.
+            Container allowed articles are written as
+            '<article-guid>' or '<article-guid>:<max-quantity>' and may be
+            repeated; when any are given, only those articles may be placed in
+            the container. A max quantity is optional and only valid for an
+            entity-tracked article.
 
             Examples:
               fargo article create --name "Widget"
@@ -44,6 +49,9 @@ public sealed class ArticleCreateCommand : Command
                 --kit-component 11111111-1111-1111-1111-111111111111:2 \
                 --kit-component 22222222-2222-2222-2222-222222222222
               fargo article create --name "Case" --is-container --container-max-mass 25kg
+              fargo article create --name "Crate" --is-container \
+                --allowed-article 11111111-1111-1111-1111-111111111111:10 \
+                --allowed-article 22222222-2222-2222-2222-222222222222:5
               fargo article create --name "6-pack" \
                 --pack-from 11111111-1111-1111-1111-111111111111 --pack-quantity 6
               fargo article create --name "Blue Widget" \
@@ -126,6 +134,17 @@ public sealed class ArticleCreateCommand : Command
                 + "Implies the article is a container."
         };
 
+        var allowedArticleOption = new Option<string[]?>("--allowed-article")
+        {
+            Description =
+                "Article allowed inside the container as '<article-guid>' or "
+                + "'<article-guid>:<max-quantity>'. Repeat the option for multiple allowed "
+                + "articles. When one or more are given, only those articles may be inserted "
+                + "into the container. The maximum quantity is optional and may only be set "
+                + "for an entity-tracked article. Implies the article is a container.",
+            AllowMultipleArgumentsPerToken = true
+        };
+
         var barcodeEan13Option = new Option<string?>("--barcode-ean13")
         {
             Description = "Optional EAN-13 barcode to assign to the article."
@@ -167,6 +186,7 @@ public sealed class ArticleCreateCommand : Command
         Add(packQuantityOption);
         Add(isContainerOption);
         Add(containerMaxMassOption);
+        Add(allowedArticleOption);
         Add(barcodeEan13Option);
         Add(trackingModeOption);
         Add(kitComponentOption);
@@ -187,6 +207,7 @@ public sealed class ArticleCreateCommand : Command
             var packQuantity = parseResult.GetValue(packQuantityOption);
             var isContainer = parseResult.GetValue(isContainerOption);
             var containerMaxMass = parseResult.GetValue(containerMaxMassOption);
+            var allowedArticles = parseResult.GetValue(allowedArticleOption);
             var barcodeEan13 = parseResult.GetValue(barcodeEan13Option);
             var trackingModeRaw = parseResult.GetValue(trackingModeOption);
             var kitComponents = parseResult.GetValue(kitComponentOption);
@@ -201,7 +222,7 @@ public sealed class ArticleCreateCommand : Command
                     variationPresent: variationFrom is not null,
                     packPresent: packFrom is not null || packQuantity is not null,
                     kitPresent: kitComponents is { Length: > 0 },
-                    containerPresent: isContainer || containerMaxMass is not null);
+                    containerPresent: isContainer || containerMaxMass is not null || allowedArticles is { Length: > 0 });
             }
             catch (FormatException ex)
             {
@@ -270,13 +291,34 @@ public sealed class ArticleCreateCommand : Command
                     };
                 }
 
-                if (containerMaxMass is not null)
+                if (containerMaxMass is not null || allowedArticles is { Length: > 0 })
                 {
-                    var (value, unit) = MeasureParser.ParseMeasure(containerMaxMass, "--container-max-mass");
-                    dto.Container = new ArticleContainerDto
+                    var container = new ArticleContainerDto();
+
+                    if (containerMaxMass is not null)
                     {
-                        MaxMass = new ArticleContainerDto_maxMass { Value = value, Unit = unit }
-                    };
+                        var (value, unit) = MeasureParser.ParseMeasure(containerMaxMass, "--container-max-mass");
+                        container.MaxMass = new ArticleContainerDto_maxMass { Value = value, Unit = unit };
+                    }
+
+                    if (allowedArticles is { Length: > 0 })
+                    {
+                        container.AllowedArticles = allowedArticles
+                            .Select(token =>
+                            {
+                                var (articleGuid, maxQuantity) = MeasureParser.ParseAllowedArticle(token);
+                                return new ArticleContainerAllowedArticleDto
+                                {
+                                    ArticleGuid = articleGuid,
+                                    MaxQuantity = maxQuantity is { } q
+                                        ? new ArticleContainerAllowedArticleDto.ArticleContainerAllowedArticleDto_maxQuantity { Double = q }
+                                        : null
+                                };
+                            })
+                            .ToList();
+                    }
+
+                    dto.Container = container;
                 }
 
                 if (!string.IsNullOrWhiteSpace(barcodeEan13))
@@ -334,7 +376,7 @@ public sealed class ArticleCreateCommand : Command
             (variationPresent, ArticleTypeVariation, "--variation-from"),
             (packPresent, ArticleTypePack, "--pack-from / --pack-quantity"),
             (kitPresent, ArticleTypeKit, "--kit-component"),
-            (containerPresent, ArticleTypeContainer, "--is-container / --container-max-mass"),
+            (containerPresent, ArticleTypeContainer, "--is-container / --container-max-mass / --allowed-article"),
         };
 
         var present = signals.Where(s => s.Present).ToList();

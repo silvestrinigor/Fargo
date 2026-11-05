@@ -37,6 +37,93 @@ public class ArticleTests
     }
 
     [Fact]
+    public void NewArticleContainer_WithMaxMass_ShouldSetMaxMass()
+    {
+        var article = Article.NewArticleContainer(Aname, maxMass: Mass.FromKilograms(25));
+
+        Assert.NotNull(article.Container!.MaxMass);
+        Assert.Equal(25, article.Container!.MaxMass!.Value.Kilograms, 3);
+    }
+
+    [Fact]
+    public void NewArticleContainer_WithAllowedArticles_ShouldListThemWithMaxQuantity()
+    {
+        var a1 = Article.NewArticle(new Name("A1"));
+        var a2 = Article.NewArticle(new Name("A2"));
+
+        var container = Article.NewArticleContainer(
+            Aname,
+            allowedArticles: [(a1, Scalar.FromAmount(10)), (a2, Scalar.FromAmount(5))]);
+
+        Assert.Equal(2, container.Container!.AllowedArticles.Count);
+        Assert.Contains(container.Container.AllowedArticles, a => a.AllowedArticleGuid == a1.Guid && a.MaxQuantity!.Value.Value == 10);
+        Assert.Contains(container.Container.AllowedArticles, a => a.AllowedArticleGuid == a2.Guid && a.MaxQuantity!.Value.Value == 5);
+    }
+
+    [Fact]
+    public void NewArticleContainer_WhenAllowedArticleIsItself_ShouldThrow()
+    {
+        var container = Article.NewArticleContainer(Aname);
+
+        // Adding the container to its own allow-list must be rejected.
+        Assert.Throws<FargoCoreException>(
+            () => container.Container!.AddAllowedArticle(container, Scalar.FromAmount(1)));
+    }
+
+    [Fact]
+    public void NewArticleContainer_WhenAllowedArticleMaxQuantityIsNotPositive_ShouldThrow()
+    {
+        var allowed = Article.NewArticle(new Name("A1"));
+
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => Article.NewArticleContainer(Aname, allowedArticles: [(allowed, Scalar.FromAmount(0))]));
+    }
+
+    [Fact]
+    public void NewArticleContainer_WhenAllowedArticleHasNoMaxQuantity_ShouldBeAllowedWithoutCap()
+    {
+        var allowed = Article.NewArticle(new Name("A1"));
+
+        var container = Article.NewArticleContainer(Aname, allowedArticles: [(allowed, null)]);
+
+        var entry = Assert.Single(container.Container!.AllowedArticles);
+        Assert.Equal(allowed.Guid, entry.AllowedArticleGuid);
+        Assert.Null(entry.MaxQuantity);
+    }
+
+    [Fact]
+    public void NewArticleContainer_WhenMaxQuantitySuppliedForEventTrackedArticle_ShouldThrow()
+    {
+        var eventTracked = Article.NewArticle(new Name("Bulk"), ArticleTrackingMode.Event);
+
+        Assert.Throws<FargoCoreException>(
+            () => Article.NewArticleContainer(Aname, allowedArticles: [(eventTracked, Scalar.FromAmount(5))]));
+    }
+
+    [Fact]
+    public void NewArticleContainer_WhenEventTrackedArticleAllowedWithoutMaxQuantity_ShouldBeAllowed()
+    {
+        var eventTracked = Article.NewArticle(new Name("Bulk"), ArticleTrackingMode.Event);
+
+        var container = Article.NewArticleContainer(Aname, allowedArticles: [(eventTracked, null)]);
+
+        var entry = Assert.Single(container.Container!.AllowedArticles);
+        Assert.Equal(eventTracked.Guid, entry.AllowedArticleGuid);
+        Assert.Null(entry.MaxQuantity);
+    }
+
+    [Fact]
+    public void NewArticleContainer_WhenAllowedArticleDuplicated_ShouldThrow()
+    {
+        var allowed = Article.NewArticle(new Name("A1"));
+
+        Assert.Throws<FargoCoreException>(
+            () => Article.NewArticleContainer(
+                Aname,
+                allowedArticles: [(allowed, Scalar.FromAmount(1)), (allowed, Scalar.FromAmount(2))]));
+    }
+
+    [Fact]
     public void NewArticleVariation_ShouldBeVariationOfSource()
     {
         var source = Article.NewArticle(new Name("Source"));

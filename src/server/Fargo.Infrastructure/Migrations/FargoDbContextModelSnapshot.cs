@@ -236,6 +236,29 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("article_containers", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleContainerAllowedArticle", b =>
+                {
+                    b.Property<Guid>("ContainerArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("container_article_guid");
+
+                    b.Property<Guid>("AllowedArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("allowed_article_guid");
+
+                    b.Property<double?>("MaxQuantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("max_quantity");
+
+                    b.HasKey("ContainerArticleGuid", "AllowedArticleGuid")
+                        .HasName("pk_article_container_allowed_articles");
+
+                    b.HasIndex("AllowedArticleGuid")
+                        .HasDatabaseName("ix_article_container_allowed_articles_allowed_article_guid");
+
+                    b.ToTable("article_container_allowed_articles", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleDimension", b =>
                 {
                     b.Property<Guid>("ArticleGuid")
@@ -1094,6 +1117,27 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Article");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleContainerAllowedArticle", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "AllowedArticle")
+                        .WithMany()
+                        .HasForeignKey("AllowedArticleGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_container_allowed_articles_articles_allowed_article");
+
+                    b.HasOne("Fargo.Core.Entities.Articles.ArticleContainer", "Container")
+                        .WithMany("AllowedArticles")
+                        .HasForeignKey("ContainerArticleGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_container_allowed_articles_article_containers_conta");
+
+                    b.Navigation("AllowedArticle");
+
+                    b.Navigation("Container");
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleDimension", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
@@ -1459,11 +1503,13 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_supply_orders_entities_guid");
 
-                    b.HasOne("Fargo.Core.Entities.Items.Item", null)
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "ReceivingContainer")
                         .WithMany()
                         .HasForeignKey("ReceivingContainerGuid")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_supply_orders_items_receiving_container_guid");
+
+                    b.Navigation("ReceivingContainer");
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroup", b =>
@@ -1509,6 +1555,11 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("UserGroupMemberships");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleContainer", b =>
+                {
+                    b.Navigation("AllowedArticles");
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.Actor", b =>

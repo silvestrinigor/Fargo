@@ -16,7 +16,22 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         .Include(item => item.Article)
         .Include(item => item.Partitions)
         .Include(item => item.ParentItemContainer)
+            .ThenInclude(parent => parent!.Article)
+                .ThenInclude(article => article.Container)
+                    .ThenInclude(container => container!.AllowedArticles)
         .SingleOrDefaultAsync(item => item.Guid == itemGuid, cancellationToken);
+    }
+
+    public Task<int> CountDirectChildrenByArticleAsync(
+        Guid itemContainerGuid,
+        Guid articleGuid,
+        CancellationToken cancellationToken = default)
+    {
+        return context.Items
+        .Where(item =>
+            item.ParentItemContainerGuid == itemContainerGuid &&
+            item.ArticleGuid == articleGuid)
+        .CountAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<Guid>> GetContainedDescendantGuidsAsync(

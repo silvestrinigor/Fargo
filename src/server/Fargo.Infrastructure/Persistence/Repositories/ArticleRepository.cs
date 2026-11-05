@@ -18,6 +18,7 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
         .Include(article => article.Pack)
         .Include(article => article.KitComponents)
         .Include(article => article.Container)
+            .ThenInclude(container => container!.AllowedArticles)
         .Include(article => article.Barcode)
         .Include(article => article.Dimension)
         .Include(article => article.Partitions)

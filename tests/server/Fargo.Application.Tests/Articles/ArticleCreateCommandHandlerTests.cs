@@ -10,6 +10,7 @@ using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 using NSubstitute;
+using UnitsNet;
 
 namespace Fargo.Application.Tests.Articles;
 
@@ -134,6 +135,69 @@ public class ArticleCreateCommandHandlerTests
             Variation: null));
 
         await Assert.ThrowsAsync<FargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenContainerWithAllowedArticles_ShouldResolveAndAttachThem()
+    {
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateArticle]);
+
+        var allowed = Article.NewArticle(new Name("Allowed"));
+        articleRepository.GetByGuidAsync(allowed.Guid, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Article?>(allowed));
+
+        var command = new ArticleCreateCommand(new ArticleCreateDto(
+            new Name("Crate"),
+            ArticleType: ArticleType.Container,
+            Container: new ArticleContainerDto(
+                MaxMass: null,
+                AllowedArticles: [new ArticleContainerAllowedArticleDto(allowed.Guid, Scalar.FromAmount(10))])));
+
+        await CreateHandler().HandleAsync(command);
+
+        articleRepository.Received(1).Add(
+            Arg.Is<Article>(a =>
+                a.ArticleType == ArticleType.Container &&
+                a.Container!.AllowedArticles.Count == 1 &&
+                a.Container.AllowedArticles.Single().AllowedArticleGuid == allowed.Guid &&
+                a.Container.AllowedArticles.Single().MaxQuantity!.Value.Value == 10));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenContainerAllowedArticleNotFound_ShouldThrow()
+    {
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateArticle]);
+        var missing = Guid.NewGuid();
+        articleRepository.GetByGuidAsync(missing, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Article?>(null));
+
+        var command = new ArticleCreateCommand(new ArticleCreateDto(
+            new Name("Crate"),
+            ArticleType: ArticleType.Container,
+            Container: new ArticleContainerDto(
+                AllowedArticles: [new ArticleContainerAllowedArticleDto(missing, Scalar.FromAmount(1))])));
+
+        await Assert.ThrowsAsync<EntityNotFoundFargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenActorHasNoAccessToAllowedArticle_ShouldThrowAccessDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid, [ActionType.CreateArticle], partitionAccesses: [Guid.NewGuid()]);
+        var allowed = Article.NewArticle(new Name("Allowed"));
+        articleRepository.GetByGuidAsync(allowed.Guid, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Article?>(allowed));
+
+        var command = new ArticleCreateCommand(new ArticleCreateDto(
+            new Name("Crate"),
+            ArticleType: ArticleType.Container,
+            Container: new ArticleContainerDto(
+                AllowedArticles: [new ArticleContainerAllowedArticleDto(allowed.Guid, Scalar.FromAmount(1))])));
+
+        await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
             () => CreateHandler().HandleAsync(command));
     }
 

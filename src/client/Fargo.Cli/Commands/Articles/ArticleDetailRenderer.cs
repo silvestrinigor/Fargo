@@ -27,6 +27,7 @@ internal static class ArticleDetailRenderer
             .Field("Dimension", FormatDimension(article.Dimension))
             .Field("Mass", FormatMeasure(article.Mass?.Unit, article.Mass?.Value))
             .Field("Container max mass", FormatMeasure(article.Container?.MaxMass?.Unit, article.Container?.MaxMass?.Value))
+            .Field("Container allowed articles", FormatAllowedArticles(article.Container?.AllowedArticles))
             .Field("Pack source article", article.Pack?.FromArticleGuid)
             .Field("Pack quantity", FormatScalar(article.Pack?.Quantity))
             .Field("Variation source article", article.Variation?.FromArticleGuid)
@@ -125,5 +126,40 @@ internal static class ArticleDetailRenderer
             .ToArray();
 
         return parts.Length == 0 ? null : string.Join(", ", parts);
+    }
+
+    private static string? FormatAllowedArticles(IEnumerable<ArticleContainerAllowedArticleDto>? allowedArticles)
+    {
+        if (allowedArticles is null)
+        {
+            return null;
+        }
+
+        var parts = allowedArticles
+            .Select(a =>
+            {
+                var maxQuantity = FormatMaxQuantity(a.MaxQuantity);
+                return maxQuantity is null
+                    ? $"{a.ArticleGuid}"
+                    : $"{a.ArticleGuid} (max {maxQuantity})";
+            })
+            .ToArray();
+
+        return parts.Length == 0 ? null : string.Join(", ", parts);
+    }
+
+    private static string? FormatMaxQuantity(ArticleContainerAllowedArticleDto.ArticleContainerAllowedArticleDto_maxQuantity? maxQuantity)
+    {
+        if (maxQuantity is null)
+        {
+            return null;
+        }
+
+        if (maxQuantity.Double is { } d)
+        {
+            return d.ToString(CultureInfo.InvariantCulture);
+        }
+
+        return maxQuantity.String;
     }
 }

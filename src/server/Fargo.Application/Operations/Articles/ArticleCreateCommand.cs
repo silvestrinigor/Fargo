@@ -161,7 +161,26 @@ public sealed class ArticleCreateCommandHandler(
 
             case ArticleType.Container:
                 {
-                    article = Article.NewArticleContainer(command.Create.Name);
+                    var allowedArticles = new List<(Article Article, Scalar? MaxQuantity)>();
+
+                    if (command.Create.Container?.AllowedArticles is { Count: > 0 } allowedArticleDtos)
+                    {
+                        foreach (var allowed in allowedArticleDtos)
+                        {
+                            var allowedArticle = await articleRepository.GetByGuidAsync(allowed.ArticleGuid, cancellationToken);
+
+                            EntityNotFoundFargoApplicationException.ThrowIfNull(allowedArticle, allowed.ArticleGuid);
+
+                            actor.ThrowIfAccessDenied(allowedArticle);
+
+                            allowedArticles.Add((allowedArticle, allowed.MaxQuantity));
+                        }
+                    }
+
+                    article = Article.NewArticleContainer(
+                        command.Create.Name,
+                        command.Create.Container?.MaxMass,
+                        allowedArticles);
 
                     break;
                 }

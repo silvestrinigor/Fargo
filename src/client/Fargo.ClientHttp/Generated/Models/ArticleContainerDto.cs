@@ -15,6 +15,14 @@ namespace Fargo.ClientHttp.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The optional list of articles allowed inside the container, each paired withthe maximum quantity the container may hold. When omitted or empty, thecontainer imposes no allow-list constraint.</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public List<global::Fargo.ClientHttp.Models.ArticleContainerAllowedArticleDto>? AllowedArticles { get; set; }
+#nullable restore
+#else
+        public List<global::Fargo.ClientHttp.Models.ArticleContainerAllowedArticleDto> AllowedArticles { get; set; }
+#endif
         /// <summary>The optional maximum mass that the container can hold.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -48,6 +56,7 @@ namespace Fargo.ClientHttp.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
+                { "allowedArticles", n => { AllowedArticles = n.GetCollectionOfObjectValues<global::Fargo.ClientHttp.Models.ArticleContainerAllowedArticleDto>(global::Fargo.ClientHttp.Models.ArticleContainerAllowedArticleDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "maxMass", n => { MaxMass = n.GetObjectValue<global::Fargo.ClientHttp.Models.ArticleContainerDto_maxMass>(global::Fargo.ClientHttp.Models.ArticleContainerDto_maxMass.CreateFromDiscriminatorValue); } },
             };
         }
@@ -58,6 +67,7 @@ namespace Fargo.ClientHttp.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
+            writer.WriteCollectionOfObjectValues<global::Fargo.ClientHttp.Models.ArticleContainerAllowedArticleDto>("allowedArticles", AllowedArticles);
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.ArticleContainerDto_maxMass>("maxMass", MaxMass);
             writer.WriteAdditionalData(AdditionalData);
         }
