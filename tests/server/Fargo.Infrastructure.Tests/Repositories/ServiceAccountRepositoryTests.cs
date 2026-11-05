@@ -4,7 +4,7 @@ using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 using Fargo.Core.Identity.Credentials;
-using Fargo.Infrastructure.Repositories;
+using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 
 namespace Fargo.Infrastructure.Tests.Repositories;

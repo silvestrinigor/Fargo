@@ -2,7 +2,7 @@ using Fargo.Application.Common;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Informations;
-using Fargo.Infrastructure.Repositories;
+using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 
 namespace Fargo.Infrastructure.Tests.Repositories;

@@ -1,6 +1,6 @@
 using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Tokens;
-using Fargo.Infrastructure.Repositories;
+using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 
 namespace Fargo.Infrastructure.Tests.Repositories;
