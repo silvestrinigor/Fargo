@@ -3,8 +3,7 @@ using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Fargo.Application.Persistence.Repositories;
-using Fargo.Application.Queries.Audits.Dtos;
+using Fargo.Application.Audits;
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
 

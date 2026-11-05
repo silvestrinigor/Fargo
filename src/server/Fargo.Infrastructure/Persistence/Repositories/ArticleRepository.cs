@@ -5,8 +5,7 @@ using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using Fargo.Application.Persistence.Repositories;
-using Fargo.Application.Queries.Articles.Dtos;
+using Fargo.Application.Articles;
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
 

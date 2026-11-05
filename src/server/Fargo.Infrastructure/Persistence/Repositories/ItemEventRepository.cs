@@ -2,8 +2,7 @@ using Fargo.Application.Common;
 using Fargo.Core.Events;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Fargo.Application.Persistence.Repositories;
-using Fargo.Application.Queries.Items.Dtos;
+using Fargo.Application.Items;
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
 
