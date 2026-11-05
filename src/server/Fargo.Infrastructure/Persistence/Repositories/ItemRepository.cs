@@ -1,10 +1,9 @@
 using Fargo.Application.Common;
+using Fargo.Application.Items;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
-using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using Fargo.Application.Items;
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
 

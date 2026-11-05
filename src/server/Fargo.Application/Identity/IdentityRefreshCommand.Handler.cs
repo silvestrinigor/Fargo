@@ -1,7 +1,6 @@
 using Fargo.Application.Common;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
-using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Tokens;
 using Microsoft.Extensions.Logging;
 using System.Security.Authentication;

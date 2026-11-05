@@ -1,7 +1,6 @@
 using Fargo.Application.Articles;
 using Fargo.Application.Common;
 using Fargo.Application.Tests.Common;
-using Fargo.Core.Audits;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;

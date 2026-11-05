@@ -2,8 +2,8 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Partitions;
-using Fargo.Core.Informations;
 using Fargo.Core.Identity.Credentials;
+using Fargo.Core.Informations;
 
 namespace Fargo.Core.Entities.Actors;
 

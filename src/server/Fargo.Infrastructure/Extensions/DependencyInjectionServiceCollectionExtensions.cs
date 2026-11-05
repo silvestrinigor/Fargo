@@ -1,4 +1,11 @@
+using Fargo.Application.Articles;
+using Fargo.Application.Audits;
 using Fargo.Application.Common;
+using Fargo.Application.Identity;
+using Fargo.Application.Items;
+using Fargo.Application.Partitions;
+using Fargo.Application.UserGroups;
+using Fargo.Application.Users;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Actors.Users;
@@ -8,8 +15,8 @@ using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Events;
 using Fargo.Core.Identity.Authentication;
-using Fargo.Core.Identity.Tokens;
 using Fargo.Core.Identity.Credentials;
+using Fargo.Core.Identity.Tokens;
 using Fargo.Infrastructure.Client;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
@@ -17,13 +24,6 @@ using Fargo.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Fargo.Application.Articles;
-using Fargo.Application.Audits;
-using Fargo.Application.Identity;
-using Fargo.Application.Items;
-using Fargo.Application.Partitions;
-using Fargo.Application.UserGroups;
-using Fargo.Application.Users;
 
 namespace Fargo.Infrastructure.Extensions;
 

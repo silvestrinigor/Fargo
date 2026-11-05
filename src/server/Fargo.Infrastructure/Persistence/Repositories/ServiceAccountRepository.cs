@@ -1,11 +1,10 @@
 using Fargo.Application.Common;
+using Fargo.Application.ServiceAccounts;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Informations;
 using Fargo.Infrastructure.Extensions;
-using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Fargo.Application.ServiceAccounts;
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
 

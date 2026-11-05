@@ -1,5 +1,3 @@
-using Fargo.Core.Entities;
-
 namespace Fargo.Core.Identity.Tokens;
 
 /// <summary>

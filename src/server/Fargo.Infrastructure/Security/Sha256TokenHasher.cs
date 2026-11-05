@@ -1,4 +1,3 @@
-using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Tokens;
 using System.Security.Cryptography;
 using System.Text;

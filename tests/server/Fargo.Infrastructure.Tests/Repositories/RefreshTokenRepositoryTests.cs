@@ -1,4 +1,3 @@
-using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;

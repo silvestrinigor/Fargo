@@ -1,13 +1,12 @@
+using Fargo.Application.Identity;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Actors.Users;
-using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Tokens;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Fargo.Application.Identity;
 
 namespace Fargo.Infrastructure.Security;
 

@@ -1,9 +1,8 @@
 using Fargo.Application.Common;
 using Fargo.Core.Barcodes;
-using Fargo.Core.Identity.Authentication;
+using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Core.Informations;
-using Fargo.Core.Identity.Credentials;
 using Microsoft.OpenApi;
 using System.Drawing;
 using System.Text.Json.Nodes;

@@ -1,6 +1,6 @@
+using Fargo.Core.Audits;
 using System.Collections;
 using System.Reflection;
-using Fargo.Core.Audits;
 
 namespace Fargo.Application.Common;
 

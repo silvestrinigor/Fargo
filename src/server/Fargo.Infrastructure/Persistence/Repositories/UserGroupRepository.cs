@@ -1,11 +1,10 @@
 using Fargo.Application.Common;
+using Fargo.Application.UserGroups;
 using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Informations;
 using Fargo.Infrastructure.Extensions;
-using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using Fargo.Application.UserGroups;
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
 

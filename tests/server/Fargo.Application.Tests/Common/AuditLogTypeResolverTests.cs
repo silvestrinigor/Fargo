@@ -1,4 +1,3 @@
-using System.Reflection;
 using Fargo.Application.Articles;
 using Fargo.Application.Common;
 using Fargo.Core.Audits;

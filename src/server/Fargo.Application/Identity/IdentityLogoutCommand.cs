@@ -1,5 +1,4 @@
 using Fargo.Application.Common;
-using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Tokens;
 
 namespace Fargo.Application.Identity;

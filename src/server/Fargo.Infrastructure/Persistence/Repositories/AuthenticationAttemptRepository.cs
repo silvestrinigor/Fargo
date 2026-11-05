@@ -1,6 +1,4 @@
 using Fargo.Core.Identity.Authentication;
-using Fargo.Core.Identity.Tokens;
-using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
