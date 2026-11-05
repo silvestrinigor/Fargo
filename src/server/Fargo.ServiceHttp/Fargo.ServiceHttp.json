@@ -1807,6 +1807,401 @@
           }
         }
       }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}": {
+      "get": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Gets a single supply order",
+        "description": "Retrieves a single supply order, including its lines and receiving container, by its unique identifier.",
+        "operationId": "GetSupplyOrder",
+        "parameters": [
+          {
+            "name": "supplyOrderGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplyOrderDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders": {
+      "get": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Gets multiple supply orders",
+        "description": "Retrieves a paginated list of supply orders, optionally filtered by status and a case-insensitive search over the reference and description.",
+        "operationId": "GetSupplyOrders",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer",
+              "default": 1000
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SupplyOrderStatus"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfSupplyOrderDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Creates a supply order",
+        "description": "Creates a new draft supply order with optional lines, receiving container, and partitions. Returns the generated identifier.",
+        "operationId": "CreateSupplyOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplyOrderCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/lines/{articleGuid}": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Adds a line to a draft supply order",
+        "description": "Adds a line for the given article and ordered quantity. Only valid while the order is a draft.",
+        "operationId": "AddSupplyOrderLine",
+        "parameters": [
+          {
+            "name": "supplyOrderGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "articleGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplyOrderLineQuantityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Changes a draft supply order line quantity",
+        "description": "Changes the ordered quantity of a line. Only valid while the order is a draft.",
+        "operationId": "ChangeSupplyOrderLineQuantity",
+        "parameters": [
+          {
+            "name": "supplyOrderGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "articleGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplyOrderLineQuantityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Removes a line from a draft supply order",
+        "description": "Removes the line for the given article. Only valid while the order is a draft.",
+        "operationId": "RemoveSupplyOrderLine",
+        "parameters": [
+          {
+            "name": "supplyOrderGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "articleGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/receiving-container": {
+      "put": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Sets the receiving container of a draft supply order",
+        "description": "Sets or clears the container into which goods are received. A null container receives goods at the root. Only valid while the order is a draft.",
+        "operationId": "SetSupplyOrderReceivingContainer",
+        "parameters": [
+          {
+            "name": "supplyOrderGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplyOrderReceivingContainerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/place": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Places a supply order",
+        "description": "Commits a draft supply order, freezing its lines. Requires at least one line.",
+        "operationId": "PlaceSupplyOrder",
+        "parameters": [
+          {
+            "name": "supplyOrderGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/receive": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Receives goods against a supply order",
+        "description": "Receives the given quantities, effecting the stock change into the order's receiving container (or at the root when it has none) and advancing the order's received quantities and status. Over-receipt is permitted.",
+        "operationId": "ReceiveSupplyOrder",
+        "parameters": [
+          {
+            "name": "supplyOrderGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplyOrderReceiveDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/cancel": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Cancels a supply order",
+        "description": "Cancels the supply order. Not allowed once the order is received, closed, or already cancelled.",
+        "operationId": "CancelSupplyOrder",
+        "parameters": [
+          {
+            "name": "supplyOrderGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/close": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Closes a supply order",
+        "description": "Finalizes the supply order. Allowed once at least some goods have been received.",
+        "operationId": "CloseSupplyOrder",
+        "parameters": [
+          {
+            "name": "supplyOrderGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3336,6 +3731,69 @@
         },
         "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
       },
+      "PagedResultOfSupplyOrderDto": {
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyOrderDto"
+            },
+            "description": "The items on the current page."
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+            "format": "int32"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The 1-based index of the current page.",
+            "format": "int32"
+          },
+          "limit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+            "format": "int32"
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page after the current one exists."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Gets a value indicating whether a page before the current one exists."
+          }
+        },
+        "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist)."
+      },
       "PagedResultOfUserDto": {
         "required": [
           "items",
@@ -3793,6 +4251,246 @@
           }
         },
         "description": "Result of a successful service-account (client-credentials) authentication."
+      },
+      "SupplyOrderCreateDto": {
+        "required": [
+          "reference"
+        ],
+        "type": "object",
+        "properties": {
+          "reference": {
+            "description": "The human-facing reference for the order.",
+            "$ref": "#/components/schemas/Name"
+          },
+          "description": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The optional description of the order."
+          },
+          "receivingContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The optional container into which goods are received. When null, goods are\r\nreceived at the root (outside any container). The referenced item must be a\r\ncontainer accessible to the caller.",
+            "format": "uuid"
+          },
+          "lines": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SupplyOrderLineCreateDto"
+            },
+            "description": "The optional initial lines of the order."
+          },
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The optional identifiers of partitions to associate with the order."
+          }
+        },
+        "description": "The data required to create a supply order."
+      },
+      "SupplyOrderDto": {
+        "required": [
+          "guid",
+          "reference",
+          "description",
+          "status",
+          "createdAt",
+          "placedAt",
+          "receivingContainerGuid",
+          "partitions",
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "guid": {
+            "type": "string",
+            "description": "The unique identifier of the order.",
+            "format": "uuid"
+          },
+          "reference": {
+            "description": "The human-facing reference for the order.",
+            "$ref": "#/components/schemas/Name"
+          },
+          "description": {
+            "description": "The description of the order.",
+            "$ref": "#/components/schemas/Description"
+          },
+          "status": {
+            "description": "The current lifecycle state.",
+            "$ref": "#/components/schemas/SupplyOrderStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the order was created, in UTC.",
+            "format": "date-time"
+          },
+          "placedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "When the order was placed, in UTC, or null while a draft.",
+            "format": "date-time"
+          },
+          "receivingContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The container into which goods are received, or null to receive at the root.",
+            "format": "uuid"
+          },
+          "partitions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The identifiers of the partitions associated with the order."
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyOrderLineDto"
+            },
+            "description": "The lines of the order."
+          }
+        },
+        "description": "Read model for a supply order."
+      },
+      "SupplyOrderLineCreateDto": {
+        "required": [
+          "articleGuid",
+          "orderedQuantity"
+        ],
+        "type": "object",
+        "properties": {
+          "articleGuid": {
+            "type": "string",
+            "description": "The article to order.",
+            "format": "uuid"
+          },
+          "orderedQuantity": {
+            "description": "The strictly positive quantity to order.",
+            "$ref": "#/components/schemas/Scalar"
+          }
+        },
+        "description": "The data required to add a line when creating a supply order."
+      },
+      "SupplyOrderLineDto": {
+        "required": [
+          "articleGuid",
+          "orderedQuantity",
+          "receivedQuantity",
+          "outstandingQuantity",
+          "isFullyReceived",
+          "isOverReceived"
+        ],
+        "type": "object",
+        "properties": {
+          "articleGuid": {
+            "type": "string",
+            "description": "The ordered article.",
+            "format": "uuid"
+          },
+          "orderedQuantity": {
+            "description": "The quantity ordered.",
+            "$ref": "#/components/schemas/Scalar"
+          },
+          "receivedQuantity": {
+            "description": "The quantity received so far.",
+            "$ref": "#/components/schemas/Scalar"
+          },
+          "outstandingQuantity": {
+            "description": "The still-outstanding quantity (clamped at zero).",
+            "$ref": "#/components/schemas/Scalar"
+          },
+          "isFullyReceived": {
+            "type": "boolean",
+            "description": "Whether the full ordered quantity (or more) has been received."
+          },
+          "isOverReceived": {
+            "type": "boolean",
+            "description": "Whether more than the ordered quantity has been received."
+          }
+        },
+        "description": "Read model for one line of a supply order."
+      },
+      "SupplyOrderLineQuantityRequest": {
+        "required": [
+          "orderedQuantity"
+        ],
+        "type": "object",
+        "properties": {
+          "orderedQuantity": {
+            "$ref": "#/components/schemas/Scalar"
+          }
+        }
+      },
+      "SupplyOrderReceiveDto": {
+        "required": [
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyOrderReceiveLineDto"
+            },
+            "description": "The received lines."
+          }
+        },
+        "description": "The data for receiving goods against a supply order. Goods are placed into\r\nthe order's receiving container (or at the root when the order has none)."
+      },
+      "SupplyOrderReceiveLineDto": {
+        "required": [
+          "articleGuid",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "articleGuid": {
+            "type": "string",
+            "description": "The article received (must be a line on the order).",
+            "format": "uuid"
+          },
+          "quantity": {
+            "description": "The strictly positive quantity received.",
+            "$ref": "#/components/schemas/Scalar"
+          }
+        },
+        "description": "One received line in a receive operation against a supply order."
+      },
+      "SupplyOrderReceivingContainerRequest": {
+        "required": [
+          "receivingContainerGuid"
+        ],
+        "type": "object",
+        "properties": {
+          "receivingContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "SupplyOrderStatus": {
+        "type": "integer",
+        "description": "Represents the lifecycle state of a SupplyOrder."
       },
       "Token": {
         "maxLength": 4096,
@@ -4411,6 +5109,9 @@
     },
     {
       "name": "ServiceAccounts"
+    },
+    {
+      "name": "SupplyOrders"
     }
   ]
 }

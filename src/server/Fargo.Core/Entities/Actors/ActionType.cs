@@ -118,5 +118,40 @@ public enum ActionType
     /// <summary>
     /// Read service accounts.
     /// </summary>
-    ReadServiceAccount = 23
+    ReadServiceAccount = 23,
+
+    /// <summary>
+    /// Create supply order.
+    /// </summary>
+    CreateSupplyOrder = 24,
+
+    /// <summary>
+    /// Edit supply order (draft lines, description, and receiving container).
+    /// </summary>
+    EditSupplyOrder = 25,
+
+    /// <summary>
+    /// Place a supply order.
+    /// </summary>
+    PlaceSupplyOrder = 26,
+
+    /// <summary>
+    /// Receive goods against a supply order.
+    /// </summary>
+    ReceiveSupplyOrder = 27,
+
+    /// <summary>
+    /// Cancel a supply order.
+    /// </summary>
+    CancelSupplyOrder = 28,
+
+    /// <summary>
+    /// Close a supply order.
+    /// </summary>
+    CloseSupplyOrder = 29,
+
+    /// <summary>
+    /// Read supply orders.
+    /// </summary>
+    ReadSupplyOrders = 30
 }

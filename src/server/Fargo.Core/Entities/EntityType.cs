@@ -28,5 +28,10 @@ public enum EntityType
     /// <summary>
     /// Partition entity.
     /// </summary>
-    Partition = 4
+    Partition = 4,
+
+    /// <summary>
+    /// Supply order entity.
+    /// </summary>
+    SupplyOrder = 5
 }

@@ -11,6 +11,8 @@ using Fargo.Application.Operations.Partitions;
 using Fargo.Application.Operations.Partitions.Dtos;
 using Fargo.Application.Operations.ServiceAccounts;
 using Fargo.Application.Operations.ServiceAccounts.Dtos;
+using Fargo.Application.Operations.SupplyOrders;
+using Fargo.Application.Operations.SupplyOrders.Dtos;
 using Fargo.Application.Operations.System;
 using Fargo.Application.Operations.UserGroups;
 using Fargo.Application.Operations.UserGroups.Dtos;
@@ -40,7 +42,8 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddFargoItemApplication()
         .AddFargoIdentityApplication()
         .AddFargoSystemApplication()
-        .AddFargoAuditLogApplication();
+        .AddFargoAuditLogApplication()
+        .AddFargoSupplyOrderApplication();
 
         public IServiceCollection AddFargoCore() => services
         .AddScoped<ActorResolver>()
@@ -112,5 +115,18 @@ public static class DependencyInjectionServiceCollectionExtension
         public IServiceCollection AddFargoAuditLogApplication() => services
         .AddFargoQueryHandler<AuditLogsQuery, PagedResult<AuditLogDto>, AuditLogsQueryHandler>()
         .AddFargoQueryHandler<AuditLogSingleQuery, AuditLogDto?, AuditLogSingleQueryHandler>();
+
+        public IServiceCollection AddFargoSupplyOrderApplication() => services
+        .AddFargoCommandHandler<SupplyOrderCreateCommand, Guid, SupplyOrderCreateCommandHandler>()
+        .AddFargoCommandHandler<SupplyOrderAddLineCommand, SupplyOrderAddLineCommandHandler>()
+        .AddFargoCommandHandler<SupplyOrderChangeLineQuantityCommand, SupplyOrderChangeLineQuantityCommandHandler>()
+        .AddFargoCommandHandler<SupplyOrderRemoveLineCommand, SupplyOrderRemoveLineCommandHandler>()
+        .AddFargoCommandHandler<SupplyOrderSetReceivingContainerCommand, SupplyOrderSetReceivingContainerCommandHandler>()
+        .AddFargoCommandHandler<SupplyOrderPlaceCommand, SupplyOrderPlaceCommandHandler>()
+        .AddFargoCommandHandler<SupplyOrderReceiveCommand, SupplyOrderReceiveCommandHandler>()
+        .AddFargoCommandHandler<SupplyOrderCancelCommand, SupplyOrderCancelCommandHandler>()
+        .AddFargoCommandHandler<SupplyOrderCloseCommand, SupplyOrderCloseCommandHandler>()
+        .AddFargoQueryHandler<SupplyOrderSingleQuery, SupplyOrderDto?, SupplyOrderSingleQueryHandler>()
+        .AddFargoQueryHandler<SupplyOrdersQuery, PagedResult<SupplyOrderDto>, SupplyOrdersQueryHandler>();
     }
 }

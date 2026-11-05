@@ -91,6 +91,8 @@ app.MapFargoAuditLog();
 
 app.MapFargoServiceAccount();
 
+app.MapFargoSupplyOrder();
+
 app.MapFargoDefaultEndpoints();
 
 // Fail fast at startup if the JWT signing configuration is missing or weak, so

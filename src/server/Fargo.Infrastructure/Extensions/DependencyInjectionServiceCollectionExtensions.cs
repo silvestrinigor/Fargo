@@ -16,6 +16,8 @@ using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Events;
 using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Credentials;
+using Fargo.Core.Entities.SupplyOrders;
+using Fargo.Application.Operations.SupplyOrders;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Infrastructure.Client;
 using Fargo.Infrastructure.Persistence;
@@ -103,7 +105,9 @@ public static class DependencyInjectionServiceCollectionExtensions
         .AddScoped<IAuditLogQueryRepository, AuditLogRepository>()
         .AddScoped<IAuthenticationAttemptRepository, AuthenticationAttemptRepository>()
         .AddScoped<IServiceAccountRepository, ServiceAccountRepository>()
-        .AddScoped<Fargo.Application.Operations.ServiceAccounts.IServiceAccountQueryRepository, ServiceAccountRepository>();
+        .AddScoped<Fargo.Application.Operations.ServiceAccounts.IServiceAccountQueryRepository, ServiceAccountRepository>()
+        .AddScoped<ISupplyOrderRepository, SupplyOrderRepository>()
+        .AddScoped<ISupplyOrderQueryRepository, SupplyOrderRepository>();
 
         public void AddFargoSecurity() => services
         .AddScoped<IPasswordHasher, IdentityPasswordHasher>()

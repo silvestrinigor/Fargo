@@ -3,6 +3,7 @@ using Fargo.Application.Operations.Identity;
 using Fargo.Application.Operations.Items;
 using Fargo.Application.Operations.Partitions;
 using Fargo.Application.Operations.ServiceAccounts;
+using Fargo.Application.Operations.SupplyOrders;
 using Fargo.Application.Operations.System;
 using Fargo.Application.Operations.UserGroups;
 using Fargo.Application.Operations.Users;
@@ -65,6 +66,17 @@ public static class AuditLogTypeResolver
 
         // System
         [typeof(InitializeSystemCommand)] = AuditLogType.SystemInitialized,
+
+        // Supply orders
+        [typeof(SupplyOrderCreateCommand)] = AuditLogType.EntityCreated,
+        [typeof(SupplyOrderAddLineCommand)] = AuditLogType.EntityUpdated,
+        [typeof(SupplyOrderChangeLineQuantityCommand)] = AuditLogType.EntityUpdated,
+        [typeof(SupplyOrderRemoveLineCommand)] = AuditLogType.EntityUpdated,
+        [typeof(SupplyOrderSetReceivingContainerCommand)] = AuditLogType.EntityUpdated,
+        [typeof(SupplyOrderPlaceCommand)] = AuditLogType.SupplyOrderPlaced,
+        [typeof(SupplyOrderReceiveCommand)] = AuditLogType.SupplyOrderReceived,
+        [typeof(SupplyOrderCancelCommand)] = AuditLogType.SupplyOrderCancelled,
+        [typeof(SupplyOrderCloseCommand)] = AuditLogType.SupplyOrderClosed,
     };
 
     /// <summary>

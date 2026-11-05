@@ -7,6 +7,7 @@ using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Entities.Partitions;
+using Fargo.Core.Entities.SupplyOrders;
 using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Events;
 using Fargo.Core.Identity.Authentication;
@@ -52,6 +53,10 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<AuthenticationAttempt> AuthenticationAttempts { get; set; }
 
     public DbSet<ServiceAccount> ServiceAccounts { get; set; }
+
+    public DbSet<SupplyOrder> SupplyOrders { get; set; }
+
+    public DbSet<SupplyOrderLine> SupplyOrderLines { get; set; }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -151,7 +156,10 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new ServiceAccountConfiguration())
         .ApplyConfiguration(new ItemEventConfiguration())
         .ApplyConfiguration(new ItemMovimentEventConfiguration())
-        .ApplyConfiguration(new ItemLifecycleEventConfiguration());
+        .ApplyConfiguration(new ItemLifecycleEventConfiguration())
+        .ApplyConfiguration(new SupplyOrderConfiguration())
+        .ApplyConfiguration(new SupplyOrderLineConfiguration())
+        .ApplyConfiguration(new SupplyOrderPartitionConfiguration());
 
         // Optimistic concurrency: map the PostgreSQL xmin system column as a
         // concurrency token (shadow property) on every mutable aggregate root

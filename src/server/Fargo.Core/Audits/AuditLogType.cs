@@ -66,4 +66,24 @@ public enum AuditLogType
     /// A command that initialized the system.
     /// </summary>
     SystemInitialized = 11,
+
+    /// <summary>
+    /// A command that placed a supply order.
+    /// </summary>
+    SupplyOrderPlaced = 12,
+
+    /// <summary>
+    /// A command that received goods against a supply order.
+    /// </summary>
+    SupplyOrderReceived = 13,
+
+    /// <summary>
+    /// A command that cancelled a supply order.
+    /// </summary>
+    SupplyOrderCancelled = 14,
+
+    /// <summary>
+    /// A command that closed a supply order.
+    /// </summary>
+    SupplyOrderClosed = 15,
 }
