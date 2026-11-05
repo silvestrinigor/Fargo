@@ -1,5 +1,7 @@
-using Fargo.Application.Articles;
-using Fargo.Application.Items;
+using Fargo.Application.Operations.Articles;
+using Fargo.Application.Operations.Articles.Dtos;
+using Fargo.Application.Operations.Items;
+using Fargo.Application.Operations.Items.Dtos;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Articles;

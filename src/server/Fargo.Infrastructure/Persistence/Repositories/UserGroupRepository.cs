@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
-using Fargo.Application.UserGroups;
+using Fargo.Application.Operations.UserGroups;
+using Fargo.Application.Operations.UserGroups.Dtos;
 using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Informations;
 using Fargo.Infrastructure.Extensions;

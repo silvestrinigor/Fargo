@@ -1,4 +1,4 @@
-using Fargo.Application.Identity;
+using Fargo.Application.Operations.Identity;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Identity.Tokens;

@@ -1,3 +1,4 @@
+using Fargo.Application.Operations;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Common;

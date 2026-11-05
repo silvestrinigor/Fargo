@@ -1,5 +1,7 @@
-using Fargo.Application.Articles;
 using Fargo.Application.Common;
+using Fargo.Application.Operations;
+using Fargo.Application.Operations.Articles;
+using Fargo.Application.Operations.Articles.Dtos;
 using Fargo.Core.Barcodes;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;

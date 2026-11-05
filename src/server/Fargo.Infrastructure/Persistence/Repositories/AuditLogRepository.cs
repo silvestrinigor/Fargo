@@ -1,5 +1,6 @@
-using Fargo.Application.Audits;
 using Fargo.Application.Common;
+using Fargo.Application.Operations.Audits;
+using Fargo.Application.Operations.Audits.Dtos;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors;
 using Microsoft.EntityFrameworkCore;

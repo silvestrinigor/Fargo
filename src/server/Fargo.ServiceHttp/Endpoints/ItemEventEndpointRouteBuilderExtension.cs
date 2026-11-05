@@ -1,5 +1,7 @@
 using Fargo.Application.Common;
-using Fargo.Application.Items;
+using Fargo.Application.Operations;
+using Fargo.Application.Operations.Items;
+using Fargo.Application.Operations.Items.Dtos;
 using Fargo.Core.Events;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;

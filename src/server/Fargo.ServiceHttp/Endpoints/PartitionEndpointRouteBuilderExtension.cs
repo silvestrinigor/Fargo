@@ -1,5 +1,7 @@
 using Fargo.Application.Common;
-using Fargo.Application.Partitions;
+using Fargo.Application.Operations;
+using Fargo.Application.Operations.Partitions;
+using Fargo.Application.Operations.Partitions.Dtos;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 

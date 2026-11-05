@@ -1,6 +1,6 @@
 using Fargo.Application.Common;
+using Fargo.Application.Operations.UserGroups;
 using Fargo.Application.Tests.Common;
-using Fargo.Application.UserGroups;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;

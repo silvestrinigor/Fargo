@@ -1,5 +1,5 @@
 using Fargo.Application.Common;
-using Fargo.Application.Partitions;
+using Fargo.Application.Operations.Partitions;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;

@@ -1,5 +1,7 @@
-using Fargo.Application.Articles;
 using Fargo.Application.Common;
+using Fargo.Application.Operations;
+using Fargo.Application.Operations.Articles;
+using Fargo.Application.Operations.Articles.Dtos;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Informations;

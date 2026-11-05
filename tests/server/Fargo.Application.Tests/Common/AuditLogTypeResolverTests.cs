@@ -1,5 +1,6 @@
-using Fargo.Application.Articles;
 using Fargo.Application.Common;
+using Fargo.Application.Operations;
+using Fargo.Application.Operations.Articles;
 using Fargo.Core.Audits;
 
 namespace Fargo.Application.Tests.Common;

@@ -1,5 +1,5 @@
-using Fargo.Application.Common;
-using Fargo.Application.System;
+using Fargo.Application.Operations;
+using Fargo.Application.Operations.System;
 using Fargo.ServiceSeed.Options;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;

@@ -1,5 +1,7 @@
 using Fargo.Application.Common;
-using Fargo.Application.UserGroups;
+using Fargo.Application.Operations;
+using Fargo.Application.Operations.UserGroups;
+using Fargo.Application.Operations.UserGroups.Dtos;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 

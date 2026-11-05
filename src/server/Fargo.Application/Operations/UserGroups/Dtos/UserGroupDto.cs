@@ -1,0 +1,16 @@
+using Fargo.Core.Entities.Actors;
+using Fargo.Core.Informations;
+
+namespace Fargo.Application.Operations.UserGroups.Dtos;
+
+public sealed record UserGroupDto(
+    Guid Guid,
+    Nameid Nameid,
+    Description Description,
+    bool IsActive,
+    bool IsAdminUserGroup,
+    Guid? ParentUserGroup,
+    IReadOnlyCollection<ActionType> Permissions,
+    IReadOnlyCollection<Guid> Partitions,
+    IReadOnlyCollection<Guid> PartitionAccesses
+);

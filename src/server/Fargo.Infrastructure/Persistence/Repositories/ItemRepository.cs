@@ -1,5 +1,6 @@
 using Fargo.Application.Common;
-using Fargo.Application.Items;
+using Fargo.Application.Operations.Items;
+using Fargo.Application.Operations.Items.Dtos;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Microsoft.EntityFrameworkCore;

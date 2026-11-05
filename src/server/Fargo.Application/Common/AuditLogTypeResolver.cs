@@ -1,11 +1,11 @@
-using Fargo.Application.Articles;
-using Fargo.Application.Identity;
-using Fargo.Application.Items;
-using Fargo.Application.Partitions;
-using Fargo.Application.ServiceAccounts;
-using Fargo.Application.System;
-using Fargo.Application.UserGroups;
-using Fargo.Application.Users;
+using Fargo.Application.Operations.Articles;
+using Fargo.Application.Operations.Identity;
+using Fargo.Application.Operations.Items;
+using Fargo.Application.Operations.Partitions;
+using Fargo.Application.Operations.ServiceAccounts;
+using Fargo.Application.Operations.System;
+using Fargo.Application.Operations.UserGroups;
+using Fargo.Application.Operations.Users;
 using Fargo.Core.Audits;
 
 namespace Fargo.Application.Common;

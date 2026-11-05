@@ -1,5 +1,5 @@
 using Fargo.Application.Common;
-using Fargo.Application.Identity;
+using Fargo.Application.Operations.Identity;
 using Fargo.Core.Common;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;

@@ -1,3 +1,4 @@
+using Fargo.Application.Operations;
 using Fargo.Core.Audits;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
