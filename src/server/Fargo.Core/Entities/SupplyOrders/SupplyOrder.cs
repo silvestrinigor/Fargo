@@ -142,15 +142,29 @@ public sealed class SupplyOrder : Entity, IPartitionedGuidsReadOnly, IConcurrenc
     /// <param name="article">The article to order.</param>
     /// <param name="orderedQuantity">The strictly positive quantity to order.</param>
     /// <returns>The created line.</returns>
+    /// <remarks>
+    /// Only event-tracked articles (<see cref="ArticleTrackingMode.Event"/>) may
+    /// be ordered: a supply order records aggregate expected quantities, which is
+    /// the receiving model for event-tracked stock. Entity-tracked articles are
+    /// received as individual items and are not orderable through a supply order.
+    /// </remarks>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the order is not editable, when the article is already on the
-    /// order, or when the quantity is not strictly positive.
+    /// Thrown when the order is not editable, when the article is not event
+    /// tracked, when the article is already on the order, or when the quantity is
+    /// not strictly positive.
     /// </exception>
     public SupplyOrderLine AddLine(Article article, Scalar orderedQuantity)
     {
         ThrowIfNotEditable();
 
         ArgumentNullException.ThrowIfNull(article);
+
+        if (article.TrackingMode != ArticleTrackingMode.Event)
+        {
+            throw new FargoCoreException(
+                $"Article '{article.Guid}' is not event tracked and cannot be added to a supply order.",
+                FargoErrorType.InvalidOperation);
+        }
 
         if (lines.Any(l => l.ArticleGuid == article.Guid))
         {

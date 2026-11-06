@@ -49,25 +49,6 @@ public class SupplyOrderReceiveCommandHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_EntityTracked_ShouldCreateOneItemPerUnitInContainer()
-    {
-        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.ReceiveSupplyOrder]);
-        var article = Article.NewArticle(new Name("Widget")); // entity-tracked by default
-        var container = Item.CreateItem(Article.NewArticleContainer(new Name("Dock A")));
-        var order = PlacedOrder(article, Qty(10), container);
-
-        var command = new SupplyOrderReceiveCommand(order.Guid, new SupplyOrderReceiveDto(
-            [new SupplyOrderReceiveLineDto(article.Guid, Qty(3))]));
-
-        await CreateHandler().HandleAsync(command);
-
-        itemRepository.Received(3).Add(Arg.Is<Item>(i =>
-            i.ArticleGuid == article.Guid && i.ParentItemContainerGuid == container.Guid));
-        Assert.Equal(SupplyOrderStatus.PartiallyReceived, order.Status);
-        Assert.Equal(3d, order.Lines.Single().ReceivedQuantity.Value);
-    }
-
-    [Fact]
     public async Task HandleAsync_EventTracked_ShouldAppendCreationEvent()
     {
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.ReceiveSupplyOrder]);
@@ -85,26 +66,10 @@ public class SupplyOrderReceiveCommandHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_EntityTracked_WhenFractionalQuantity_ShouldThrow()
-    {
-        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.ReceiveSupplyOrder]);
-        var article = Article.NewArticle(new Name("Widget"));
-        var order = PlacedOrder(article, Qty(10));
-
-        var command = new SupplyOrderReceiveCommand(order.Guid, new SupplyOrderReceiveDto(
-            [new SupplyOrderReceiveLineDto(article.Guid, Qty(2.5))]));
-
-        await Assert.ThrowsAsync<FargoApplicationException>(
-            () => CreateHandler().HandleAsync(command));
-
-        itemRepository.DidNotReceive().Add(Arg.Any<Item>());
-    }
-
-    [Fact]
     public async Task HandleAsync_WhenFullyReceived_ShouldSetStatusReceived()
     {
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.ReceiveSupplyOrder]);
-        var article = Article.NewArticle(new Name("Widget"));
+        var article = Article.NewArticle(new Name("Widget"), ArticleTrackingMode.Event);
         var order = PlacedOrder(article, Qty(5));
 
         await CreateHandler().HandleAsync(new SupplyOrderReceiveCommand(order.Guid, new SupplyOrderReceiveDto(
@@ -137,7 +102,7 @@ public class SupplyOrderReceiveCommandHandlerTests
     public async Task HandleAsync_WhenArticleNotOnOrder_ShouldThrow()
     {
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.ReceiveSupplyOrder]);
-        var article = Article.NewArticle(new Name("Widget"));
+        var article = Article.NewArticle(new Name("Widget"), ArticleTrackingMode.Event);
         var order = PlacedOrder(article, Qty(5));
 
         var command = new SupplyOrderReceiveCommand(order.Guid, new SupplyOrderReceiveDto(

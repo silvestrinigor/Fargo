@@ -39,7 +39,7 @@ public class SupplyOrderCreateCommandHandlerTests
     public async Task HandleAsync_WhenValidWithLines_ShouldAddOrderWithLines()
     {
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateSupplyOrder]);
-        var article = Article.NewArticle(new Name("Widget"));
+        var article = Article.NewArticle(new Name("Widget"), ArticleTrackingMode.Event);
         articleRepository.GetByGuidAsync(article.Guid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<Article?>(article));
 
@@ -53,6 +53,24 @@ public class SupplyOrderCreateCommandHandlerTests
             o.Guid == result
             && o.Lines.Count == 1
             && o.Lines.Single().ArticleGuid == article.Guid));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenLineArticleIsEntityTracked_ShouldThrowDomainException()
+    {
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateSupplyOrder]);
+        var article = Article.NewArticle(new Name("Widget"));
+        articleRepository.GetByGuidAsync(article.Guid, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Article?>(article));
+
+        var command = new SupplyOrderCreateCommand(new SupplyOrderCreateDto(
+            new Name("PO-1"),
+            Lines: [new SupplyOrderLineCreateDto(article.Guid, Qty(10))]));
+
+        await Assert.ThrowsAsync<Fargo.Core.Common.FargoCoreException>(
+            () => CreateHandler().HandleAsync(command));
+
+        supplyOrderRepository.DidNotReceive().Add(Arg.Any<SupplyOrder>());
     }
 
     [Fact]
