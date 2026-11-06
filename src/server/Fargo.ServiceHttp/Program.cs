@@ -27,6 +27,15 @@ builder.Services.AddFargoApplication();
 
 builder.Services.AddFargoInfrastructure(builder.Configuration);
 
+// Outbound integration events: the outbox relay publishes article events to
+// RabbitMQ. The broker health check is disabled on purpose: while the broker is
+// down, events wait in the outbox and the API stays healthy.
+builder.AddRabbitMQClient("fargo-rabbitmq", settings => settings.DisableHealthChecks = true);
+
+builder.Services.AddFargoRabbitMqEventPublisher(builder.Configuration);
+
+builder.Services.AddFargoOutboxRelay(builder.Configuration);
+
 builder.Services
 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer();

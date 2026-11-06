@@ -1,4 +1,5 @@
 using Fargo.Application.Common;
+using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Operations.Articles;
 using Fargo.Application.Operations.Audits;
 using Fargo.Application.Operations.Identity;
@@ -20,12 +21,17 @@ using Fargo.Core.Entities.SupplyOrders;
 using Fargo.Application.Operations.SupplyOrders;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Infrastructure.Client;
+using Fargo.Infrastructure.Messaging;
+using Fargo.Infrastructure.Outbox;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
 
 namespace Fargo.Infrastructure.Extensions;
 
@@ -75,8 +81,13 @@ public static class DependencyInjectionServiceCollectionExtensions
         public IServiceCollection AddFargoUnitOfWork() =>
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        public IServiceCollection AddFargoDbContext(IConfiguration configuration) =>
-            services.AddDbContext<FargoDbContext>((sp, opt) =>
+        public IServiceCollection AddFargoDbContext(IConfiguration configuration)
+        {
+            // Stateless, so one instance serves every context.
+            services.TryAddSingleton(TimeProvider.System);
+            services.TryAddSingleton<OutboxSaveChangesInterceptor>();
+
+            return services.AddDbContext<FargoDbContext>((sp, opt) =>
             {
                 opt.UseNpgsql(
                     configuration.GetConnectionString("fargo-database"),
@@ -85,7 +96,10 @@ public static class DependencyInjectionServiceCollectionExtensions
                         npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
                     }
                 ).UseSnakeCaseNamingConvention();
+
+                opt.AddInterceptors(sp.GetRequiredService<OutboxSaveChangesInterceptor>());
             });
+        }
 
         public void AddFargoRepositories() => services
         .AddScoped<IArticleRepository, ArticleRepository>()
@@ -115,5 +129,47 @@ public static class DependencyInjectionServiceCollectionExtensions
         .AddScoped<ITokenHasher, Sha256TokenHasher>()
         .AddScoped<IRefreshTokenGenerator, CryptoRefreshTokenGenerator>()
         .AddScoped<IClientSecretGenerator, ClientSecretGenerator>();
+
+        /// <summary>
+        /// Registers the background relay that publishes outbox messages through
+        /// the registered <see cref="IEventPublisher"/>. Register it in one host
+        /// only (the API); other hosts still write outbox messages.
+        /// </summary>
+        public IServiceCollection AddFargoOutboxRelay(IConfiguration configuration)
+        {
+            services
+            .AddOptions<OutboxOptions>()
+            .Bind(configuration.GetSection(OutboxOptions.SectionName))
+            .ValidateDataAnnotations();
+
+            services.TryAddSingleton(TimeProvider.System);
+
+            services.AddScoped<OutboxRelay>();
+
+            services.AddHostedService<OutboxRelayService>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// Registers <see cref="RabbitMqEventPublisher"/> as the
+        /// <see cref="IEventPublisher"/>. Requires an <see cref="IConnection"/>
+        /// registration, for example from the Aspire RabbitMQ client integration.
+        /// </summary>
+        public IServiceCollection AddFargoRabbitMqEventPublisher(IConfiguration configuration)
+        {
+            services
+            .AddOptions<RabbitMqEventOptions>()
+            .Bind(configuration.GetSection(RabbitMqEventOptions.SectionName))
+            .ValidateDataAnnotations();
+
+            // The connection is resolved lazily, on the first publish, so the
+            // host starts even while the broker is down.
+            services.AddSingleton<IEventPublisher>(sp => new RabbitMqEventPublisher(
+                () => sp.GetRequiredService<IConnection>(),
+                sp.GetRequiredService<IOptions<RabbitMqEventOptions>>()));
+
+            return services;
+        }
     }
 }

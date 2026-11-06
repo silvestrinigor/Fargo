@@ -14,6 +14,7 @@ using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Core.Informations;
+using Fargo.Infrastructure.Outbox;
 using Fargo.Infrastructure.Persistence.Configurations;
 using Fargo.Infrastructure.Persistence.ValueConverters;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +58,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<SupplyOrder> SupplyOrders { get; set; }
 
     public DbSet<SupplyOrderLine> SupplyOrderLines { get; set; }
+
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -160,7 +163,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new ItemLifecycleEventConfiguration())
         .ApplyConfiguration(new SupplyOrderConfiguration())
         .ApplyConfiguration(new SupplyOrderLineConfiguration())
-        .ApplyConfiguration(new SupplyOrderPartitionConfiguration());
+        .ApplyConfiguration(new SupplyOrderPartitionConfiguration())
+        .ApplyConfiguration(new OutboxMessageConfiguration());
 
         // Optimistic concurrency: map the PostgreSQL xmin system column as a
         // concurrency token (shadow property) on every mutable aggregate root

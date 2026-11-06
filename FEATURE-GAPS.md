@@ -70,16 +70,13 @@ Status after review (2026-10):
   enforces three thresholds (>=5 fails per IP+identifier / 5 min; >=20 per IP / 1 min; >=5 per identifier
   / 15 min), returns the longest `RetryAfter`, records every failure, and surfaces 429 with `retryAfter`.
   Success resets the count. No work needed.
-- **MFA - WON'T DO (by design).** Fargo runs internally over a VPN on shared warehouse terminals, not on
-  the public web. Per-login MFA would wreck floor throughput, and the VPN perimeter is itself a factor.
-  Documented risk acceptance: if an attacker is already on the VPN there is no second barrier.
 - **OAuth/OIDC/SSO - OPTIONAL.** Only worth it if operators should log in with a corporate directory
   (AD / Entra / LDAP) for centralized account lifecycle. Skip while Fargo's own user store is the
   intended home for accounts. (Open question: does the org have a central directory?)
 - **Service-to-service auth - REAL, build when the first machine caller appears.** Design captured in
   the appendix below (native `ServiceAccount` + `ActorType.Service` + client-credentials token endpoint).
   Not yet built because no confirmed unattended machine caller exists today.
-- **JWT signing-key hardening - REAL, low priority given VPN.** Today a single shared symmetric secret
+- **JWT signing-key hardening - REAL, low priority.** Today a single shared symmetric secret
   (`JwtOptions.Key`, HMAC-SHA256) both signs and verifies, so anyone who can read it can forge an admin
   token, and there is no rotation (changing the key logs everyone out). Fix tiers: (a) treat the secret
   as a real secret - out of source/logs, long/random, injected via a secrets manager; (b) add rotation
@@ -122,8 +119,6 @@ instance; no automated integration tests with a throwaway DB (Testcontainers / W
 - [x] Add an EF concurrency token (`xmin`) to the mutable aggregates (Article, Item, User, UserGroup,
   Partition) + translate `DbUpdateConcurrencyException` to 409. Done in code; EF migration still to be
   generated/reviewed. -> GAP-11
-- [x] ~~Wire account lockout to `AuthenticationAttempt`~~ - already implemented; removed as a false
-  positive. -> GAP-13
 
 ---
 
@@ -140,7 +135,7 @@ model already anticipates non-user actors. A service should therefore be a first
 user. Mechanism: the slim OAuth2 client-credentials pattern (client id + secret -> short-lived JWT),
 which reuses Fargo's existing JWT validation and `Actor` pipeline wholesale.
 
-Deliberately NOT mTLS/client certificates (operationally heavy; overkill on a trusted VPN) and NOT an
+Deliberately NOT mTLS/client certificates (operationally heavy) and NOT an
 external IdP (only relevant if also doing SSO).
 
 ### Components

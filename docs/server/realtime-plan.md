@@ -86,7 +86,7 @@ it is built on its own rather than bundled with the query features.
   payload-bearing is faster but must re-apply partition/permission scoping in the
   push path.
 - **Backplane**: a single API instance needs no backplane; multiple instances do
-  (Redis is the usual choice for SignalR). The current VPN-internal single-instance
-  deployment may not need one yet — decide based on how the API is actually hosted.
+  (Redis is the usual choice for SignalR). A single-instance deployment may not
+  need one yet — decide based on how the API is actually hosted.
 - **Build with GAP-14**: the post-commit notification/outbox should be designed
   once and serve both real-time push and outbound integrations.
