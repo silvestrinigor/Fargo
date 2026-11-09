@@ -1,3 +1,4 @@
+using Fargo.Core.Common;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
@@ -47,6 +48,12 @@ public static partial class HandlerLog
 
     [LoggerMessage(Level = LogLevel.Error, Message = "{Operation} failed after {ElapsedMilliseconds} ms.")]
     internal static partial void OperationFailed(this ILogger logger, string operation, long elapsedMilliseconds, Exception exception);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "{Operation} rejected after {ElapsedMilliseconds} ms: {ExceptionType} ({ErrorType}): {Reason}")]
+    internal static partial void OperationRejected(
+        this ILogger logger, string operation, long elapsedMilliseconds, string exceptionType, FargoErrorType errorType, string reason);
 }
 
 /// <summary>
@@ -103,12 +110,43 @@ public sealed class OperationLog : IDisposable
         {
             logger.OperationCompleted(operation, elapsed);
         }
+        else if (TryGetExpectedFailure(failure, out var errorType))
+        {
+            // Business and validation rejections are mapped to HTTP responses by
+            // the exception handlers; they are expected outcomes, so log them as
+            // a warning without a stack trace.
+            if (logger.IsEnabled(LogLevel.Warning))
+            {
+                logger.OperationRejected(
+                    operation, elapsed, failure!.GetType().Name, errorType, GetReason(failure));
+            }
+        }
         else
         {
             logger.OperationFailed(operation, elapsed, failure!);
         }
 
         scope?.Dispose();
+    }
+
+    // The internal reason (never sent to the client) wins over the public message.
+    private static string GetReason(Exception exception)
+        => (exception as FargoApplicationException)?.InternalReason ?? exception.Message;
+
+    private static bool TryGetExpectedFailure(Exception? exception, out FargoErrorType errorType)
+    {
+        switch (exception)
+        {
+            case FargoApplicationException applicationException:
+                errorType = applicationException.ErrorType;
+                return true;
+            case FargoCoreException coreException:
+                errorType = coreException.ErrorType;
+                return true;
+            default:
+                errorType = FargoErrorType.None;
+                return false;
+        }
     }
 
     private static Dictionary<string, object> BuildScopeState(string operation, ICurrentActor? actor)

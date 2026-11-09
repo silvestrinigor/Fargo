@@ -3,7 +3,6 @@ using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Core.Informations;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Operations.Identity;
 
@@ -21,12 +20,10 @@ public sealed record IdentityPasswordChangeCommand(IdentityPasswordUpdateDto Pas
 /// <param name="userRepository">Provides access to user data.</param>
 /// <param name="passwordHasher">Hashes and verifies password values.</param>
 /// <param name="refreshTokenRepository">Manages refresh token persistence for token invalidation.</param>
-/// <param name="logger">Logs the execution of the password change process.</param>
 public sealed class IdentityPasswordChangeCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
-    IRefreshTokenRepository refreshTokenRepository,
-    ILogger<IdentityPasswordChangeCommandHandler> logger
+    IRefreshTokenRepository refreshTokenRepository
 ) : ICommandHandler<IdentityPasswordChangeCommand>
 {
     /// <summary>
@@ -45,25 +42,19 @@ public sealed class IdentityPasswordChangeCommandHandler(
         }
         catch (ArgumentException)
         {
-            logger.IdentityPasswordChangeRejectedInvalidNameId(command.Passwords.Nameid);
-
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"Nameid '{command.Passwords.Nameid}' has an invalid format.");
         }
 
         var user = await userRepository.GetByNameidAsync(nameid, cancellationToken);
 
         if (user is null)
         {
-            logger.IdentityPasswordChangeUserNotFound(nameid);
-
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"User '{nameid}' was not found.");
         }
 
         if (!user.Actor.IsActive)
         {
-            logger.IdentityPasswordChangeUserInactive(user.ActorGuid);
-
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"User '{user.ActorGuid}' is not active.");
         }
 
         var currentPassword = command.Passwords.CurrentPassword;
@@ -73,9 +64,7 @@ public sealed class IdentityPasswordChangeCommandHandler(
 
         if (!isValid)
         {
-            logger.IdentityPasswordChangeInvalidPassword(user.ActorGuid);
-
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"The current password does not match for user '{user.ActorGuid}'.");
         }
 
         user.Authentication.SetPasswordHash(passwordHasher.Hash(command.Passwords.NewPassword));
@@ -91,28 +80,4 @@ public sealed class IdentityPasswordChangeCommandHandler(
             refreshToken.Revoke();
         }
     }
-}
-
-internal static partial class IdentityPasswordChangeCommandHandlerLogs
-{
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Password change flow rejected because user '{nameid}' was not found.")]
-    public static partial void IdentityPasswordChangeUserNotFound(this ILogger logger, Nameid nameid);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Passoword change flow rejected because the provided nameid '{nameid}' format is invalid.")]
-    public static partial void IdentityPasswordChangeRejectedInvalidNameId(
-        this ILogger logger, string nameId);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Password change flow rejected for inactive user '{userGuid}'.")]
-    public static partial void IdentityPasswordChangeUserInactive(this ILogger logger, Guid userGuid);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Password change flow rejected because the current password was invalid for user '{userGuid}'.")]
-    public static partial void IdentityPasswordChangeInvalidPassword(this ILogger logger, Guid userGuid);
 }

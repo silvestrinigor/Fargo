@@ -4,8 +4,6 @@ using Fargo.Application.Operations.Identity.Dtos;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Identity.Tokens;
-using Microsoft.Extensions.Logging;
-using System.Security.Authentication;
 
 namespace Fargo.Application.Operations.Identity;
 
@@ -27,7 +25,6 @@ public sealed record IdentityRefreshCommand(Token RefreshToken) : ICommand<Ident
 /// <param name="tokenHasher">Hashes refresh tokens for secure storage</param>
 /// <param name="refreshTokenRepository">Manages refresh token persistence</param>
 /// <param name="unitOfWork">Provides transactional consistency for data operations</param>
-/// <param name="logger">Logs the execution of the refresh process</param>
 public sealed class IdentityRefreshCommandHandler(
     ActorResolver actorService,
     IUserRepository userRepository,
@@ -35,8 +32,7 @@ public sealed class IdentityRefreshCommandHandler(
     IRefreshTokenGenerator refreshTokenGenerator,
     ITokenHasher tokenHasher,
     IRefreshTokenRepository refreshTokenRepository,
-    IUnitOfWork unitOfWork,
-    ILogger<IdentityRefreshCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<IdentityRefreshCommand, IdentityAuthResultDto>
 {
     /// <summary>
@@ -55,18 +51,14 @@ public sealed class IdentityRefreshCommandHandler(
 
         if (storedOldRefreshToken == null || !storedOldRefreshToken.IsUsable)
         {
-            logger.IdentityRefreshRejectedMissionToken();
-
-            throw new InvalidCredentialException();
+            throw new InvalidCredentialsFargoApplicationException("The refresh token was missing or not usable.");
         }
 
         var user = await userRepository.GetByGuidAsync(storedOldRefreshToken.UserGuid, cancellationToken);
 
         if (user is null)
         {
-            logger.IdentityRefreshRejectedUserNotFound(storedOldRefreshToken.UserGuid);
-
-            throw new InvalidCredentialException();
+            throw new InvalidCredentialsFargoApplicationException($"User '{storedOldRefreshToken.UserGuid}' from the refresh token was not found.");
         }
 
         if (!user.Actor.IsActive)
@@ -78,9 +70,7 @@ public sealed class IdentityRefreshCommandHandler(
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            logger.IdentityRefreshRejectedUserNotActive(user.ActorGuid);
-
-            throw new InvalidCredentialException();
+            throw new InvalidCredentialsFargoApplicationException($"User '{user.ActorGuid}' is not active; the old refresh token was revoked.");
         }
 
         if (user.Authentication.IsPasswordChangeRequired)
@@ -91,8 +81,6 @@ public sealed class IdentityRefreshCommandHandler(
             // commit-on-success decorator skips committing when the handler
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
-
-            logger.IdentityRefreshPasswordChangeRequired(user.ActorGuid);
 
             throw new UserPasswordChangeRequiredFargoApplicationException(user.ActorGuid);
         }
@@ -121,27 +109,4 @@ public sealed class IdentityRefreshCommandHandler(
             newAccessTokenResult.ExpiresAt
         );
     }
-}
-
-internal static partial class IdentityRefreshCommandHandlerLogs
-{
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Refresh flow rejected because the refresh token was missing or not usable.")]
-    public static partial void IdentityRefreshRejectedMissionToken(this ILogger logger);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Refresh flow rejected because user '{userGuid}' from the refresh token was not found.")]
-    public static partial void IdentityRefreshRejectedUserNotFound(this ILogger logger, Guid userGuid);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Refresh flow rejected for inactive user '{userGuid}'; old refresh token was revoked.")]
-    public static partial void IdentityRefreshRejectedUserNotActive(this ILogger logger, Guid userGuid);
-
-    [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "Refresh flow requires password change for user '{userGuid}'; old refresh token was revoked.")]
-    public static partial void IdentityRefreshPasswordChangeRequired(this ILogger logger, Guid userGuid);
 }

@@ -12,5 +12,17 @@ namespace Fargo.Application.Operations.Identity;
 /// intentionally used for all these cases to avoid leaking information about which
 /// condition was triggered.
 /// </remarks>
-public sealed class InvalidCredentialsFargoApplicationException()
-    : FargoApplicationException("The provided credentials are invalid.", FargoErrorType.InvalidCredentials);
+public sealed class InvalidCredentialsFargoApplicationException : FargoApplicationException
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InvalidCredentialsFargoApplicationException"/> class.
+    /// </summary>
+    /// <param name="internalReason">
+    /// The specific cause, written to the logs only; it is never returned to the client.
+    /// </param>
+    public InvalidCredentialsFargoApplicationException(string? internalReason = null)
+        : base("The provided credentials are invalid.", FargoErrorType.InvalidCredentials)
+    {
+        InternalReason = internalReason;
+    }
+}

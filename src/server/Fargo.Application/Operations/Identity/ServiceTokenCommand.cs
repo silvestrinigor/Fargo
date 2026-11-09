@@ -5,7 +5,6 @@ using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Informations;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Operations.Identity;
 
@@ -33,8 +32,7 @@ public sealed class ServiceTokenCommandHandler(
     ITokenGenerator tokenGenerator,
     IAuthenticationAttemptService attemptService,
     IClientContext clientContext,
-    IUnitOfWork unitOfWork,
-    ILogger<ServiceTokenCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<ServiceTokenCommand, ServiceTokenResultDto>
 {
     public async Task<ServiceTokenResultDto> HandleAsync(ServiceTokenCommand command, CancellationToken cancellationToken = default)
@@ -43,9 +41,9 @@ public sealed class ServiceTokenCommandHandler(
 
         if (!allowed.Allow)
         {
-            logger.ServiceTokenRejectedRateLimit(command.ClientId);
-
-            throw new AuthenticationRateLimitFargoApplicationException(allowed.RetryAfter);
+            throw new AuthenticationRateLimitFargoApplicationException(
+                allowed.RetryAfter,
+                $"Too many authentication attempts for client '{command.ClientId}'.");
         }
 
         Nameid clientId;
@@ -57,7 +55,7 @@ public sealed class ServiceTokenCommandHandler(
         catch (ArgumentException)
         {
             await RegisterFailureAndSaveAsync(command.ClientId, cancellationToken);
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"Client id '{command.ClientId}' has an invalid format.");
         }
 
         var service = await serviceAccountRepository.GetByClientIdAsync(clientId, cancellationToken);
@@ -65,7 +63,7 @@ public sealed class ServiceTokenCommandHandler(
         if (service is null || !service.Actor.IsActive)
         {
             await RegisterFailureAndSaveAsync(command.ClientId, cancellationToken);
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"Client '{command.ClientId}' was not found or is not active.");
         }
 
         Password secret;
@@ -77,13 +75,13 @@ public sealed class ServiceTokenCommandHandler(
         catch (ArgumentException)
         {
             await RegisterFailureAndSaveAsync(command.ClientId, cancellationToken);
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"The client secret format is invalid for client '{command.ClientId}'.");
         }
 
         if (!passwordHasher.Verify(service.SecretHash, secret))
         {
             await RegisterFailureAndSaveAsync(command.ClientId, cancellationToken);
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"The client secret does not match for client '{command.ClientId}'.");
         }
 
         var tokenResult = tokenGenerator.Generate(service);
@@ -100,23 +98,8 @@ public sealed class ServiceTokenCommandHandler(
     // must happen here (mirrors the user login handler).
     private async Task RegisterFailureAndSaveAsync(string clientId, CancellationToken cancellationToken)
     {
-        logger.ServiceTokenRejectedInvalidCredentials(clientId);
-
         await attemptService.RegisterFailureAsync(clientId, clientContext.IpAddress, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
-}
-
-internal static partial class ServiceTokenCommandHandlerLogs
-{
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Service token flow rejected because too many authentication attempts for client '{clientId}'.")]
-    public static partial void ServiceTokenRejectedRateLimit(this ILogger logger, string clientId);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Service token flow rejected due to invalid credentials for client '{clientId}'.")]
-    public static partial void ServiceTokenRejectedInvalidCredentials(this ILogger logger, string clientId);
 }

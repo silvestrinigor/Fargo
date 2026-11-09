@@ -19,9 +19,11 @@ public class AuthenticationRateLimitFargoApplicationException : FargoApplication
     /// Initializes a new instance of the AuthenticationRateLimitFargoApplicationException class.
     /// </summary>
     /// <param name="retryAfter">The time span after which the actor can retry authentication attempts</param>
-    public AuthenticationRateLimitFargoApplicationException(TimeSpan retryAfter) : base(
+    /// <param name="internalReason">Diagnostic detail written to the logs only, such as who was limited.</param>
+    public AuthenticationRateLimitFargoApplicationException(TimeSpan retryAfter, string? internalReason = null) : base(
         message: $"Too many authentication attempts. Please try again in {retryAfter}.", errorType: FargoErrorType.NotAuthorized)
     {
         RetryAfter = retryAfter;
+        InternalReason = internalReason;
     }
 }

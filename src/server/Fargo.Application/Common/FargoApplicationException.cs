@@ -15,6 +15,14 @@ public class FargoApplicationException : Exception
     public FargoErrorType ErrorType { get; init; } = FargoErrorType.None;
 
     /// <summary>
+    /// Gets diagnostic detail that is written to the logs but never returned to
+    /// the client. Use it for the specific cause of a deliberately generic
+    /// failure (for example, why a login was rejected) so the public message
+    /// does not leak it.
+    /// </summary>
+    public string? InternalReason { get; init; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="FargoApplicationException"/> class.
     /// </summary>
     public FargoApplicationException() : base(defaultExceptionMessage) { }

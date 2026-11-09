@@ -7,7 +7,6 @@ using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Core.Informations;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Fargo.Application.Tests.Identity;
@@ -28,8 +27,7 @@ public class IdentityPasswordChangeCommandHandlerTests
         => new(
             userRepository,
             passwordHasher,
-            refreshTokenRepository,
-            Substitute.For<ILogger<IdentityPasswordChangeCommandHandler>>());
+            refreshTokenRepository);
 
     private static IdentityPasswordChangeCommand Command(
         string nameid = ValidNameid, string currentPassword = CurrentPassword)

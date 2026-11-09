@@ -6,7 +6,6 @@ using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Core.Informations;
-using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Operations.Identity;
 
@@ -41,7 +40,6 @@ public sealed record IdentityLoginCommand(
 /// </param>
 /// <param name="clientContext">Provides information about the current client request.</param>
 /// <param name="unitOfWork">Provides transactional consistency for data operations.</param>
-/// <param name="logger">Logs the execution and outcome of the authentication process.</param>
 public sealed class IdentityLoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
@@ -51,8 +49,7 @@ public sealed class IdentityLoginCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     IAuthenticationAttemptService attemptService,
     IClientContext clientContext,
-    IUnitOfWork unitOfWork,
-    ILogger<IdentityLoginCommandHandler> logger
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<IdentityLoginCommand, IdentityAuthResultDto>
 {
     /// <summary>
@@ -83,9 +80,8 @@ public sealed class IdentityLoginCommandHandler(
 
         if (!shouldLogin.Allow)
         {
-            logger.IdentityLoginRejectedRateLimit(command.Nameid);
-
-            throw new AuthenticationRateLimitFargoApplicationException(shouldLogin.RetryAfter);
+            throw new AuthenticationRateLimitFargoApplicationException(shouldLogin.RetryAfter,
+                $"Too many authentication attempts for user '{command.Nameid}'.");
         }
 
         Nameid nameid;
@@ -96,8 +92,6 @@ public sealed class IdentityLoginCommandHandler(
         }
         catch (ArgumentException)
         {
-            logger.IdentityLoginRejectedInvalidNameId(command.Nameid);
-
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
             // Persist the recorded failed attempt before throwing: the
@@ -105,15 +99,13 @@ public sealed class IdentityLoginCommandHandler(
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"Nameid '{command.Nameid}' has an invalid format.");
         }
 
         var user = await userRepository.GetByNameidAsync(nameid, cancellationToken);
 
         if (user is null)
         {
-            logger.IdentityLoginRejectedUserNotFound(command.Nameid);
-
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
             // Persist the recorded failed attempt before throwing: the
@@ -121,13 +113,11 @@ public sealed class IdentityLoginCommandHandler(
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"User '{command.Nameid}' was not found.");
         }
 
         if (!user.Actor.IsActive)
         {
-            logger.IdentityLoginRejectedUserNotActive(command.Nameid);
-
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
             // Persist the recorded failed attempt before throwing: the
@@ -135,7 +125,7 @@ public sealed class IdentityLoginCommandHandler(
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"User '{command.Nameid}' is not active.");
         }
 
         Password password;
@@ -146,8 +136,6 @@ public sealed class IdentityLoginCommandHandler(
         }
         catch (ArgumentException)
         {
-            logger.IdentityLoginRejectedInvalidPasswordFormat(user.ActorGuid);
-
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
             // Persist the recorded failed attempt before throwing: the
@@ -155,7 +143,7 @@ public sealed class IdentityLoginCommandHandler(
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"The password format is invalid for user '{user.ActorGuid}'.");
         }
 
         var isValid = user.Authentication.PasswordHash != null
@@ -163,8 +151,6 @@ public sealed class IdentityLoginCommandHandler(
 
         if (!isValid)
         {
-            logger.IdentityLoginRejectedInvalidPassword(user.ActorGuid);
-
             await attemptService.RegisterFailureAsync(command.Nameid, clientContext.IpAddress, cancellationToken);
 
             // Persist the recorded failed attempt before throwing: the
@@ -172,13 +158,11 @@ public sealed class IdentityLoginCommandHandler(
             // throws, so this reject-path save must remain here.
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            throw new InvalidCredentialsFargoApplicationException();
+            throw new InvalidCredentialsFargoApplicationException($"The password does not match for user '{user.ActorGuid}'.");
         }
 
         if (user.Authentication.IsPasswordChangeRequired)
         {
-            logger.IdentityLoginRejectedPasswordChangeRequired(user.ActorGuid);
-
             await attemptService.RegisterSuccessAsync(
                 command.Nameid,
                 clientContext.IpAddress,
@@ -211,49 +195,4 @@ public sealed class IdentityLoginCommandHandler(
 
         return authResult;
     }
-}
-
-internal static partial class IdentityLoginCommandHandlerLogs
-{
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Login flow rejected because too many authentication attempts for user '{nameid}'.")]
-    public static partial void IdentityLoginRejectedRateLimit(
-        this ILogger logger, string nameId);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Login flow rejected because the provided nameid '{nameid}' format is invalid.")]
-    public static partial void IdentityLoginRejectedInvalidNameId(
-        this ILogger logger, string nameId);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Login flow rejected because the user '{nameId}' was not found.")]
-    public static partial void IdentityLoginRejectedUserNotFound(
-        this ILogger logger, string nameid);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Login flow rejected because the user '{nameId}' is not active.")]
-    public static partial void IdentityLoginRejectedUserNotActive(
-        this ILogger logger, string nameid);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Login flow rejected for user '{userGuid}' because the password format is invalid.")]
-    public static partial void IdentityLoginRejectedInvalidPasswordFormat(
-        this ILogger logger, Guid userGuid);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Login flow rejected because the password was invalid for user '{UserGuid}'.")]
-    public static partial void IdentityLoginRejectedInvalidPassword(
-        this ILogger logger, Guid userGuid);
-
-    [LoggerMessage(
-        Level = LogLevel.Warning,
-        Message = "Login flow requires password change for user '{UserGuid}'.")]
-    public static partial void IdentityLoginRejectedPasswordChangeRequired(
-        this ILogger logger, Guid userGuid);
 }
