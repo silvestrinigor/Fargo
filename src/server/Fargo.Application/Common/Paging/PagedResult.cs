@@ -1,4 +1,4 @@
-﻿namespace Fargo.Application.Common.Paging;
+namespace Fargo.Application.Common.Paging;
 
 /// <summary>
 /// A page of query results together with the paging metadata needed by clients

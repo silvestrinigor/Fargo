@@ -1,4 +1,4 @@
-﻿using Fargo.Core.Entities.Actors.ServiceAccounts;
+using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Actors.Users;
 
 namespace Fargo.Application.Security;

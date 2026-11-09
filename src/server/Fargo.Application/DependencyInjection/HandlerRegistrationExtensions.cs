@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Abstractions;
+using Fargo.Application.Abstractions;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Decorators;
 using Fargo.Application.Persistence;

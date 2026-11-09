@@ -1,4 +1,4 @@
-﻿namespace Fargo.Application.Abstractions;
+namespace Fargo.Application.Abstractions;
 
 /// <summary>
 /// Represents a query in the application layer.

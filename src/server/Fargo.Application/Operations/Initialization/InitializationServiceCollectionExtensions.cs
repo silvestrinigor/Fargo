@@ -1,4 +1,4 @@
-﻿using Fargo.Application.DependencyInjection;
+using Fargo.Application.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Operations.Initialization;

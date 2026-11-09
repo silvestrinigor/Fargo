@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Paging;
+using Fargo.Application.Common.Paging;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Informations;
 using Fargo.Infrastructure.Persistence.Repositories;

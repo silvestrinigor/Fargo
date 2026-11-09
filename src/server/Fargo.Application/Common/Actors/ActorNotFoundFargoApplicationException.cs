@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Exceptions;
+using Fargo.Application.Common.Exceptions;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;
 using System.Diagnostics.CodeAnalysis;

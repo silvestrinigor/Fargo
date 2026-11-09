@@ -1,4 +1,4 @@
-﻿namespace Fargo.Application.Common.Paging;
+namespace Fargo.Application.Common.Paging;
 
 /// <summary>The direction a sort is applied in.</summary>
 public enum SortDirection

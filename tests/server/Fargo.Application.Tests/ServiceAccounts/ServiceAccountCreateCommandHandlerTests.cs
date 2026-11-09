@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Actors;
+using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
 using Fargo.Application.Operations.ServiceAccounts;
 using Fargo.Application.Operations.ServiceAccounts.Dtos;

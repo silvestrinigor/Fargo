@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Paging;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Users;
 using Fargo.Application.Operations.Users.Dtos;
 using Fargo.Application.Persistence.Repositories;

@@ -1,4 +1,4 @@
-﻿using Fargo.Core.Audits;
+using Fargo.Core.Audits;
 using System.Collections;
 using System.Reflection;
 

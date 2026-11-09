@@ -1,4 +1,4 @@
-﻿using Fargo.Core.Common;
+using Fargo.Core.Common;
 
 namespace Fargo.Application.Common.Exceptions;
 

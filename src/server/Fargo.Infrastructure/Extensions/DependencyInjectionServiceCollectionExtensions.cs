@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common;
+using Fargo.Application.Common;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Operations.Articles;

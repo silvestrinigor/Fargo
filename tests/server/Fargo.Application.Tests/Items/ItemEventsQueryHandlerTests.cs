@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Actors;
+using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Items;
 using Fargo.Application.Operations.Items.Dtos;

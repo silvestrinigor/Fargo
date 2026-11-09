@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Exceptions;
+using Fargo.Application.Common.Exceptions;
 using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 

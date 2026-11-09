@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Paging;
+using Fargo.Application.Common.Paging;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Identity.Tokens;

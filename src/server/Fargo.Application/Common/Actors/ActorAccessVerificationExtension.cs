@@ -1,4 +1,4 @@
-﻿using Fargo.Core.Entities;
+using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Partitions;
 

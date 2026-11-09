@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Abstractions;
+using Fargo.Application.Abstractions;
 using Fargo.Core.Identity.Tokens;
 using Microsoft.Extensions.Logging;
 

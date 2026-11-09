@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Operations.Articles;
+using Fargo.Application.Operations.Articles;
 using Fargo.Application.Operations.Identity;
 using Fargo.Application.Operations.Initialization;
 using Fargo.Application.Operations.Items;

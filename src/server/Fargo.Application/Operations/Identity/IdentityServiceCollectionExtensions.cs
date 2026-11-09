@@ -1,4 +1,4 @@
-﻿using Fargo.Application.DependencyInjection;
+using Fargo.Application.DependencyInjection;
 using Fargo.Application.Operations.Identity.Dtos;
 using Microsoft.Extensions.DependencyInjection;
 

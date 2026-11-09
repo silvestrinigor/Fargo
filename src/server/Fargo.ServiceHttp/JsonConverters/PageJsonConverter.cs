@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Paging;
+using Fargo.Application.Common.Paging;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Abstractions;
+using Fargo.Application.Abstractions;
 using Fargo.Application.Operations.Identity.Dtos;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Identity.Credentials;

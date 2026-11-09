@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Abstractions;
+using Fargo.Application.Abstractions;
 using Fargo.Application.Auditing;
 using Fargo.Application.Operations.Articles;
 using Fargo.Core.Audits;

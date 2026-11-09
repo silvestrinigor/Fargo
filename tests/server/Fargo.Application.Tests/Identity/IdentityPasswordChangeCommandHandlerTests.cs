@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Operations.Identity;
+using Fargo.Application.Operations.Identity;
 using Fargo.Application.Operations.Identity.Dtos;
 using Fargo.Application.Persistence;
 using Fargo.Core.Entities.Actors;

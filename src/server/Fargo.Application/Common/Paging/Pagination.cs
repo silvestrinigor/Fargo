@@ -1,4 +1,4 @@
-﻿namespace Fargo.Application.Common.Paging;
+namespace Fargo.Application.Common.Paging;
 
 /// <summary>
 /// Represents pagination parameters used in paginated queries.

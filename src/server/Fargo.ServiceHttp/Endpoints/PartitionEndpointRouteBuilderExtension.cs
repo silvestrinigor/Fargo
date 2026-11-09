@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Abstractions;
+using Fargo.Application.Abstractions;
 using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Partitions;
 using Fargo.Application.Operations.Partitions.Dtos;

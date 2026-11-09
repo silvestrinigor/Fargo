@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Paging;
+using Fargo.Application.Common.Paging;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;

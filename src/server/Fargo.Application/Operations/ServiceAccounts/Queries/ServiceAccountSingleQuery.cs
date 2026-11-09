@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Abstractions;
+using Fargo.Application.Abstractions;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Operations.ServiceAccounts.Dtos;
 using Fargo.Application.Persistence.Repositories;

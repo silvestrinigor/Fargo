@@ -1,4 +1,4 @@
-﻿using Fargo.Application.IntegrationEvents;
+using Fargo.Application.IntegrationEvents;
 using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

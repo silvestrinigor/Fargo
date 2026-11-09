@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Abstractions;
+using Fargo.Application.Abstractions;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.Identity.Dtos;
 using Fargo.Application.Persistence;

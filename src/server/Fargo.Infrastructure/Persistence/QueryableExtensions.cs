@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Common.Exceptions;
+using Fargo.Application.Common.Exceptions;
 using Fargo.Application.Common.Paging;
 using Fargo.Infrastructure.Extensions;
 using System.Linq.Expressions;

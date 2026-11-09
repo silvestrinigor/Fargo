@@ -1,4 +1,4 @@
-﻿using Fargo.Application.Operations.Initialization;
+using Fargo.Application.Operations.Initialization;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.ServiceSeed;

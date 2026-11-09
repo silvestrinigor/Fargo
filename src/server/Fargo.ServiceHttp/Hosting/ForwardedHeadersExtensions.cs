@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.HttpOverrides;
 using System.Net;
 
 namespace Fargo.ServiceHttp.Hosting;
