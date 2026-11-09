@@ -1,3 +1,4 @@
+using Fargo.Application.Persistence.Repositories;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.ServiceAccounts.Dtos;
 using Fargo.Core.Entities.Actors;

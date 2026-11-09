@@ -1,8 +1,9 @@
+using Fargo.Application.Operations.Items;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.Items.Dtos;
 using Fargo.Core.Events;
 
-namespace Fargo.Application.Operations.Items;
+namespace Fargo.Application.Persistence.Repositories;
 
 /// <summary>
 /// Provides query operations for retrieving item event information.

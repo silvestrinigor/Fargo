@@ -1,8 +1,9 @@
+using Fargo.Application.Operations.Articles;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.Articles.Dtos;
 using Fargo.Core.Barcodes;
 
-namespace Fargo.Application.Operations.Articles;
+namespace Fargo.Application.Persistence.Repositories;
 
 /// <summary>
 /// Provides article query operations.
@@ -198,10 +199,10 @@ public interface IArticleQueryRepository
     /// </param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>
-    /// The article's <see cref="Fargo.Core.Entities.Articles.ArticleTrackingMode"/>, or
+    /// The article's <see cref="Core.Entities.Articles.ArticleTrackingMode"/>, or
     /// <see langword="null"/> when the article was not found.
     /// </returns>
-    Task<Fargo.Core.Entities.Articles.ArticleTrackingMode?> GetTrackingModeByGuidAsync(
+    Task<Core.Entities.Articles.ArticleTrackingMode?> GetTrackingModeByGuidAsync(
         Guid articleGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         CancellationToken cancellationToken = default

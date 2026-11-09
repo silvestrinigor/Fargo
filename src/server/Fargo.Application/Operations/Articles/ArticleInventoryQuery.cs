@@ -1,3 +1,4 @@
+using Fargo.Application.Persistence.Repositories;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.Articles.Dtos;
 using Fargo.Core.Entities.Actors;
@@ -27,9 +28,9 @@ public sealed record ArticleInventoryByGuidQuery(
 ) : IQuery<ArticleInventoryDto?>;
 
 /// <summary>
-/// Handles queries to retrieve inventory information for a specific article identified by its GUID.
+/// Handles queries to retrieve inventory information for a specific article.
 /// </summary>
-public sealed class ArticleInventoryByGuidQueryHandler(
+public sealed class ArticleInventoryQueryHandler(
     ActorResolver actorService,
     IArticleQueryRepository articleRepository,
     ICurrentActor currentActor

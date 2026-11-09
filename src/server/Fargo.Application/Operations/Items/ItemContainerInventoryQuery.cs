@@ -1,3 +1,4 @@
+using Fargo.Application.Persistence.Repositories;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.Items.Dtos;
 using Fargo.Core.Entities.Actors;
@@ -30,7 +31,7 @@ public sealed record ItemContainerInventoryByGuidQuery(
     DateTimeOffset? At = null
 ) : IQuery<IReadOnlyCollection<ItemContainerInventoryDto>?>;
 
-public sealed class ItemContainerInventoryByGuidQueryHandler(
+public sealed class ItemContainerInventoryQueryHandler(
     ActorResolver actorService,
     IItemQueryRepository itemQueryRepository,
     IItemRepository itemRepository,

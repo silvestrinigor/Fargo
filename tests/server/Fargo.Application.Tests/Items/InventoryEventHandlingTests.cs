@@ -1,3 +1,4 @@
+using Fargo.Application.Persistence.Repositories;
 using Fargo.Application.Operations.Articles;
 using Fargo.Application.Operations.Articles.Dtos;
 using Fargo.Application.Operations.Items;
@@ -45,7 +46,7 @@ public class InventoryEventHandlingTests
             .Returns(Task.FromResult<IReadOnlyCollection<ItemContainerInventoryDto>>(
                 [new ItemContainerInventoryDto(eventArticle, 12.5)]));
 
-        var handler = new ItemContainerInventoryByGuidQueryHandler(
+        var handler = new ItemContainerInventoryQueryHandler(
             ActorTestFactory.Resolver(userRepository),
             itemQueryRepository,
             itemRepository,
@@ -76,7 +77,7 @@ public class InventoryEventHandlingTests
                 article, Arg.Any<IReadOnlyCollection<Guid>?>(), Arg.Any<bool>(), Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ArticleInventoryDto(42.0)));
 
-        var handler = new ArticleInventoryByGuidQueryHandler(
+        var handler = new ArticleInventoryQueryHandler(
             ActorTestFactory.Resolver(userRepository),
             articleRepository,
             currentActor);
@@ -104,7 +105,7 @@ public class InventoryEventHandlingTests
                 article, Arg.Any<IReadOnlyCollection<Guid>?>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ArticleInventoryDto(7.0)));
 
-        var handler = new ArticleInventoryByGuidQueryHandler(
+        var handler = new ArticleInventoryQueryHandler(
             ActorTestFactory.Resolver(userRepository),
             articleRepository,
             currentActor);
@@ -128,7 +129,7 @@ public class InventoryEventHandlingTests
         articleRepository.GetTrackingModeByGuidAsync(article, Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ArticleTrackingMode?>(null));
 
-        var handler = new ArticleInventoryByGuidQueryHandler(
+        var handler = new ArticleInventoryQueryHandler(
             ActorTestFactory.Resolver(userRepository),
             articleRepository,
             currentActor);

@@ -1,8 +1,9 @@
+using Fargo.Application.Operations.SupplyOrders;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.SupplyOrders.Dtos;
 using Fargo.Core.Entities.SupplyOrders;
 
-namespace Fargo.Application.Operations.SupplyOrders;
+namespace Fargo.Application.Persistence.Repositories;
 
 /// <summary>
 /// Read-side repository for <see cref="SupplyOrder"/> projections.

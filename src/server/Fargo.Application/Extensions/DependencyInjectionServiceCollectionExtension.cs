@@ -80,7 +80,7 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddFargoQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>, ItemLocationQueryHandler>()
         .AddFargoQueryHandler<ItemMovimentsQuery, IReadOnlyCollection<ItemMovimentDto>?, ItemMovimentsQueryHandler>()
         .AddFargoQueryHandler<ItemEventsQuery, PagedResult<ItemEventDto>, ItemEventsQueryHandler>()
-        .AddFargoQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?, ItemContainerInventoryByGuidQueryHandler>();
+        .AddFargoQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?, ItemContainerInventoryQueryHandler>();
 
         public IServiceCollection AddFargoUserApplication() => services
         .AddFargoCommandHandler<UserCreateCommand, Guid, UserCreateCommandHandler>()
@@ -103,7 +103,7 @@ public static class DependencyInjectionServiceCollectionExtension
         .AddFargoQueryHandler<ArticleByGuidQuery, ArticleDto?, ArticleQueryHandler>()
         .AddFargoQueryHandler<ArticleByBarcodeQuery, ArticleDto?, ArticleQueryHandler>()
         .AddFargoQueryHandler<ArticlesQuery, PagedResult<ArticleDto>, ArticlesQueryHandler>()
-        .AddFargoQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?, ArticleInventoryByGuidQueryHandler>();
+        .AddFargoQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?, ArticleInventoryQueryHandler>();
 
         public IServiceCollection AddFargoPartitionApplication() => services
         .AddFargoCommandHandler<PartitionCreateCommand, Guid, PartitionCreateCommandHandler>()

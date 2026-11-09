@@ -1,3 +1,4 @@
+using Fargo.Application.Persistence;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.Partitions;
 using Fargo.Application.Operations.Partitions.Dtos;

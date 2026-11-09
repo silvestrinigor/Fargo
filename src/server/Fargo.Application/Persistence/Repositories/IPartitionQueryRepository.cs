@@ -1,16 +1,18 @@
+using Fargo.Application.Operations.Partitions;
 using Fargo.Application.Common;
-using Fargo.Application.Operations.UserGroups.Dtos;
+using Fargo.Application.Operations.Partitions.Dtos;
 
-namespace Fargo.Application.Operations.UserGroups;
+namespace Fargo.Application.Persistence.Repositories;
 
-public interface IUserGroupQueryRepository
+public interface IPartitionQueryRepository
 {
-    Task<UserGroupDto?> GetInfoByGuidAsync(
-        Guid userGroupGuid,
+    Task<PartitionDto?> GetInfoByGuid(
+        Guid partitionGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        bool? notChildOfAnyPartition = null,
         CancellationToken cancellationToken = default);
 
-    Task<PagedResult<UserGroupDto>> GetManyInfoAsync(
+    Task<PagedResult<PartitionDto>> GetManyInfo(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
         Sort? sort = null,

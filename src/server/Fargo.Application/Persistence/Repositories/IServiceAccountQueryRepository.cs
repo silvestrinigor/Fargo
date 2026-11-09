@@ -1,7 +1,8 @@
+using Fargo.Application.Operations.ServiceAccounts;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.ServiceAccounts.Dtos;
 
-namespace Fargo.Application.Operations.ServiceAccounts;
+namespace Fargo.Application.Persistence.Repositories;
 
 /// <summary>
 /// Read-side repository for service accounts, projecting to DTOs. Mirrors the

@@ -1,3 +1,5 @@
+using Fargo.Application.Persistence.Repositories;
+using Fargo.Application.Persistence;
 using Fargo.Application.Common;
 using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Operations.Articles;
@@ -119,7 +121,7 @@ public static class DependencyInjectionServiceCollectionExtensions
         .AddScoped<IAuditLogQueryRepository, AuditLogRepository>()
         .AddScoped<IAuthenticationAttemptRepository, AuthenticationAttemptRepository>()
         .AddScoped<IServiceAccountRepository, ServiceAccountRepository>()
-        .AddScoped<Fargo.Application.Operations.ServiceAccounts.IServiceAccountQueryRepository, ServiceAccountRepository>()
+        .AddScoped<IServiceAccountQueryRepository, ServiceAccountRepository>()
         .AddScoped<ISupplyOrderRepository, SupplyOrderRepository>()
         .AddScoped<ISupplyOrderQueryRepository, SupplyOrderRepository>();
 

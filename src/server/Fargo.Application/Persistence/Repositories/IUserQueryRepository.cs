@@ -1,7 +1,8 @@
+using Fargo.Application.Operations.Users;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.Users.Dtos;
 
-namespace Fargo.Application.Operations.Users;
+namespace Fargo.Application.Persistence.Repositories;
 
 /// <summary>
 /// Defines read-only queries for user information.

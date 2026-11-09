@@ -1,8 +1,9 @@
+using Fargo.Application.Operations.Audits;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.Audits.Dtos;
 using Fargo.Core.Entities.Actors;
 
-namespace Fargo.Application.Operations.Audits;
+namespace Fargo.Application.Persistence.Repositories;
 
 /// <summary>
 /// Provides query operations for retrieving command audit log information.

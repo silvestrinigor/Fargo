@@ -1,3 +1,4 @@
+using Fargo.Application.Persistence;
 using Fargo.Application.Operations;
 
 namespace Fargo.Application.Common;

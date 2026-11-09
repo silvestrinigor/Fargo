@@ -1,8 +1,26 @@
+using Fargo.Application.Persistence.Repositories;
 using Fargo.Application.Common;
 using Fargo.Application.Operations.Articles.Dtos;
+using Fargo.Core.Barcodes;
 using Fargo.Core.Entities.Actors;
 
 namespace Fargo.Application.Operations.Articles;
+
+/// <summary>
+/// Query used to retrieve an article by identifier.
+/// </summary>
+/// <param name="ArticleGuid">
+/// Article unique identifier.
+/// </param>
+public sealed record ArticleByGuidQuery(Guid ArticleGuid) : IQuery<ArticleDto?>;
+
+/// <summary>
+/// Query used to retrieve an article by barcode.
+/// </summary>
+/// <param name="ArticleBarcode">
+/// Article barcode information.
+/// </param>
+public sealed record ArticleByBarcodeQuery(Barcode ArticleBarcode) : IQuery<ArticleDto?>;
 
 /// <summary>
 /// Handles the single-article lookup queries (<see cref="ArticleByGuidQuery"/>
