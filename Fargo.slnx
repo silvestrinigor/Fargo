@@ -6,6 +6,7 @@
     <Project Path="src/server/Fargo.ServiceDefaults/Fargo.ServiceDefaults.csproj" />
     <Project Path="src/server/Fargo.ServiceHttp/Fargo.ServiceHttp.csproj" />
     <Project Path="src/server/Fargo.ServiceMigration/Fargo.ServiceMigration.csproj" />
+    <Project Path="src/server/Fargo.ServiceOutbox/Fargo.ServiceOutbox.csproj" />
     <Project Path="src/server/Fargo.ServiceSeed/Fargo.ServiceSeed.csproj" />
     <Project Path="src/client/Fargo.Cli/Fargo.Cli.csproj" />
     <Project Path="src/client/Fargo.ClientHttp/Fargo.ClientHttp.csproj" />

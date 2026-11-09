@@ -8,7 +8,7 @@ var postgres = builder
 
 var databaseFargo = postgres.AddDatabase("fargo-database", "fargo");
 
-// Broker for outbound integration events (published by the API's outbox relay).
+// Broker for outbound integration events (published by the outbox service).
 var rabbitmq = builder
 .AddRabbitMQ("fargo-rabbitmq")
 .WithManagementPlugin()
@@ -35,11 +35,19 @@ _ = builder
 .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
 .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
 .WithReference(databaseFargo)
-.WithReference(rabbitmq)
 .WithReference(serviceMigrations)
 .WithReference(serviceSeeds)
-.WaitFor(rabbitmq)
 .WaitForCompletion(serviceMigrations)
 .WaitForCompletion(serviceSeeds);
+
+_ = builder
+.AddProject<Projects.Fargo_ServiceOutbox>("fargo-outbox")
+.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+.WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
+.WithReference(databaseFargo)
+.WithReference(rabbitmq)
+.WithReference(serviceMigrations)
+.WaitFor(rabbitmq)
+.WaitForCompletion(serviceMigrations);
 
 builder.Build().Run();

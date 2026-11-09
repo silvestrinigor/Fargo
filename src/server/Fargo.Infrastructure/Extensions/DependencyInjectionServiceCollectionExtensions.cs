@@ -133,7 +133,7 @@ public static class DependencyInjectionServiceCollectionExtensions
         /// <summary>
         /// Registers the background relay that publishes outbox messages through
         /// the registered <see cref="IEventPublisher"/>. Register it in one host
-        /// only (the API); other hosts still write outbox messages.
+        /// only (Fargo.ServiceOutbox); other hosts still write outbox messages.
         /// </summary>
         public IServiceCollection AddFargoOutboxRelay(IConfiguration configuration)
         {

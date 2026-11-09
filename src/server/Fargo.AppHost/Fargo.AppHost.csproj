@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Fargo.ServiceHttp\Fargo.ServiceHttp.csproj" />
     <ProjectReference Include="..\Fargo.ServiceMigration\Fargo.ServiceMigration.csproj" />
+    <ProjectReference Include="..\Fargo.ServiceOutbox\Fargo.ServiceOutbox.csproj" />
     <ProjectReference Include="..\Fargo.ServiceSeed\Fargo.ServiceSeed.csproj" />
   </ItemGroup>
 
