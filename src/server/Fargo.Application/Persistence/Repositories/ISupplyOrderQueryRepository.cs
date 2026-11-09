@@ -1,7 +1,7 @@
-using Fargo.Application.Operations.SupplyOrders;
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.SupplyOrders.Dtos;
 using Fargo.Core.Entities.SupplyOrders;
+
 
 namespace Fargo.Application.Persistence.Repositories;
 

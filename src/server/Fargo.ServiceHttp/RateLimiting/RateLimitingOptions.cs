@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace Fargo.ServiceHttp.RateLimiting;

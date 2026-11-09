@@ -1,9 +1,10 @@
-using Fargo.Application.Persistence.Repositories;
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Items;
 using Fargo.Application.Operations.Items.Dtos;
+using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Events;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
 

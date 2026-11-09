@@ -1,4 +1,4 @@
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Events;
@@ -6,6 +6,7 @@ using Fargo.Core.Informations;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 using UnitsNet;
+
 
 namespace Fargo.Infrastructure.Tests.Repositories;
 

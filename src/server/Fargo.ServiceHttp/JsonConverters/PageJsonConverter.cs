@@ -1,6 +1,7 @@
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
 
 namespace Fargo.ServiceHttp.JsonConverters;
 

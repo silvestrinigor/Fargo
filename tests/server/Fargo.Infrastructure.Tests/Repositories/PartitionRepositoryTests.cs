@@ -1,10 +1,11 @@
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace Fargo.Infrastructure.Tests.Repositories;
 

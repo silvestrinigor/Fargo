@@ -1,4 +1,4 @@
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Partitions;
@@ -6,6 +6,7 @@ using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Informations;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
+
 
 namespace Fargo.Infrastructure.Tests.Repositories;
 

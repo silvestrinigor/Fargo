@@ -252,3 +252,12 @@ dotnet_diagnostic.CS1591.severity = silent
 
 # CS1591: Missing XML comment for publicly visible type or member
 dotnet_diagnostic.CS1591.severity = silent
+
+# Fargo.Application: namespaces must mirror folders (enforced in the IDE / dotnet format).
+[src/server/Fargo.Application/**.cs]
+dotnet_diagnostic.IDE0130.severity = warning
+
+# Feature use-case subfolders (Commands/Queries/Exceptions) are organizational only:
+# their types live in the feature namespace Fargo.Application.Operations.<Feature>.
+[src/server/Fargo.Application/Operations/**/{Commands,Queries,Exceptions}/*.cs]
+dotnet_diagnostic.IDE0130.severity = none

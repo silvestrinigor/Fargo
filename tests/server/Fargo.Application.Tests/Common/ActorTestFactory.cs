@@ -1,10 +1,11 @@
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Actors;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Informations;
 using NSubstitute;
+
 
 namespace Fargo.Application.Tests.Common;
 
@@ -86,7 +87,7 @@ public static class ActorTestFactory
 /// <summary>
 /// A simple <see cref="ICurrentActor"/> stub for tests.
 /// </summary>
-public sealed class TestCurrentActor : Fargo.Application.Common.ICurrentActor
+public sealed class TestCurrentActor : ICurrentActor
 {
     public Guid Guid { get; init; } = Guid.NewGuid();
 

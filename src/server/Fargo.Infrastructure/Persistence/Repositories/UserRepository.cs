@@ -1,13 +1,14 @@
-using Fargo.Application.Persistence.Repositories;
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Users;
 using Fargo.Application.Operations.Users.Dtos;
+using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Informations;
 using Fargo.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
 

@@ -1,7 +1,8 @@
-using Fargo.Application.Persistence;
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Actors;
+using Fargo.Application.Common.Exceptions;
 using Fargo.Application.Operations.Articles;
 using Fargo.Application.Operations.Articles.Dtos;
+using Fargo.Application.Persistence;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Common;
@@ -11,6 +12,7 @@ using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 using NSubstitute;
+
 
 namespace Fargo.Application.Tests.Articles;
 

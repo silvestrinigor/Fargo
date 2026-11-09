@@ -1,5 +1,4 @@
-using Fargo.Application.Persistence;
-using Fargo.Application.Common;
+﻿using Fargo.Application.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

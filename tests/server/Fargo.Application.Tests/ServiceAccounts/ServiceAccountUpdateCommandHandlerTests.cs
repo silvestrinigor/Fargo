@@ -1,4 +1,5 @@
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Actors;
+using Fargo.Application.Common.Exceptions;
 using Fargo.Application.Operations.ServiceAccounts;
 using Fargo.Application.Operations.ServiceAccounts.Dtos;
 using Fargo.Application.Tests.Common;
@@ -9,6 +10,7 @@ using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Informations;
 using NSubstitute;
+
 
 namespace Fargo.Application.Tests.ServiceAccounts;
 

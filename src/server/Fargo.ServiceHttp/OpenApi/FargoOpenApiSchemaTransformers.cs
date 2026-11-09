@@ -1,4 +1,4 @@
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Identity.Tokens;
@@ -7,6 +7,7 @@ using Microsoft.OpenApi;
 using System.Drawing;
 using System.Text.Json.Nodes;
 using UnitsNet;
+
 
 namespace Fargo.ServiceHttp.OpenApi;
 

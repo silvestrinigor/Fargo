@@ -1,4 +1,4 @@
-using Fargo.Application.Extensions;
+﻿using Fargo.Application.DependencyInjection;
 using Fargo.Infrastructure.Extensions;
 using Fargo.Infrastructure.Persistence;
 using Fargo.ServiceDefaults;

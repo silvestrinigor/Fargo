@@ -1,6 +1,6 @@
-using Fargo.Application.Operations.UserGroups;
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.UserGroups.Dtos;
+
 
 namespace Fargo.Application.Persistence.Repositories;
 

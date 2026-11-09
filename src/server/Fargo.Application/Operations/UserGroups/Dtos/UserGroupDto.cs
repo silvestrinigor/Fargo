@@ -1,6 +1,6 @@
 using Fargo.Core.Entities.Actors;
-using Fargo.Core.Informations;
 using Fargo.Core.Entities.UserGroups;
+using Fargo.Core.Informations;
 using System.Linq.Expressions;
 
 namespace Fargo.Application.Operations.UserGroups.Dtos;

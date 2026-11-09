@@ -1,9 +1,10 @@
-using Fargo.Application.Common;
-using Fargo.Application.Operations;
+﻿using Fargo.Application.Abstractions;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Partitions;
 using Fargo.Application.Operations.Partitions.Dtos;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
+
 
 namespace Fargo.ServiceHttp.Endpoints;
 

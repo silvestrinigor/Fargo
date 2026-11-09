@@ -1,6 +1,6 @@
-using Fargo.Application.Operations.Partitions;
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Partitions.Dtos;
+
 
 namespace Fargo.Application.Persistence.Repositories;
 

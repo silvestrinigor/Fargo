@@ -1,4 +1,4 @@
-using Fargo.Application.Extensions;
+﻿using Fargo.Application.Operations.Initialization;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
 using Fargo.ServiceSeed;
@@ -18,7 +18,7 @@ builder.Services.AddFargoRepositories();
 
 builder.Services.AddFargoSecurity();
 
-builder.Services.AddFargoSystemApplication();
+builder.Services.AddFargoInitializationApplication();
 
 builder.Services.AddHostedService<FargoSeedService>();
 

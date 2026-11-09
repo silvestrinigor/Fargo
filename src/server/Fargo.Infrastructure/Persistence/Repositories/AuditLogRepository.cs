@@ -1,10 +1,11 @@
-using Fargo.Application.Persistence.Repositories;
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Audits;
 using Fargo.Application.Operations.Audits.Dtos;
+using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace Fargo.Infrastructure.Persistence.Repositories;
 

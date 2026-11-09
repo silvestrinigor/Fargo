@@ -1,26 +1,28 @@
-using Fargo.Application.Persistence.Repositories;
-using Fargo.Application.Persistence;
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common;
+using Fargo.Application.Common.Actors;
 using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Operations.Articles;
 using Fargo.Application.Operations.Audits;
 using Fargo.Application.Operations.Identity;
 using Fargo.Application.Operations.Items;
 using Fargo.Application.Operations.Partitions;
+using Fargo.Application.Operations.SupplyOrders;
 using Fargo.Application.Operations.UserGroups;
 using Fargo.Application.Operations.Users;
+using Fargo.Application.Persistence;
+using Fargo.Application.Persistence.Repositories;
+using Fargo.Application.Security;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Entities.Partitions;
+using Fargo.Core.Entities.SupplyOrders;
 using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Events;
 using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Credentials;
-using Fargo.Core.Entities.SupplyOrders;
-using Fargo.Application.Operations.SupplyOrders;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Infrastructure.Client;
 using Fargo.Infrastructure.Messaging;
@@ -34,6 +36,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+
 
 namespace Fargo.Infrastructure.Extensions;
 

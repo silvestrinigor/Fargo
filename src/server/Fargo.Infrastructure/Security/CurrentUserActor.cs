@@ -1,8 +1,9 @@
-using Fargo.Application.Common;
+﻿using Fargo.Application.Common.Actors;
 using Fargo.Core.Entities.Actors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
+
 
 namespace Fargo.Infrastructure.Security;
 

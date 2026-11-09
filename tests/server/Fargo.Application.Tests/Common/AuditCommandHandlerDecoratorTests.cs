@@ -1,11 +1,12 @@
-using Fargo.Application.Common;
-using Fargo.Application.Operations;
+﻿using Fargo.Application.Abstractions;
+using Fargo.Application.Decorators;
 using Fargo.Application.Operations.Articles;
 using Fargo.Application.Operations.Articles.Dtos;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Informations;
 using NSubstitute;
+
 
 namespace Fargo.Application.Tests.Common;
 
