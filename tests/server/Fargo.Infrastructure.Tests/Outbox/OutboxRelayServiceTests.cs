@@ -1,5 +1,5 @@
-using Fargo.ServiceOutbox;
 using Fargo.ServiceOutbox.Options;
+using Fargo.ServiceOutbox.Services;
 
 namespace Fargo.Infrastructure.Tests.Outbox;
 

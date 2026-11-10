@@ -1,6 +1,6 @@
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
-using Fargo.ServiceMigration;
+using Fargo.ServiceMigration.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 

@@ -1,8 +1,8 @@
 using Fargo.Application.Operations.Initialization;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
-using Fargo.ServiceSeed;
 using Fargo.ServiceSeed.Extensions;
+using Fargo.ServiceSeed.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 

@@ -2,7 +2,7 @@ using Fargo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
-namespace Fargo.ServiceMigration;
+namespace Fargo.ServiceMigration.Services;
 
 /// <summary>
 /// Background service responsible for applying pending database migrations

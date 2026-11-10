@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Fargo.ServiceOutbox;
+namespace Fargo.ServiceOutbox.Services;
 
 /// <summary>
 /// Source-generated log messages of the outbox relay host.

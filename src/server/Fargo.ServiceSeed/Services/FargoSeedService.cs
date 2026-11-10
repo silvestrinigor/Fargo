@@ -4,7 +4,7 @@ using Fargo.ServiceSeed.Options;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
-namespace Fargo.ServiceSeed;
+namespace Fargo.ServiceSeed.Services;
 
 /// <summary>
 /// Background service responsible for executing the system seed process during application startup.

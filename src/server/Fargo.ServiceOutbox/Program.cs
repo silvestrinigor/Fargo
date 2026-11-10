@@ -2,8 +2,8 @@ using Fargo.Application.Abstractions;
 using Fargo.Application.Operations.Outbox;
 using Fargo.Infrastructure.Extensions;
 using Fargo.ServiceDefaults;
-using Fargo.ServiceOutbox;
 using Fargo.ServiceOutbox.Options;
+using Fargo.ServiceOutbox.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = Host.CreateApplicationBuilder(args);

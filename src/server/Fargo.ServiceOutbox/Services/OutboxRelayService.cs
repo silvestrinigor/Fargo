@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Fargo.ServiceOutbox;
+namespace Fargo.ServiceOutbox.Services;
 
 /// <summary>
 /// Drives the outbox publish and purge commands continuously in the background.
