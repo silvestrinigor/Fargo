@@ -1,5 +1,6 @@
 using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Operations.Outbox;
+using Fargo.Application.Operations.Outbox.Dtos;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
@@ -74,7 +75,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
         await using var context = postgres.CreateContext();
         var result = await CreatePublisher(context, publisher).HandleAsync(new PublishOutboxBatchCommand(100));
 
-        Assert.Equal(new OutboxBatchResult(3, 3, false), result);
+        Assert.Equal(new OutboxBatchResultDto(3, 3, false), result);
 
         var messages = await ReadOutboxAsync();
         Assert.Equal(messages.Select(m => m.EventId), publisher.Published.Select(e => e.EventId));
@@ -106,7 +107,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
         await using var context = postgres.CreateContext();
         var result = await CreatePublisher(context, publisher).HandleAsync(new PublishOutboxBatchCommand(100));
 
-        Assert.Equal(new OutboxBatchResult(0, 0, false), result);
+        Assert.Equal(new OutboxBatchResultDto(0, 0, false), result);
         Assert.Empty(publisher.Published);
     }
 
@@ -120,7 +121,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
         {
             var result = await CreatePublisher(context, publisher).HandleAsync(new PublishOutboxBatchCommand(100));
 
-            Assert.Equal(new OutboxBatchResult(3, 1, true), result);
+            Assert.Equal(new OutboxBatchResultDto(3, 1, true), result);
         }
 
         var afterFailure = await ReadOutboxAsync();
@@ -138,7 +139,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
         {
             var result = await CreatePublisher(context, retryPublisher).HandleAsync(new PublishOutboxBatchCommand(100));
 
-            Assert.Equal(new OutboxBatchResult(2, 2, false), result);
+            Assert.Equal(new OutboxBatchResultDto(2, 2, false), result);
         }
 
         Assert.Equal(
@@ -168,13 +169,13 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
         {
             var resultB = await CreatePublisher(contextB, publisherB).HandleAsync(new PublishOutboxBatchCommand(100));
 
-            Assert.Equal(new OutboxBatchResult(1, 1, false), resultB);
+            Assert.Equal(new OutboxBatchResultDto(1, 1, false), resultB);
         }
 
         blockingPublisher.Release.SetResult();
 
         var resultA = await relayA.WaitAsync(TimeSpan.FromSeconds(30));
-        Assert.Equal(new OutboxBatchResult(2, 2, false), resultA);
+        Assert.Equal(new OutboxBatchResultDto(2, 2, false), resultA);
 
         var all = blockingPublisher.Published.Concat(publisherB.Published).Select(e => e.EventId).ToList();
         Assert.Equal(3, all.Count);

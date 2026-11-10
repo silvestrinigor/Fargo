@@ -1,24 +1,17 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.IntegrationEvents;
+using Fargo.Application.Operations.Outbox.Dtos;
 using Fargo.Application.Persistence.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Operations.Outbox;
 
 /// <summary>
-/// The outcome of publishing one outbox batch.
-/// </summary>
-/// <param name="Claimed">The number of messages claimed from the outbox.</param>
-/// <param name="Published">The number of messages the broker accepted.</param>
-/// <param name="Failed">Whether publishing stopped on a failure.</param>
-public sealed record OutboxBatchResult(int Claimed, int Published, bool Failed);
-
-/// <summary>
 /// Claims the oldest unpublished outbox messages and publishes them, in order,
 /// through the registered <see cref="IEventPublisher"/>.
 /// </summary>
 /// <param name="BatchSize">The maximum number of messages to claim and publish.</param>
-public sealed record PublishOutboxBatchCommand(int BatchSize) : ICommand<OutboxBatchResult>;
+public sealed record PublishOutboxBatchCommand(int BatchSize) : ICommand<OutboxBatchResultDto>;
 
 /// <summary>
 /// Publishes one batch of waiting outbox messages and marks them processed.
@@ -46,10 +39,10 @@ public sealed class PublishOutboxBatchCommandHandler(
     IEventPublisher publisher,
     TimeProvider timeProvider,
     ILogger<PublishOutboxBatchCommandHandler> logger)
-    : ICommandHandler<PublishOutboxBatchCommand, OutboxBatchResult>
+    : ICommandHandler<PublishOutboxBatchCommand, OutboxBatchResultDto>
 {
     /// <inheritdoc />
-    public async Task<OutboxBatchResult> HandleAsync(
+    public async Task<OutboxBatchResultDto> HandleAsync(
         PublishOutboxBatchCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -61,7 +54,7 @@ public sealed class PublishOutboxBatchCommandHandler(
 
         if (messages.Count == 0)
         {
-            return new OutboxBatchResult(0, 0, false);
+            return new OutboxBatchResultDto(0, 0, false);
         }
 
         var published = 0;
@@ -103,6 +96,6 @@ public sealed class PublishOutboxBatchCommandHandler(
             logger.OutboxBatchPublished(published, messages.Count);
         }
 
-        return new OutboxBatchResult(messages.Count, published, failed);
+        return new OutboxBatchResultDto(messages.Count, published, failed);
     }
 }

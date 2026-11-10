@@ -1,9 +1,7 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.Operations.Outbox;
+using Fargo.Application.Operations.Outbox.Dtos;
 using Fargo.ServiceOutbox.Options;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Fargo.ServiceOutbox.Services;
@@ -23,7 +21,8 @@ public sealed class OutboxRelayService(
     IServiceScopeFactory scopeFactory,
     IOptions<OutboxOptions> options,
     TimeProvider timeProvider,
-    ILogger<OutboxRelayService> logger) : BackgroundService
+    ILogger<OutboxRelayService> logger
+) : BackgroundService
 {
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -41,7 +40,7 @@ public sealed class OutboxRelayService(
                 await using var scope = scopeFactory.CreateAsyncScope();
 
                 var publish = scope.ServiceProvider
-                    .GetRequiredService<ICommandHandler<PublishOutboxBatchCommand, OutboxBatchResult>>();
+                .GetRequiredService<ICommandHandler<PublishOutboxBatchCommand, OutboxBatchResultDto>>();
 
                 var result = await publish.HandleAsync(new PublishOutboxBatchCommand(settings.BatchSize), stoppingToken);
 
