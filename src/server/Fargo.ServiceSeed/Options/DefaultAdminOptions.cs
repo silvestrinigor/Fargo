@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Fargo.ServiceSeed.Options;
 
 /// <summary>
@@ -29,6 +31,7 @@ public sealed class DefaultAdminOptions
     /// This value defines the unique login identifier that will be assigned
     /// to the administrator user created during system initialization.
     /// </remarks>
+    [Required(AllowEmptyStrings = false)]
     public required string Nameid { get; init; }
 
     /// <summary>
@@ -41,6 +44,7 @@ public sealed class DefaultAdminOptions
     /// It should be replaced or changed immediately after the system
     /// is first deployed to ensure proper security.
     /// </remarks>
+    [Required(AllowEmptyStrings = false)]
     public required string Password { get; init; }
 
     public string Description { get; init; } = string.Empty;

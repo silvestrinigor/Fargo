@@ -65,5 +65,6 @@ public sealed class JwtOptions
     /// The default value is 120 minutes (2 hours).
     /// This value determines the expiration time embedded in the token.
     /// </remarks>
+    [Range(1, int.MaxValue)]
     public int AccessTokenExpirationInMinutes { get; init; } = 120;
 }

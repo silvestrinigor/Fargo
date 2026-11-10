@@ -39,20 +39,19 @@ public static class ServiceCollectionExtensions
             services
             .AddOptions<DefaultAdminOptions>()
             .Bind(configuration.GetSection(DefaultAdminOptions.SectionName))
-            .Validate(o => !string.IsNullOrWhiteSpace(o.Nameid), "DefaultAdmin:Nameid must be provided.")
-            .Validate(o => !string.IsNullOrWhiteSpace(o.Password), "DefaultAdmin:Password must be provided.")
+            .ValidateDataAnnotations()
             .ValidateOnStart();
 
             services
             .AddOptions<AdministratorsUserGroupOptions>()
             .Bind(configuration.GetSection(AdministratorsUserGroupOptions.SectionName))
-            .Validate(o => !string.IsNullOrWhiteSpace(o.Nameid), "DefaultAdmin:Nameid must be provided.")
+            .ValidateDataAnnotations()
             .ValidateOnStart();
 
             services
             .AddOptions<GlobalPartitionOptions>()
             .Bind(configuration.GetSection(GlobalPartitionOptions.SectionName))
-            .Validate(o => !string.IsNullOrWhiteSpace(o.Name), "GlobalPartition:Name must be provided.")
+            .ValidateDataAnnotations()
             .ValidateOnStart();
 
             return services;
