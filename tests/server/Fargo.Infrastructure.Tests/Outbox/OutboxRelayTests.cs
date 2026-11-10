@@ -1,17 +1,18 @@
 using Fargo.Application.IntegrationEvents;
-using Fargo.Infrastructure.Outbox;
+using Fargo.Application.Operations.Outbox;
 using Fargo.Infrastructure.Persistence;
+using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 
 namespace Fargo.Infrastructure.Tests.Outbox;
 
 /// <summary>
-/// Relay tests against real PostgreSQL: the claim query uses raw SQL with
-/// <c>FOR UPDATE SKIP LOCKED</c>, which the in-memory provider cannot run.
+/// Outbox publish and purge tests against real PostgreSQL: the claim query uses
+/// raw SQL with <c>FOR UPDATE SKIP LOCKED</c>, which the in-memory provider
+/// cannot run.
 /// </summary>
 public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<PostgresFixture>, IAsyncLifetime
 {
@@ -24,13 +25,17 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
 
     public Task DisposeAsync() => Task.CompletedTask;
 
-    private static OutboxRelay CreateRelay(FargoDbContext context, IEventPublisher publisher, int batchSize = 100)
+    private static PublishOutboxBatchCommandHandler CreatePublisher(FargoDbContext context, IEventPublisher publisher)
         => new(
-            context,
+            new OutboxRepository(context),
             publisher,
-            Options.Create(new OutboxOptions { BatchSize = batchSize }),
             TimeProvider.System,
-            NullLogger<OutboxRelay>.Instance);
+            NullLogger<PublishOutboxBatchCommandHandler>.Instance);
+
+    private static PurgeProcessedOutboxCommandHandler CreatePurger(FargoDbContext context)
+        => new(
+            new OutboxRepository(context),
+            NullLogger<PurgeProcessedOutboxCommandHandler>.Instance);
 
     private async Task<List<Guid>> AddMessagesAsync(int count)
     {
@@ -61,13 +66,13 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
     }
 
     [Fact]
-    public async Task ProcessBatchAsync_ShouldPublishInSequenceOrderAndMarkProcessed()
+    public async Task PublishBatch_ShouldPublishInSequenceOrderAndMarkProcessed()
     {
         var articleGuids = await AddMessagesAsync(3);
         var publisher = new RecordingPublisher();
 
         await using var context = postgres.CreateContext();
-        var result = await CreateRelay(context, publisher).ProcessBatchAsync();
+        var result = await CreatePublisher(context, publisher).HandleAsync(new PublishOutboxBatchCommand(100));
 
         Assert.Equal(new OutboxBatchResult(3, 3, false), result);
 
@@ -78,14 +83,14 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
     }
 
     [Fact]
-    public async Task ProcessBatchAsync_ShouldPublishTheStoredBodyUnchanged()
+    public async Task PublishBatch_ShouldPublishTheStoredBodyUnchanged()
     {
         await AddMessagesAsync(1);
         var stored = Assert.Single(await ReadOutboxAsync());
         var publisher = new RecordingPublisher();
 
         await using var context = postgres.CreateContext();
-        await CreateRelay(context, publisher).ProcessBatchAsync();
+        await CreatePublisher(context, publisher).HandleAsync(new PublishOutboxBatchCommand(100));
 
         var published = Assert.Single(publisher.Published);
         Assert.Equal(stored.Body, published.Body);
@@ -94,26 +99,26 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
     }
 
     [Fact]
-    public async Task ProcessBatchAsync_WhenOutboxEmpty_ShouldDoNothing()
+    public async Task PublishBatch_WhenOutboxEmpty_ShouldDoNothing()
     {
         var publisher = new RecordingPublisher();
 
         await using var context = postgres.CreateContext();
-        var result = await CreateRelay(context, publisher).ProcessBatchAsync();
+        var result = await CreatePublisher(context, publisher).HandleAsync(new PublishOutboxBatchCommand(100));
 
         Assert.Equal(new OutboxBatchResult(0, 0, false), result);
         Assert.Empty(publisher.Published);
     }
 
     [Fact]
-    public async Task ProcessBatchAsync_WhenPublishFails_ShouldStopRecordTheErrorAndRetryInOrderLater()
+    public async Task PublishBatch_WhenPublishFails_ShouldStopRecordTheErrorAndRetryInOrderLater()
     {
         await AddMessagesAsync(3);
         var publisher = new RecordingPublisher { FailOnCall = 2 };
 
         await using (var context = postgres.CreateContext())
         {
-            var result = await CreateRelay(context, publisher).ProcessBatchAsync();
+            var result = await CreatePublisher(context, publisher).HandleAsync(new PublishOutboxBatchCommand(100));
 
             Assert.Equal(new OutboxBatchResult(3, 1, true), result);
         }
@@ -131,7 +136,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
 
         await using (var context = postgres.CreateContext())
         {
-            var result = await CreateRelay(context, retryPublisher).ProcessBatchAsync();
+            var result = await CreatePublisher(context, retryPublisher).HandleAsync(new PublishOutboxBatchCommand(100));
 
             Assert.Equal(new OutboxBatchResult(2, 2, false), result);
         }
@@ -143,7 +148,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
     }
 
     [Fact]
-    public async Task ProcessBatchAsync_WhenTwoRelaysRunConcurrently_ShouldNeverPublishTheSameMessageTwice()
+    public async Task PublishBatch_WhenTwoRelaysRunConcurrently_ShouldNeverPublishTheSameMessageTwice()
     {
         await AddMessagesAsync(3);
 
@@ -152,7 +157,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
         var blockingPublisher = new BlockingPublisher();
 
         await using var contextA = postgres.CreateContext();
-        var relayA = CreateRelay(contextA, blockingPublisher, batchSize: 2).ProcessBatchAsync();
+        var relayA = CreatePublisher(contextA, blockingPublisher).HandleAsync(new PublishOutboxBatchCommand(2));
 
         await blockingPublisher.Entered.Task.WaitAsync(TimeSpan.FromSeconds(30));
 
@@ -161,7 +166,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
 
         await using (var contextB = postgres.CreateContext())
         {
-            var resultB = await CreateRelay(contextB, publisherB).ProcessBatchAsync();
+            var resultB = await CreatePublisher(contextB, publisherB).HandleAsync(new PublishOutboxBatchCommand(100));
 
             Assert.Equal(new OutboxBatchResult(1, 1, false), resultB);
         }
@@ -178,19 +183,19 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
     }
 
     [Fact]
-    public async Task PurgeProcessedAsync_ShouldDeleteOnlyProcessedMessagesBeforeTheCutoff()
+    public async Task Purge_ShouldDeleteOnlyProcessedMessagesBeforeTheCutoff()
     {
         await AddMessagesAsync(3);
 
         await using (var context = postgres.CreateContext())
         {
-            await CreateRelay(context, new RecordingPublisher(), batchSize: 2).ProcessBatchAsync();
+            await CreatePublisher(context, new RecordingPublisher()).HandleAsync(new PublishOutboxBatchCommand(2));
         }
 
         await using (var context = postgres.CreateContext())
         {
-            var deleted = await CreateRelay(context, new RecordingPublisher())
-                .PurgeProcessedAsync(DateTimeOffset.UtcNow.AddMinutes(1));
+            var deleted = await CreatePurger(context)
+                .HandleAsync(new PurgeProcessedOutboxCommand(DateTimeOffset.UtcNow.AddMinutes(1)));
 
             Assert.Equal(2, deleted);
         }

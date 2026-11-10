@@ -95,7 +95,7 @@ public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
     /// while removing the item from a container records a movement with no
     /// destination container.
     /// </remarks>
-    public IReadOnlyCollection<ItemMoviment> Moviments => Moviments;
+    public IReadOnlyCollection<ItemMoviment> Moviments => moviments;
 
     private readonly List<ItemMoviment> moviments = [];
 

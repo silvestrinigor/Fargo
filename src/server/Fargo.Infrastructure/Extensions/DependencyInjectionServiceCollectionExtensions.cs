@@ -128,33 +128,15 @@ public static class DependencyInjectionServiceCollectionExtensions
         .AddScoped<ISupplyOrderRepository, SupplyOrderRepository>()
         .AddScoped<ISupplyOrderQueryRepository, SupplyOrderRepository>();
 
+        public IServiceCollection AddFargoOutboxRepository() =>
+            services.AddScoped<IOutboxRepository, OutboxRepository>();
+
         public void AddFargoSecurity() => services
         .AddScoped<IPasswordHasher, IdentityPasswordHasher>()
         .AddScoped<ITokenGenerator, JwtTokenGenerator>()
         .AddScoped<ITokenHasher, Sha256TokenHasher>()
         .AddScoped<IRefreshTokenGenerator, CryptoRefreshTokenGenerator>()
         .AddScoped<IClientSecretGenerator, ClientSecretGenerator>();
-
-        /// <summary>
-        /// Registers the background relay that publishes outbox messages through
-        /// the registered <see cref="IEventPublisher"/>. Register it in one host
-        /// only (Fargo.ServiceOutbox); other hosts still write outbox messages.
-        /// </summary>
-        public IServiceCollection AddFargoOutboxRelay(IConfiguration configuration)
-        {
-            services
-            .AddOptions<OutboxOptions>()
-            .Bind(configuration.GetSection(OutboxOptions.SectionName))
-            .ValidateDataAnnotations();
-
-            services.TryAddSingleton(TimeProvider.System);
-
-            services.AddScoped<OutboxRelay>();
-
-            services.AddHostedService<OutboxRelayService>();
-
-            return services;
-        }
 
         /// <summary>
         /// Registers <see cref="RabbitMqEventPublisher"/> as the

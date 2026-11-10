@@ -1,14 +1,12 @@
-using Fargo.Application.IntegrationEvents;
-
-namespace Fargo.Infrastructure.Outbox;
+namespace Fargo.Application.IntegrationEvents;
 
 /// <summary>
 /// An integration event waiting to be published, stored in the same database
 /// transaction as the change that produced it (transactional outbox).
 /// </summary>
 /// <remarks>
-/// Rows are written by <see cref="OutboxSaveChangesInterceptor"/> and read only
-/// by <see cref="OutboxRelay"/>, which publishes them in <see cref="Sequence"/>
+/// Rows are written by the outbox save-changes interceptor (Fargo.Infrastructure) and read only
+/// by the outbox relay (Fargo.ServiceOutbox), which publishes them in <see cref="Sequence"/>
 /// order and marks them processed. Processed rows are purged after a retention
 /// period.
 /// </remarks>

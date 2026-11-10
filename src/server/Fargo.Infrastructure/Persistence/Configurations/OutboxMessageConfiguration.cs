@@ -1,4 +1,4 @@
-using Fargo.Infrastructure.Outbox;
+using Fargo.Application.IntegrationEvents;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -7,7 +7,7 @@ namespace Fargo.Infrastructure.Persistence.Configurations;
 public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>
 {
     /// <summary>
-    /// The table name. <see cref="OutboxRelay"/> repeats it in its raw claim
+    /// The table name. <c>OutboxRepository</c> repeats it in its raw claim
     /// query, so keep the two in sync.
     /// </summary>
     public const string TableName = "outbox_messages";

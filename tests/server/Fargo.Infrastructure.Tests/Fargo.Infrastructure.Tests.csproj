@@ -32,6 +32,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\server\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\src\server\Fargo.Core\Fargo.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\server\Fargo.ServiceOutbox\Fargo.ServiceOutbox.csproj" />
   </ItemGroup>
 
 </Project>

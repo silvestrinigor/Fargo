@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Fargo.Infrastructure.Outbox;
+namespace Fargo.ServiceOutbox.Options;
 
 /// <summary>
 /// Configuration of the outbox relay, bound from the <c>Outbox</c> section.

@@ -1,19 +1,23 @@
+using Fargo.Application.Abstractions;
+using Fargo.Application.Operations.Outbox;
+using Fargo.ServiceOutbox.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Fargo.Infrastructure.Outbox;
+namespace Fargo.ServiceOutbox;
 
 /// <summary>
-/// Runs the <see cref="OutboxRelay"/> continuously in the background.
+/// Drives the outbox publish and purge commands continuously in the background.
 /// </summary>
 /// <remarks>
-/// A full batch is followed immediately by the next one; an empty or partial
-/// batch waits <see cref="OutboxOptions.PollInterval"/>. After a failure the
-/// wait doubles, up to <see cref="OutboxOptions.MaxRetryDelay"/>, and resets on
-/// the next success. Published messages past their retention are purged every
-/// <see cref="OutboxOptions.PurgeInterval"/>.
+/// This host owns only scheduling: a full batch is followed immediately by the
+/// next one; an empty or partial batch waits <see cref="OutboxOptions.PollInterval"/>.
+/// After a failure the wait doubles, up to <see cref="OutboxOptions.MaxRetryDelay"/>,
+/// and resets on the next success. Published messages past their retention are
+/// purged every <see cref="OutboxOptions.PurgeInterval"/>. The publishing and
+/// purging rules themselves live in the application command handlers.
 /// </remarks>
 public sealed class OutboxRelayService(
     IServiceScopeFactory scopeFactory,
@@ -36,9 +40,10 @@ public sealed class OutboxRelayService(
             {
                 await using var scope = scopeFactory.CreateAsyncScope();
 
-                var relay = scope.ServiceProvider.GetRequiredService<OutboxRelay>();
+                var publish = scope.ServiceProvider
+                    .GetRequiredService<ICommandHandler<PublishOutboxBatchCommand, OutboxBatchResult>>();
 
-                var result = await relay.ProcessBatchAsync(stoppingToken);
+                var result = await publish.HandleAsync(new PublishOutboxBatchCommand(settings.BatchSize), stoppingToken);
 
                 if (result.Failed)
                 {
@@ -55,7 +60,10 @@ public sealed class OutboxRelayService(
 
                 if (now >= nextPurgeAt)
                 {
-                    await relay.PurgeProcessedAsync(now - settings.Retention, stoppingToken);
+                    var purge = scope.ServiceProvider
+                        .GetRequiredService<ICommandHandler<PurgeProcessedOutboxCommand, int>>();
+
+                    await purge.HandleAsync(new PurgeProcessedOutboxCommand(now - settings.Retention), stoppingToken);
 
                     nextPurgeAt = now + settings.PurgeInterval;
                 }
