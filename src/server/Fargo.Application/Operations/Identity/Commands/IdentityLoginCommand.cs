@@ -51,7 +51,8 @@ public sealed class IdentityLoginCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     IAuthenticationAttemptService attemptService,
     IClientContext clientContext,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    TimeProvider timeProvider
 ) : ICommandHandler<IdentityLoginCommand, IdentityAuthResultDto>
 {
     /// <summary>
@@ -163,7 +164,7 @@ public sealed class IdentityLoginCommandHandler(
             throw new InvalidCredentialsFargoApplicationException($"The password does not match for user '{user.ActorGuid}'.");
         }
 
-        if (user.Authentication.IsPasswordChangeRequired)
+        if (user.Authentication.IsPasswordChangeRequiredAt(timeProvider.GetUtcNow()))
         {
             await attemptService.RegisterSuccessAsync(
                 command.Nameid,
@@ -184,7 +185,7 @@ public sealed class IdentityLoginCommandHandler(
 
         var refreshTokenHash = tokenHasher.Hash(rawRefreshToken);
 
-        var refreshToken = RefreshToken.Create(user.ActorGuid, refreshTokenHash);
+        var refreshToken = RefreshToken.Create(user.ActorGuid, refreshTokenHash, timeProvider.GetUtcNow());
 
         refreshTokenRepository.Add(refreshToken);
 

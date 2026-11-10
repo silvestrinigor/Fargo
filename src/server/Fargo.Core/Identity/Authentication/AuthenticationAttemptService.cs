@@ -6,7 +6,10 @@ namespace Fargo.Core.Identity.Authentication;
 /// <param name="attemptRepository">
 /// The repository used to persist and query authentication attempts.
 /// </param>
-public sealed class AuthenticationAttemptService(IAuthenticationAttemptRepository attemptRepository) : IAuthenticationAttemptService
+/// <param name="timeProvider">Supplies the current time.</param>
+public sealed class AuthenticationAttemptService(
+    IAuthenticationAttemptRepository attemptRepository,
+    TimeProvider timeProvider) : IAuthenticationAttemptService
 {
     /// <inheritdoc/>
     public async Task<AuthenticationAttemptAllowResults> IsAllowedAsync(string identifier, string ipAddress, CancellationToken cancellationToken)
@@ -17,7 +20,7 @@ public sealed class AuthenticationAttemptService(IAuthenticationAttemptRepositor
 
         var lastFailAuth = await attemptRepository.GetLastFailAuthenticationAttemptAsync(ipAddress, identifier, cancellationToken);
 
-        var now = DateTimeOffset.UtcNow;
+        var now = timeProvider.GetUtcNow();
 
         var retryAfter = TimeSpan.Zero;
 
@@ -55,7 +58,7 @@ public sealed class AuthenticationAttemptService(IAuthenticationAttemptRepositor
     /// <inheritdoc/>
     public Task RegisterFailureAsync(string identifier, string ipAddress, CancellationToken cancellationToken)
     {
-        var attempt = new AuthenticationAttempt(identifier, ipAddress, successful: false);
+        var attempt = new AuthenticationAttempt(identifier, ipAddress, successful: false, timeProvider.GetUtcNow());
 
         attemptRepository.Add(attempt);
 
@@ -65,7 +68,7 @@ public sealed class AuthenticationAttemptService(IAuthenticationAttemptRepositor
     /// <inheritdoc/>
     public Task RegisterSuccessAsync(string identifier, string ipAddress, CancellationToken cancellationToken)
     {
-        var attempt = new AuthenticationAttempt(identifier, ipAddress, successful: true);
+        var attempt = new AuthenticationAttempt(identifier, ipAddress, successful: true, timeProvider.GetUtcNow());
 
         attemptRepository.Add(attempt);
 

@@ -26,7 +26,8 @@ public sealed class UserUpdateCommandHandler(
     IPasswordHasher passwordHasher,
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
-    ICurrentActor currentActor
+    ICurrentActor currentActor,
+    TimeProvider timeProvider
 ) : ICommandHandler<UserUpdateCommand>
 {
     public async Task HandleAsync(
@@ -90,7 +91,7 @@ public sealed class UserUpdateCommandHandler(
 
                 user.Authentication.SetPasswordHash(passwordHash);
 
-                user.Authentication.MarkPasswordChangeAsRequired();
+                user.Authentication.MarkPasswordChangeAsRequired(timeProvider.GetUtcNow());
             }
 
             if (auth.DefaultPasswordExpirationPeriod is not null)

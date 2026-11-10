@@ -13,7 +13,7 @@ public class RefreshTokenRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new RefreshTokenRepository(context);
-        var token = RefreshToken.Create(Guid.NewGuid(), Hash("HASH-A"));
+        var token = RefreshToken.Create(Guid.NewGuid(), Hash("HASH-A"), DateTimeOffset.UtcNow);
 
         repo.Add(token);
         await context.SaveChangesAsync();
@@ -29,7 +29,7 @@ public class RefreshTokenRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new RefreshTokenRepository(context);
-        var token = RefreshToken.Create(Guid.NewGuid(), Hash("HASH-B"));
+        var token = RefreshToken.Create(Guid.NewGuid(), Hash("HASH-B"), DateTimeOffset.UtcNow);
 
         repo.Add(token);
         await context.SaveChangesAsync();
@@ -48,9 +48,9 @@ public class RefreshTokenRepositoryTests
         var userA = Guid.NewGuid();
         var userB = Guid.NewGuid();
 
-        repo.Add(RefreshToken.Create(userA, Hash("A1")));
-        repo.Add(RefreshToken.Create(userA, Hash("A2")));
-        repo.Add(RefreshToken.Create(userB, Hash("B1")));
+        repo.Add(RefreshToken.Create(userA, Hash("A1"), DateTimeOffset.UtcNow));
+        repo.Add(RefreshToken.Create(userA, Hash("A2"), DateTimeOffset.UtcNow));
+        repo.Add(RefreshToken.Create(userB, Hash("B1"), DateTimeOffset.UtcNow));
         await context.SaveChangesAsync();
 
         var tokens = await repo.GetByUserGuidAsync(userA);
@@ -75,7 +75,7 @@ public class RefreshTokenRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new RefreshTokenRepository(context);
-        var token = RefreshToken.Create(Guid.NewGuid(), Hash("HASH-C"));
+        var token = RefreshToken.Create(Guid.NewGuid(), Hash("HASH-C"), DateTimeOffset.UtcNow);
         repo.Add(token);
         await context.SaveChangesAsync();
 
@@ -90,16 +90,16 @@ public class RefreshTokenRepositoryTests
     {
         await using var context = TestDbContextFactory.Create();
         var repo = new RefreshTokenRepository(context);
-        var token = RefreshToken.Create(Guid.NewGuid(), Hash("HASH-D"));
+        var token = RefreshToken.Create(Guid.NewGuid(), Hash("HASH-D"), DateTimeOffset.UtcNow);
         repo.Add(token);
         await context.SaveChangesAsync();
 
-        token.Revoke();
+        token.Revoke(DateTimeOffset.UtcNow);
         await context.SaveChangesAsync();
 
         var reloaded = await repo.GetByGuidAsync(token.Guid);
         Assert.NotNull(reloaded);
         Assert.NotNull(reloaded!.RevokedAt);
-        Assert.False(reloaded.IsUsable);
+        Assert.False(reloaded.IsUsableAt(DateTimeOffset.UtcNow));
     }
 }

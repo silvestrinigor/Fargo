@@ -49,7 +49,7 @@ public sealed class RefreshToken
     /// Newly created refresh tokens expire after
     /// <see cref="DefaultExpirationTimeSpan"/> from their creation time.
     /// </remarks>
-    public DateTimeOffset ExpiresAt { get; init; } = DateTimeOffset.UtcNow + DefaultExpirationTimeSpan;
+    public DateTimeOffset ExpiresAt { get; private init; }
 
     /// <summary>
     /// Gets the date and time when the refresh token was revoked.
@@ -61,19 +61,21 @@ public sealed class RefreshToken
     public DateTimeOffset? RevokedAt { get; private set; }
 
     /// <summary>
-    /// Gets a value indicating whether the refresh token has expired.
+    /// Determines whether the refresh token has expired at the given instant.
     /// </summary>
-    public bool IsExpired => ExpiresAt <= DateTimeOffset.UtcNow;
+    /// <param name="now">The instant, in UTC, to evaluate against.</param>
+    public bool IsExpiredAt(DateTimeOffset now) => ExpiresAt <= now;
 
     /// <summary>
-    /// Gets a value indicating whether the refresh token can currently be used
-    /// to obtain a new access token.
+    /// Determines whether the refresh token can be used at the given instant to
+    /// obtain a new access token.
     /// </summary>
     /// <remarks>
     /// A refresh token is usable only while it has not expired and has not been
     /// revoked.
     /// </remarks>
-    public bool IsUsable => !IsExpired && RevokedAt is null;
+    /// <param name="now">The instant, in UTC, to evaluate against.</param>
+    public bool IsUsableAt(DateTimeOffset now) => !IsExpiredAt(now) && RevokedAt is null;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RefreshToken"/> class.
@@ -94,14 +96,19 @@ public sealed class RefreshToken
     /// <param name="tokenHash">
     /// The hashed value of the refresh token.
     /// </param>
+    /// <param name="createdAt">
+    /// The instant, in UTC, at which the token is created. The token expires
+    /// <see cref="DefaultExpirationTimeSpan"/> after it.
+    /// </param>
     /// <returns>
     /// A new <see cref="RefreshToken"/> instance.
     /// </returns>
-    public static RefreshToken Create(Guid userGuid, TokenHash tokenHash)
+    public static RefreshToken Create(Guid userGuid, TokenHash tokenHash, DateTimeOffset createdAt)
         => new()
         {
             UserGuid = userGuid,
-            TokenHash = tokenHash
+            TokenHash = tokenHash,
+            ExpiresAt = createdAt + DefaultExpirationTimeSpan,
         };
 
     /// <summary>
@@ -110,8 +117,9 @@ public sealed class RefreshToken
     /// <remarks>
     /// If the refresh token has already been revoked, this method has no effect.
     /// </remarks>
-    public void Revoke()
+    /// <param name="revokedAt">The instant, in UTC, at which the token is revoked.</param>
+    public void Revoke(DateTimeOffset revokedAt)
     {
-        RevokedAt ??= DateTimeOffset.UtcNow;
+        RevokedAt ??= revokedAt;
     }
 }

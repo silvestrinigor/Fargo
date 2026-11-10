@@ -27,7 +27,7 @@ public sealed class AuthenticationAttempt
     /// <summary>
     /// Gets the date and time, in UTC, at which the attempt occurred.
     /// </summary>
-    public DateTimeOffset OccuredAt { get; private init; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset OccuredAt { get; private init; }
 
     /// <summary>
     /// Gets a value indicating whether the authentication attempt succeeded.
@@ -48,12 +48,17 @@ public sealed class AuthenticationAttempt
     /// <param name="successful">
     /// A value indicating whether the authentication attempt succeeded.
     /// </param>
-    public AuthenticationAttempt(string actorIdentifier, string ipAddress, bool successful)
+    /// <param name="occurredAt">
+    /// The instant, in UTC, at which the attempt occurred.
+    /// </param>
+    public AuthenticationAttempt(string actorIdentifier, string ipAddress, bool successful, DateTimeOffset occurredAt)
     {
         ActorIdentifier = actorIdentifier;
 
         IpAddress = ipAddress;
 
         Successful = successful;
+
+        OccuredAt = occurredAt;
     }
 }

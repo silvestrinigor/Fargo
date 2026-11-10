@@ -25,7 +25,8 @@ public sealed class UserCreateCommandHandler(
     IPartitionRepository partitionRepository,
     IUserGroupRepository userGroupRepository,
     ICurrentActor currentActor,
-    IPasswordHasher passwordHasher
+    IPasswordHasher passwordHasher,
+    TimeProvider timeProvider
 ) : ICommandHandler<UserCreateCommand, Guid>
 {
     public async Task<Guid> HandleAsync(
@@ -73,7 +74,7 @@ public sealed class UserCreateCommandHandler(
             user.Authentication.SetPasswordHash(passwordHash);
         }
 
-        user.Authentication.MarkPasswordChangeAsRequired();
+        user.Authentication.MarkPasswordChangeAsRequired(timeProvider.GetUtcNow());
 
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {

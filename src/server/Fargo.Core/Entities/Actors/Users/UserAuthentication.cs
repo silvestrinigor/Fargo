@@ -33,10 +33,12 @@ public class UserAuthentication
     public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
 
     /// <summary>
-    /// Gets a value indicating whether the user is required to change their password.
+    /// Determines whether the user is required to change their password at the
+    /// given instant.
     /// </summary>
-    public bool IsPasswordChangeRequired
-        => RequirePasswordChangeAt is not null && DateTimeOffset.UtcNow >= RequirePasswordChangeAt;
+    /// <param name="now">The instant, in UTC, to evaluate against.</param>
+    public bool IsPasswordChangeRequiredAt(DateTimeOffset now)
+        => RequirePasswordChangeAt is not null && now >= RequirePasswordChangeAt;
 
     /// <summary>
     /// Gets the current authentication version of the user.
@@ -62,7 +64,7 @@ public class UserAuthentication
     /// <see cref="DefaultPasswordExpirationPeriod"/>.
     ///
     /// The new expiration date is calculated by adding the configured
-    /// default expiration interval to the current UTC time.
+    /// default expiration interval to <paramref name="now"/>.
     ///
     /// A value of <see cref="TimeSpan.Zero"/> causes the password to expire
     /// immediately.
@@ -71,20 +73,22 @@ public class UserAuthentication
     /// This method is typically used after the user successfully changes
     /// their own password.
     /// </remarks>
-    public void ResetPasswordExpiration()
-        => RequirePasswordChangeAt = DateTimeOffset.UtcNow + DefaultPasswordExpirationPeriod;
+    /// <param name="now">The instant, in UTC, to calculate the expiration from.</param>
+    public void ResetPasswordExpiration(DateTimeOffset now)
+        => RequirePasswordChangeAt = now + DefaultPasswordExpirationPeriod;
 
     /// <summary>
     /// Marks the user's password as requiring an immediate change.
     /// </summary>
     /// <remarks>
-    /// After calling this method, <see cref="IsPasswordChangeRequired"/> returns
+    /// After calling this method, <see cref="IsPasswordChangeRequiredAt"/> returns
     /// <see langword="true"/> until the password is changed and its expiration
     /// is reset.
     /// </remarks>
-    public void MarkPasswordChangeAsRequired()
+    /// <param name="now">The instant, in UTC, from which the change is required.</param>
+    public void MarkPasswordChangeAsRequired(DateTimeOffset now)
     {
-        RequirePasswordChangeAt = DateTimeOffset.UtcNow;
+        RequirePasswordChangeAt = now;
     }
 
     /// <summary>

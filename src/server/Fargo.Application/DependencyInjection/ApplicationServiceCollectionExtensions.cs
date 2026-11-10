@@ -16,6 +16,7 @@ using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Identity.Authentication;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Fargo.Application.DependencyInjection;
 
@@ -41,13 +42,21 @@ public static class ApplicationServiceCollectionExtensions
         .AddFargoAuditLogApplication()
         .AddFargoSupplyOrderApplication();
 
-        public IServiceCollection AddFargoDomainServices() => services
-        .AddScoped<ActorResolver>()
-        .AddScoped<ArticleService>()
-        .AddScoped<UserService>()
-        .AddScoped<UserGroupService>()
-        .AddScoped<PartitionService>()
-        .AddScoped<ItemService>()
-        .AddScoped<IAuthenticationAttemptService, AuthenticationAttemptService>();
+        public IServiceCollection AddFargoDomainServices()
+        {
+            // Stateless system clock; one instance serves every consumer. Handlers
+            // and domain services take the current time from here so time-dependent
+            // behaviour (token expiry, lockout windows) is deterministic in tests.
+            services.TryAddSingleton(TimeProvider.System);
+
+            return services
+            .AddScoped<ActorResolver>()
+            .AddScoped<ArticleService>()
+            .AddScoped<UserService>()
+            .AddScoped<UserGroupService>()
+            .AddScoped<PartitionService>()
+            .AddScoped<ItemService>()
+            .AddScoped<IAuthenticationAttemptService, AuthenticationAttemptService>();
+        }
     }
 }

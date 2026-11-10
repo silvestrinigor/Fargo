@@ -31,7 +31,10 @@ public class AuditLogTypeResolverTests
         var commandTypes = typeof(ArticleCreateCommand).Assembly
             .GetTypes()
             .Where(t => t is { IsAbstract: false, IsInterface: false }
-                && commandInterface.IsAssignableFrom(t));
+                && commandInterface.IsAssignableFrom(t)
+                // Non-audited commands (for example the outbox relay) are
+                // registered outside the audited pipeline and carry no mapping.
+                && !typeof(INonAuditedCommand).IsAssignableFrom(t));
 
         foreach (var commandType in commandTypes)
         {

@@ -33,7 +33,8 @@ public class UserCreateCommandHandlerTests
             partitionRepository,
             userGroupRepository,
             currentActor,
-            passwordHasher);
+            passwordHasher,
+            TimeProvider.System);
 
     private static UserCreateCommand SimpleCommand(string nameid = "newuser")
         => new(new UserCreateDto(new Nameid(nameid)));

@@ -24,7 +24,8 @@ public sealed record IdentityPasswordChangeCommand(IdentityPasswordUpdateDto Pas
 public sealed class IdentityPasswordChangeCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
-    IRefreshTokenRepository refreshTokenRepository
+    IRefreshTokenRepository refreshTokenRepository,
+    TimeProvider timeProvider
 ) : ICommandHandler<IdentityPasswordChangeCommand>
 {
     /// <summary>
@@ -68,17 +69,19 @@ public sealed class IdentityPasswordChangeCommandHandler(
             throw new InvalidCredentialsFargoApplicationException($"The current password does not match for user '{user.ActorGuid}'.");
         }
 
+        var now = timeProvider.GetUtcNow();
+
         user.Authentication.SetPasswordHash(passwordHasher.Hash(command.Passwords.NewPassword));
 
-        user.Authentication.ResetPasswordExpiration();
+        user.Authentication.ResetPasswordExpiration(now);
 
         user.Authentication.RotateAuthVersion();
 
         var refreshTokens = await refreshTokenRepository.GetByUserGuidAsync(user.ActorGuid, cancellationToken);
 
-        foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsable))
+        foreach (var refreshToken in refreshTokens.Where(refreshToken => refreshToken.IsUsableAt(now)))
         {
-            refreshToken.Revoke();
+            refreshToken.Revoke(now);
         }
     }
 }

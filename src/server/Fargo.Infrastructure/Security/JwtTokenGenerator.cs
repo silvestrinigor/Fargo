@@ -33,7 +33,7 @@ namespace Fargo.Infrastructure.Security;
 /// The token is signed using HMAC SHA-256 and expires according to
 /// <see cref="JwtOptions.AccessTokenExpirationInMinutes"/>.
 /// </remarks>
-public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions) : ITokenGenerator
+public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions, TimeProvider timeProvider) : ITokenGenerator
 {
     private readonly JwtOptions options = jwtOptions.Value;
 
@@ -63,7 +63,7 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions) : ITokenG
             new(FargoJwtClaims.AuthVersion, user.Authentication.AuthVersion.ToString()),
         };
 
-        var expiresAt = DateTimeOffset.UtcNow.AddMinutes(
+        var expiresAt = timeProvider.GetUtcNow().AddMinutes(
             options.AccessTokenExpirationInMinutes);
 
         var token = new JwtSecurityToken(
@@ -100,7 +100,7 @@ public sealed class JwtTokenGenerator(IOptions<JwtOptions> jwtOptions) : ITokenG
             new(FargoJwtClaims.ActorType, FargoJwtClaims.ActorTypeService),
         };
 
-        var expiresAt = DateTimeOffset.UtcNow.AddMinutes(
+        var expiresAt = timeProvider.GetUtcNow().AddMinutes(
             options.AccessTokenExpirationInMinutes);
 
         var token = new JwtSecurityToken(

@@ -11,7 +11,7 @@ namespace Fargo.Application.Operations.Outbox;
 /// through the registered <see cref="IEventPublisher"/>.
 /// </summary>
 /// <param name="BatchSize">The maximum number of messages to claim and publish.</param>
-public sealed record PublishOutboxBatchCommand(int BatchSize) : ICommand<OutboxBatchResultDto>;
+public sealed record PublishOutboxBatchCommand(int BatchSize) : ICommand<OutboxBatchResultDto>, INonAuditedCommand;
 
 /// <summary>
 /// Publishes one batch of waiting outbox messages and marks them processed.

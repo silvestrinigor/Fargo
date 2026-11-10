@@ -26,7 +26,8 @@ public class IdentityPasswordChangeCommandHandlerTests
         => new(
             userRepository,
             passwordHasher,
-            refreshTokenRepository);
+            refreshTokenRepository,
+            TimeProvider.System);
 
     private static IdentityPasswordChangeCommand Command(
         string nameid = ValidNameid, string currentPassword = CurrentPassword)
@@ -66,14 +67,14 @@ public class IdentityPasswordChangeCommandHandlerTests
         passwordHasher.Verify(Arg.Any<PasswordHash>(), Arg.Any<Password>()).Returns(true);
         passwordHasher.Hash(Arg.Any<Password>()).Returns(new PasswordHash("new-hash"));
 
-        var activeToken = RefreshToken.Create(user.ActorGuid, new TokenHash(new string('a', 64)));
+        var activeToken = RefreshToken.Create(user.ActorGuid, new TokenHash(new string('a', 64)), DateTimeOffset.UtcNow);
         refreshTokenRepository.GetByUserGuidAsync(user.ActorGuid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<RefreshToken>>([activeToken]));
 
         await CreateHandler().HandleAsync(Command());
 
         Assert.Equal("new-hash", user.Authentication.PasswordHash!.Value.Value);
-        Assert.False(activeToken.IsUsable);
+        Assert.False(activeToken.IsUsableAt(DateTimeOffset.UtcNow));
     }
 
     [Fact]

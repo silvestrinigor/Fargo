@@ -9,7 +9,7 @@ namespace Fargo.Application.Operations.Outbox;
 /// outbox does not grow without bound.
 /// </summary>
 /// <param name="Cutoff">Messages processed before this instant are deleted.</param>
-public sealed record PurgeProcessedOutboxCommand(DateTimeOffset Cutoff) : ICommand<int>;
+public sealed record PurgeProcessedOutboxCommand(DateTimeOffset Cutoff) : ICommand<int>, INonAuditedCommand;
 
 /// <summary>
 /// Purges processed outbox messages older than the requested cutoff.

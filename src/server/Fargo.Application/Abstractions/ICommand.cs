@@ -33,6 +33,14 @@ public interface ICommand<out TResponse> : ICommand;
 public interface ITransactionalCommand : ICommand;
 
 /// <summary>
+/// Marks a command that is intentionally not audited and therefore is exempt
+/// from the total <c>AuditLogType</c> mapping. These are system or background
+/// operations registered outside the audited command pipeline (for example the
+/// outbox relay), not user actions, so they carry no audit classification.
+/// </summary>
+public interface INonAuditedCommand : ICommand;
+
+/// <summary>
 /// Defines a handler responsible for executing a command.
 /// </summary>
 /// <typeparam name="TCommand">

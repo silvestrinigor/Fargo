@@ -35,7 +35,8 @@ public sealed class IdentityRefreshCommandHandler(
     IRefreshTokenGenerator refreshTokenGenerator,
     ITokenHasher tokenHasher,
     IRefreshTokenRepository refreshTokenRepository,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    TimeProvider timeProvider
 ) : ICommandHandler<IdentityRefreshCommand, IdentityAuthResultDto>
 {
     /// <summary>
@@ -48,11 +49,13 @@ public sealed class IdentityRefreshCommandHandler(
     /// <returns>A new authentication result containing updated access and refresh tokens</returns>
     public async Task<IdentityAuthResultDto> HandleAsync(IdentityRefreshCommand command, CancellationToken cancellationToken = default)
     {
+        var now = timeProvider.GetUtcNow();
+
         var oldRefreshTokenHash = tokenHasher.Hash(command.RefreshToken);
 
         var storedOldRefreshToken = await refreshTokenRepository.GetByTokenHashAsync(oldRefreshTokenHash, cancellationToken);
 
-        if (storedOldRefreshToken == null || !storedOldRefreshToken.IsUsable)
+        if (storedOldRefreshToken == null || !storedOldRefreshToken.IsUsableAt(now))
         {
             throw new InvalidCredentialsFargoApplicationException("The refresh token was missing or not usable.");
         }
@@ -66,7 +69,7 @@ public sealed class IdentityRefreshCommandHandler(
 
         if (!user.Actor.IsActive)
         {
-            storedOldRefreshToken.Revoke();
+            storedOldRefreshToken.Revoke(now);
 
             // Persist the token revocation before throwing: the
             // commit-on-success decorator skips committing when the handler
@@ -76,9 +79,9 @@ public sealed class IdentityRefreshCommandHandler(
             throw new InvalidCredentialsFargoApplicationException($"User '{user.ActorGuid}' is not active; the old refresh token was revoked.");
         }
 
-        if (user.Authentication.IsPasswordChangeRequired)
+        if (user.Authentication.IsPasswordChangeRequiredAt(now))
         {
-            storedOldRefreshToken.Revoke();
+            storedOldRefreshToken.Revoke(now);
 
             // Persist the token revocation before throwing: the
             // commit-on-success decorator skips committing when the handler
@@ -92,11 +95,11 @@ public sealed class IdentityRefreshCommandHandler(
 
         var newRefreshTokenHash = tokenHasher.Hash(rawNewRefreshToken);
 
-        var storedNewRefreshToken = RefreshToken.Create(user.ActorGuid, newRefreshTokenHash);
+        var storedNewRefreshToken = RefreshToken.Create(user.ActorGuid, newRefreshTokenHash, now);
 
         refreshTokenRepository.Add(storedNewRefreshToken);
 
-        storedOldRefreshToken.Revoke();
+        storedOldRefreshToken.Revoke(now);
 
         var newAccessTokenResult = tokenGenerator.Generate(user);
 

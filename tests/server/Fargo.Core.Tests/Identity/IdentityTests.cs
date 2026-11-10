@@ -6,56 +6,70 @@ namespace Fargo.Core.Tests.Identity;
 
 public class RefreshTokenTests
 {
+    private static readonly DateTimeOffset Now = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
     private static TokenHash Hash() => new("ABCDEF0123456789");
 
     [Fact]
     public void Create_ShouldBeUsableAndNotRevoked()
     {
-        var token = RefreshToken.Create(Guid.NewGuid(), Hash());
+        var token = RefreshToken.Create(Guid.NewGuid(), Hash(), Now);
 
-        Assert.True(token.IsUsable);
-        Assert.False(token.IsExpired);
+        Assert.True(token.IsUsableAt(Now));
+        Assert.False(token.IsExpiredAt(Now));
         Assert.Null(token.RevokedAt);
     }
 
     [Fact]
-    public void Create_ShouldSetDefaultExpiryInTheFuture()
+    public void Create_ShouldSetExpiryToTheDefaultSpanAfterCreation()
     {
-        var token = RefreshToken.Create(Guid.NewGuid(), Hash());
+        var token = RefreshToken.Create(Guid.NewGuid(), Hash(), Now);
 
-        Assert.True(token.ExpiresAt > DateTimeOffset.UtcNow);
+        Assert.Equal(Now + RefreshToken.DefaultExpirationTimeSpan, token.ExpiresAt);
+    }
+
+    [Fact]
+    public void IsExpiredAt_AtOrAfterExpiry_ShouldBeExpiredAndNotUsable()
+    {
+        var token = RefreshToken.Create(Guid.NewGuid(), Hash(), Now);
+
+        Assert.True(token.IsExpiredAt(token.ExpiresAt));
+        Assert.False(token.IsUsableAt(token.ExpiresAt));
     }
 
     [Fact]
     public void Revoke_ShouldMakeTokenUnusable()
     {
-        var token = RefreshToken.Create(Guid.NewGuid(), Hash());
+        var token = RefreshToken.Create(Guid.NewGuid(), Hash(), Now);
 
-        token.Revoke();
+        token.Revoke(Now);
 
-        Assert.False(token.IsUsable);
-        Assert.NotNull(token.RevokedAt);
+        Assert.False(token.IsUsableAt(Now));
+        Assert.Equal(Now, token.RevokedAt);
     }
 
     [Fact]
     public void Revoke_WhenAlreadyRevoked_ShouldKeepOriginalRevokedAt()
     {
-        var token = RefreshToken.Create(Guid.NewGuid(), Hash());
+        var token = RefreshToken.Create(Guid.NewGuid(), Hash(), Now);
 
-        token.Revoke();
-        var firstRevokedAt = token.RevokedAt;
-        token.Revoke();
+        token.Revoke(Now);
+        token.Revoke(Now.AddMinutes(5));
 
-        Assert.Equal(firstRevokedAt, token.RevokedAt);
+        Assert.Equal(Now, token.RevokedAt);
     }
 }
 
 public class AuthenticationAttemptServiceTests
 {
+    private static readonly DateTimeOffset Now = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
     private readonly IAuthenticationAttemptRepository repository =
         Substitute.For<IAuthenticationAttemptRepository>();
 
-    private AuthenticationAttemptService Service() => new(repository);
+    private readonly FixedTimeProvider timeProvider = new(Now);
+
+    private AuthenticationAttemptService Service() => new(repository, timeProvider);
 
     private void SetupCounts(int ip, int actor, int combined)
     {
@@ -69,7 +83,7 @@ public class AuthenticationAttemptServiceTests
     {
         var attempt = occurredAt is null
             ? null
-            : BuildAttempt(occurredAt.Value);
+            : new AuthenticationAttempt("user", "127.0.0.1", successful: false, occurredAt.Value);
 
         repository
             .GetLastFailAuthenticationAttemptAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -79,12 +93,6 @@ public class AuthenticationAttemptServiceTests
             .GetLastSuccessAuthenticationAttemptAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<AuthenticationAttempt?>(null));
     }
-
-    // Build an attempt with a controlled OccuredAt (private init) via reflection-free path:
-    // OccuredAt is set from UtcNow in the ctor, so we approximate "recent" by using the ctor
-    // and asserting on behavior rather than exact timing. For "recent" cases we create now.
-    private static AuthenticationAttempt BuildAttempt(DateTimeOffset _)
-        => new("user", "127.0.0.1", successful: false);
 
     [Fact]
     public async Task IsAllowedAsync_WhenNoFailures_ShouldAllow()
@@ -103,7 +111,7 @@ public class AuthenticationAttemptServiceTests
     {
         // 5+ combined IP+user failures with a recent (now) last failure -> blocked.
         SetupCounts(ip: 0, actor: 0, combined: 5);
-        SetupLastFail(DateTimeOffset.UtcNow);
+        SetupLastFail(Now);
 
         var result = await Service().IsAllowedAsync("user", "127.0.0.1", CancellationToken.None);
 
@@ -115,11 +123,24 @@ public class AuthenticationAttemptServiceTests
     public async Task IsAllowedAsync_WhenActorThresholdAndRecentFailure_ShouldBlock()
     {
         SetupCounts(ip: 0, actor: 5, combined: 0);
-        SetupLastFail(DateTimeOffset.UtcNow);
+        SetupLastFail(Now);
 
         var result = await Service().IsAllowedAsync("user", "127.0.0.1", CancellationToken.None);
 
         Assert.False(result.Allow);
+    }
+
+    [Fact]
+    public async Task IsAllowedAsync_WhenThresholdButFailureOutsideWindow_ShouldAllow()
+    {
+        // 5+ combined failures, but the last failure is older than the 5-minute
+        // window, so the time-window condition is not met and the attempt is allowed.
+        SetupCounts(ip: 0, actor: 0, combined: 5);
+        SetupLastFail(Now - TimeSpan.FromMinutes(6));
+
+        var result = await Service().IsAllowedAsync("user", "127.0.0.1", CancellationToken.None);
+
+        Assert.True(result.Allow);
     }
 
     [Fact]
@@ -136,18 +157,23 @@ public class AuthenticationAttemptServiceTests
     }
 
     [Fact]
-    public async Task RegisterFailureAsync_ShouldAddFailedAttempt()
+    public async Task RegisterFailureAsync_ShouldAddFailedAttemptStampedWithNow()
     {
         await Service().RegisterFailureAsync("user", "127.0.0.1", CancellationToken.None);
 
-        repository.Received(1).Add(Arg.Is<AuthenticationAttempt>(a => a != null && !a.Successful));
+        repository.Received(1).Add(Arg.Is<AuthenticationAttempt>(a => a != null && !a.Successful && a.OccuredAt == Now));
     }
 
     [Fact]
-    public async Task RegisterSuccessAsync_ShouldAddSuccessfulAttempt()
+    public async Task RegisterSuccessAsync_ShouldAddSuccessfulAttemptStampedWithNow()
     {
         await Service().RegisterSuccessAsync("user", "127.0.0.1", CancellationToken.None);
 
-        repository.Received(1).Add(Arg.Is<AuthenticationAttempt>(a => a != null && a.Successful));
+        repository.Received(1).Add(Arg.Is<AuthenticationAttempt>(a => a != null && a.Successful && a.OccuredAt == Now));
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => now;
     }
 }

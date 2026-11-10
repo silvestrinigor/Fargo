@@ -21,6 +21,7 @@ public sealed record IdentityLogoutCommand(Token RefreshToken) : ICommand;
 public sealed class IdentityLogoutCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     ITokenHasher tokenHasher,
+    TimeProvider timeProvider,
     ILogger<IdentityLogoutCommandHandler> logger
 ) : ICommandHandler<IdentityLogoutCommand>
 {
@@ -43,7 +44,7 @@ public sealed class IdentityLogoutCommandHandler(
             return;
         }
 
-        storedRefreshToken.Revoke();
+        storedRefreshToken.Revoke(timeProvider.GetUtcNow());
     }
 }
 

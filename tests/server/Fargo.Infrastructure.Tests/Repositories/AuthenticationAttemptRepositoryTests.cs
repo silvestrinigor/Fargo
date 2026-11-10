@@ -15,9 +15,9 @@ public class AuthenticationAttemptRepositoryTests
         await using var context = TestDbContextFactory.Create();
         var repo = new AuthenticationAttemptRepository(context);
 
-        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false));
-        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false));
-        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: true)); // success is not counted
+        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false, DateTimeOffset.UtcNow));
+        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false, DateTimeOffset.UtcNow));
+        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: true, DateTimeOffset.UtcNow)); // success is not counted
         await context.SaveChangesAsync();
 
         var counts = await repo.GetAuthenticationAttemptFailCountAsync(Ip, Actor);
@@ -34,10 +34,10 @@ public class AuthenticationAttemptRepositoryTests
         var repo = new AuthenticationAttemptRepository(context);
 
         // Same actor, different IPs.
-        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false));
-        repo.Add(new AuthenticationAttempt(Actor, "10.0.0.2", successful: false));
+        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false, DateTimeOffset.UtcNow));
+        repo.Add(new AuthenticationAttempt(Actor, "10.0.0.2", successful: false, DateTimeOffset.UtcNow));
         // Different actor, same IP.
-        repo.Add(new AuthenticationAttempt("bob", Ip, successful: false));
+        repo.Add(new AuthenticationAttempt("bob", Ip, successful: false, DateTimeOffset.UtcNow));
         await context.SaveChangesAsync();
 
         var counts = await repo.GetAuthenticationAttemptFailCountAsync(Ip, Actor);
@@ -53,7 +53,7 @@ public class AuthenticationAttemptRepositoryTests
         await using var context = TestDbContextFactory.Create();
         var repo = new AuthenticationAttemptRepository(context);
 
-        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false));
+        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false, DateTimeOffset.UtcNow));
         await context.SaveChangesAsync();
 
         var counts = await repo.GetAuthenticationAttemptFailCountAsync(
@@ -68,7 +68,7 @@ public class AuthenticationAttemptRepositoryTests
         await using var context = TestDbContextFactory.Create();
         var repo = new AuthenticationAttemptRepository(context);
 
-        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false));
+        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false, DateTimeOffset.UtcNow));
         await context.SaveChangesAsync();
 
         var last = await repo.GetLastFailAuthenticationAttemptAsync(Ip, Actor);
@@ -83,7 +83,7 @@ public class AuthenticationAttemptRepositoryTests
         await using var context = TestDbContextFactory.Create();
         var repo = new AuthenticationAttemptRepository(context);
 
-        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false));
+        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: false, DateTimeOffset.UtcNow));
         await context.SaveChangesAsync();
 
         var lastSuccess = await repo.GetLastSuccessAuthenticationAttemptAsync(Ip, Actor);
@@ -97,7 +97,7 @@ public class AuthenticationAttemptRepositoryTests
         await using var context = TestDbContextFactory.Create();
         var repo = new AuthenticationAttemptRepository(context);
 
-        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: true));
+        repo.Add(new AuthenticationAttempt(Actor, Ip, successful: true, DateTimeOffset.UtcNow));
         await context.SaveChangesAsync();
 
         var lastSuccess = await repo.GetLastSuccessAuthenticationAttemptAsync(Ip, Actor);
