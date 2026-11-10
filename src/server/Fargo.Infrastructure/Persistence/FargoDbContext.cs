@@ -1,3 +1,4 @@
+using Fargo.Application.IntegrationEvents;
 using Fargo.Core.Audits;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Entities;
@@ -12,10 +13,8 @@ using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Events;
 using Fargo.Core.Identity.Authentication;
 using Fargo.Core.Identity.Credentials;
-using Fargo.Application.IntegrationEvents;
 using Fargo.Core.Identity.Tokens;
 using Fargo.Core.Informations;
-using Fargo.Infrastructure.Outbox;
 using Fargo.Infrastructure.Persistence.Configurations;
 using Fargo.Infrastructure.Persistence.ValueConverters;
 using Microsoft.EntityFrameworkCore;
