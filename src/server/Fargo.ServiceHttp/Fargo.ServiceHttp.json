@@ -4882,40 +4882,17 @@
         }
       },
       "UserGroupUpdateDto": {
-        "required": [
-          "nameid",
-          "description",
-          "isActive",
-          "parentUserGroup",
-          "removeParentUserGroup",
-          "permissionsToAdd",
-          "permissionsToRemove",
-          "partitionsToAdd",
-          "partitionsToRemove",
-          "partitionAccessesToAdd",
-          "partitionAccessesToRemove"
-        ],
         "type": "object",
         "properties": {
           "nameid": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Nameid"
-              }
-            ]
+            "maxLength": 100,
+            "minLength": 3,
+            "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$",
+            "type": "string"
           },
           "description": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Description"
-              }
-            ]
+            "maxLength": 500,
+            "type": "string"
           },
           "isActive": {
             "type": [

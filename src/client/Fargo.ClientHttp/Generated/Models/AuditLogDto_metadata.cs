@@ -8,7 +8,7 @@ using System;
 namespace Fargo.ClientHttp.Models
 {
     /// <summary>
-    /// A dictionary containing additional metadata about the audit event
+    /// A snapshot of the executed command&apos;s data.
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class AuditLogDto_metadata : IAdditionalDataHolder, IParsable

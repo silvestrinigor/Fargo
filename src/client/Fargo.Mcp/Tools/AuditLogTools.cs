@@ -12,7 +12,7 @@ namespace Fargo.Mcp.Tools;
 public static class AuditLogTools
 {
     [McpServerTool(Name = "fargo_auditlogs_list")]
-    [Description("List audit log entries, optionally filtered by actor, affected entity, and time period.")]
+    [Description("List audit log entries, optionally filtered by actor and time period.")]
     public static async Task<IReadOnlyList<AuditLogSummary>> ListAuditLogsAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
@@ -20,8 +20,6 @@ public static class AuditLogTools
         [Description("Maximum number of audit log entries to return per page.")] int? limit = null,
         [Description("Only return entries for the actor with this GUID.")] Guid? actorGuid = null,
         [Description("Only return entries for this numeric actor type.")] int? actorType = null,
-        [Description("Only return entries affecting the entity with this GUID.")] Guid? entityGuid = null,
-        [Description("Only return entries affecting this numeric entity type.")] int? entityType = null,
         [Description("Only return entries that occurred at or after this UTC timestamp (ISO 8601).")] DateTimeOffset? periodStart = null,
         [Description("Only return entries that occurred at or before this UTC timestamp (ISO 8601).")] DateTimeOffset? periodEnd = null,
         CancellationToken cancellationToken = default)
@@ -48,16 +46,6 @@ public static class AuditLogTools
             if (actorType.HasValue)
             {
                 request.QueryParameters.ActorType = actorType.Value;
-            }
-
-            if (entityGuid.HasValue)
-            {
-                request.QueryParameters.EntityGuid = entityGuid.Value;
-            }
-
-            if (entityType.HasValue)
-            {
-                request.QueryParameters.EntityType = entityType.Value;
             }
 
             if (periodStart.HasValue)

@@ -21,6 +21,8 @@ public static class PartitionTools
         [Description("Page number to retrieve, starting at 1.")] int? page = null,
         [Description("Maximum number of partitions to return per page.")] int? limit = null,
         [Description("Only return partitions that are children of any of these partition GUIDs.")] Guid[]? partitions = null,
+        [Description("Case-insensitive text to match against the partition name or description.")] string? search = null,
+        [Description("Sort field, optionally prefixed with '-' for descending (e.g. name, -name). Fields: guid, name, description.")] string? sort = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -41,6 +43,16 @@ public static class PartitionTools
             {
                 request.QueryParameters.ChildOfAnyOfThesePartitions =
                     partitions.Select(g => (Guid?)g).ToArray();
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                request.QueryParameters.Search = search;
+            }
+
+            if (!string.IsNullOrWhiteSpace(sort))
+            {
+                request.QueryParameters.Sort = sort;
             }
         }, cancellationToken);
 

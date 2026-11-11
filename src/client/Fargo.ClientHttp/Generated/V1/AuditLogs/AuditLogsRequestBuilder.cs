@@ -48,7 +48,7 @@ namespace Fargo.ClientHttp.V1.AuditLogs
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public AuditLogsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v1/audit-logs{?actorGuid*,actorType*,entityGuid*,entityType*,limit*,page*,periodEnd*,periodStart*}", pathParameters)
+        public AuditLogsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v1/audit-logs{?actorGuid*,actorType*,limit*,page*,periodEnd*,periodStart*}", pathParameters)
         {
         }
         /// <summary>
@@ -56,7 +56,7 @@ namespace Fargo.ClientHttp.V1.AuditLogs
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public AuditLogsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v1/audit-logs{?actorGuid*,actorType*,entityGuid*,entityType*,limit*,page*,periodEnd*,periodStart*}", rawUrl)
+        public AuditLogsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v1/audit-logs{?actorGuid*,actorType*,limit*,page*,periodEnd*,periodStart*}", rawUrl)
         {
         }
         /// <summary>
@@ -118,14 +118,6 @@ namespace Fargo.ClientHttp.V1.AuditLogs
             #pragma warning disable CS1591
             [QueryParameter("actorType")]
             public int? ActorType { get; set; }
-            #pragma warning restore CS1591
-            #pragma warning disable CS1591
-            [QueryParameter("entityGuid")]
-            public Guid? EntityGuid { get; set; }
-            #pragma warning restore CS1591
-            #pragma warning disable CS1591
-            [QueryParameter("entityType")]
-            public int? EntityType { get; set; }
             #pragma warning restore CS1591
             #pragma warning disable CS1591
             [QueryParameter("limit")]

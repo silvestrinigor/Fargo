@@ -21,6 +21,8 @@ public static class ItemTools
         [Description("Page number to retrieve, starting at 1.")] int? page = null,
         [Description("Maximum number of items to return per page.")] int? limit = null,
         [Description("Only return items that belong to any of these partition GUIDs.")] Guid[]? partitions = null,
+        [Description("Case-insensitive text to match against the article barcode of the item.")] string? search = null,
+        [Description("Sort field, optionally prefixed with '-' for descending (e.g. -guid). Fields: guid, article, parentcontainer, isfixed.")] string? sort = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -41,6 +43,16 @@ public static class ItemTools
             {
                 request.QueryParameters.ChildOfAnyOfThesePartitions =
                     partitions.Select(g => (Guid?)g).ToArray();
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                request.QueryParameters.Search = search;
+            }
+
+            if (!string.IsNullOrWhiteSpace(sort))
+            {
+                request.QueryParameters.Sort = sort;
             }
         }, cancellationToken);
 

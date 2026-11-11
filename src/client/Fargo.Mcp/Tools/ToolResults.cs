@@ -1,4 +1,5 @@
 using Fargo.ClientHttp.Models;
+using Microsoft.Kiota.Abstractions.Serialization;
 
 namespace Fargo.Mcp.Tools;
 
@@ -54,14 +55,40 @@ public static class ToolResults
         dto.Permissions?.Where(p => p.HasValue).Select(p => p!.Value).ToArray(),
         dto.PartitionAccessGuids?.Where(g => g.HasValue).Select(g => g!.Value).ToArray());
 
+    public static ServiceAccountCreatedSummary ToCreatedSummary(this ServiceAccountCreatedDto dto) => new(
+        dto.Guid,
+        dto.ClientId,
+        dto.ClientSecret);
+
     public static AuditLogSummary ToSummary(this AuditLogDto dto) => new(
         dto.Guid,
         dto.ActorGuid,
         dto.ActorType,
-        dto.EntityGuid,
-        dto.EntityType,
         dto.AuditLogType,
-        dto.OccurredAt);
+        dto.CommandName,
+        dto.OccurredAt,
+        dto.Metadata?.AdditionalData is { Count: > 0 } data
+            ? data.ToDictionary(kv => kv.Key, kv => UntypedToPlain(kv.Value))
+            : null);
+
+    /// <summary>
+    /// Converts a Kiota untyped JSON node (how audit metadata values are parsed)
+    /// to plain CLR values the MCP serializer renders as ordinary JSON.
+    /// </summary>
+    private static object? UntypedToPlain(object? value) => value switch
+    {
+        null or UntypedNull => null,
+        UntypedString s => s.GetValue(),
+        UntypedBoolean b => b.GetValue(),
+        UntypedInteger i => i.GetValue(),
+        UntypedLong l => l.GetValue(),
+        UntypedDecimal d => d.GetValue(),
+        UntypedDouble d => d.GetValue(),
+        UntypedFloat f => f.GetValue(),
+        UntypedArray array => array.GetValue().Select(UntypedToPlain).ToArray(),
+        UntypedObject obj => obj.GetValue().ToDictionary(kv => kv.Key, kv => UntypedToPlain(kv.Value)),
+        _ => value.ToString()
+    };
 
     public static ArticleInventorySummary ToSummary(this ArticleInventoryDto dto) => new(
         dto.TotalCount);
@@ -122,6 +149,15 @@ public sealed record ServiceAccountSummary(
     int[]? Permissions,
     Guid[]? PartitionAccessGuids);
 
+/// <summary>
+/// Result of creating a service account or rotating its secret. Carries the
+/// plain client secret, which the server reveals only this once.
+/// </summary>
+public sealed record ServiceAccountCreatedSummary(
+    Guid? Guid,
+    string? ClientId,
+    string? ClientSecret);
+
 public sealed record UserGroupSummary(
     Guid? Guid,
     string? Nameid,
@@ -134,10 +170,10 @@ public sealed record AuditLogSummary(
     Guid? Guid,
     Guid? ActorGuid,
     int? ActorType,
-    Guid? EntityGuid,
-    int? EntityType,
     int? AuditLogType,
-    DateTimeOffset? OccurredAt);
+    string? CommandName,
+    DateTimeOffset? OccurredAt,
+    IReadOnlyDictionary<string, object?>? Metadata);
 
 public sealed record ArticleInventorySummary(
     double? TotalCount);

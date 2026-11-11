@@ -41,30 +41,16 @@ public sealed class GetAuditLogCommand : Command
                 .Title("Audit log")
                 .Field("GUID", auditLog.Guid)
                 .Field("Type", EnumFormatting.Format<AuditLogType>(auditLog.AuditLogType))
+                .Field("Command", auditLog.CommandName)
                 .Field("Actor", auditLog.ActorGuid)
                 .Field("Actor type", EnumFormatting.Format<ActorType>(auditLog.ActorType))
-                .Field("Entity", auditLog.EntityGuid)
-                .Field("Entity type", EnumFormatting.Format<EntityType>(auditLog.EntityType))
                 .Field("Occurred at", auditLog.OccurredAt?.ToString("u"))
-                .Field("Partitions", FormatGuids(auditLog.Partitions))
                 .Write();
 
             WriteMetadata(auditLog.Metadata);
 
             return 0;
         });
-    }
-
-    private static string? FormatGuids(IEnumerable<Guid?>? guids)
-    {
-        if (guids is null)
-        {
-            return null;
-        }
-
-        var values = guids.Where(g => g.HasValue).Select(g => g!.Value.ToString()).ToArray();
-
-        return values.Length == 0 ? null : string.Join(", ", values);
     }
 
     private static void WriteMetadata(AuditLogDto_metadata? metadata)

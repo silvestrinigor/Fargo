@@ -827,53 +827,36 @@ internal sealed class LargeTreeScenario(
             "audit log has entries since the scenario started");
         Log.Info($"Audit entries since scenario start: {windowed?.TotalCount ?? 0}");
 
-        // 9b. Filter by entity type = Partition and assert creations are recorded
-        // for the partitions we built.
-        var partitionLogs = await _admin.V1.AuditLogs.GetAsync(cfg =>
+        // 9b. Assert creations are recorded for the partitions we built. The audit
+        // log records the executed command, so match on the command name.
+        var windowLogs = await _admin.V1.AuditLogs.GetAsync(cfg =>
         {
-            cfg.QueryParameters.EntityType = EntityTypes.Partition;
             cfg.QueryParameters.PeriodStart = _scenarioStart;
             cfg.QueryParameters.Page = 1;
-            cfg.QueryParameters.Limit = 500;
+            cfg.QueryParameters.Limit = 1000;
         }, cancellationToken);
-        var partitionCreates = partitionLogs?.Items?
-            .Count(l => l.AuditLogType == AuditLogTypes.EntityCreated) ?? 0;
+        var partitionCreates = windowLogs?.Items?
+            .Count(l => l.AuditLogType == AuditLogTypes.EntityCreated
+                && l.CommandName == "PartitionCreateCommand") ?? 0;
         _check.That(partitionCreates >= _partitions.Count,
             $"audit log records at least {_partitions.Count} partition creations " +
             $"(saw {partitionCreates})");
 
-        // 9c. Filter by a specific entity (a user we deactivated then reactivated):
-        // there must be an update entry for it.
+        // 9c. We deactivated then reactivated a user, so there must be user update
+        // entries in the window.
         var trackedUser = _users.LastOrDefault();
         if (trackedUser is not null)
         {
-            var userLogs = await _admin.V1.AuditLogs.GetAsync(cfg =>
-            {
-                cfg.QueryParameters.EntityGuid = trackedUser.Guid;
-                cfg.QueryParameters.Page = 1;
-                cfg.QueryParameters.Limit = 100;
-            }, cancellationToken);
-            _check.That((userLogs?.Items?.Count ?? 0) > 0,
-                $"audit log has entries for user '{trackedUser.Nameid}'");
             _check.That(
-                userLogs?.Items?.Any(l => l.AuditLogType == AuditLogTypes.EntityUpdated) == true,
-                $"audit log records an update for user '{trackedUser.Nameid}'");
-            _check.That(
-                userLogs?.Items?.All(l => l.EntityType == EntityTypes.User) == true,
-                "entity-filtered audit entries all concern the user entity");
+                windowLogs?.Items?.Any(l => l.AuditLogType == AuditLogTypes.EntityUpdated
+                    && l.CommandName == "UserUpdateCommand") == true,
+                "audit log records a user update");
         }
 
-        // 9d. Filter by entity type = User and audit type = deleted: the users we
-        // deleted must appear as deletions.
-        var deletionLogs = await _admin.V1.AuditLogs.GetAsync(cfg =>
-        {
-            cfg.QueryParameters.EntityType = EntityTypes.User;
-            cfg.QueryParameters.PeriodStart = _scenarioStart;
-            cfg.QueryParameters.Page = 1;
-            cfg.QueryParameters.Limit = 500;
-        }, cancellationToken);
-        var userDeletes = deletionLogs?.Items?
-            .Count(l => l.AuditLogType == AuditLogTypes.EntityDeleted) ?? 0;
+        // 9d. The users we deleted must appear as deletions.
+        var userDeletes = windowLogs?.Items?
+            .Count(l => l.AuditLogType == AuditLogTypes.EntityDeleted
+                && l.CommandName == "UserDeleteCommand") ?? 0;
         _check.That(userDeletes >= 1,
             $"audit log records user deletions (saw {userDeletes})");
 
@@ -911,14 +894,9 @@ internal sealed class LargeTreeScenario(
         }
 
         // 9g. Item-event recording leaves an ItemEventRecorded audit trail.
-        var itemEventLogs = await _admin.V1.AuditLogs.GetAsync(cfg =>
-        {
-            cfg.QueryParameters.EntityType = EntityTypes.ItemEvent;
-            cfg.QueryParameters.PeriodStart = _scenarioStart;
-            cfg.QueryParameters.Page = 1;
-            cfg.QueryParameters.Limit = 100;
-        }, cancellationToken);
-        Log.Info($"ItemEvent audit entries: {itemEventLogs?.TotalCount ?? 0}");
+        var itemEventEntries = windowLogs?.Items?
+            .Count(l => l.AuditLogType == AuditLogTypes.ItemEventRecorded) ?? 0;
+        Log.Info($"ItemEvent audit entries: {itemEventEntries}");
 
         Log.Success("Audit-log inspection completed.");
     }

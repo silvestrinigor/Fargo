@@ -4,15 +4,15 @@ using Fargo.Core.Informations;
 namespace Fargo.Application.Operations.UserGroups.Dtos;
 
 public sealed record UserGroupUpdateDto(
-    Nameid? Nameid,
-    Description? Description,
-    bool? IsActive,
-    Guid? ParentUserGroup,
-    bool? RemoveParentUserGroup,
-    IReadOnlyCollection<ActionType>? PermissionsToAdd,
-    IReadOnlyCollection<ActionType>? PermissionsToRemove,
-    IReadOnlyCollection<Guid>? PartitionsToAdd,
-    IReadOnlyCollection<Guid>? PartitionsToRemove,
-    IReadOnlyCollection<Guid>? PartitionAccessesToAdd,
-    IReadOnlyCollection<Guid>? PartitionAccessesToRemove
+    Nameid? Nameid = null,
+    Description? Description = null,
+    bool? IsActive = null,
+    Guid? ParentUserGroup = null,
+    bool? RemoveParentUserGroup = null,
+    IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
+    IReadOnlyCollection<ActionType>? PermissionsToRemove = null,
+    IReadOnlyCollection<Guid>? PartitionsToAdd = null,
+    IReadOnlyCollection<Guid>? PartitionsToRemove = null,
+    IReadOnlyCollection<Guid>? PartitionAccessesToAdd = null,
+    IReadOnlyCollection<Guid>? PartitionAccessesToRemove = null
 );

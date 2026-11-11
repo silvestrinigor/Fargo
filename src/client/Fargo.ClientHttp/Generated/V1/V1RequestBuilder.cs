@@ -7,6 +7,7 @@ using Fargo.ClientHttp.V1.Item_Escaped;
 using Fargo.ClientHttp.V1.Items;
 using Fargo.ClientHttp.V1.Partitions;
 using Fargo.ClientHttp.V1.ServiceAccounts;
+using Fargo.ClientHttp.V1.SupplyOrders;
 using Fargo.ClientHttp.V1.UserGroups;
 using Fargo.ClientHttp.V1.Users;
 using Microsoft.Kiota.Abstractions.Extensions;
@@ -57,6 +58,11 @@ namespace Fargo.ClientHttp.V1
         public global::Fargo.ClientHttp.V1.ServiceAccounts.ServiceAccountsRequestBuilder ServiceAccounts
         {
             get => new global::Fargo.ClientHttp.V1.ServiceAccounts.ServiceAccountsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The supplyOrders property</summary>
+        public global::Fargo.ClientHttp.V1.SupplyOrders.SupplyOrdersRequestBuilder SupplyOrders
+        {
+            get => new global::Fargo.ClientHttp.V1.SupplyOrders.SupplyOrdersRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The userGroups property</summary>
         public global::Fargo.ClientHttp.V1.UserGroups.UserGroupsRequestBuilder UserGroups

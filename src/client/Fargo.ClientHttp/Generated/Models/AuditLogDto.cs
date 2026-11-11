@@ -8,26 +8,30 @@ using System;
 namespace Fargo.ClientHttp.Models
 {
     /// <summary>
-    /// Represents a data transfer object for audit log information.This DTO contains all the essential details about an audit event, includingthe actor who performed the action, the entity affected, the type of action,when it occurred, and any additional metadata.
+    /// Represents a data transfer object for a command audit log entry.
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class AuditLogDto : IAdditionalDataHolder, IParsable
     {
-        /// <summary>The unique identifier of the actor who performed the action</summary>
+        /// <summary>The unique identifier of the actor that executed the command.</summary>
         public Guid? ActorGuid { get; set; }
-        /// <summary>The type of actor who performed the action (e.g., User, Application)</summary>
+        /// <summary>The type of actor that executed the command.</summary>
         public int? ActorType { get; set; }
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The type of change that was recorded (entity created, updated, or deleted)</summary>
+        /// <summary>The kind of command that was executed.</summary>
         public int? AuditLogType { get; set; }
-        /// <summary>The unique identifier of the entity that was affected by the action</summary>
-        public Guid? EntityGuid { get; set; }
-        /// <summary>The type of entity that was affected (e.g., Article, User)</summary>
-        public int? EntityType { get; set; }
-        /// <summary>The unique identifier of the audit log entry</summary>
+        /// <summary>The type name of the executed command.</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? CommandName { get; set; }
+#nullable restore
+#else
+        public string CommandName { get; set; }
+#endif
+        /// <summary>The unique identifier of the audit log entry.</summary>
         public Guid? Guid { get; set; }
-        /// <summary>A dictionary containing additional metadata about the audit event</summary>
+        /// <summary>A snapshot of the executed command&apos;s data.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public global::Fargo.ClientHttp.Models.AuditLogDto_metadata? Metadata { get; set; }
@@ -35,16 +39,8 @@ namespace Fargo.ClientHttp.Models
 #else
         public global::Fargo.ClientHttp.Models.AuditLogDto_metadata Metadata { get; set; }
 #endif
-        /// <summary>The date and time when the audit event occurred</summary>
+        /// <summary>The date and time when the command was executed.</summary>
         public DateTimeOffset? OccurredAt { get; set; }
-        /// <summary>The collection of partition GUIDs that this audit log entry belongs to</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? Partitions { get; set; }
-#nullable restore
-#else
-        public List<Guid?> Partitions { get; set; }
-#endif
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.AuditLogDto"/> and sets the default values.
         /// </summary>
@@ -73,12 +69,10 @@ namespace Fargo.ClientHttp.Models
                 { "actorGuid", n => { ActorGuid = n.GetGuidValue(); } },
                 { "actorType", n => { ActorType = n.GetIntValue(); } },
                 { "auditLogType", n => { AuditLogType = n.GetIntValue(); } },
-                { "entityGuid", n => { EntityGuid = n.GetGuidValue(); } },
-                { "entityType", n => { EntityType = n.GetIntValue(); } },
+                { "commandName", n => { CommandName = n.GetStringValue(); } },
                 { "guid", n => { Guid = n.GetGuidValue(); } },
                 { "metadata", n => { Metadata = n.GetObjectValue<global::Fargo.ClientHttp.Models.AuditLogDto_metadata>(global::Fargo.ClientHttp.Models.AuditLogDto_metadata.CreateFromDiscriminatorValue); } },
                 { "occurredAt", n => { OccurredAt = n.GetDateTimeOffsetValue(); } },
-                { "partitions", n => { Partitions = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
             };
         }
         /// <summary>
@@ -91,12 +85,10 @@ namespace Fargo.ClientHttp.Models
             writer.WriteGuidValue("actorGuid", ActorGuid);
             writer.WriteIntValue("actorType", ActorType);
             writer.WriteIntValue("auditLogType", AuditLogType);
-            writer.WriteGuidValue("entityGuid", EntityGuid);
-            writer.WriteIntValue("entityType", EntityType);
+            writer.WriteStringValue("commandName", CommandName);
             writer.WriteGuidValue("guid", Guid);
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.AuditLogDto_metadata>("metadata", Metadata);
             writer.WriteDateTimeOffsetValue("occurredAt", OccurredAt);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitions", Partitions);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

@@ -11,7 +11,7 @@ public sealed class ListAuditLogsCommand : Command
         : base("list", """
             List audit log entries as a table.
 
-            Each row shows who (actor) did what (action) to which entity, and when.
+            Each row shows who (actor) executed which command, and when.
 
             By default the list is paged interactively: a page of entries is shown
             and you can press 'n' for the next page, 'p' for the previous page, or
@@ -77,8 +77,7 @@ public sealed class ListAuditLogsCommand : Command
             .Column("ACTOR", a => a.ActorGuid?.ToString())
             .Column("ACTOR TYPE", a => EnumFormatting.Format<ActorType>(a.ActorType))
             .Column("TYPE", a => EnumFormatting.Format<AuditLogType>(a.AuditLogType))
-            .Column("ENTITY TYPE", a => EnumFormatting.Format<EntityType>(a.EntityType))
-            .Column("ENTITY", a => a.EntityGuid?.ToString())
+            .Column("COMMAND", a => a.CommandName)
             .Column("OCCURRED AT", a => a.OccurredAt?.ToString("u"))
             .EmptyMessage("No audit logs found.")
             .Write(items);

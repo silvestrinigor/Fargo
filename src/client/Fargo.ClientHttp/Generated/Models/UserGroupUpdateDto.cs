@@ -17,20 +17,20 @@ namespace Fargo.ClientHttp.Models
         /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.ClientHttp.Models.Description? Description { get; set; }
+        public string? Description { get; set; }
 #nullable restore
 #else
-        public global::Fargo.ClientHttp.Models.Description Description { get; set; }
+        public string Description { get; set; }
 #endif
         /// <summary>The isActive property</summary>
         public bool? IsActive { get; set; }
         /// <summary>The nameid property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::Fargo.ClientHttp.Models.Nameid? Nameid { get; set; }
+        public string? Nameid { get; set; }
 #nullable restore
 #else
-        public global::Fargo.ClientHttp.Models.Nameid Nameid { get; set; }
+        public string Nameid { get; set; }
 #endif
         /// <summary>The parentUserGroup property</summary>
         public Guid? ParentUserGroup { get; set; }
@@ -109,9 +109,9 @@ namespace Fargo.ClientHttp.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "description", n => { Description = n.GetObjectValue<global::Fargo.ClientHttp.Models.Description>(global::Fargo.ClientHttp.Models.Description.CreateFromDiscriminatorValue); } },
+                { "description", n => { Description = n.GetStringValue(); } },
                 { "isActive", n => { IsActive = n.GetBoolValue(); } },
-                { "nameid", n => { Nameid = n.GetObjectValue<global::Fargo.ClientHttp.Models.Nameid>(global::Fargo.ClientHttp.Models.Nameid.CreateFromDiscriminatorValue); } },
+                { "nameid", n => { Nameid = n.GetStringValue(); } },
                 { "parentUserGroup", n => { ParentUserGroup = n.GetGuidValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionAccessesToRemove", n => { PartitionAccessesToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -129,9 +129,9 @@ namespace Fargo.ClientHttp.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<global::Fargo.ClientHttp.Models.Description>("description", Description);
+            writer.WriteStringValue("description", Description);
             writer.WriteBoolValue("isActive", IsActive);
-            writer.WriteObjectValue<global::Fargo.ClientHttp.Models.Nameid>("nameid", Nameid);
+            writer.WriteStringValue("nameid", Nameid);
             writer.WriteGuidValue("parentUserGroup", ParentUserGroup);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToRemove", PartitionAccessesToRemove);
