@@ -25,7 +25,7 @@ public partial class AddSupplyOrders : Migration
             },
             constraints: table =>
             {
-                table.PrimaryKey("pk_entities", x => x.guid);
+                table.PrimaryKey("PK_supply_orders", x => x.guid);
                 table.ForeignKey(
                     name: "fk_supply_orders_entities_guid",
                     column: x => x.guid,

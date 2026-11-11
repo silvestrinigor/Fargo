@@ -383,8 +383,7 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("entity_type");
 
-                    b.HasKey("Guid")
-                        .HasName("pk_entities");
+                    b.HasKey("Guid");
 
                     b.HasIndex("EntityType")
                         .HasDatabaseName("ix_entities_entity_type");

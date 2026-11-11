@@ -7,53 +7,28 @@ namespace Fargo.Infrastructure.Migrations;
 /// <inheritdoc />
 public partial class IntroduceEntityBaseTable : Migration
 {
+    // Derived TPT tables keep their own primary key; only the constraint is
+    // renamed to the EF default name for a TPT table ("PK_<table>"). The keys
+    // are renamed instead of dropped and recreated because other tables hold
+    // foreign keys that depend on them (PostgreSQL error 2BP01 otherwise).
+    //
+    // Values of entity_type mirror Fargo.Core.Entities.EntityType.
+    private static readonly (string Table, string OldKey, int EntityType)[] DerivedTables =
+    [
+        ("articles", "pk_articles", 0),
+        ("items", "pk_items", 1),
+        ("actors", "pk_actors", 2),
+        ("user_groups", "pk_user_groups", 3),
+        ("partitions", "pk_partitions", 4),
+    ];
+
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_user_groups",
-            table: "user_groups");
-
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_partitions",
-            table: "partitions");
-
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_items",
-            table: "items");
-
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_articles",
-            table: "articles");
-
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_actors",
-            table: "actors");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_entities",
-            table: "user_groups",
-            column: "guid");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_entities",
-            table: "partitions",
-            column: "guid");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_entities",
-            table: "items",
-            column: "guid");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_entities",
-            table: "articles",
-            column: "guid");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_entities",
-            table: "actors",
-            column: "guid");
+        foreach (var (table, oldKey, _) in DerivedTables)
+        {
+            migrationBuilder.Sql($"ALTER TABLE {table} RENAME CONSTRAINT {oldKey} TO \"PK_{table}\";");
+        }
 
         migrationBuilder.CreateTable(
             name: "entities",
@@ -64,13 +39,19 @@ public partial class IntroduceEntityBaseTable : Migration
             },
             constraints: table =>
             {
-                table.PrimaryKey("pk_entities", x => x.guid);
+                table.PrimaryKey("PK_entities", x => x.guid);
             });
 
         migrationBuilder.CreateIndex(
             name: "ix_entities_entity_type",
             table: "entities",
             column: "entity_type");
+
+        // Backfill the base rows so the new foreign keys hold for existing data.
+        foreach (var (table, _, entityType) in DerivedTables)
+        {
+            migrationBuilder.Sql($"INSERT INTO entities (guid, entity_type) SELECT guid, {entityType} FROM {table};");
+        }
 
         migrationBuilder.AddForeignKey(
             name: "fk_actors_entities_guid",
@@ -139,49 +120,9 @@ public partial class IntroduceEntityBaseTable : Migration
         migrationBuilder.DropTable(
             name: "entities");
 
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_entities",
-            table: "user_groups");
-
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_entities",
-            table: "partitions");
-
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_entities",
-            table: "items");
-
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_entities",
-            table: "articles");
-
-        migrationBuilder.DropPrimaryKey(
-            name: "pk_entities",
-            table: "actors");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_user_groups",
-            table: "user_groups",
-            column: "guid");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_partitions",
-            table: "partitions",
-            column: "guid");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_items",
-            table: "items",
-            column: "guid");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_articles",
-            table: "articles",
-            column: "guid");
-
-        migrationBuilder.AddPrimaryKey(
-            name: "pk_actors",
-            table: "actors",
-            column: "guid");
+        foreach (var (table, oldKey, _) in DerivedTables)
+        {
+            migrationBuilder.Sql($"ALTER TABLE {table} RENAME CONSTRAINT \"PK_{table}\" TO {oldKey};");
+        }
     }
 }

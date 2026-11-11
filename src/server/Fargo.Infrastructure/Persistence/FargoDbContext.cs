@@ -18,6 +18,7 @@ using Fargo.Core.Informations;
 using Fargo.Infrastructure.Persistence.Configurations;
 using Fargo.Infrastructure.Persistence.ValueConverters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using System.Drawing;
 using UnitsNet;
 
@@ -175,6 +176,20 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         // schema column is added; the token requires no data migration.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
+            // TPT roots (entities, events): EF Core applies a key's explicit
+            // constraint name to *every* table of the hierarchy (one key is
+            // shared by all of them, see dotnet/efcore#23444). The snake_case
+            // naming convention names the root key while it is still alone
+            // (e.g. "pk_entities"), so every derived table would get the same
+            // primary key name, which PostgreSQL rejects (constraint/index
+            // names are unique per schema). Removing the explicit name lets EF
+            // derive a distinct default per table ("PK_<table>").
+            if (entityType.BaseType is null
+                && entityType.GetMappingStrategy() == RelationalAnnotationNames.TptMappingStrategy)
+            {
+                entityType.FindPrimaryKey()?.SetName(null);
+            }
+
             if (typeof(IConcurrencyVersioned).IsAssignableFrom(entityType.ClrType))
             {
                 modelBuilder

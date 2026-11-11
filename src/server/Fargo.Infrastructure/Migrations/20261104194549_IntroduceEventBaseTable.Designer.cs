@@ -383,8 +383,7 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("entity_type");
 
-                    b.HasKey("Guid")
-                        .HasName("pk_entities");
+                    b.HasKey("Guid");
 
                     b.HasIndex("EntityType")
                         .HasDatabaseName("ix_entities_entity_type");
@@ -493,8 +492,7 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("occured_at");
 
-                    b.HasKey("Guid")
-                        .HasName("pk_events");
+                    b.HasKey("Guid");
 
                     b.HasIndex("EventType")
                         .HasDatabaseName("ix_events_event_type");
