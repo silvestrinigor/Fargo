@@ -3,7 +3,6 @@ using Fargo.Application.Operations.Partitions;
 using Fargo.Application.Operations.Partitions.Dtos;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Partitions;
-using Fargo.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

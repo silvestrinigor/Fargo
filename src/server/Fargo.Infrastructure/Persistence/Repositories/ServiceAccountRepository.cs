@@ -5,7 +5,6 @@ using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Informations;
-using Fargo.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 

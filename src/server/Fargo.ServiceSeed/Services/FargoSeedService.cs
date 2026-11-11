@@ -13,7 +13,7 @@ public sealed class FargoSeedService(
     IServiceProvider serviceProvider,
     IHostApplicationLifetime hostApplicationLifetime,
     ILogger<FargoSeedService> logger
-    ) : BackgroundService
+) : BackgroundService
 {
     /// <summary>
     /// Gets the name of the <see cref="ActivitySource"/> used for tracing seed operations.

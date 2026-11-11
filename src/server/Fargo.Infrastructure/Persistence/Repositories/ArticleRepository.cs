@@ -4,7 +4,6 @@ using Fargo.Application.Operations.Articles.Dtos;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Entities.Articles;
-using Fargo.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

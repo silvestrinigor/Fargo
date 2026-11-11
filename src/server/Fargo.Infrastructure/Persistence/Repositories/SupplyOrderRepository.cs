@@ -3,7 +3,6 @@ using Fargo.Application.Operations.SupplyOrders;
 using Fargo.Application.Operations.SupplyOrders.Dtos;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.SupplyOrders;
-using Fargo.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

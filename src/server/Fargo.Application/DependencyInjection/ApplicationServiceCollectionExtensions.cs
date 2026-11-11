@@ -3,6 +3,7 @@ using Fargo.Application.Operations.Audits;
 using Fargo.Application.Operations.Identity;
 using Fargo.Application.Operations.Initialization;
 using Fargo.Application.Operations.Items;
+using Fargo.Application.Operations.Outbox;
 using Fargo.Application.Operations.Partitions;
 using Fargo.Application.Operations.ServiceAccounts;
 using Fargo.Application.Operations.SupplyOrders;
@@ -40,9 +41,10 @@ public static class ApplicationServiceCollectionExtensions
         .AddFargoServiceAccountApplication()
         .AddFargoInitializationApplication()
         .AddFargoAuditLogApplication()
-        .AddFargoSupplyOrderApplication();
+        .AddFargoSupplyOrderApplication()
+        .AddFargoOutboxApplication();
 
-        public IServiceCollection AddFargoDomainServices()
+        private IServiceCollection AddFargoDomainServices()
         {
             // Stateless system clock; one instance serves every consumer. Handlers
             // and domain services take the current time from here so time-dependent

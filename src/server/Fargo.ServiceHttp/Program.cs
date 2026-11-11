@@ -1,5 +1,5 @@
 using Fargo.Application.DependencyInjection;
-using Fargo.Infrastructure.Extensions;
+using Fargo.Infrastructure.DependencyInjection;
 using Fargo.Infrastructure.Persistence;
 using Fargo.ServiceDefaults;
 using Fargo.ServiceHttp.Endpoints;
