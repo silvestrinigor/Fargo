@@ -13,8 +13,8 @@ using NpgsqlTypes;
 namespace Fargo.Infrastructure.Migrations
 {
     [DbContext(typeof(FargoDbContext))]
-    [Migration("20261104213514_CommandBasedAuditLog")]
-    partial class CommandBasedAuditLog
+    [Migration("20261111200706_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,76 @@ namespace Fargo.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Fargo.Application.IntegrationEvents.OutboxMessage", b =>
+                {
+                    b.Property<long>("Sequence")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("sequence");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Sequence"));
+
+                    b.Property<Guid>("AggregateGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("aggregate_guid");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("event_type");
+
+                    b.Property<DateTimeOffset?>("LastAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_attempt_at");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("last_error");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("schema_version");
+
+                    b.HasKey("Sequence")
+                        .HasName("pk_outbox_messages");
+
+                    b.HasIndex("EventId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_outbox_messages_event_id");
+
+                    b.HasIndex("ProcessedAt")
+                        .HasDatabaseName("ix_outbox_messages_processed_at");
+
+                    b.HasIndex("Sequence")
+                        .HasDatabaseName("ix_outbox_messages_unprocessed_sequence")
+                        .HasFilter("processed_at IS NULL");
+
+                    b.ToTable("outbox_messages", (string)null);
+                });
 
             modelBuilder.Entity("Fargo.Core.Audits.AuditLog", b =>
                 {
@@ -239,6 +309,29 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("article_containers", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleContainerAllowedArticle", b =>
+                {
+                    b.Property<Guid>("ContainerArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("container_article_guid");
+
+                    b.Property<Guid>("AllowedArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("allowed_article_guid");
+
+                    b.Property<double?>("MaxQuantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("max_quantity");
+
+                    b.HasKey("ContainerArticleGuid", "AllowedArticleGuid")
+                        .HasName("pk_article_container_allowed_articles");
+
+                    b.HasIndex("AllowedArticleGuid")
+                        .HasDatabaseName("ix_article_container_allowed_articles_allowed_article_guid");
+
+                    b.ToTable("article_container_allowed_articles", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleDimension", b =>
                 {
                     b.Property<Guid>("ArticleGuid")
@@ -412,6 +505,52 @@ namespace Fargo.Infrastructure.Migrations
                         .HasDatabaseName("ix_item_partitions_partition_guid");
 
                     b.ToTable("item_partitions", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.SupplyOrders.SupplyOrderLine", b =>
+                {
+                    b.Property<Guid>("SupplyOrderGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("supply_order_guid");
+
+                    b.Property<Guid>("ArticleGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_guid");
+
+                    b.Property<double>("OrderedQuantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("ordered_quantity");
+
+                    b.Property<double>("ReceivedQuantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("received_quantity");
+
+                    b.HasKey("SupplyOrderGuid", "ArticleGuid")
+                        .HasName("pk_supply_order_lines");
+
+                    b.HasIndex("ArticleGuid")
+                        .HasDatabaseName("ix_supply_order_lines_article_guid");
+
+                    b.ToTable("supply_order_lines", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.SupplyOrders.SupplyOrderPartition", b =>
+                {
+                    b.Property<Guid>("SupplyOrderGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("supply_order_guid");
+
+                    b.Property<Guid>("PartitionGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("partition_guid");
+
+                    b.HasKey("SupplyOrderGuid", "PartitionGuid")
+                        .HasName("pk_supply_order_partitions");
+
+                    b.HasIndex("PartitionGuid")
+                        .HasDatabaseName("ix_supply_order_partitions_partition_guid");
+
+                    b.ToTable("supply_order_partitions", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroupPartition", b =>
@@ -617,7 +756,7 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
-            modelBuilder.Entity("Fargo.Infrastructure.Entities.ItemParentContainerHistoryPostgresTemporal", b =>
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.Entities.ItemParentContainerHistoryPostgresTemporal", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -804,6 +943,53 @@ namespace Fargo.Infrastructure.Migrations
                         .HasDatabaseName("ix_partitions_parent_partition_guid");
 
                     b.ToTable("partitions", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.SupplyOrders.SupplyOrder", b =>
+                {
+                    b.HasBaseType("Fargo.Core.Entities.Entity");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<DateTimeOffset?>("PlacedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("placed_at");
+
+                    b.Property<Guid?>("ReceivingContainerGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("receiving_container_guid");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("reference");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasIndex("ReceivingContainerGuid")
+                        .HasDatabaseName("ix_supply_orders_receiving_container_guid");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_supply_orders_status");
+
+                    b.ToTable("supply_orders", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroup", b =>
@@ -1002,6 +1188,27 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Article");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleContainerAllowedArticle", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "AllowedArticle")
+                        .WithMany()
+                        .HasForeignKey("AllowedArticleGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_container_allowed_articles_articles_allowed_article");
+
+                    b.HasOne("Fargo.Core.Entities.Articles.ArticleContainer", "Container")
+                        .WithMany("AllowedArticles")
+                        .HasForeignKey("ContainerArticleGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_article_container_allowed_articles_article_containers_conta");
+
+                    b.Navigation("AllowedArticle");
+
+                    b.Navigation("Container");
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleDimension", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
@@ -1135,6 +1342,48 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Partition");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.SupplyOrders.SupplyOrderLine", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Articles.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("ArticleGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_supply_order_lines_articles_article_guid");
+
+                    b.HasOne("Fargo.Core.Entities.SupplyOrders.SupplyOrder", "SupplyOrder")
+                        .WithMany("Lines")
+                        .HasForeignKey("SupplyOrderGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_supply_order_lines_supply_orders_supply_order_guid");
+
+                    b.Navigation("Article");
+
+                    b.Navigation("SupplyOrder");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.SupplyOrders.SupplyOrderPartition", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Partitions.Partition", "Partition")
+                        .WithMany()
+                        .HasForeignKey("PartitionGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_supply_order_partitions_partitions_partition_guid");
+
+                    b.HasOne("Fargo.Core.Entities.SupplyOrders.SupplyOrder", "SupplyOrder")
+                        .WithMany("Partitions")
+                        .HasForeignKey("SupplyOrderGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_supply_order_partitions_supply_orders_supply_order_guid");
+
+                    b.Navigation("Partition");
+
+                    b.Navigation("SupplyOrder");
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroupPartition", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Partitions.Partition", "Partition")
@@ -1231,7 +1480,7 @@ namespace Fargo.Infrastructure.Migrations
                         .HasConstraintName("fk_refresh_tokens_users_user_guid");
                 });
 
-            modelBuilder.Entity("Fargo.Infrastructure.Entities.ItemParentContainerHistoryPostgresTemporal", b =>
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.Entities.ItemParentContainerHistoryPostgresTemporal", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Items.Item", "Item")
                         .WithMany()
@@ -1316,6 +1565,24 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("ParentPartition");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.SupplyOrders.SupplyOrder", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Entity", null)
+                        .WithOne()
+                        .HasForeignKey("Fargo.Core.Entities.SupplyOrders.SupplyOrder", "Guid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_supply_orders_entities_guid");
+
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "ReceivingContainer")
+                        .WithMany()
+                        .HasForeignKey("ReceivingContainerGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_supply_orders_items_receiving_container_guid");
+
+                    b.Navigation("ReceivingContainer");
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroup", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Entity", null)
@@ -1361,6 +1628,11 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("UserGroupMemberships");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.Articles.ArticleContainer", b =>
+                {
+                    b.Navigation("AllowedArticles");
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.Actors.Actor", b =>
                 {
                     b.Navigation("PartitionAccesses");
@@ -1394,6 +1666,13 @@ namespace Fargo.Infrastructure.Migrations
             modelBuilder.Entity("Fargo.Core.Entities.Items.Item", b =>
                 {
                     b.Navigation("Moviments");
+
+                    b.Navigation("Partitions");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.SupplyOrders.SupplyOrder", b =>
+                {
+                    b.Navigation("Lines");
 
                     b.Navigation("Partitions");
                 });
