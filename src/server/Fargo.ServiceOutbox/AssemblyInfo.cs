@@ -1,3 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Fargo.Infrastructure.Tests")]
+[assembly: InternalsVisibleTo("Fargo.ServiceOutbox.Tests")]
