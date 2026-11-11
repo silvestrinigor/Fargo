@@ -1,0 +1,2 @@
+- [ ] move toc.yml, index.md, docfx.json, /api and /img to /docs folder.
+- [ ] keep all projects in /src and /tests folder insted of separate in /client and /server.
