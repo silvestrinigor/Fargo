@@ -1,7 +1,7 @@
 using Fargo.Application.DependencyInjection;
 using Fargo.Infrastructure.DependencyInjection;
 using Fargo.ServiceDefaults;
-using Fargo.ServiceSeed.Extensions;
+using Fargo.ServiceSeed.Options;
 using Fargo.ServiceSeed.Services;
 
 var builder = Host.CreateApplicationBuilder(args);

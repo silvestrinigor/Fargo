@@ -1,11 +1,9 @@
-using Fargo.ServiceSeed.Options;
-
-namespace Fargo.ServiceSeed.Extensions;
+namespace Fargo.ServiceSeed.Options;
 
 /// <summary>
 /// Provides extension methods for configuring the worker.
 /// </summary>
-public static class ServiceCollectionExtensions
+public static class SeedOptionsServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
