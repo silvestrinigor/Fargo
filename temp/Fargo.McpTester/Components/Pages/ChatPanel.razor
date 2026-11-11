@@ -1,0 +1,81 @@
+@implements IDisposable
+@inject ChatService Chat
+
+<div class="panel">
+    @if (Chat.Problem is not null)
+    {
+        <FluentMessageBar Intent="MessageIntent.Warning" AllowDismiss="false">@Chat.Problem</FluentMessageBar>
+    }
+
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalGap="16">
+        <FluentSwitch @bind-Value="Chat.AllowWrites" Label="Allow tools that change data" />
+        <FluentButton Appearance="Appearance.Outline" OnClick="Chat.Clear">Clear</FluentButton>
+        <span>Model: @(Chat.ModelName ?? "-")</span>
+    </FluentStack>
+
+    <div class="messages">
+        @foreach (var entry in Chat.Entries)
+        {
+            switch (entry.Kind)
+            {
+                case ChatEntryKind.User:
+                    <div class="msg msg-user">@entry.Text</div>
+                    break;
+                case ChatEntryKind.Assistant:
+                    <div class="msg msg-assistant">@entry.Text</div>
+                    break;
+                case ChatEntryKind.Error:
+                    <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false">@entry.Text</FluentMessageBar>
+                    break;
+                case ChatEntryKind.ToolCall:
+                    <details class="msg msg-tool">
+                        <summary>
+                            🔧 @entry.ToolName
+                            @if (entry.Result is null)
+                            {
+                                <span>…running</span>
+                            }
+                        </summary>
+                        <div><strong>Arguments</strong><pre>@entry.Arguments</pre></div>
+                        @if (entry.Result is not null)
+                        {
+                            <div><strong>Result</strong><pre>@entry.Result</pre></div>
+                        }
+                    </details>
+                    break;
+            }
+        }
+        @if (Chat.IsBusy)
+        {
+            <FluentProgressRing Style="width: 24px; height: 24px;" />
+        }
+    </div>
+
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Bottom" HorizontalGap="8">
+        <FluentTextArea @bind-Value="_input" Placeholder="Ask something, e.g. list my partitions" Rows="2"
+                        Style="flex: 1;" Disabled="@(Chat.IsBusy || Chat.Problem is not null)" />
+        <FluentButton Appearance="Appearance.Accent" Disabled="@(Chat.IsBusy || Chat.Problem is not null)"
+                      OnClick="SendAsync">Send</FluentButton>
+    </FluentStack>
+</div>
+
+@code {
+    private string? _input;
+
+    protected override void OnInitialized() => Chat.Changed += OnChanged;
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private async Task SendAsync()
+    {
+        var text = _input;
+        _input = null;
+
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            await Chat.SendAsync(text);
+        }
+    }
+
+    public void Dispose() => Chat.Changed -= OnChanged;
+}

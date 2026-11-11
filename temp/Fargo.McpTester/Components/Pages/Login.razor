@@ -1,0 +1,60 @@
+@page "/login"
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+<PageTitle>Log in - Fargo MCP Tester</PageTitle>
+
+<div class="login-card">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="12">
+            <h2>Log in with your Fargo account</h2>
+
+            @if (_error is not null)
+            {
+                <FluentMessageBar Intent="MessageIntent.Error" AllowDismiss="false">@_error</FluentMessageBar>
+            }
+
+            <FluentTextField @bind-Value="_nameid" Label="User (nameid)" Style="width: 100%;" autocomplete="username" />
+            <FluentTextField @bind-Value="_password" Label="Password" TextFieldType="TextFieldType.Password"
+                             Style="width: 100%;" autocomplete="current-password" />
+
+            <FluentButton Appearance="Appearance.Accent" Loading="_busy" Disabled="_busy" OnClick="LoginAsync">Log in</FluentButton>
+        </FluentStack>
+    </FluentCard>
+</div>
+
+@code {
+    private string? _nameid;
+    private string? _password;
+    private string? _error;
+    private bool _busy;
+
+    protected override void OnInitialized()
+    {
+        if (Session.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task LoginAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_nameid) || string.IsNullOrEmpty(_password))
+        {
+            _error = "Enter your user and password.";
+            return;
+        }
+
+        _busy = true;
+        _error = null;
+
+        _error = await Session.LoginAsync(_nameid, _password);
+        _password = null;
+        _busy = false;
+
+        if (_error is null)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+}

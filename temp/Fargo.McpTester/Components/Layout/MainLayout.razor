@@ -1,0 +1,48 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject UserSession Session
+@inject McpSession Mcp
+@inject ChatService Chat
+@inject NavigationManager Navigation
+
+<FluentLayout>
+    <FluentHeader>
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween" VerticalAlignment="VerticalAlignment.Center">
+            <span>Fargo MCP Tester</span>
+            @if (Session.IsAuthenticated)
+            {
+                <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalGap="12" Style="width: auto;">
+                    <span>@Session.UserName</span>
+                    <FluentButton Appearance="Appearance.Outline" OnClick="LogoutAsync">Log out</FluentButton>
+                </FluentStack>
+            }
+        </FluentStack>
+    </FluentHeader>
+    <FluentBodyContent>
+        <div class="content">
+            @Body
+        </div>
+    </FluentBodyContent>
+</FluentLayout>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    protected override void OnInitialized() => Session.Changed += OnSessionChanged;
+
+    private void OnSessionChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private async Task LogoutAsync()
+    {
+        await Mcp.ResetAsync();
+        Chat.Clear();
+        Session.Logout();
+        Navigation.NavigateTo("/login");
+    }
+
+    public void Dispose() => Session.Changed -= OnSessionChanged;
+}

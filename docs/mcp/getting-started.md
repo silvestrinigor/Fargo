@@ -113,3 +113,21 @@ Once registered, ask the host to list available tools (or use its tool inspector
 and confirm the `fargo_*` tools appear. A simple first call is
 `fargo_partitions_list`, which returns the partitions the authenticated user can
 see.
+
+## HTTP transport (multi-user)
+
+Besides stdio, the server can run as a Streamable HTTP endpoint. In this mode it
+has no fixed identity: every request must carry the caller's Fargo access token
+as `Authorization: Bearer <token>`, and each request gets its own Fargo client
+and token store, so one caller's token is never visible to another. Requests
+without a bearer token get `401`.
+
+```powershell
+$env:FARGO_SERVER = "http://localhost:5534"
+dotnet run --project src/client/Fargo.Mcp -- --transport http
+```
+
+The endpoint is `http://localhost:5290/mcp` by default; change it with
+`--urls` or `ASPNETCORE_URLS`. `FARGO_MCP_TRANSPORT=http` is equivalent to the
+`--transport http` argument. `FARGO_USERNAME`, `FARGO_PASSWORD` and
+`FARGO_ACCESS_TOKEN` are ignored in this mode.
