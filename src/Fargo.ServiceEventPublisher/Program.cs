@@ -1,8 +1,8 @@
 using Fargo.Application.DependencyInjection;
 using Fargo.Infrastructure.DependencyInjection;
 using Fargo.ServiceDefaults;
-using Fargo.ServiceOutbox.Options;
-using Fargo.ServiceOutbox.Services;
+using Fargo.ServiceEventPublisher.Options;
+using Fargo.ServiceEventPublisher.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 

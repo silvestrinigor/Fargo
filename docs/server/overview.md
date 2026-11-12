@@ -27,7 +27,7 @@ Everything lives under `src/`, with tests under `tests/`.
 | --- | --- |
 | `Fargo.ServiceHttp` | The HTTP API: minimal-API endpoints, authentication, rate limiting, OpenAPI, and error handling. |
 | `Fargo.ServiceRealtime` | The real-time service: a SignalR hub that pushes changes to connected clients. |
-| `Fargo.ServiceOutbox` | A background worker that publishes stored integration events to RabbitMQ. |
+| `Fargo.ServiceEventPublisher` | A background worker that publishes stored integration events to RabbitMQ. |
 | `Fargo.ServiceMigration` | A startup worker that applies pending database migrations, then exits. |
 | `Fargo.ServiceInitializer` | A startup worker that initializes the system state (global partition, administrators group, default admin), then exits. |
 | `Fargo.ServiceDefaults` | Shared host defaults: OpenTelemetry, health checks, resilience, and service discovery. |

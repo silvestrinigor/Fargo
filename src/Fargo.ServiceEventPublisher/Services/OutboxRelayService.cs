@@ -1,17 +1,16 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.Commands.Outbox;
 using Fargo.Application.Dtos.Outbox;
-using Fargo.ServiceOutbox.Options;
+using Fargo.ServiceEventPublisher.Options;
 using Microsoft.Extensions.Options;
 
-namespace Fargo.ServiceOutbox.Services;
+namespace Fargo.ServiceEventPublisher.Services;
 
 /// <summary>
 /// Owns only scheduling: a full batch is followed immediately by the next one; an empty or partial batch waits
 /// <see cref="OutboxOptions.PollInterval"/>. After a failure the wait doubles, up to
-/// <see cref="OutboxOptions.MaxRetryDelay"/>, and resets on the next success. Published messages past their
-/// retention are purged every <see cref="OutboxOptions.PurgeInterval"/>. The publishing and purging rules live
-/// in the application command handlers.
+/// <see cref="OutboxOptions.MaxRetryDelay"/>, and resets on the next success. The publishing rules live in the
+/// application command handler. Purging published messages is done by <c>Fargo.ServiceMaintenance</c>.
 /// </summary>
 public sealed class OutboxRelayService(
     IServiceScopeFactory scopeFactory,
@@ -24,7 +23,6 @@ public sealed class OutboxRelayService(
     {
         var settings = options.Value;
         var consecutiveFailures = 0;
-        var nextPurgeAt = timeProvider.GetUtcNow();
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -48,18 +46,6 @@ public sealed class OutboxRelayService(
                 {
                     consecutiveFailures = 0;
                     delay = result.Claimed >= settings.BatchSize ? TimeSpan.Zero : settings.PollInterval;
-                }
-
-                var now = timeProvider.GetUtcNow();
-
-                if (now >= nextPurgeAt)
-                {
-                    var purge = scope.ServiceProvider
-                        .GetRequiredService<ICommandHandler<PurgeProcessedOutboxCommand, int>>();
-
-                    await purge.HandleAsync(new PurgeProcessedOutboxCommand(now - settings.Retention), stoppingToken);
-
-                    nextPurgeAt = now + settings.PurgeInterval;
                 }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)

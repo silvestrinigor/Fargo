@@ -20,6 +20,14 @@ builder.Services
 
 builder.Services.AddHostedService<IdempotencyKeyPurgeService>();
 
+builder.Services
+.AddOptions<OutboxPurgeOptions>()
+.Bind(builder.Configuration.GetSection(OutboxPurgeOptions.SectionName))
+.ValidateDataAnnotations()
+.ValidateOnStart();
+
+builder.Services.AddHostedService<OutboxPurgeService>();
+
 var host = builder.Build();
 
 host.Run();

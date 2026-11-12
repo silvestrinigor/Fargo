@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fargo.ServiceOutbox\Fargo.ServiceOutbox.csproj" />
+    <ProjectReference Include="..\..\src\Fargo.ServiceEventPublisher\Fargo.ServiceEventPublisher.csproj" />
   </ItemGroup>
 
 </Project>

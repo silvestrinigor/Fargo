@@ -67,8 +67,8 @@ for long. A failed run is logged and tried again at the next interval, because
 expired records only waste space. Several instances can run at once, since
 deleting a record twice is harmless.
 
-The service needs only the database. The outbox relay keeps purging its own
-published messages; that is a separate concern.
+The service needs only the database. It also purges published outbox messages; see
+[Integration Events](integration-events.md#configuration).
 
 ## Configuration
 

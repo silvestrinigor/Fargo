@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Fargo.ServiceOutbox.Options;
+namespace Fargo.ServiceEventPublisher.Options;
 
 public sealed class OutboxOptions
 {
@@ -17,10 +17,4 @@ public sealed class OutboxOptions
     /// </summary>
     [Range(typeof(TimeSpan), "00:00:00.010", "01:00:00")]
     public TimeSpan MaxRetryDelay { get; set; } = TimeSpan.FromMinutes(1);
-
-    [Range(typeof(TimeSpan), "00:01:00", "3650.00:00:00")]
-    public TimeSpan Retention { get; set; } = TimeSpan.FromDays(7);
-
-    [Range(typeof(TimeSpan), "00:00:01", "1.00:00:00")]
-    public TimeSpan PurgeInterval { get; set; } = TimeSpan.FromHours(1);
 }

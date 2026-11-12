@@ -1,4 +1,4 @@
-namespace Fargo.ServiceOutbox.Services;
+namespace Fargo.ServiceEventPublisher.Services;
 
 internal static partial class OutboxServiceLog
 {

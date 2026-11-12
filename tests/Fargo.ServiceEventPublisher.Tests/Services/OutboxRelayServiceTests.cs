@@ -1,7 +1,7 @@
-using Fargo.ServiceOutbox.Options;
-using Fargo.ServiceOutbox.Services;
+using Fargo.ServiceEventPublisher.Options;
+using Fargo.ServiceEventPublisher.Services;
 
-namespace Fargo.ServiceOutbox.Tests.Services;
+namespace Fargo.ServiceEventPublisher.Tests.Services;
 
 public class OutboxRelayServiceTests
 {
