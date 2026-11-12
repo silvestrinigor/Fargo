@@ -38,8 +38,6 @@ namespace Fargo.ClientHttp.Models
 #else
         public string FirstName { get; set; }
 #endif
-        /// <summary>The isActive property</summary>
-        public bool? IsActive { get; set; }
         /// <summary>The lastName property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -148,7 +146,6 @@ namespace Fargo.ClientHttp.Models
                 { "authentication", n => { Authentication = n.GetObjectValue<global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto>(global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto.CreateFromDiscriminatorValue); } },
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "firstName", n => { FirstName = n.GetStringValue(); } },
-                { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "lastName", n => { LastName = n.GetStringValue(); } },
                 { "nameid", n => { Nameid = n.GetStringValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -171,7 +168,6 @@ namespace Fargo.ClientHttp.Models
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto>("authentication", Authentication);
             writer.WriteStringValue("description", Description);
             writer.WriteStringValue("firstName", FirstName);
-            writer.WriteBoolValue("isActive", IsActive);
             writer.WriteStringValue("lastName", LastName);
             writer.WriteStringValue("nameid", Nameid);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);

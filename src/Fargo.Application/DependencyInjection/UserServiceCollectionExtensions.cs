@@ -14,6 +14,7 @@ public static class UserServiceCollectionExtensions
         public IServiceCollection AddFargoUserApplication() => services
         .AddFargoCommandHandler<UserCreateCommand, Guid, UserCreateCommandHandler>()
         .AddFargoCommandHandler<UserUpdateCommand, UserUpdateCommandHandler>()
+        .AddFargoCommandHandler<UserSetActiveCommand, UserSetActiveCommandHandler>()
         .AddFargoCommandHandler<UserDeleteCommand, UserDeleteCommandHandler>()
         .AddFargoQueryHandler<UserSingleQuery, UserDto?, UserSingleQueryHandler>()
         .AddFargoQueryHandler<UsersQuery, PagedResult<UserDto>, UsersQueryHandler>();

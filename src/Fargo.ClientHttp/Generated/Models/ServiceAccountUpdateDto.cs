@@ -7,11 +7,10 @@ using System.IO;
 using System;
 namespace Fargo.ClientHttp.Models
 {
-    /// <summary>
-    /// Mutable service-account state to apply in an update.
-    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
+    #pragma warning disable CS1591
     public partial class ServiceAccountUpdateDto : IAdditionalDataHolder, IParsable
+    #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
@@ -23,8 +22,6 @@ namespace Fargo.ClientHttp.Models
 #else
         public string Description { get; set; }
 #endif
-        /// <summary>The isActive property</summary>
-        public bool? IsActive { get; set; }
         /// <summary>The partitionAccessesToAdd property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -99,7 +96,6 @@ namespace Fargo.ClientHttp.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "description", n => { Description = n.GetStringValue(); } },
-                { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionAccessesToRemove", n => { PartitionAccessesToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -116,7 +112,6 @@ namespace Fargo.ClientHttp.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("description", Description);
-            writer.WriteBoolValue("isActive", IsActive);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToRemove", PartitionAccessesToRemove);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);

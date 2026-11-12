@@ -19,46 +19,52 @@ Options:
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  list           List user groups as a table.
+  list                        List user groups as a table.
   
-                 By default the list is paged interactively: a page of user groups is
-                 shown and you can press 'n' for the next page, 'p' for the previous
-                 page, or 'q' to quit (press Enter after the key). Passing --page or
-                 --limit switches to a single, non-interactive fetch of exactly that
-                 page.
+                              By default the list is paged interactively: a page of user groups is
+                              shown and you can press 'n' for the next page, 'p' for the previous
+                              page, or 'q' to quit (press Enter after the key). Passing --page or
+                              --limit switches to a single, non-interactive fetch of exactly that
+                              page.
   
-                 Examples:
-                   fargo user-group list
-                   fargo user-group list --page 2
-                   fargo user-group list --page 1 --limit 50
-                   fargo user-group list --partitions 00000000-0000-0000-0000-000000000001
-  tree           Show user groups as a tree: child groups nested under their parent,
-                 and member users nested under each group.
+                              Examples:
+                                fargo user-group list
+                                fargo user-group list --page 2
+                                fargo user-group list --page 1 --limit 50
+                                fargo user-group list --partitions 00000000-0000-0000-0000-000000000001
+  tree                        Show user groups as a tree: child groups nested under their parent,
+                              and member users nested under each group.
   
-                 Each line is tagged with its type ([group] or [user]). Users that
-                 are not in any group appear at the root level, alongside the
-                 top-level groups.
+                              Each line is tagged with its type ([group] or [user]). Users that
+                              are not in any group appear at the root level, alongside the
+                              top-level groups.
   
-                 Examples:
-                   fargo user-group tree
-  get <guid>     Show the full details of a single user group.
+                              Examples:
+                                fargo user-group tree
+  get <guid>                  Show the full details of a single user group.
   
-                 Examples:
-                   fargo user-group get 00000000-0000-0000-0000-000000000003
-  create         Create a new user group, optionally nested under a parent group.
+                              Examples:
+                                fargo user-group get 00000000-0000-0000-0000-000000000003
+  create                      Create a new user group, optionally nested under a parent group.
   
-                 Examples:
-                   fargo user-group create --name warehouse-ops
-                   fargo user-group create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
-  update <guid>  Update an existing user group. Only the options you pass are changed.
+                              Examples:
+                                fargo user-group create --name warehouse-ops
+                                fargo user-group create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
+  update <guid>               Update an existing user group. Only the options you pass are changed.
   
-                 Examples:
-                   fargo user-group update 00000000-0000-0000-0000-000000000003 --active false
-                   fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
-  delete <guid>  Delete a user group by GUID.
+                              Examples:
+                                fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
+  set-active <guid> <active>  Activate or deactivate a user group.
   
-                 Examples:
-                   fargo user-group delete 00000000-0000-0000-0000-000000000003
+                              This is a separate operation from update and requires its own permission.
+  
+                              Examples:
+                                fargo user-group set-active 00000000-0000-0000-0000-000000000003 true
+                                fargo user-group set-active 00000000-0000-0000-0000-000000000003 false
+  delete <guid>               Delete a user group by GUID.
+  
+                              Examples:
+                                fargo user-group delete 00000000-0000-0000-0000-000000000003
 
 ```
 
@@ -179,7 +185,6 @@ Description:
   Update an existing user group. Only the options you pass are changed.
   
   Examples:
-    fargo user-group update 00000000-0000-0000-0000-000000000003 --active false
     fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
 
 Usage:
@@ -189,9 +194,36 @@ Arguments:
   <guid>  The user group GUID.
 
 Options:
-  --active               Set the user group active state (true or false).
   --parent <parent>      New parent user group GUID.
   --remove-parent        Remove the parent user group association.
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user-group set-active`
+
+```text
+Description:
+  Activate or deactivate a user group.
+  
+  This is a separate operation from update and requires its own permission.
+  
+  Examples:
+    fargo user-group set-active 00000000-0000-0000-0000-000000000003 true
+    fargo user-group set-active 00000000-0000-0000-0000-000000000003 false
+
+Usage:
+  fargo user-group set-active <guid> [<active>] [options]
+
+Arguments:
+  <guid>    The user group GUID.
+  <active>  true to activate, false to deactivate.
+
+Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information

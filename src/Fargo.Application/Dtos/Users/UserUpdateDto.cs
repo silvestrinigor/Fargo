@@ -8,7 +8,6 @@ public sealed record UserUpdateDto(
     FirstName? FirstName = null,
     LastName? LastName = null,
     Description? Description = null,
-    bool? IsActive = null,
     UserAuthenticationUpdateDto? Authentication = null,
     IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
     IReadOnlyCollection<ActionType>? PermissionsToRemove = null,

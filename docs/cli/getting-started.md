@@ -47,7 +47,7 @@ Create, update, and delete:
 fargo article create --name "Widget"
 fargo article create --name "Bulk sand" --tracking-mode event
 fargo partition create --name "Warehouse A"
-fargo user update 00000000-0000-0000-0000-000000000004 --active false
+fargo user set-active 00000000-0000-0000-0000-000000000004 false
 fargo item delete 22222222-2222-2222-2222-222222222222
 ```
 

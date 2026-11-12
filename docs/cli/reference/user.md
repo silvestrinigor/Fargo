@@ -6,7 +6,7 @@ Command reference for `fargo user`, generated from the CLI's help output.
 
 ```text
 Description:
-  Manage user accounts (list, inspect, create, update, delete).
+  Manage user accounts (list, inspect, create, update, activate or deactivate, delete).
 
 Usage:
   fargo user [command] [options]
@@ -19,36 +19,42 @@ Options:
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  list           List users as a table.
+  list                        List users as a table.
   
-                 By default the list is paged interactively: a page of users is shown
-                 and you can press 'n' for the next page, 'p' for the previous page, or
-                 'q' to quit (press Enter after the key). Passing --page or --limit
-                 switches to a single, non-interactive fetch of exactly that page.
+                              By default the list is paged interactively: a page of users is shown
+                              and you can press 'n' for the next page, 'p' for the previous page, or
+                              'q' to quit (press Enter after the key). Passing --page or --limit
+                              switches to a single, non-interactive fetch of exactly that page.
   
-                 Examples:
-                   fargo user list
-                   fargo user list --page 2
-                   fargo user list --page 1 --limit 50
-                   fargo user list --partitions 00000000-0000-0000-0000-000000000001
-  get <guid>     Show the full details of a single user.
+                              Examples:
+                                fargo user list
+                                fargo user list --page 2
+                                fargo user list --page 1 --limit 50
+                                fargo user list --partitions 00000000-0000-0000-0000-000000000001
+  get <guid>                  Show the full details of a single user.
   
-                 Examples:
-                   fargo user get 00000000-0000-0000-0000-000000000004
-  create         Create a new user account.
+                              Examples:
+                                fargo user get 00000000-0000-0000-0000-000000000004
+  create                      Create a new user account.
   
-                 Examples:
-                   fargo user create --username jdoe --password 'S3cr3t!'
-                   fargo user create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
-  update <guid>  Update an existing user. Only the options you pass are changed.
+                              Examples:
+                                fargo user create --username jdoe --password 'S3cr3t!'
+                                fargo user create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
+  update <guid>               Update an existing user. Only the options you pass are changed.
   
-                 Examples:
-                   fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
-                   fargo user update 00000000-0000-0000-0000-000000000004 --active false
-  delete <guid>  Delete a user by GUID.
+                              Examples:
+                                fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
+  set-active <guid> <active>  Activate or deactivate a user.
   
-                 Examples:
-                   fargo user delete 00000000-0000-0000-0000-000000000004
+                              This is a separate operation from update and requires its own permission.
+  
+                              Examples:
+                                fargo user set-active 00000000-0000-0000-0000-000000000004 true
+                                fargo user set-active 00000000-0000-0000-0000-000000000004 false
+  delete <guid>               Delete a user by GUID.
+  
+                              Examples:
+                                fargo user delete 00000000-0000-0000-0000-000000000004
 
 ```
 
@@ -145,7 +151,6 @@ Description:
   
   Examples:
     fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
-    fargo user update 00000000-0000-0000-0000-000000000004 --active false
 
 Usage:
   fargo user update <guid> [options]
@@ -157,12 +162,39 @@ Options:
   --username <username>      New username (nameid) for the user.
   --first-name <first-name>  New first name.
   --last-name <last-name>    New last name.
-  --active                   Set the user active state (true or false).
   --username <username>      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information
   --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
   -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user set-active`
+
+```text
+Description:
+  Activate or deactivate a user.
+  
+  This is a separate operation from update and requires its own permission.
+  
+  Examples:
+    fargo user set-active 00000000-0000-0000-0000-000000000004 true
+    fargo user set-active 00000000-0000-0000-0000-000000000004 false
+
+Usage:
+  fargo user set-active <guid> [<active>] [options]
+
+Arguments:
+  <guid>    The user GUID.
+  <active>  true to activate, false to deactivate.
+
+Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

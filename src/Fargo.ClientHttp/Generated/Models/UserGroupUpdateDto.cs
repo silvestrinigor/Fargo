@@ -22,8 +22,6 @@ namespace Fargo.ClientHttp.Models
 #else
         public string Description { get; set; }
 #endif
-        /// <summary>The isActive property</summary>
-        public bool? IsActive { get; set; }
         /// <summary>The nameid property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -110,7 +108,6 @@ namespace Fargo.ClientHttp.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "description", n => { Description = n.GetStringValue(); } },
-                { "isActive", n => { IsActive = n.GetBoolValue(); } },
                 { "nameid", n => { Nameid = n.GetStringValue(); } },
                 { "parentUserGroup", n => { ParentUserGroup = n.GetGuidValue(); } },
                 { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
@@ -130,7 +127,6 @@ namespace Fargo.ClientHttp.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("description", Description);
-            writer.WriteBoolValue("isActive", IsActive);
             writer.WriteStringValue("nameid", Nameid);
             writer.WriteGuidValue("parentUserGroup", ParentUserGroup);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);

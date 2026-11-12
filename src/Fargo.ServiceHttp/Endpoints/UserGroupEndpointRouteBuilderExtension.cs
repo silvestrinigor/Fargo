@@ -1,5 +1,6 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.Common.Paging;
+using Fargo.Application.Dtos;
 using Fargo.Application.Commands.UserGroups;
 using Fargo.Application.Dtos.UserGroups;
 using Fargo.Application.Queries.UserGroups;
@@ -21,6 +22,8 @@ public static class UserGroupEndpointRouteBuilderExtension
         group.MapCreateUserGroup();
 
         group.MapUpdateUserGroup();
+
+        group.MapSetUserGroupActive();
 
         group.MapDeleteUserGroup();
     }
@@ -156,6 +159,32 @@ public static class UserGroupEndpointRouteBuilderExtension
 
     #endregion Update
 
+    #region Set active
+
+    private static IEndpointRouteBuilder MapSetUserGroupActive(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{userGroupGuid:guid}/is-active", SetActive)
+            .WithName("SetUserGroupActive")
+            .WithSummary("Activates or deactivates a user group")
+            .WithDescription("Sets whether the user group is active. Requires the ActivateUserGroup permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetActive(
+        Guid userGroupGuid,
+        ActiveStateDto request,
+        ICommandHandler<UserGroupSetActiveCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new UserGroupSetActiveCommand(userGroupGuid, request.IsActive), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set active
     #region Delete
 
     private static IEndpointRouteBuilder MapDeleteUserGroup(this IEndpointRouteBuilder builder)

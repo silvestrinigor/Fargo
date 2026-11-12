@@ -41,5 +41,20 @@ public enum ActionType
     ReceiveSupplyOrder = 27,
     CancelSupplyOrder = 28,
     CloseSupplyOrder = 29,
-    ReadSupplyOrders = 30
+    ReadSupplyOrders = 30,
+
+    /// <summary>
+    /// Activates or deactivates a user.
+    /// </summary>
+    ActivateUser = 31,
+
+    /// <summary>
+    /// Activates or deactivates a user group.
+    /// </summary>
+    ActivateUserGroup = 32,
+
+    /// <summary>
+    /// Activates or deactivates a service account.
+    /// </summary>
+    ActivateServiceAccount = 33
 }

@@ -1,5 +1,6 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.Common.Paging;
+using Fargo.Application.Dtos;
 using Fargo.Application.Commands.ServiceAccounts;
 using Fargo.Application.Dtos.ServiceAccounts;
 using Fargo.Application.Queries.ServiceAccounts;
@@ -22,6 +23,8 @@ public static class ServiceAccountEndpointRouteBuilderExtension
         group.MapGetServiceAccounts();
         group.MapCreateServiceAccount();
         group.MapUpdateServiceAccount();
+
+        group.MapSetServiceAccountActive();
         group.MapRotateServiceAccountSecret();
         group.MapDeleteServiceAccount();
     }
@@ -125,7 +128,7 @@ public static class ServiceAccountEndpointRouteBuilderExtension
         builder.MapPut("/{serviceAccountGuid:guid}", Update)
             .WithName("UpdateServiceAccount")
             .WithSummary("Updates a service account")
-            .WithDescription("Updates mutable service-account state: description, active flag, permissions and partition accesses.")
+            .WithDescription("Updates mutable service-account state: description, permissions and partition accesses. Use the is-active endpoint to activate or deactivate.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -144,6 +147,32 @@ public static class ServiceAccountEndpointRouteBuilderExtension
 
     #endregion
 
+    #region Set active
+
+    private static IEndpointRouteBuilder MapSetServiceAccountActive(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{serviceAccountGuid:guid}/is-active", SetActive)
+            .WithName("SetServiceAccountActive")
+            .WithSummary("Activates or deactivates a service account")
+            .WithDescription("Sets whether the service account is active. Requires the ActivateServiceAccount permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetActive(
+        Guid serviceAccountGuid,
+        ActiveStateDto request,
+        ICommandHandler<ServiceAccountSetActiveCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new ServiceAccountSetActiveCommand(serviceAccountGuid, request.IsActive), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set active
     #region Rotate secret
 
     private static IEndpointRouteBuilder MapRotateServiceAccountSecret(this IEndpointRouteBuilder builder)

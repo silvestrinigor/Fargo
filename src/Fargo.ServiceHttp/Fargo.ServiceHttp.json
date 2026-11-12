@@ -932,6 +932,45 @@
         }
       }
     },
+    "/v1/users/{userGuid}/is-active": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Activates or deactivates a user",
+        "description": "Sets whether the user is active. Requires the ActivateUser permission, which is separate from the edit permission.",
+        "operationId": "SetUserActive",
+        "parameters": [
+          {
+            "name": "userGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActiveStateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/v1/user-groups/{userGroupGuid}": {
       "get": {
         "tags": [
@@ -1126,6 +1165,45 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/is-active": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Activates or deactivates a user group",
+        "description": "Sets whether the user group is active. Requires the ActivateUserGroup permission, which is separate from the edit permission.",
+        "operationId": "SetUserGroupActive",
+        "parameters": [
+          {
+            "name": "userGroupGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActiveStateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1640,7 +1718,7 @@
           "ServiceAccounts"
         ],
         "summary": "Updates a service account",
-        "description": "Updates mutable service-account state: description, active flag, permissions and partition accesses.",
+        "description": "Updates mutable service-account state: description, permissions and partition accesses. Use the is-active endpoint to activate or deactivate.",
         "operationId": "UpdateServiceAccount",
         "parameters": [
           {
@@ -1768,6 +1846,45 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}/is-active": {
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Activates or deactivates a service account",
+        "description": "Sets whether the service account is active. Requires the ActivateServiceAccount permission, which is separate from the edit permission.",
+        "operationId": "SetServiceAccountActive",
+        "parameters": [
+          {
+            "name": "serviceAccountGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActiveStateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2208,6 +2325,18 @@
     "schemas": {
       "ActionType": {
         "type": "integer"
+      },
+      "ActiveStateDto": {
+        "required": [
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "description": "Request body of the dedicated activate/deactivate endpoints."
       },
       "ActorType": {
         "type": "integer"
@@ -4025,12 +4154,6 @@
               "string"
             ]
           },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
           "permissionsToAdd": {
             "type": [
               "null",
@@ -4702,12 +4825,6 @@
             "maxLength": 500,
             "type": "string"
           },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
           "parentUserGroup": {
             "type": [
               "null",
@@ -4803,12 +4920,6 @@
           "description": {
             "maxLength": 500,
             "type": "string"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
           },
           "authentication": {
             "oneOf": [

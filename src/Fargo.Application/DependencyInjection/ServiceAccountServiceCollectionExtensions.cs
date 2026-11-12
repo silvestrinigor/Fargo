@@ -14,6 +14,7 @@ public static class ServiceAccountServiceCollectionExtensions
         public IServiceCollection AddFargoServiceAccountApplication() => services
         .AddFargoCommandHandler<ServiceAccountCreateCommand, ServiceAccountCreatedDto, ServiceAccountCreateCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountUpdateCommand, ServiceAccountUpdateCommandHandler>()
+        .AddFargoCommandHandler<ServiceAccountSetActiveCommand, ServiceAccountSetActiveCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountRotateSecretCommand, ServiceAccountCreatedDto, ServiceAccountRotateSecretCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountDeleteCommand, ServiceAccountDeleteCommandHandler>()
         .AddFargoQueryHandler<ServiceAccountSingleQuery, ServiceAccountDto?, ServiceAccountSingleQueryHandler>()

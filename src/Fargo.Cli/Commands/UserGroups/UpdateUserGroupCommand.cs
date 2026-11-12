@@ -12,18 +12,12 @@ public sealed class UpdateUserGroupCommand : Command
             Update an existing user group. Only the options you pass are changed.
 
             Examples:
-              fargo user-group update 00000000-0000-0000-0000-000000000003 --active false
               fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
             """)
     {
         var guidArgument = new Argument<Guid>("guid")
         {
             Description = "The user group GUID."
-        };
-
-        var isActiveOption = new Option<bool?>("--active")
-        {
-            Description = "Set the user group active state (true or false)."
         };
 
         var parentOption = new Option<Guid?>("--parent")
@@ -37,20 +31,17 @@ public sealed class UpdateUserGroupCommand : Command
         };
 
         Add(guidArgument);
-        Add(isActiveOption);
         Add(parentOption);
         Add(removeParentOption);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
-            var isActive = parseResult.GetValue(isActiveOption);
             var parent = parseResult.GetValue(parentOption);
             var removeParent = parseResult.GetValue(removeParentOption);
 
             var dto = new UserGroupUpdateDto
             {
-                IsActive = isActive,
                 ParentUserGroup = parent,
                 RemoveParentUserGroup = removeParent ? true : null
             };

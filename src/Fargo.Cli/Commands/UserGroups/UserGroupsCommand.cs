@@ -13,6 +13,7 @@ public sealed class UserGroupsCommand : Command
         Add(new GetUserGroupCommand(client));
         Add(new CreateUserGroupCommand(client));
         Add(new UpdateUserGroupCommand(client));
+        Add(new SetUserGroupActiveCommand(client));
         Add(new DeleteUserGroupCommand(client));
     }
 }

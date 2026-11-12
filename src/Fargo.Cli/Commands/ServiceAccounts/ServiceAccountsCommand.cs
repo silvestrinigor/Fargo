@@ -12,6 +12,7 @@ public sealed class ServiceAccountsCommand : Command
         Add(new GetServiceAccountCommand(client));
         Add(new CreateServiceAccountCommand(client));
         Add(new UpdateServiceAccountCommand(client));
+        Add(new SetServiceAccountActiveCommand(client));
         Add(new RotateServiceAccountSecretCommand(client));
         Add(new DeleteServiceAccountCommand(client));
     }

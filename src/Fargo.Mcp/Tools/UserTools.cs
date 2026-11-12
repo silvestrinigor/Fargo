@@ -130,7 +130,6 @@ public static class UserTools
         [Description("The new first name.")] string? firstName = null,
         [Description("The new last name.")] string? lastName = null,
         [Description("The new description.")] string? description = null,
-        [Description("Set the active state.")] bool? isActive = null,
         [Description("A new password to set for the user.")] string? password = null,
         [Description("The new default password validity as an ISO-8601 duration, e.g. 'P90D'.")] string? defaultPasswordExpirationPeriod = null,
         [Description("Set true to clear the default password expiration period.")] bool? removeDefaultPasswordExpirationPeriod = null,
@@ -152,7 +151,6 @@ public static class UserTools
             FirstName = firstName,
             LastName = lastName,
             Description = description,
-            IsActive = isActive,
             PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
             PermissionsToRemove = ToolInput.ToIntList(permissionsToRemove),
             PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
@@ -180,6 +178,24 @@ public static class UserTools
         await client.V1.Users[userGuid].PutAsync(body, cancellationToken: cancellationToken);
 
         return $"User '{userGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_users_set_active")]
+    [Description("Activate or deactivate a user. Requires the ActivateUser permission, which is separate from the permission to update.")]
+    public static async Task<string> SetUserActiveAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the user.")] Guid userGuid,
+        [Description("true to activate, false to deactivate.")] bool isActive,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Users[userGuid].IsActive.PutAsync(
+            new ActiveStateDto { IsActive = isActive },
+            cancellationToken: cancellationToken);
+
+        return $"User '{userGuid}' {(isActive ? "activated" : "deactivated")}.";
     }
 
     [McpServerTool(Name = "fargo_users_delete")]

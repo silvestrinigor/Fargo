@@ -16,7 +16,7 @@ public sealed class UpdateServiceAccountCommand : Command
             independently.
 
             Examples:
-              fargo service-account update 00000000-0000-0000-0000-000000000010 --active false
+              fargo service-account update 00000000-0000-0000-0000-000000000010 --description "CI runner"
               fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
               fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
             """)
@@ -29,11 +29,6 @@ public sealed class UpdateServiceAccountCommand : Command
         var descriptionOption = new Option<string?>("--description")
         {
             Description = "New description."
-        };
-
-        var isActiveOption = new Option<bool?>("--active")
-        {
-            Description = "Set the active state (true or false)."
         };
 
         var addPermissionsOption = new Option<int[]?>("--add-permissions")
@@ -74,7 +69,6 @@ public sealed class UpdateServiceAccountCommand : Command
 
         Add(guidArgument);
         Add(descriptionOption);
-        Add(isActiveOption);
         Add(addPermissionsOption);
         Add(removePermissionsOption);
         Add(addPartitionMembershipsOption);
@@ -89,7 +83,6 @@ public sealed class UpdateServiceAccountCommand : Command
             var dto = new ServiceAccountUpdateDto
             {
                 Description = parseResult.GetValue(descriptionOption),
-                IsActive = parseResult.GetValue(isActiveOption),
                 PermissionsToAdd = ToIntList(parseResult.GetValue(addPermissionsOption)),
                 PermissionsToRemove = ToIntList(parseResult.GetValue(removePermissionsOption)),
                 PartitionsToAdd = ToGuidList(parseResult.GetValue(addPartitionMembershipsOption)),

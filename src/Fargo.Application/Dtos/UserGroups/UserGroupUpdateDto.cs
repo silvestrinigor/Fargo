@@ -6,7 +6,6 @@ namespace Fargo.Application.Dtos.UserGroups;
 public sealed record UserGroupUpdateDto(
     Nameid? Nameid = null,
     Description? Description = null,
-    bool? IsActive = null,
     Guid? ParentUserGroup = null,
     bool? RemoveParentUserGroup = null,
     IReadOnlyCollection<ActionType>? PermissionsToAdd = null,

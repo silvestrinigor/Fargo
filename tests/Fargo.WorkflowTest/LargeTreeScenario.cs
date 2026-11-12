@@ -611,8 +611,8 @@ internal sealed class LargeTreeScenario(
         // Admin can toggle a user active/inactive and the change is reflected.
         var toggleUser = _users[^1];
         await _check.AllowedAsync($"admin deactivates '{toggleUser.Nameid}'", () =>
-            _admin.V1.Users[toggleUser.Guid].PutAsync(
-                new UserUpdateDto { IsActive = false }, cancellationToken: cancellationToken));
+            _admin.V1.Users[toggleUser.Guid].IsActive.PutAsync(
+                new ActiveStateDto { IsActive = false }, cancellationToken: cancellationToken));
         var afterDeactivate = await _admin.V1.Users[toggleUser.Guid].GetAsync(cancellationToken: cancellationToken);
         _check.Equal(false, afterDeactivate?.IsActive, $"'{toggleUser.Nameid}' is now inactive");
 
@@ -624,8 +624,8 @@ internal sealed class LargeTreeScenario(
 
         // Reactivate so later phases can still use it if needed.
         await _check.AllowedAsync($"admin reactivates '{toggleUser.Nameid}'", () =>
-            _admin.V1.Users[toggleUser.Guid].PutAsync(
-                new UserUpdateDto { IsActive = true }, cancellationToken: cancellationToken));
+            _admin.V1.Users[toggleUser.Guid].IsActive.PutAsync(
+                new ActiveStateDto { IsActive = true }, cancellationToken: cancellationToken));
     }
 
     // -------------------------------------------------------------------------

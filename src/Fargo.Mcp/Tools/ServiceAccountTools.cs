@@ -95,7 +95,6 @@ public static class ServiceAccountTools
         FargoAuthenticator authenticator,
         [Description("The GUID of the service account to update.")] Guid serviceAccountGuid,
         [Description("The new description.")] string? description = null,
-        [Description("Set the active state.")] bool? isActive = null,
         [Description("Permissions to grant. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
         [Description("Permissions to revoke (same codes as permissionsToAdd).")] int[]? permissionsToRemove = null,
         [Description("GUIDs of partitions to add to the account's membership.")] Guid[]? partitionsToAdd = null,
@@ -109,7 +108,6 @@ public static class ServiceAccountTools
         var body = new ServiceAccountUpdateDto
         {
             Description = description,
-            IsActive = isActive,
             PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
             PermissionsToRemove = ToolInput.ToIntList(permissionsToRemove),
             PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
@@ -121,6 +119,24 @@ public static class ServiceAccountTools
         await client.V1.ServiceAccounts[serviceAccountGuid].PutAsync(body, cancellationToken: cancellationToken);
 
         return $"Service account '{serviceAccountGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_serviceaccounts_set_active")]
+    [Description("Activate or deactivate a service account. Requires the ActivateServiceAccount permission, which is separate from the permission to update.")]
+    public static async Task<string> SetServiceAccountActiveAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the service account.")] Guid serviceAccountGuid,
+        [Description("true to activate, false to deactivate.")] bool isActive,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.ServiceAccounts[serviceAccountGuid].IsActive.PutAsync(
+            new ActiveStateDto { IsActive = isActive },
+            cancellationToken: cancellationToken);
+
+        return $"Service account '{serviceAccountGuid}' {(isActive ? "activated" : "deactivated")}.";
     }
 
     [McpServerTool(Name = "fargo_serviceaccounts_rotate_secret")]

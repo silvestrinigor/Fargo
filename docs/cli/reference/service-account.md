@@ -19,51 +19,58 @@ Options:
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  list                  List service accounts as a table.
+  list                        List service accounts as a table.
   
-                        By default the list is paged interactively: a page is shown and you
-                        can press 'n' for the next page, 'p' for the previous page, or 'q' to
-                        quit (press Enter after the key). Passing --page or --limit switches
-                        to a single, non-interactive fetch of exactly that page.
+                              By default the list is paged interactively: a page is shown and you
+                              can press 'n' for the next page, 'p' for the previous page, or 'q' to
+                              quit (press Enter after the key). Passing --page or --limit switches
+                              to a single, non-interactive fetch of exactly that page.
   
-                        Examples:
-                          fargo service-account list
-                          fargo service-account list --page 1 --limit 50
-  get <guid>            Show the full details of a single service account. Never shows the secret.
+                              Examples:
+                                fargo service-account list
+                                fargo service-account list --page 1 --limit 50
+  get <guid>                  Show the full details of a single service account. Never shows the secret.
   
-                        Examples:
-                          fargo service-account get 00000000-0000-0000-0000-000000000010
-  create                Create a new service account. The generated client secret is printed
-                        EXACTLY ONCE - store it securely, it cannot be retrieved later (only
-                        rotated).
+                              Examples:
+                                fargo service-account get 00000000-0000-0000-0000-000000000010
+  create                      Create a new service account. The generated client secret is printed
+                              EXACTLY ONCE - store it securely, it cannot be retrieved later (only
+                              rotated).
   
-                        Permissions are numeric ActionType codes (space-separated). Partition
-                        memberships and partition accesses are partition GUIDs (space-separated).
-                        Membership defines the partitions the account belongs to (its scope);
-                        access defines the partitions the account is allowed to reach.
+                              Permissions are numeric ActionType codes (space-separated). Partition
+                              memberships and partition accesses are partition GUIDs (space-separated).
+                              Membership defines the partitions the account belongs to (its scope);
+                              access defines the partitions the account is allowed to reach.
   
-                        Examples:
-                          fargo service-account create --client-id erp-importer
-                          fargo service-account create --client-id erp-importer --permissions 1 4 6 --partition-memberships 00000000-0000-0000-0000-000000000002 --partition-accesses 00000000-0000-0000-0000-000000000002
-  update <guid>         Update an existing service account. Only the options you pass are changed.
+                              Examples:
+                                fargo service-account create --client-id erp-importer
+                                fargo service-account create --client-id erp-importer --permissions 1 4 6 --partition-memberships 00000000-0000-0000-0000-000000000002 --partition-accesses 00000000-0000-0000-0000-000000000002
+  update <guid>               Update an existing service account. Only the options you pass are changed.
   
-                        Partition membership (the partitions the account belongs to) and
-                        partition access (the partitions the account may reach) are managed
-                        independently.
+                              Partition membership (the partitions the account belongs to) and
+                              partition access (the partitions the account may reach) are managed
+                              independently.
   
-                        Examples:
-                          fargo service-account update 00000000-0000-0000-0000-000000000010 --active false
-                          fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
-                          fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
-  rotate-secret <guid>  Rotate a service account's secret. The new secret is printed EXACTLY
-                        ONCE and all tokens previously issued to the account stop validating.
+                              Examples:
+                                fargo service-account update 00000000-0000-0000-0000-000000000010 --description "CI runner"
+                                fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
+                                fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
+  set-active <guid> <active>  Activate or deactivate a service account.
   
-                        Examples:
-                          fargo service-account rotate-secret 00000000-0000-0000-0000-000000000010
-  delete <guid>         Delete a service account by GUID. Any tokens it holds stop validating.
+                              This is a separate operation from update and requires its own permission.
   
-                        Examples:
-                          fargo service-account delete 00000000-0000-0000-0000-000000000010
+                              Examples:
+                                fargo service-account set-active 00000000-0000-0000-0000-000000000010 true
+                                fargo service-account set-active 00000000-0000-0000-0000-000000000010 false
+  rotate-secret <guid>        Rotate a service account's secret. The new secret is printed EXACTLY
+                              ONCE and all tokens previously issued to the account stop validating.
+  
+                              Examples:
+                                fargo service-account rotate-secret 00000000-0000-0000-0000-000000000010
+  delete <guid>               Delete a service account by GUID. Any tokens it holds stop validating.
+  
+                              Examples:
+                                fargo service-account delete 00000000-0000-0000-0000-000000000010
 
 ```
 
@@ -166,7 +173,7 @@ Description:
   independently.
   
   Examples:
-    fargo service-account update 00000000-0000-0000-0000-000000000010 --active false
+    fargo service-account update 00000000-0000-0000-0000-000000000010 --description "CI runner"
     fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
     fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
 
@@ -178,7 +185,6 @@ Arguments:
 
 Options:
   --description <description>                                                   New description.
-  --active                                                                      Set the active state (true or false).
   --add-permissions <add-permissions>                                           ActionType permission codes to grant (space-separated).
   --remove-permissions <remove-permissions>                                     ActionType permission codes to revoke (space-separated).
   --add-partition-memberships <add-partition-memberships>                       Partition GUIDs to add to the account's membership (space-separated).
@@ -190,6 +196,34 @@ Options:
   -?, -h, --help                                                                Show help and usage information
   --server <server>                                                             The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
   -v, --verbose                                                                 Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo service-account set-active`
+
+```text
+Description:
+  Activate or deactivate a service account.
+  
+  This is a separate operation from update and requires its own permission.
+  
+  Examples:
+    fargo service-account set-active 00000000-0000-0000-0000-000000000010 true
+    fargo service-account set-active 00000000-0000-0000-0000-000000000010 false
+
+Usage:
+  fargo service-account set-active <guid> [<active>] [options]
+
+Arguments:
+  <guid>    The service account GUID.
+  <active>  true to activate, false to deactivate.
+
+Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

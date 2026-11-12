@@ -72,6 +72,20 @@ public enum ActionType
     EditPartition = 17,
     ReadAuditLogs = 18,
     ReadItemEvents = 19,
+    CreateServiceAccount = 20,
+    DeleteServiceAccount = 21,
+    EditServiceAccount = 22,
+    ReadServiceAccount = 23,
+    CreateSupplyOrder = 24,
+    EditSupplyOrder = 25,
+    PlaceSupplyOrder = 26,
+    ReceiveSupplyOrder = 27,
+    CancelSupplyOrder = 28,
+    CloseSupplyOrder = 29,
+    ReadSupplyOrders = 30,
+    ActivateUser = 31,
+    ActivateUserGroup = 32,
+    ActivateServiceAccount = 33,
 }
 
 /// <summary>

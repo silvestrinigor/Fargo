@@ -1,5 +1,6 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.Common.Paging;
+using Fargo.Application.Dtos;
 using Fargo.Application.Commands.Users;
 using Fargo.Application.Dtos.Users;
 using Fargo.Application.Queries.Users;
@@ -21,6 +22,8 @@ public static class UserEndpointRouteBuilderExtension
         group.MapCreateUser();
 
         group.MapUpdateUser();
+
+        group.MapSetUserActive();
 
         group.MapDeleteUser();
     }
@@ -161,6 +164,32 @@ public static class UserEndpointRouteBuilderExtension
 
     #endregion Update
 
+    #region Set active
+
+    private static IEndpointRouteBuilder MapSetUserActive(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{userGuid:guid}/is-active", SetActive)
+            .WithName("SetUserActive")
+            .WithSummary("Activates or deactivates a user")
+            .WithDescription("Sets whether the user is active. Requires the ActivateUser permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetActive(
+        Guid userGuid,
+        ActiveStateDto request,
+        ICommandHandler<UserSetActiveCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new UserSetActiveCommand(userGuid, request.IsActive), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set active
     #region Delete
 
     private static IEndpointRouteBuilder MapDeleteUser(this IEndpointRouteBuilder builder)

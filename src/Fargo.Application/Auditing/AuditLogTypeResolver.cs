@@ -38,16 +38,19 @@ public static class AuditLogTypeResolver
         // Users
         [typeof(UserCreateCommand)] = AuditLogType.EntityCreated,
         [typeof(UserUpdateCommand)] = AuditLogType.EntityUpdated,
+        [typeof(UserSetActiveCommand)] = AuditLogType.EntityUpdated,
         [typeof(UserDeleteCommand)] = AuditLogType.EntityDeleted,
 
         // User groups
         [typeof(UserGroupCreateCommand)] = AuditLogType.EntityCreated,
         [typeof(UserGroupUpdateCommand)] = AuditLogType.EntityUpdated,
+        [typeof(UserGroupSetActiveCommand)] = AuditLogType.EntityUpdated,
         [typeof(UserGroupDeleteCommand)] = AuditLogType.EntityDeleted,
 
         // Service accounts
         [typeof(ServiceAccountCreateCommand)] = AuditLogType.EntityCreated,
         [typeof(ServiceAccountUpdateCommand)] = AuditLogType.EntityUpdated,
+        [typeof(ServiceAccountSetActiveCommand)] = AuditLogType.EntityUpdated,
         [typeof(ServiceAccountDeleteCommand)] = AuditLogType.EntityDeleted,
         [typeof(ServiceAccountRotateSecretCommand)] = AuditLogType.ServiceAccountSecretRotated,
 

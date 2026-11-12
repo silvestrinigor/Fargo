@@ -56,15 +56,6 @@ public sealed class UserGroupUpdateCommandHandler(
             userGroup.Description = description;
         }
 
-        if (command.Update.IsActive is true)
-        {
-            userGroup.Activate();
-        }
-        else if (command.Update.IsActive is false)
-        {
-            userGroup.Deactivate();
-        }
-
         if (command.Update.ParentUserGroup is { } parentUserGroupGuid)
         {
             var parentUserGroup = await userGroupRepository.GetByGuidAsync(parentUserGroupGuid, cancellationToken);

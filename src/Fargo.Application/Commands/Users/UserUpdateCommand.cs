@@ -64,19 +64,6 @@ public sealed class UserUpdateCommandHandler(
             userActor.Description = description;
         }
 
-        if (command.Update.IsActive is { } isActive)
-        {
-            if (isActive is true)
-            {
-                userActor.Activate();
-            }
-
-            else if (isActive is false)
-            {
-                userActor.Deactivate();
-            }
-        }
-
         if (command.Update.Authentication is { } auth)
         {
             if (auth.Password is { } password)

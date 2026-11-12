@@ -39,19 +39,6 @@ public sealed class ServiceAccountUpdateCommandHandler(
             accountActor.Description = new Description(description);
         }
 
-        if (command.Update.IsActive is { } isActive)
-        {
-            if (isActive)
-            {
-                accountActor.Activate();
-            }
-            else
-            {
-                accountActor.Deactivate();
-                account.RotateAuthVersion();
-            }
-        }
-
         if (command.Update.PermissionsToAdd is { } permissionsToAdd)
         {
             foreach (var permission in permissionsToAdd)

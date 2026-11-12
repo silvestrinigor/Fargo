@@ -94,7 +94,6 @@ public static class UserGroupTools
         {
             Nameid = nameid,
             Description = description,
-            IsActive = isActive,
             ParentUserGroup = parentUserGroup,
             PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
             PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
@@ -112,7 +111,6 @@ public static class UserGroupTools
         [Description("The GUID of the user group to update.")] Guid userGroupGuid,
         [Description("The new name (nameid).")] string? nameid = null,
         [Description("The new description.")] string? description = null,
-        [Description("Set the active state.")] bool? isActive = null,
         [Description("GUID of the new parent user group.")] Guid? parentUserGroup = null,
         [Description("Set true to detach the group from its current parent.")] bool? removeParentUserGroup = null,
         [Description("Permissions to grant. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
@@ -129,7 +127,6 @@ public static class UserGroupTools
         {
             Nameid = nameid,
             Description = description,
-            IsActive = isActive,
             ParentUserGroup = parentUserGroup,
             RemoveParentUserGroup = removeParentUserGroup,
             PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
@@ -143,6 +140,24 @@ public static class UserGroupTools
         await client.V1.UserGroups[userGroupGuid].PutAsync(body, cancellationToken: cancellationToken);
 
         return $"User group '{userGroupGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_usergroups_set_active")]
+    [Description("Activate or deactivate a user group. Requires the ActivateUserGroup permission, which is separate from the permission to update.")]
+    public static async Task<string> SetUserGroupActiveAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the user group.")] Guid userGroupGuid,
+        [Description("true to activate, false to deactivate.")] bool isActive,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.UserGroups[userGroupGuid].IsActive.PutAsync(
+            new ActiveStateDto { IsActive = isActive },
+            cancellationToken: cancellationToken);
+
+        return $"User group '{userGroupGuid}' {(isActive ? "activated" : "deactivated")}.";
     }
 
     [McpServerTool(Name = "fargo_usergroups_delete")]
