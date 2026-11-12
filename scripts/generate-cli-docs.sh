@@ -18,7 +18,7 @@ REFERENCE_DIR="docs/cli/reference"
 # Command groups and their subcommands. Keep in sync with CommandFactory.
 # Format: "group|Title|sub1 sub2 ..."
 CLI_GROUPS=(
-    "config|Config|set-server get-server show"
+    "config|Config|set-server get-server set-realtime-server get-realtime-server show"
     "identity|Identity|login logout change-password"
     "article|Article|list tree get get-by-barcode inventory create update update-by-barcode delete delete-by-barcode"
     "item|Item|list get create update move delete location moviments inventory"
@@ -27,6 +27,7 @@ CLI_GROUPS=(
     "user|User|list get create update delete"
     "service-account|Service Account|list get create update rotate-secret delete"
     "audit|Audit|list get"
+    "realtime|Realtime|watch"
 )
 
 echo "Building the Fargo CLI..."

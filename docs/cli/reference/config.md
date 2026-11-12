@@ -6,7 +6,7 @@ Command reference for `fargo config`, generated from the CLI's help output.
 
 ```text
 Description:
-  Manage CLI configuration (the server URL this CLI connects to).
+  Manage CLI configuration (the server URLs this CLI connects to).
 
 Usage:
   fargo config [command] [options]
@@ -19,20 +19,31 @@ Options:
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  set-server  Set and persist the Fargo server URL the CLI connects to by default.
+  set-server           Set and persist the Fargo server URL the CLI connects to by default.
   
-              This is used when a command does not pass --server explicitly.
+                       This is used when a command does not pass --server explicitly.
   
-              Examples:
-                fargo config set-server --url https://localhost:7563
-  get-server  Print the configured default Fargo server URL.
+                       Examples:
+                         fargo config set-server --url https://localhost:7563
+  get-server           Print the configured default Fargo server URL.
   
-              Examples:
-                fargo config get-server
-  show        Show the current CLI configuration.
+                       Examples:
+                         fargo config get-server
+  set-realtime-server  Set and persist the Fargo real-time service URL used by 'fargo realtime watch'.
   
-              Examples:
-                fargo config show
+                       The real-time service is separate from the API, so it has its own URL.
+                       This is used when 'fargo realtime watch' does not pass --realtime-server.
+  
+                       Examples:
+                         fargo config set-realtime-server --url https://localhost:7571
+  get-realtime-server  Print the configured Fargo real-time service URL.
+  
+                       Examples:
+                         fargo config get-realtime-server
+  show                 Show the current CLI configuration.
+  
+                       Examples:
+                         fargo config show
 
 ```
 
@@ -71,6 +82,52 @@ Description:
 
 Usage:
   fargo config get-server [options]
+
+Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo config set-realtime-server`
+
+```text
+Description:
+  Set and persist the Fargo real-time service URL used by 'fargo realtime watch'.
+  
+  The real-time service is separate from the API, so it has its own URL.
+  This is used when 'fargo realtime watch' does not pass --realtime-server.
+  
+  Examples:
+    fargo config set-realtime-server --url https://localhost:7571
+
+Usage:
+  fargo config set-realtime-server [options]
+
+Options:
+  --url <url> (REQUIRED)  The real-time service URL (e.g. https://localhost:7571).
+  --username <username>   Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>   Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help          Show help and usage information
+  --server <server>       The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose           Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo config get-realtime-server`
+
+```text
+Description:
+  Print the configured Fargo real-time service URL.
+  
+  Examples:
+    fargo config get-realtime-server
+
+Usage:
+  fargo config get-realtime-server [options]
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.

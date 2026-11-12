@@ -165,6 +165,9 @@ session (dependency injection does this).
 Browser clients use the JavaScript SignalR client directly, with the same hub
 path, method name and payload.
 
+From a terminal, `fargo realtime watch` prints the same changes live (see the
+[CLI overview](../cli/overview.md#watching-live-changes)).
+
 ### What clients must handle
 
 - **Duplicates.** Delivery is at-least-once, so the same `eventId` can arrive

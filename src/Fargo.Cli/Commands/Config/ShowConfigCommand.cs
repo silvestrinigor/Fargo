@@ -21,6 +21,7 @@ public sealed class ShowConfigCommand : Command
             new DetailWriter()
                 .Title("CLI configuration")
                 .Field("Server", configuration.Server?.ToString())
+                .Field("Real-time server", configuration.RealtimeServer?.ToString() ?? "(none)")
                 .Field("Credential ID", configuration.CredentialId ?? "(none)")
                 .Write();
 

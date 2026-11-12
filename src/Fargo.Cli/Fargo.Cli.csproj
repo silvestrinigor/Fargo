@@ -49,6 +49,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fargo.ClientHttp\Fargo.ClientHttp.csproj" />
+    <ProjectReference Include="..\Fargo.ClientRealtime\Fargo.ClientRealtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Fargo.Cli.Tests" />
   </ItemGroup>
 
 </Project>

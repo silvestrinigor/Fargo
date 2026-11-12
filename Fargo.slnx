@@ -16,6 +16,7 @@
     <Project Path="src/Fargo.Mcp/Fargo.Mcp.csproj" />
     <Project Path="src/Fargo.RealtimeContracts/Fargo.RealtimeContracts.csproj" />
     <Project Path="tests/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
+    <Project Path="tests/Fargo.Cli.Tests/Fargo.Cli.Tests.csproj" />
     <Project Path="tests/Fargo.ClientAuthentication.Tests/Fargo.ClientAuthentication.Tests.csproj" />
     <Project Path="tests/Fargo.ClientRealtime.Tests/Fargo.ClientRealtime.Tests.csproj" />
     <Project Path="tests/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />

@@ -4,6 +4,7 @@ using Fargo.Cli.Commands.Config;
 using Fargo.Cli.Commands.Identity;
 using Fargo.Cli.Commands.Items;
 using Fargo.Cli.Commands.Partitions;
+using Fargo.Cli.Commands.Realtime;
 using Fargo.Cli.Commands.ServiceAccounts;
 using Fargo.Cli.Commands.UserGroups;
 using Fargo.Cli.Commands.Users;
@@ -53,6 +54,8 @@ public static class CommandFactory
         var configurationStore =
             services.GetRequiredService<IFargoCliConfigurationStore>();
 
+        var tokenRefresher = services.GetRequiredService<FargoTokenRefresher>();
+
         // The identity group is intentionally excluded from the ad-hoc
         // credential options: its commands take their own credentials or use the
         // stored session, so --username/--password are not applicable there.
@@ -68,6 +71,7 @@ public static class CommandFactory
             new UsersCommand(client),
             new ServiceAccountsCommand(client),
             new AuditLogsCommand(client),
+            new RealtimeCommand(configurationStore, tokenRefresher, tokenStore),
         };
 
         foreach (var group in credentialGroups)

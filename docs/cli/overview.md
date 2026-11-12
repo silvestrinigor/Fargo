@@ -30,7 +30,7 @@ fargo article create --help
 
 | Group | Description |
 | --- | --- |
-| `config` | Manage CLI configuration (the server URL the CLI connects to). |
+| `config` | Manage CLI configuration (the server URLs the CLI connects to). |
 | `identity` | Authenticate: login, logout, change password. |
 | `articles` | Manage articles — the catalog of product definitions. |
 | `items` | Manage items — physical instances of articles and their locations. |
@@ -38,6 +38,7 @@ fargo article create --help
 | `user-groups` | Manage user groups — collections of users that share permissions. |
 | `users` | Manage user accounts. |
 | `audit` | View audit logs — a record of actions performed in the system. |
+| `realtime` | Watch changes pushed live by the real-time service (see below). |
 
 ## Global options
 
@@ -86,6 +87,32 @@ API errors are rendered as concise messages instead of stack traces:
 
 When the server returns problem details, the message includes the server's
 explanation and a trace id for support.
+
+## Watching live changes
+
+`fargo realtime watch` connects to the [real-time service](../server/realtime.md)
+and prints one line per change, until Ctrl+C:
+
+```text
+$ fargo realtime watch
+Watching https://localhost:7571/hubs/fargo. Press Ctrl+C to stop.
+2026-11-06 14:03:22Z  created  article  a3e9d1c2-0000-4000-8000-000000000002
+2026-11-06 14:03:40Z  edited   article  a3e9d1c2-0000-4000-8000-000000000002
+```
+
+- **What you see:** only changes to entities in partitions you can access.
+  Today those are article changes. A line shows what changed; use
+  `fargo article get <guid>` for the details.
+- **Where it connects:** the real-time service is separate from the API, so it
+  has its own URL. Set it with
+  `fargo config set-realtime-server --url <url>`, or pass `--realtime-server`.
+  A fresh configuration defaults to `https://localhost:7571`.
+- **Scripting:** `--json` writes one JSON object per line on standard output.
+  Connection messages go to standard error, so the output can be piped.
+- **Sessions:** it uses your logged-in session or `--username`/`--password`, and
+  refreshes the access token while it runs, so a long watch outlives the token.
+- **Interruptions:** if the connection drops, it reconnects on its own and says
+  so. Changes made while disconnected are not replayed.
 
 ## Next steps
 

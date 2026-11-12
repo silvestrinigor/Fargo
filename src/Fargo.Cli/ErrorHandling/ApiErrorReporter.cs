@@ -160,6 +160,12 @@ public static class ApiErrorReporter
 
     /// <summary>
     /// When <see cref="Verbose"/> is enabled, writes technical diagnostics for
+    /// an error a command has already reported in its own words.
+    /// </summary>
+    public static void WriteVerboseDiagnostics(Exception exception) => WriteVerboseDetails(exception);
+
+    /// <summary>
+    /// When <see cref="Verbose"/> is enabled, writes technical diagnostics for
     /// <paramref name="exception"/> (type, status code, inner exceptions and
     /// stack trace) to standard error, below the user-facing message.
     /// </summary>

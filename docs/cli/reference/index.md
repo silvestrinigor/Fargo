@@ -15,6 +15,8 @@ fargo
 ├─ config         Manage CLI configuration
 │  ├─ set-server
 │  ├─ get-server
+│  ├─ set-realtime-server
+│  ├─ get-realtime-server
 │  └─ show
 ├─ identity       Authenticate with the Fargo server
 │  ├─ login
@@ -65,9 +67,11 @@ fargo
 │  ├─ create
 │  ├─ update
 │  └─ delete
-└─ audit          View audit logs
-   ├─ list
-   └─ get
+├─ audit          View audit logs
+│  ├─ list
+│  └─ get
+└─ realtime       Watch changes pushed live
+   └─ watch
 ```
 
 ## Global options
