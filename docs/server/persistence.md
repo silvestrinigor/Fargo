@@ -16,8 +16,21 @@ over **PostgreSQL** (via **Npgsql**).
 - Record applied migrations in the `__ef_migrations_history` table.
 
 Entity-to-table mapping is defined by `IEntityTypeConfiguration<T>` classes under
-`Fargo.Infrastructure/Configurations` (one per entity), keeping mapping out of
-the domain types.
+`Fargo.Infrastructure/Persistence/Configurations` (one per entity), keeping
+mapping out of the domain types.
+
+### Save-changes interceptors
+
+Two interceptors run on every `SaveChanges`, whichever code path calls it, and
+add their rows in the same transaction as the change:
+
+| Interceptor | Writes | Purpose |
+| --- | --- | --- |
+| `OutboxSaveChangesInterceptor` | `outbox_messages` | An integration event for each changed article. See [Integration Events](integration-events.md). |
+| `AuthorizationStampSaveChangesInterceptor` | `authorization_stamps` | A new authorization stamp when permissions or partition access change, which invalidates the authorization cache. See [Security](security.md#how-the-principal-is-read-and-cached). |
+
+Changes made outside the change tracker (raw SQL, `ExecuteUpdate`,
+`ExecuteDelete`) bypass both.
 
 ### Event-tracking tables
 
@@ -46,7 +59,8 @@ Both are implemented by a single class per resource (for example
 `ArticleRepository`) and registered as scoped services in
 `AddFargoRepositories`. Writes are committed through `IUnitOfWork`
 (`UnitOfWork`), which wraps `SaveChanges` so a handler commits all of its changes
-in one transaction.
+in one transaction. Commands that must read and write consistently run inside an
+explicit transaction instead (see [Architecture](architecture.md#cqrs)).
 
 Read queries apply the actor's partition access as a filter and project directly
 to DTOs, so reads never over-fetch or leak entities the actor cannot see.

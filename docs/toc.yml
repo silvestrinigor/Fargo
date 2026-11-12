@@ -34,6 +34,8 @@
       href: server/cross-cutting.md
     - name: Operations
       href: server/operations.md
+    - name: Integration Events
+      href: server/integration-events.md
     - name: Real-time Updates (SignalR)
       href: server/realtime.md
 - name: CLI

@@ -1,4 +1,4 @@
-# Real-time updates (SignalR)
+# Real-time Updates (SignalR)
 
 Clients such as live dashboards can receive a push when an entity changes,
 instead of polling the list endpoints. The push carries no entity data: the
@@ -36,24 +36,11 @@ command commits ──► outbox row (same transaction)
 
 ## The event message
 
-Article events are published with schema version **2**:
-
-```json
-{
-  "eventId": "6f1c2b3a-0000-7000-8000-000000000001",
-  "eventType": "article.edited",
-  "occurredAt": "2026-11-06T14:03:22+00:00",
-  "articleGuid": "a3e9d1c2-0000-4000-8000-000000000002",
-  "partitionGuids": ["10000000-0000-4000-8000-000000000001"]
-}
-```
-
-`partitionGuids` holds every partition the article belonged to **before or
-after** the change. When a partition is removed, the actors that just lost
-access are told too, and their next read returns not found. A deleted article
-reports the partitions it had when it was deleted. The `schema-version` message
-header carries the version, and the consumer drops any other version instead of
-guessing.
+The service consumes the article events described in
+[Integration Events](integration-events.md#the-message). What matters here:
+each event carries `partitionGuids`, every partition the article belonged to
+before or after the change, so the service can decide who may see it without
+reading the database. Messages of an unknown schema version are dropped.
 
 ## Who receives an event
 

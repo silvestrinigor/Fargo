@@ -2,7 +2,8 @@
 
 Fargo is an inventory management system. It models the physical world of a
 warehouse or stockroom as a small set of connected concepts and exposes them
-through a REST API and a command-line client.
+through a REST API, a command-line client, an MCP server for AI agents, and
+real-time push.
 
 > [!NOTE]
 > Fargo is under active development and is not yet production-ready. Features,
@@ -40,6 +41,11 @@ through a REST API and a command-line client.
   scripts.
 - **[MCP server](mcp/overview.md)** — a Model Context Protocol server that lets
   AI agents work with Fargo through tools.
+- **[Real-time updates](server/realtime.md)** — a SignalR hub that pushes
+  changes to connected clients, such as live dashboards or
+  `fargo realtime watch`.
+- **[Integration events](server/integration-events.md)** — events published to
+  RabbitMQ when articles change, for other systems to react to.
 
 ## Where to go next
 

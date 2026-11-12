@@ -1,18 +1,16 @@
 # Cross-Cutting Concerns
 
 This page covers concerns that apply across the whole HTTP surface: error
-handling, rate limiting, and the shared host defaults (telemetry, health checks,
-and resilience).
+handling and rate limiting, plus the defaults every host shares: telemetry,
+health checks, and resilience.
 
 ## Error handling
 
-Domain and application exceptions are translated into
-[RFC 7807 problem details](https://datatracker.ietf.org/doc/html/rfc7807) by
-`FargoApplicationExceptionHandler`, registered with `AddFargoExceptionHandler`
-and `AddProblemDetails`. `UseStatusCodePages` ensures bodyless error status codes
+Exceptions are translated into
+[RFC 7807 problem details](https://datatracker.ietf.org/doc/html/rfc7807) by a
+chain of exception handlers, registered with `AddFargoExceptionHandler` and
+`AddProblemDetails`. `UseStatusCodePages` ensures bodyless error status codes
 also return a consistent response.
-
-Each application exception maps to a status code:
 
 | Exception | Status |
 | --- | --- |
@@ -22,8 +20,12 @@ Each application exception maps to a status code:
 | `ActorPermissionDenied` | `403 Forbidden` |
 | `ActorNotFound` | `403 Forbidden` |
 | `EntityNotFound` | `404 Not Found` |
+| A domain or application error of type `Conflict` | `409 Conflict` |
+| A concurrency conflict (`DbUpdateConcurrencyException`): the data changed since it was read; read it again and retry | `409 Conflict` |
+| A unique-constraint violation in the database, for example a name already in use | `409 Conflict` |
 | `AuthenticationRateLimit` | `429 Too Many Requests` |
-| other application errors | `400 Bad Request` |
+| An infrastructure failure (`FargoInfrastructureException`) | `503 Service Unavailable` |
+| A malformed request (`BadHttpRequestException`), and other domain or application errors | `400 Bad Request` |
 
 Every problem response includes a `title`, a `detail`, the request `instance`,
 and extension members: a `traceId` for correlation, an `errorType`, and any
@@ -43,21 +45,26 @@ entity involved).
 
 ## Rate limiting
 
-Rate limiting is configured by `AddFargoRateLimiter` and applied with
-`UseRateLimiter`. Rejected requests receive `429 Too Many Requests`. All limiters
+Rate limiting is configured by `AddFargoRateLimiter` from the `RateLimiting`
+section and applied with `UseRateLimiter`. Rejected requests receive
+`429 Too Many Requests`, with a `Retry-After` header when known. All limiters
 are fixed-window.
 
-| Scope | Policy | Limit | Partitioned by |
+| Scope | Setting | Default limit | Partitioned by |
 | --- | --- | --- | --- |
-| Global (every request) | — | 100 / minute | client IP |
-| Authenticated resource endpoints | `general-authenticated` | 100 / minute | user identity |
-| Login | `identity-login` | 10 / minute | client IP |
-| Token refresh | `identity-refresh` | 30 / minute | client IP |
-| Other identity endpoints | `identity-default` | 10 / minute | client IP |
+| Global (every request) | `Global` | 300 / minute | client IP |
+| Authenticated resource endpoints | `GeneralAuthenticated` | 100 / minute | user identity, or client IP |
+| Login | `IdentityLogin` | 10 / minute | client IP |
+| Token refresh | `IdentityRefresh` | 30 / minute | client IP |
+| Other identity endpoints | `IdentityDefault` | 10 / minute | client IP |
 
-The global limiter applies to all traffic; endpoints additionally opt into a
-named policy. The stricter login/identity limits protect the authentication
-surface from brute-force attempts.
+Each setting has `PermitLimit`, `WindowSeconds` and `QueueLimit` (`0`
+rejects at once instead of queueing). `RateLimiting:Enabled = false` turns rate
+limiting off. The global limiter applies to all traffic; endpoints additionally
+opt into a named policy. The stricter identity limits protect the
+authentication surface from brute-force attempts. Behind a proxy, enable
+[forwarded headers](operations.md#behind-a-proxy) so the limits see the real
+client IP.
 
 ## Host defaults
 
@@ -75,11 +82,13 @@ surface from brute-force attempts.
 
 ### Health checks
 
-Two endpoints are exposed **in development only** (exposing health endpoints in
-other environments has security implications):
+Two endpoints are mapped in every environment, so orchestrators and load
+balancers can probe them. They return only the overall status, no component
+details:
 
-- `/health` — ready: all registered health checks must pass. The HTTP API also
-  registers a database check (`AddDbContextCheck<FargoDbContext>`).
+- `/health` — ready: all registered health checks must pass. The HTTP API and
+  the real-time service also register a database check
+  (`AddDbContextCheck<FargoDbContext>`).
 - `/alive` — live: only checks tagged `live` (a default `self` check) must pass.
 
 ### Resilience and service discovery
