@@ -56,9 +56,13 @@ Every command handler is wrapped in decorators, from the outside in:
 2. **Unit of work**: saves all changes when the handler succeeds. A command that
    implements `ITransactionalCommand` instead runs inside an explicit
    transaction (begin, handler, save, commit), for handlers that must read and
-   write consistently.
-3. **Audit**: records an audit log for the command, unless the command
-   implements `INonAuditedCommand` (for example the outbox commands).
+   write consistently or hold row and advisory locks until the commit. Once the
+   handler has finished, the save and commit run to completion even if the
+   request is cancelled, because cancelling then would only discard work that
+   is done.
+3. **Audit**: records an audit log for the command when an authenticated actor
+   ran it, unless the command implements `INonAuditedCommand` (the outbox
+   commands, which are system work rather than an actor's action).
 
 Queries get only the logging decorator. Reads go through dedicated query
 repositories that project straight to DTOs.

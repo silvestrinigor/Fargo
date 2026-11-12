@@ -33,7 +33,10 @@ flowchart LR
    `FOR UPDATE SKIP LOCKED`, so several relays never publish the same row. It
    publishes them in order and marks them processed. Publishing stops at the
    first failure, and that row and the ones after it are retried later, so
-   order is preserved.
+   order is preserved. The claim and the marks run in one transaction, owned by
+   the unit of work because the publish command is transactional. When the
+   relay stops, what was already published is still committed, so it isn't
+   sent again.
 3. **The broker.** Each event is published to the durable topic exchange
    `fargo.events`, with its event type as the routing key, as a persistent
    message. A publish only counts once RabbitMQ confirms it.
