@@ -1,30 +1,30 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.Commands.Initialization;
-using Fargo.ServiceSeed.Options;
+using Fargo.ServiceInitializer.Options;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
-namespace Fargo.ServiceSeed.Services;
+namespace Fargo.ServiceInitializer.Services;
 
 /// <summary>
 /// Runs the system initialization command once at startup, then stops the host. A failure is recorded on
 /// the tracing activity and rethrown.
 /// </summary>
-public sealed class FargoSeedService(
+public sealed class FargoInitializerService(
     IServiceProvider serviceProvider,
     IHostApplicationLifetime hostApplicationLifetime,
-    ILogger<FargoSeedService> logger
+    ILogger<FargoInitializerService> logger
 ) : BackgroundService
 {
-    public const string ActivitySourceName = "Seeds";
+    public const string ActivitySourceName = "Initializer";
 
     private static readonly ActivitySource activitySource = new(ActivitySourceName);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var activity = activitySource.StartActivity("Seeding database", ActivityKind.Client);
+        using var activity = activitySource.StartActivity("Initializing system", ActivityKind.Client);
 
-        logger.LogInformation("Starting seed database.");
+        logger.LogInformation("Starting system initialization.");
 
         try
         {
@@ -46,19 +46,19 @@ public sealed class FargoSeedService(
 
             await handler.HandleAsync(command, stoppingToken);
 
-            logger.LogInformation("Seed database completed successfully.");
+            logger.LogInformation("System initialization completed successfully.");
         }
         catch (Exception ex)
         {
             activity?.AddException(ex);
 
-            logger.LogError(ex, "Seed database failed.");
+            logger.LogError(ex, "System initialization failed.");
 
             throw;
         }
         finally
         {
-            logger.LogInformation("Stopping seed database.");
+            logger.LogInformation("Stopping system initialization.");
 
             hostApplicationLifetime.StopApplication();
         }

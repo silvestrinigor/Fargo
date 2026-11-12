@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Fargo.ServiceSeed.Options;
+namespace Fargo.ServiceInitializer.Options;
 
 public sealed class GlobalPartitionOptions
 {

@@ -16,7 +16,7 @@ layers above. The domain at the center has no dependencies at all.
 | Domain | `Fargo.Core` | Entities, value objects, enums, and the rules that are always true regardless of how data is stored or exposed. Defines ports such as the repository interfaces and `IActorAuthorizationProvider`. | nothing |
 | Application | `Fargo.Application` | Use cases as CQRS commands and queries with handlers, DTOs, query repository interfaces, and integration event contracts. | Core |
 | Infrastructure | `Fargo.Infrastructure` | Concrete implementations: EF Core persistence, repositories, security, the outbox, RabbitMQ messaging, and the authorization cache. | Application, Core |
-| Hosts | `Fargo.ServiceHttp`, `Fargo.ServiceRealtime`, `Fargo.ServiceOutbox`, `Fargo.ServiceMigration`, `Fargo.ServiceSeed` | Each host is a composition root that wires the layers together for one job. | Application, Infrastructure, ServiceDefaults |
+| Hosts | `Fargo.ServiceHttp`, `Fargo.ServiceRealtime`, `Fargo.ServiceOutbox`, `Fargo.ServiceMaintenance`, `Fargo.ServiceMigration`, `Fargo.ServiceInitializer` | Each host is a composition root that wires the layers together for one job. | Application, Infrastructure, ServiceDefaults |
 
 Because the inner layers define the interfaces and the infrastructure layer
 implements them, the domain and use cases never depend on Entity Framework,
@@ -34,7 +34,8 @@ lazily, so a host only pays for the services it actually resolves.
 | `Fargo.ServiceHttp` | API versioning, JSON converters, JWT authentication, exception handlers, rate limiting, forwarded headers, the endpoints and the database health check. |
 | `Fargo.ServiceRealtime` | JWT authentication (with the token accepted in the query string under `/hubs`), SignalR, the RabbitMQ consumer and the connection registry. See [Real-time Updates](realtime.md). |
 | `Fargo.ServiceOutbox` | The RabbitMQ client and the relay loop. See [Integration Events](integration-events.md). |
-| `Fargo.ServiceMigration`, `Fargo.ServiceSeed` | Their one-time startup job. See [Persistence](persistence.md). |
+| `Fargo.ServiceMaintenance` | A timer that deletes expired idempotency keys. See [Idempotency](idempotency.md). |
+| `Fargo.ServiceMigration`, `Fargo.ServiceInitializer` | Their one-time startup job. See [Persistence](persistence.md). |
 
 ## CQRS
 
@@ -125,17 +126,19 @@ flowchart TD
     RabbitMQ[("RabbitMQ")]
 
     Migration["Migration"]
-    Seed["Seed"]
+    Initializer["Initializer"]
     HTTP["HTTP API"]
     Outbox["Outbox relay"]
     Realtime["Real-time service"]
+    Maintenance["Maintenance service"]
 
     PostgreSQL --> Migration
-    Migration -->|completes before| Seed
+    Migration -->|completes before| Initializer
     Migration -->|completes before| HTTP
-    Seed -->|completes before| HTTP
+    Initializer -->|completes before| HTTP
     Migration -->|completes before| Outbox
     Migration -->|completes before| Realtime
+    Migration -->|completes before| Maintenance
     RabbitMQ -->|must be up for| Outbox
     RabbitMQ -.->|used when available| Realtime
 ```
@@ -144,4 +147,4 @@ The outbox relay waits for RabbitMQ. The real-time service doesn't: it serves
 connections while the broker is down and its consumer retries until it is up.
 
 See [Operations](operations.md) for how to run this and
-[Persistence](persistence.md) for what migration and seeding do.
+[Persistence](persistence.md) for what migration and initialization do.

@@ -116,6 +116,17 @@ public sealed class FargoApplicationExceptionHandler(IProblemDetailsService prob
 
                 break;
 
+            case IdempotencyKeyReusedFargoApplicationException ex:
+
+                problem = new ProblemDetails
+                {
+                    Status = StatusCodes.Status422UnprocessableEntity,
+                    Title = "Idempotency key reused.",
+                    Detail = ex.Message,
+                };
+
+                break;
+
             default:
 
                 problem = new ProblemDetails

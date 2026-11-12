@@ -7,7 +7,7 @@ namespace Fargo.Application.Decorators;
 
 /// <summary>
 /// Records an <see cref="AuditLog"/> for each command, only after the inner handler succeeds and only
-/// when an authenticated actor is present. Actor-less contexts (the seed worker, an unauthenticated
+/// when an authenticated actor is present. Actor-less contexts (the initializer worker, an unauthenticated
 /// login) record nothing, so <c>ICurrentActor?</c> is optional.
 /// </summary>
 /// <remarks>

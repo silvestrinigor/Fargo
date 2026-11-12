@@ -14,6 +14,7 @@ public sealed class CreateItemCommand : Command
             Examples:
               fargo item create --article 11111111-1111-1111-1111-111111111111
               fargo item create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
+              fargo item create --article 11111111-1111-1111-1111-111111111111 --idempotency-key 3f2b8c1e-9d4a-4b7e-8c2f-1a5d6e7f8091
             """)
     {
         var articleOption = new Option<Guid?>("--article")
@@ -32,9 +33,12 @@ public sealed class CreateItemCommand : Command
             AllowMultipleArgumentsPerToken = true
         };
 
+        var idempotencyKey = new IdempotencyKeyOption();
+
         Add(articleOption);
         Add(containerOption);
         Add(partitionsOption);
+        Add(idempotencyKey.Option);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
@@ -49,7 +53,7 @@ public sealed class CreateItemCommand : Command
                 PartitionsToAdd = partitions?.Select(g => (Guid?)g).ToList()
             };
 
-            var guid = await client.V1.Items.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.V1.Items.PostAsync(dto, idempotencyKey.Configure(parseResult), cancellationToken);
 
             StatusWriter.Success(
                 "Item created.",

@@ -21,8 +21,8 @@ var serviceMigrations = builder
 .WithReference(databaseFargo)
 .WaitFor(databaseFargo);
 
-var serviceSeeds = builder
-.AddProject<Projects.Fargo_ServiceSeed>("fargo-seed")
+var serviceInitializer = builder
+.AddProject<Projects.Fargo_ServiceInitializer>("fargo-initializer")
 .WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
 .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
 .WithReference(databaseFargo)
@@ -36,9 +36,9 @@ _ = builder
 .WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
 .WithReference(databaseFargo)
 .WithReference(serviceMigrations)
-.WithReference(serviceSeeds)
+.WithReference(serviceInitializer)
 .WaitForCompletion(serviceMigrations)
-.WaitForCompletion(serviceSeeds);
+.WaitForCompletion(serviceInitializer);
 
 _ = builder
 .AddProject<Projects.Fargo_ServiceOutbox>("fargo-outbox")
@@ -48,6 +48,16 @@ _ = builder
 .WithReference(rabbitmq)
 .WithReference(serviceMigrations)
 .WaitFor(rabbitmq)
+.WaitForCompletion(serviceMigrations);
+
+// Housekeeping: deletes expired idempotency keys. Needs only the database, so it waits for neither the broker
+// nor the other services.
+_ = builder
+.AddProject<Projects.Fargo_ServiceMaintenance>("fargo-maintenance")
+.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+.WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
+.WithReference(databaseFargo)
+.WithReference(serviceMigrations)
 .WaitForCompletion(serviceMigrations);
 
 // Real-time push (SignalR). It does not wait for the broker: the hub serves

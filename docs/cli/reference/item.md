@@ -40,6 +40,7 @@ Commands:
                                 Examples:
                                   fargo item create --article 11111111-1111-1111-1111-111111111111
                                   fargo item create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
+                                  fargo item create --article 11111111-1111-1111-1111-111111111111 --idempotency-key 3f2b8c1e-9d4a-4b7e-8c2f-1a5d6e7f8091
   set-partitions <guid>         Change the partitions of an item.
   
                                 This is a separate operation from update and requires the ChangeItemPartitions
@@ -159,19 +160,21 @@ Description:
   Examples:
     fargo item create --article 11111111-1111-1111-1111-111111111111
     fargo item create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
+    fargo item create --article 11111111-1111-1111-1111-111111111111 --idempotency-key 3f2b8c1e-9d4a-4b7e-8c2f-1a5d6e7f8091
 
 Usage:
   fargo item create [options]
 
 Options:
-  --article <article>        GUID of the article this item is an instance of.
-  --container <container>    GUID of the parent container item.
-  --partitions <partitions>  Partition GUIDs to associate (space-separated).
-  --username <username>      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
-  --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
-  -?, -h, --help             Show help and usage information
-  --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+  --article <article>                  GUID of the article this item is an instance of.
+  --container <container>              GUID of the parent container item.
+  --partitions <partitions>            Partition GUIDs to associate (space-separated).
+  --idempotency-key <idempotency-key>  A GUID that makes the request safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.
+  --username <username>                Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>                Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                       Show help and usage information
+  --server <server>                    The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                        Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

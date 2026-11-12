@@ -78,6 +78,7 @@ public static class ItemTools
         [Description("The GUID of the article this item is an instance of.")] Guid articleGuid,
         [Description("The GUID of the parent item container this item is placed in, if any.")] Guid? parentItemContainerGuid = null,
         [Description("The GUIDs of the partitions to add the item to.")] Guid[]? partitionsToAdd = null,
+        [Description("A GUID that makes the call safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.")] Guid? idempotencyKey = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -89,7 +90,7 @@ public static class ItemTools
             PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList()
         };
 
-        return await client.V1.Items.PostAsync(body, cancellationToken: cancellationToken);
+        return await client.V1.Items.PostAsync(body, IdempotencyKeys.Header(idempotencyKey ?? Guid.NewGuid()), cancellationToken);
     }
 
     [McpServerTool(Name = "fargo_items_delete")]
@@ -208,6 +209,7 @@ public static class ItemTools
         [Description("The GUID of the origin container. Omit for a receipt from outside any container.")] Guid? fromItemContainerGuid = null,
         [Description("The GUID of the destination container. Omit for a dispatch to outside any container.")] Guid? toItemContainerGuid = null,
         [Description("Optional instant (ISO 8601 UTC) at which the movement occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        [Description("A GUID that makes the call safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.")] Guid? idempotencyKey = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -222,7 +224,7 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.V1.Item.Events.PostAsync(body, IdempotencyKeys.Header(idempotencyKey ?? Guid.NewGuid()), cancellationToken);
 
         return $"Movement event '{guid}' recorded for article '{articleGuid}'.";
     }
@@ -236,6 +238,7 @@ public static class ItemTools
         [Description("The strictly positive quantity created.")] double quantity,
         [Description("The GUID of the container the quantity was created in. Omit for outside any container.")] Guid? itemContainerGuid = null,
         [Description("Optional instant (ISO 8601 UTC) at which the creation occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        [Description("A GUID that makes the call safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.")] Guid? idempotencyKey = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -249,7 +252,7 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.V1.Item.Events.PostAsync(body, IdempotencyKeys.Header(idempotencyKey ?? Guid.NewGuid()), cancellationToken);
 
         return $"Creation event '{guid}' recorded for article '{articleGuid}'.";
     }
@@ -263,6 +266,7 @@ public static class ItemTools
         [Description("The strictly positive quantity deleted.")] double quantity,
         [Description("The GUID of the container the quantity was deleted from. Omit for outside any container.")] Guid? itemContainerGuid = null,
         [Description("Optional instant (ISO 8601 UTC) at which the deletion occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        [Description("A GUID that makes the call safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.")] Guid? idempotencyKey = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -276,7 +280,7 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.V1.Item.Events.PostAsync(body, IdempotencyKeys.Header(idempotencyKey ?? Guid.NewGuid()), cancellationToken);
 
         return $"Deletion event '{guid}' recorded for article '{articleGuid}'.";
     }

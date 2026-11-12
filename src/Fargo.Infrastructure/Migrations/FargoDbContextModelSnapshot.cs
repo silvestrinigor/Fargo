@@ -23,6 +23,49 @@ namespace Fargo.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Fargo.Application.Idempotency.IdempotencyRecord", b =>
+                {
+                    b.Property<Guid>("ActorGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_guid");
+
+                    b.Property<Guid>("Key")
+                        .HasColumnType("uuid")
+                        .HasColumnName("key");
+
+                    b.Property<string>("CommandName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("command_name");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("Response")
+                        .HasColumnType("text")
+                        .HasColumnName("response");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("ActorGuid", "Key")
+                        .HasName("pk_idempotency_keys");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("ix_idempotency_keys_expires_at");
+
+                    b.ToTable("idempotency_keys", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Application.IntegrationEvents.OutboxMessage", b =>
                 {
                     b.Property<long>("Sequence")
@@ -1073,6 +1116,16 @@ namespace Fargo.Infrastructure.Migrations
                         .HasDatabaseName("ix_item_events_article_guid");
 
                     b.ToTable("item_events", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Application.Idempotency.IdempotencyRecord", b =>
+                {
+                    b.HasOne("Fargo.Core.Entities.Actors.Actor", null)
+                        .WithMany()
+                        .HasForeignKey("ActorGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_idempotency_keys_actors_actor_guid");
                 });
 
             modelBuilder.Entity("Fargo.Core.Audits.AuditLog", b =>

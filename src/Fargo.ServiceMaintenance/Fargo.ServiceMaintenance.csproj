@@ -4,7 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <UserSecretsId>dotnet-Fargo.SeedService-fcf1a1b2-00dc-4358-a7cd-7d3236c09b6c</UserSecretsId>
+        <UserSecretsId>dotnet-Fargo.ServiceMaintenance-d11e8712-56d5-4b0d-ac83-a1bb3d977c04</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,8 +14,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
         <ProjectReference Include="..\Fargo.Infrastructure\Fargo.Infrastructure.csproj" />
         <ProjectReference Include="..\Fargo.ServiceDefaults\Fargo.ServiceDefaults.csproj" />
-        <ProjectReference Include="..\Fargo.Application\Fargo.Application.csproj" />
     </ItemGroup>
 </Project>

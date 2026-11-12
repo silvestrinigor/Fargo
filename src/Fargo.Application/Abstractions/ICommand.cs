@@ -16,6 +16,23 @@ public interface ICommand<out TResponse> : ICommand;
 public interface ITransactionalCommand : ICommand;
 
 /// <summary>
+/// Opt-in for a command that a client may retry safely by sending an idempotency key. A retry with the
+/// same key returns the first result instead of running the handler again.
+/// </summary>
+/// <remarks>
+/// The registration layer detects this marker and adds the idempotency decorator, which stores the key in
+/// the same transaction as the change. The key identifies the operation: a client that changes the request
+/// must use a new key. Never opt in a command whose response carries a secret, because the response is
+/// stored to be replayed.
+/// </remarks>
+public interface IIdempotentCommand : ICommand
+{
+    /// <summary>
+    /// <see langword="null"/> runs the command normally, with no retry protection.
+    /// </summary>
+    Guid? IdempotencyKey { get; }
+}
+/// <summary>
 /// Exempt from the total <c>AuditLogType</c> mapping. For system or background operations registered
 /// outside the audited command pipeline, such as the outbox relay.
 /// </summary>

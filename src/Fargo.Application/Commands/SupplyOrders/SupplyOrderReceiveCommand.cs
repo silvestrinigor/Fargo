@@ -23,8 +23,9 @@ namespace Fargo.Application.Commands.SupplyOrders;
 /// </remarks>
 public sealed record SupplyOrderReceiveCommand(
     Guid SupplyOrderGuid,
-    SupplyOrderReceiveDto Receive
-) : ITransactionalCommand;
+    SupplyOrderReceiveDto Receive,
+    Guid? IdempotencyKey = null
+) : ITransactionalCommand, IIdempotentCommand;
 
 public sealed class SupplyOrderReceiveCommandHandler(
     ActorResolver actorService,

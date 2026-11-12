@@ -108,9 +108,9 @@ execution strategy (so transient failures are retried). In the Aspire
 orchestration the migration service runs before the API, and the API waits for
 it to complete. See [Operations](operations.md).
 
-## Seeding
+## System initialization
 
-After migrations, the **seed service** (`Fargo.ServiceSeed`) initializes the
+After migrations, the **initializer service** (`Fargo.ServiceInitializer`) initializes the
 system on first run by executing `InitializeSystemCommand`, which creates:
 
 1. the **global partition** (the root of the partition hierarchy),

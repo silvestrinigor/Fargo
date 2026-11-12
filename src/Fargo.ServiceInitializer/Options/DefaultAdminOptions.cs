@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Fargo.ServiceSeed.Options;
+namespace Fargo.ServiceInitializer.Options;
 
 /// <summary>
 /// Used only during system initialization to create the default administrator; it does not affect

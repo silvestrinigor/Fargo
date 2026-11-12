@@ -29,7 +29,7 @@ Everything lives under `src/`, with tests under `tests/`.
 | `Fargo.ServiceRealtime` | The real-time service: a SignalR hub that pushes changes to connected clients. |
 | `Fargo.ServiceOutbox` | A background worker that publishes stored integration events to RabbitMQ. |
 | `Fargo.ServiceMigration` | A startup worker that applies pending database migrations, then exits. |
-| `Fargo.ServiceSeed` | A startup worker that seeds the initial system state (global partition, administrators group, default admin), then exits. |
+| `Fargo.ServiceInitializer` | A startup worker that initializes the system state (global partition, administrators group, default admin), then exits. |
 | `Fargo.ServiceDefaults` | Shared host defaults: OpenTelemetry, health checks, resilience, and service discovery. |
 | `Fargo.AppHost` | The .NET Aspire orchestrator that runs PostgreSQL, RabbitMQ, and the hosts together for local development. |
 
@@ -67,7 +67,7 @@ layers together.
 
 ```mermaid
 flowchart LR
-    Hosts["Hosts<br/>(HTTP API, real-time, outbox, migration, seed)"]
+    Hosts["Hosts<br/>(HTTP API, real-time, outbox, migration, initializer)"]
     Infrastructure["Fargo.Infrastructure<br/>(EF Core, security, messaging)"]
     Application["Fargo.Application<br/>(CQRS, DTOs)"]
     Core["Fargo.Core<br/>(domain)"]
@@ -84,7 +84,7 @@ flowchart LR
 - [Architecture](architecture.md): layers, the dependency rule, CQRS, the request
   lifecycle, and startup.
 - [Domain Model](domain-model.md): the core concepts and their rules.
-- [Persistence](persistence.md): EF Core, migrations, and seeding.
+- [Persistence](persistence.md): EF Core, migrations, and system initialization.
 - [Security](security.md): authentication, permissions, partition scoping, and
   the authorization cache.
 - [Integration Events](integration-events.md): the outbox and the events

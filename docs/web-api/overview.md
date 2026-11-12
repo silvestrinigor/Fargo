@@ -112,7 +112,14 @@ Common status codes:
 | `401 Unauthorized` | Authentication is required, missing, or expired. |
 | `403 Forbidden` | The authenticated actor lacks permission. |
 | `404 Not Found` | The requested resource does not exist or is not accessible. |
+| `409 Conflict` | The request conflicts with the current state, for example a duplicate or a concurrent change. |
+| `422 Unprocessable Content` | An idempotency key was reused for a different endpoint. |
 | `429 Too Many Requests` | A rate limit was exceeded. |
+
+## Idempotency
+
+A few endpoints that create stock accept an `Idempotency-Key` header, so a
+retried request is not applied twice. See [Idempotency Keys](idempotency.md).
 
 ## Rate limiting
 
@@ -122,4 +129,5 @@ Exceeding a limit returns `429 Too Many Requests`.
 ## Next steps
 
 - [Getting Started](getting-started.md) — authenticate and make your first calls.
+- [Idempotency Keys](idempotency.md) — retry the requests that create stock safely.
 - [API Reference](reference/fargo.swagger.json) — the complete, generated endpoint reference.

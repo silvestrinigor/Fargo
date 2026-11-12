@@ -66,10 +66,6 @@ DB). Nothing can notify an ERP/carrier when stock changes.
 One HTTP call per item (throttled by the 100/min per-user rate limit); a retried "receive" can
 double-count. No idempotency keys.
 
-### [ ] GAP-17 - Caching, background jobs/scheduler, async long-running ops (Tier 3)
-No reorder-check job, no report generation, no 202-Accepted + poll pattern. DB `EnableRetryOnFailure` is
-set for migrations only, not the runtime DbContext.
-
 ### [ ] GAP-18 - CI integration tests (Tier 2)
 Good domain/handler unit tests exist, but E2E drivers (WorkflowTest, SimulationWorker) need a live
 instance; no automated integration tests with a throwaway DB (Testcontainers / WebApplicationFactory).

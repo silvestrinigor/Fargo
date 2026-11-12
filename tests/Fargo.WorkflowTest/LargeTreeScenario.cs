@@ -898,6 +898,25 @@ internal sealed class LargeTreeScenario(
             .Count(l => l.AuditLogType == AuditLogTypes.ItemEventRecorded) ?? 0;
         Log.Info($"ItemEvent audit entries: {itemEventEntries}");
 
+        // 9h. Replaying an item creation with the same Idempotency-Key returns the first result.
+        var idempotencyPartition = _partitions.First(p => p.Level >= 1 || p.ParentGuid is null).Guid;
+        var idempotencyArticle = await _admin.V1.Articles.PostAsync(
+            new ArticleCreateDto
+            {
+                Name = N($"idempotency-{_random.Next(100000)}"),
+                ArticleType = ArticleTypeContainer,
+                PartitionsToAdd = [idempotencyPartition],
+            },
+            cancellationToken: cancellationToken);
+        var idempotencyKey = Guid.NewGuid();
+        var itemDto = new ItemCreateDto { ArticleGuid = idempotencyArticle, PartitionsToAdd = [idempotencyPartition] };
+        var firstItem = await _admin.V1.Items.PostAsync(
+            itemDto, IdempotencyKeys.Header(idempotencyKey), cancellationToken);
+        var replayedItem = await _admin.V1.Items.PostAsync(
+            itemDto, IdempotencyKeys.Header(idempotencyKey), cancellationToken);
+        _check.That(firstItem is not null && firstItem != Guid.Empty && firstItem == replayedItem,
+            "a retried item creation with the same Idempotency-Key returns the first item");
+
         Log.Success("Audit-log inspection completed.");
     }
 

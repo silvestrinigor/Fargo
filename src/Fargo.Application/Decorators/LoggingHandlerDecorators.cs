@@ -7,7 +7,7 @@ namespace Fargo.Application.Decorators;
 
 /// <summary>
 /// Emits the uniform started, completed and failed events, with duration and an actor-correlated
-/// scope, via <see cref="HandlerLog"/>. <c>ICurrentActor?</c> is optional: without an actor (the seed
+/// scope, via <see cref="HandlerLog"/>. <c>ICurrentActor?</c> is optional: without an actor (the initializer
 /// worker, login and refresh) only the operation name is attached to the scope.
 /// </summary>
 internal static class LoggingHandlerDecorator

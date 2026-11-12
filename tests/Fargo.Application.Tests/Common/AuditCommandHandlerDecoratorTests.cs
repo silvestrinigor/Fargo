@@ -55,7 +55,7 @@ public class AuditCommandHandlerDecoratorTests
     {
         var inner = Substitute.For<ICommandHandler<ArticleCreateCommand>>();
 
-        // No current actor (actor-less host, e.g. seed worker).
+        // No current actor (actor-less host, e.g. initializer worker).
         var decorator = new AuditCommandHandlerDecorator<ArticleCreateCommand>(
             inner, currentActor: null, auditLogRepository);
 

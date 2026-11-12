@@ -78,7 +78,7 @@ namespace Fargo.ClientHttp.V1.Items
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.PagedResultOfItemDto>(requestInfo, global::Fargo.ClientHttp.Models.PagedResultOfItemDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Creates a new item with optional partitions. Returns the generated identifier.
+        /// Creates a new item with optional partitions. Returns the generated identifier. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of creating another item. Use a new key for a different request.
         /// </summary>
         /// <returns>A <see cref="Guid"/></returns>
         /// <param name="body">The request body</param>
@@ -117,7 +117,7 @@ namespace Fargo.ClientHttp.V1.Items
             return requestInfo;
         }
         /// <summary>
-        /// Creates a new item with optional partitions. Returns the generated identifier.
+        /// Creates a new item with optional partitions. Returns the generated identifier. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of creating another item. Use a new key for a different request.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

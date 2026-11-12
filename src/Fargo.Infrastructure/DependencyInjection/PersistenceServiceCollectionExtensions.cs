@@ -77,7 +77,8 @@ public static class PersistenceServiceCollectionExtensions
         .AddScoped<IServiceAccountRepository, ServiceAccountRepository>()
         .AddScoped<IServiceAccountQueryRepository, ServiceAccountRepository>()
         .AddScoped<ISupplyOrderRepository, SupplyOrderRepository>()
-        .AddScoped<ISupplyOrderQueryRepository, SupplyOrderRepository>();
+        .AddScoped<ISupplyOrderQueryRepository, SupplyOrderRepository>()
+        .AddScoped<IIdempotencyRecordRepository, IdempotencyRecordRepository>();
 
         private IServiceCollection AddFargoOutboxRepository() =>
             services.AddScoped<IOutboxRepository, OutboxRepository>();

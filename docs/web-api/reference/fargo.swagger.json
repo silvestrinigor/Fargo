@@ -607,7 +607,7 @@
           "Items"
         ],
         "summary": "Creates a new item",
-        "description": "Creates a new item with optional partitions. Returns the generated identifier.",
+        "description": "Creates a new item with optional partitions. Returns the generated identifier. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of creating another item. Use a new key for a different request.",
         "operationId": "CreateItem",
         "consumes": [
           "application/json"
@@ -616,6 +616,12 @@
           "application/json"
         ],
         "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "type": "string",
+            "format": "uuid"
+          },
           {
             "in": "body",
             "name": "body",
@@ -632,6 +638,15 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
           }
         }
       }
@@ -739,7 +754,7 @@
           "ItemEvents"
         ],
         "summary": "Records an item event",
-        "description": "Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.",
+        "description": "Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of recording the event again. Use a new key for a different request.",
         "operationId": "CreateItemEvent",
         "consumes": [
           "application/json"
@@ -748,6 +763,12 @@
           "application/json"
         ],
         "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "type": "string",
+            "format": "uuid"
+          },
           {
             "in": "body",
             "name": "body",
@@ -764,6 +785,15 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
           }
         }
       }
@@ -2638,7 +2668,7 @@
           "SupplyOrders"
         ],
         "summary": "Receives goods against a supply order",
-        "description": "Receives the given quantities, effecting the stock change into the order's receiving container (or at the root when it has none) and advancing the order's received quantities and status. Over-receipt is permitted.",
+        "description": "Receives the given quantities, effecting the stock change into the order's receiving container (or at the root when it has none) and advancing the order's received quantities and status. Over-receipt is permitted, and a received order accepts further receipts, so a retried request would be counted again. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key does nothing and returns the first result. Use a new key for a different receipt.",
         "operationId": "ReceiveSupplyOrder",
         "consumes": [
           "application/json"
@@ -2648,6 +2678,12 @@
             "in": "path",
             "name": "supplyOrderGuid",
             "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
             "type": "string",
             "format": "uuid"
           },
@@ -2663,6 +2699,15 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
           }
         }
       }

@@ -4,8 +4,10 @@ using Fargo.Application.Commands.Items;
 using Fargo.Application.Dtos;
 using Fargo.Application.Dtos.Items;
 using Fargo.Application.Queries.Items;
+using Fargo.Application.Idempotency;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.ServiceHttp.Endpoints;
 
@@ -209,20 +211,26 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapPost("/", CreateItem)
             .WithName("CreateItem")
             .WithSummary("Creates a new item")
-            .WithDescription("Creates a new item with optional partitions. Returns the generated identifier.")
-            .Produces<Guid>(StatusCodes.Status200OK);
+            .WithDescription("Creates a new item with optional partitions. Returns the generated identifier. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of creating another item. Use a new key for a different request.")
+            .Produces<Guid>(StatusCodes.Status200OK)
+            .ProducesIdempotencyErrors();
 
         return builder;
     }
 
     private static async Task<Ok<Guid>> CreateItem(
         ItemCreateDto request,
+        [FromHeader(Name = IdempotencyEndpointExtensions.KeyHeaderName)] Guid? idempotencyKey,
+        IdempotencyOutcome outcome,
+        HttpContext httpContext,
         ICommandHandler<ItemCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ItemCreateCommand(request);
+        var command = new ItemCreateCommand(request, idempotencyKey);
 
         var response = await handler.HandleAsync(command, cancellationToken);
+
+        httpContext.Response.MarkIfReplayed(outcome);
 
         return TypedResults.Ok(response);
     }

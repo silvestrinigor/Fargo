@@ -1,14 +1,14 @@
-namespace Fargo.ServiceSeed.Options;
+namespace Fargo.ServiceInitializer.Options;
 
-public static class SeedOptionsServiceCollectionExtensions
+public static class InitializerOptionsServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
         /// <summary>
-        /// Binds and validates the seed options (<c>DefaultAdmin</c>, administrators group, global partition).
+        /// Binds and validates the initializer options (<c>DefaultAdmin</c>, administrators group, global partition).
         /// <c>ValidateOnStart()</c> makes the host fail fast when any of them is missing or invalid.
         /// </summary>
-        public IServiceCollection AddFargoSeedOptions(IConfiguration configuration)
+        public IServiceCollection AddFargoInitializerOptions(IConfiguration configuration)
         {
             services
             .AddOptions<DefaultAdminOptions>()

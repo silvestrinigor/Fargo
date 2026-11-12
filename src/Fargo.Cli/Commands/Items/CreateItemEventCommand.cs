@@ -45,7 +45,10 @@ public sealed class CreateItemEventCommand : Command
         Add(articleOption);
         Add(quantityOption);
         Add(containerOption);
+        var idempotencyKey = new IdempotencyKeyOption();
+
         Add(atOption);
+        Add(idempotencyKey.Option);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
@@ -63,7 +66,7 @@ public sealed class CreateItemEventCommand : Command
                 OccuredAt = at
             };
 
-            var guid = await client.V1.Item.Events.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.V1.Item.Events.PostAsync(dto, idempotencyKey.Configure(parseResult), cancellationToken);
 
             StatusWriter.Success(
                 "Item creation event recorded.",

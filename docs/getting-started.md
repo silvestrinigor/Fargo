@@ -21,7 +21,7 @@ The Aspire AppHost starts the services in order:
 
 1. PostgreSQL with the `fargo` database, and RabbitMQ.
 2. The migration service (applies pending database migrations).
-3. The seed service (creates the default administrator on first run).
+3. The initializer service (creates the default administrator on first run).
 4. The HTTP API, the outbox relay (publishes integration events) and the
    real-time service (pushes changes to connected clients).
 
@@ -44,7 +44,7 @@ containers, so they need the container runtime too. The rest run without it.
 
 ## Default administrator
 
-On first run the seed service creates a default administrator account from the
+On first run the initializer service creates a default administrator account from the
 `DefaultAdmin` configuration section. In development this is `admin`. Use it to
 obtain an access token and then create additional users and groups.
 
