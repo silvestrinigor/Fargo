@@ -84,5 +84,10 @@
       href: mcp/overview.md
     - name: Getting Started
       href: mcp/getting-started.md
+- name: Contributing
+  href: contributing/code-documentation.md
+  items:
+    - name: Code Documentation
+      href: contributing/code-documentation.md
 - name: API
   href: api/

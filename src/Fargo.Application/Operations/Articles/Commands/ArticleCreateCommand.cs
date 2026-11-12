@@ -11,34 +11,10 @@ using UnitsNet;
 
 namespace Fargo.Application.Operations.Articles;
 
-/// <summary>
-/// Represents a command to create a new article.
-/// </summary>
-/// <param name="Create">
-/// The data required to create the article.
-/// </param>
 public sealed record ArticleCreateCommand(
     ArticleCreateDto Create
 ) : ICommand<Guid>;
 
-/// <summary>
-/// Handles commands that create articles.
-/// </summary>
-/// <param name="articleService">
-/// Provides article-specific operations and validation.
-/// </param>
-/// <param name="actorService">
-/// Resolves the current actor and its permissions and partition access.
-/// </param>
-/// <param name="articleRepository">
-/// Provides access to article entities.
-/// </param>
-/// <param name="partitionRepository">
-/// Provides access to partitions associated with the article.
-/// </param>
-/// <param name="currentActor">
-/// Provides information about the currently authenticated actor.
-/// </param>
 public sealed class ArticleCreateCommandHandler(
     ArticleService articleService, ActorResolver actorService,
     IArticleRepository articleRepository,
@@ -46,32 +22,6 @@ public sealed class ArticleCreateCommandHandler(
     ICurrentActor currentActor
     ) : ICommandHandler<ArticleCreateCommand, Guid>
 {
-    /// <summary>
-    /// Creates an article according to the requested article type, validates the
-    /// current actor's permissions and access to referenced entities, and
-    /// associates the article with the requested partitions.
-    /// </summary>
-    /// <param name="command">
-    /// The command containing the article creation data.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token that can be used to cancel the operation.
-    /// </param>
-    /// <returns>
-    /// The unique identifier of the newly created article.
-    /// </returns>
-    /// <exception cref="ActorNotFoundFargoApplicationException">
-    /// Thrown when the current actor cannot be found.
-    /// </exception>
-    /// <exception cref="FargoApplicationException">
-    /// Thrown when required data for the requested article type is missing.
-    /// </exception>
-    /// <exception cref="EntityNotFoundFargoApplicationException">
-    /// Thrown when a referenced article or partition cannot be found.
-    /// </exception>
-    /// <exception cref="NotSupportedException">
-    /// Thrown when the requested article type is not supported.
-    /// </exception>
     public async Task<Guid> HandleAsync(ArticleCreateCommand command, CancellationToken cancellationToken = default)
     {
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
