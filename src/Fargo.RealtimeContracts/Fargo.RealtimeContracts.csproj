@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+
+    <!--
+      The wire contract of the real-time hub, shared by the server
+      (Fargo.ServiceRealtime) and the client (Fargo.ClientRealtime) so the
+      payload cannot drift. No dependencies.
+    -->
+    <Version>0.1.0-alpha.1</Version>
+  </PropertyGroup>
+
+</Project>

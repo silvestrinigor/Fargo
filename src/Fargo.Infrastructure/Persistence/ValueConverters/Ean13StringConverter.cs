@@ -1,0 +1,7 @@
+using Fargo.Core.Barcodes;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+namespace Fargo.Infrastructure.Persistence.ValueConverters;
+
+public class Ean13StringConverter()
+    : ValueConverter<Ean13, string>(x => x.Value, x => new Ean13(x));

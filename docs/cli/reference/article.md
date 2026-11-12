@@ -90,6 +90,7 @@ Commands:
                                  fargo article create --name "Blue Widget" \
                                    --variation-from 11111111-1111-1111-1111-111111111111
                                  fargo article create --name "Widget" --barcode-ean13 1234567890128
+                                 fargo article create --name "Bulk sand" --tracking-mode event
   delete <guid>                Delete an article by GUID.
   
                                Examples:
@@ -148,6 +149,8 @@ Options:
   --page <page>              Page number to retrieve (starts at 1). Disables interactive paging.
   --limit <limit>            Maximum number of articles per page. Disables interactive paging.
   --partitions <partitions>  Only show articles under these partition GUIDs (space-separated).
+  --sort <sort>              Sort field, optionally prefixed with '-' for descending (e.g. name, -name). Fields: guid, name, description, type, trackingmode.
+  --search <search>          Case-insensitive text to match against the article name or description.
   --username <username>      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information
@@ -298,6 +301,7 @@ Description:
     fargo article create --name "Blue Widget" \
       --variation-from 11111111-1111-1111-1111-111111111111
     fargo article create --name "Widget" --barcode-ean13 1234567890128
+    fargo article create --name "Bulk sand" --tracking-mode event
 
 Usage:
   fargo article create [options]
@@ -317,6 +321,7 @@ Options:
   --is-container                             Create the article as a container.
   --container-max-mass <container-max-mass>  Maximum mass the container can hold, as value+unit, e.g. '25kg'. Implies the article is a container.
   --barcode-ean13 <barcode-ean13>            Optional EAN-13 barcode to assign to the article.
+  --tracking-mode <tracking-mode>            How the article's stock is tracked: 'entity' (each unit is an individual item; the default) or 'event' (aggregate quantities recorded as movement events). Container articles are always entity-tracked.
   --kit-component <kit-component>            Kit component as '<article-guid>' or '<article-guid>:<quantity>'. Repeat the option for multiple components. Implies the article is a kit.
   --partitions <partitions>                  Partition GUIDs to associate the article with (space-separated).
   --username <username>                      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.

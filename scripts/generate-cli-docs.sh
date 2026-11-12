@@ -6,11 +6,11 @@
 # For each command group it writes docs/cli/reference/<group>.md containing the
 # group's help and each subcommand's help, plus a reference/toc.yml.
 #
-# Run it before `docfx docfx.json`. The docs CI workflow runs it automatically.
+# Run it before `docfx docs/docfx.json`. The docs CI workflow runs it automatically.
 
 set -e
 
-CLI_PROJECT="src/client/Fargo.Cli/Fargo.Cli.csproj"
+CLI_PROJECT="src/Fargo.Cli/Fargo.Cli.csproj"
 BUILD_DIR="$(pwd)/artifacts/cli-docs"
 CLI_DLL="$BUILD_DIR/fargo.dll"
 REFERENCE_DIR="docs/cli/reference"
@@ -18,14 +18,16 @@ REFERENCE_DIR="docs/cli/reference"
 # Command groups and their subcommands. Keep in sync with CommandFactory.
 # Format: "group|Title|sub1 sub2 ..."
 CLI_GROUPS=(
-    "config|Config|set-server get-server show"
+    "config|Config|set-server get-server set-realtime-server get-realtime-server show"
     "identity|Identity|login logout change-password"
     "article|Article|list tree get get-by-barcode inventory create update update-by-barcode delete delete-by-barcode"
-    "item|Item|list get create update delete location moviments inventory"
+    "item|Item|list get create update move delete location moviments inventory"
     "partition|Partition|list tree get create update delete"
     "user-group|User Group|list tree get create update delete"
     "user|User|list get create update delete"
+    "service-account|Service Account|list get create update rotate-secret delete"
     "audit|Audit|list get"
+    "realtime|Realtime|watch"
 )
 
 echo "Building the Fargo CLI..."

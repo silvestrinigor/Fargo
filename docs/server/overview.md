@@ -5,12 +5,12 @@ exposes it over HTTP. It follows a clean, layered architecture and is
 orchestrated for local development with [.NET Aspire](https://learn.microsoft.com/dotnet/aspire/).
 
 This section documents how the server is built. For the HTTP endpoints see the
-[Web API Reference](~/docs/web-api/reference/fargo.swagger.json); for type-level
+[Web API Reference](~/web-api/reference/fargo.swagger.json); for type-level
 detail see the generated [.NET API Reference](~/api/index.md).
 
 ## Solution layout
 
-The server lives under `src/server/` and is composed of eight projects:
+The server lives under `src/` and is composed of eight projects:
 
 | Project | Role |
 | --- | --- |

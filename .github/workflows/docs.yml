@@ -32,12 +32,12 @@ jobs:
         run: bash scripts/generate-cli-docs.sh
 
       - name: Build documentation
-        run: docfx docfx.json
+        run: docfx docs/docfx.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: ./docs/_site
 
   deploy:
     needs: build

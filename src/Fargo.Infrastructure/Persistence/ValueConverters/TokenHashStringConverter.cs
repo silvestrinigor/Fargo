@@ -1,0 +1,7 @@
+using Fargo.Core.Identity.Tokens;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+namespace Fargo.Infrastructure.Persistence.ValueConverters;
+
+public class TokenHashStringConverter()
+    : ValueConverter<TokenHash, string>(x => x.Value, x => new(x));

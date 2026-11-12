@@ -87,6 +87,8 @@ Usage:
 Options:
   --page <page>              Page number to retrieve (starts at 1). Disables interactive paging.
   --limit <limit>            Maximum number of partitions per page. Disables interactive paging.
+  --sort <sort>              Sort field, optionally prefixed with '-' for descending (e.g. -name). Fields: guid, name, description.
+  --search <search>          Case-insensitive text to match against the partition name or description.
   --partitions <partitions>  Only show partitions under these parent GUIDs (space-separated).
   --username <username>      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.

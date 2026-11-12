@@ -1,0 +1,87 @@
+using Fargo.Cli.Output;
+using Fargo.ClientHttp;
+using Fargo.ClientHttp.Models;
+using System.CommandLine;
+
+namespace Fargo.Cli.Commands.Users;
+
+public sealed class UpdateUserCommand : Command
+{
+    public UpdateUserCommand(FargoApiClient client)
+        : base("update", """
+            Update an existing user. Only the options you pass are changed.
+
+            Examples:
+              fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
+              fargo user update 00000000-0000-0000-0000-000000000004 --active false
+            """)
+    {
+        var guidArgument = new Argument<Guid>("guid")
+        {
+            Description = "The user GUID."
+        };
+
+        var usernameOption = new Option<string?>("--username")
+        {
+            Description = "New username (nameid) for the user."
+        };
+
+        var firstNameOption = new Option<string?>("--first-name")
+        {
+            Description = "New first name."
+        };
+
+        var lastNameOption = new Option<string?>("--last-name")
+        {
+            Description = "New last name."
+        };
+
+        var isActiveOption = new Option<bool?>("--active")
+        {
+            Description = "Set the user active state (true or false)."
+        };
+
+        Add(guidArgument);
+        Add(usernameOption);
+        Add(firstNameOption);
+        Add(lastNameOption);
+        Add(isActiveOption);
+
+        SetAction(async (parseResult, cancellationToken) =>
+        {
+            var guid = parseResult.GetValue(guidArgument);
+            var username = parseResult.GetValue(usernameOption);
+            var firstName = parseResult.GetValue(firstNameOption);
+            var lastName = parseResult.GetValue(lastNameOption);
+            var isActive = parseResult.GetValue(isActiveOption);
+
+            var dto = new UserUpdateDto();
+
+            if (username is not null)
+            {
+                dto.Nameid = username;
+            }
+
+            if (firstName is not null)
+            {
+                dto.FirstName = firstName;
+            }
+
+            if (lastName is not null)
+            {
+                dto.LastName = lastName;
+            }
+
+            if (isActive.HasValue)
+            {
+                dto.IsActive = isActive;
+            }
+
+            await client.V1.Users[guid].PutAsync(dto, cancellationToken: cancellationToken);
+
+            StatusWriter.Success("User updated.", ("GUID", guid.ToString()));
+
+            return 0;
+        });
+    }
+}

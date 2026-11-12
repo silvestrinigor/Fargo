@@ -1,0 +1,161 @@
+using Fargo.Application.Common.Paging;
+using Fargo.Application.Operations.UserGroups;
+using Fargo.Application.Operations.UserGroups.Dtos;
+using Fargo.Application.Persistence.Repositories;
+using Fargo.Core.Entities.UserGroups;
+using Fargo.Core.Informations;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+
+namespace Fargo.Infrastructure.Persistence.Repositories;
+
+public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepository, IUserGroupQueryRepository
+{
+    private readonly DbSet<UserGroup> userGroups = context.UserGroups;
+
+    public Task<bool> AnyAsync(CancellationToken cancellationToken = default)
+        => userGroups.AnyAsync(cancellationToken);
+
+    public void Add(UserGroup userGroup) => userGroups.Add(userGroup);
+
+    public void Remove(UserGroup userGroup) => userGroups.Remove(userGroup);
+
+    // Single global key: a cycle can span groups whose only shared node is along their paths, so a per-group
+    // key cannot reliably serialize the conflicting re-parents. Cheap in practice, because the caller takes
+    // the lock only when assigning a parent group.
+    private const long HierarchyLockKey = 0x_7A60_C017_A10C_3703;
+
+    public async Task AcquireHierarchyLockAsync(CancellationToken cancellationToken = default)
+    {
+        // Transaction-scoped advisory lock: released when the surrounding transaction ends, so it must run
+        // inside one (the user-group-update command runs under the transactional unit-of-work
+        // decorator); otherwise it would release after this statement.
+        FormattableString query = $"SELECT pg_advisory_xact_lock({HierarchyLockKey})";
+
+        await context.Database.ExecuteSqlInterpolatedAsync(query, cancellationToken);
+    }
+
+    public Task<UserGroup?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
+    {
+        return userGroups
+        .Include(userGroup => userGroup.Partitions)
+        .Include(userGroup => userGroup.PartitionAccesses)
+        .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
+    }
+
+    public Task<bool> ExistsByNameidAsync(Nameid nameid, CancellationToken cancellationToken = default)
+        => userGroups.AnyAsync(userGroup => userGroup.Nameid == nameid, cancellationToken);
+
+    public async Task<UserGroupDto?> GetInfoByGuidAsync(
+        Guid entityGuid,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        CancellationToken cancellationToken = default)
+    {
+        var userGroup = await ApplyPartitionFilter(
+                userGroups
+                    .AsNoTracking(),
+                childOfAnyOfThesePartitions)
+            .Where(userGroup => userGroup.Guid == entityGuid)
+            .Select(UserGroupDtoMappings.Projection)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return userGroup;
+    }
+
+    private static readonly IReadOnlyDictionary<string, Expression<Func<UserGroup, object?>>> UserGroupSortFields =
+        new Dictionary<string, Expression<Func<UserGroup, object?>>>
+        {
+            ["guid"] = g => g.Guid,
+            ["nameid"] = g => g.Nameid,
+            ["description"] = g => g.Description,
+            ["isactive"] = g => g.IsActive,
+        };
+
+    public async Task<PagedResult<UserGroupDto>> GetManyInfoAsync(
+        Pagination pagination,
+        IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
+        Sort? sort = null,
+        string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        var queryFiltered = ApplyPartitionFilter(
+                userGroups
+                    .AsNoTracking(),
+                childOfAnyOfThesePartitions);
+
+        queryFiltered = ApplySearch(queryFiltered, search);
+
+        var totalCount = await queryFiltered.CountAsync(cancellationToken);
+
+        var result = await queryFiltered
+            .ApplySort(sort, UserGroupSortFields, g => g.Nameid, g => g.Guid)
+            .WithPagination(pagination)
+            .Select(UserGroupDtoMappings.Projection)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<UserGroupDto>(
+            result,
+            totalCount,
+            pagination.Page.Value,
+            pagination.Limit.Value);
+    }
+
+    private static IQueryable<UserGroup> ApplySearch(IQueryable<UserGroup> query, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return query;
+        }
+
+        var pattern = $"%{SearchPattern.Escape(search.Trim())}%";
+
+        return query.Where(g =>
+            EF.Functions.ILike((string)g.Nameid, pattern, SearchPattern.EscapeChar)
+            || EF.Functions.ILike((string)g.Description, pattern, SearchPattern.EscapeChar));
+    }
+
+    private static IQueryable<UserGroup> ApplyPartitionFilter(
+        IQueryable<UserGroup> query,
+        IReadOnlyCollection<Guid>? partitionGuids)
+        => query.WherePartitionAccessible(
+            partitionGuids,
+            userGroup => userGroup.Partitions,
+            partition => partition.PartitionGuid);
+
+    public async Task<IReadOnlyCollection<Guid>> GetDescendantUserGroupGuidsAsync(Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default)
+    {
+        FormattableString query = $"""
+        WITH RECURSIVE user_group_tree AS
+        (
+            SELECT guid, parent_user_group_guid
+            FROM user_groups
+            WHERE guid = {userGroupGuid}
+
+            UNION ALL
+
+            SELECT child.guid, child.parent_user_group_guid
+            FROM user_groups AS child
+            INNER JOIN user_group_tree AS parent
+                ON child.parent_user_group_guid = parent.guid
+        )
+        SELECT guid
+        FROM user_group_tree
+        """;
+
+        var guids = await context.Database
+            .SqlQuery<Guid>(query)
+            .ToListAsync(cancellationToken);
+
+        if (!includeRoot)
+        {
+            guids.RemoveAll(guid => guid == userGroupGuid);
+        }
+
+        return guids;
+    }
+
+    public Task<bool> HasChildrenUserGroupAsync(Guid parentUserGroupGuid, CancellationToken cancellationToken = default)
+    {
+        return context.UserGroups.AnyAsync(u => u.ParentUserGroupGuid == parentUserGroupGuid, cancellationToken);
+    }
+}

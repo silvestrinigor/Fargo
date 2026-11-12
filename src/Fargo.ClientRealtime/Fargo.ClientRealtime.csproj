@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+
+    <!--
+      Client for the Fargo real-time hub. Depends on the shared token handling
+      (Fargo.ClientAuthentication) and the hub contract (Fargo.RealtimeContracts),
+      not on the Kiota HTTP client.
+    -->
+    <Version>0.1.0-alpha.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fargo.ClientAuthentication\Fargo.ClientAuthentication.csproj" />
+    <ProjectReference Include="..\Fargo.RealtimeContracts\Fargo.RealtimeContracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Fargo.ClientRealtime.Tests" />
+  </ItemGroup>
+
+</Project>

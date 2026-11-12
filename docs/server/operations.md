@@ -7,7 +7,7 @@ This page covers running and configuring the server.
 The server is orchestrated with .NET Aspire. From the repository root:
 
 ```bash
-dotnet run --project src/server/Fargo.AppHost
+dotnet run --project src/Fargo.AppHost
 ```
 
 The AppHost starts a persistent PostgreSQL container and the service projects in

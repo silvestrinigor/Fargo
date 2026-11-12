@@ -1,0 +1,329 @@
+using Fargo.ClientHttp;
+using Fargo.ClientHttp.Models;
+using Fargo.Mcp.Authentication;
+using ModelContextProtocol.Server;
+using System.ComponentModel;
+
+namespace Fargo.Mcp.Tools;
+
+[McpServerToolType]
+public static class ItemTools
+{
+    [McpServerTool(Name = "fargo_items_list")]
+    [Description("List items, optionally paginated and filtered to those under specific partitions.")]
+    public static async Task<IReadOnlyList<ItemSummary>> ListItemsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("Page number to retrieve, starting at 1.")] int? page = null,
+        [Description("Maximum number of items to return per page.")] int? limit = null,
+        [Description("Only return items that belong to any of these partition GUIDs.")] Guid[]? partitions = null,
+        [Description("Case-insensitive text to match against the article barcode of the item.")] string? search = null,
+        [Description("Sort field, optionally prefixed with '-' for descending (e.g. -guid). Fields: guid, article, parentcontainer, isfixed.")] string? sort = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var result = await client.V1.Items.GetAsync(request =>
+        {
+            if (page.HasValue)
+            {
+                request.QueryParameters.Page = page.Value;
+            }
+
+            if (limit.HasValue)
+            {
+                request.QueryParameters.Limit = limit.Value;
+            }
+
+            if (partitions is { Length: > 0 })
+            {
+                request.QueryParameters.ChildOfAnyOfThesePartitions =
+                    partitions.Select(g => (Guid?)g).ToArray();
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                request.QueryParameters.Search = search;
+            }
+
+            if (!string.IsNullOrWhiteSpace(sort))
+            {
+                request.QueryParameters.Sort = sort;
+            }
+        }, cancellationToken);
+
+        return result?.Items?.Select(i => i.ToSummary()).ToArray() ?? [];
+    }
+
+    [McpServerTool(Name = "fargo_items_get")]
+    [Description("Get a single item by its GUID.")]
+    public static async Task<ItemSummary?> GetItemAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item.")] Guid itemGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var item = await client.V1.Items[itemGuid].GetAsync(cancellationToken: cancellationToken);
+
+        return item?.ToSummary();
+    }
+
+    [McpServerTool(Name = "fargo_items_create")]
+    [Description("Create a new item for an article, optionally placed in a parent container and partitions. Returns the GUID of the created item.")]
+    public static async Task<Guid?> CreateItemAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the article this item is an instance of.")] Guid articleGuid,
+        [Description("The GUID of the parent item container this item is placed in, if any.")] Guid? parentItemContainerGuid = null,
+        [Description("The GUIDs of the partitions to add the item to.")] Guid[]? partitionsToAdd = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ItemCreateDto
+        {
+            ArticleGuid = articleGuid,
+            ParentItemContainerGuid = parentItemContainerGuid,
+            PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList()
+        };
+
+        return await client.V1.Items.PostAsync(body, cancellationToken: cancellationToken);
+    }
+
+    [McpServerTool(Name = "fargo_items_delete")]
+    [Description("Delete an item by its GUID.")]
+    public static async Task<string> DeleteItemAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item to delete.")] Guid itemGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Items[itemGuid].DeleteAsync(cancellationToken: cancellationToken);
+
+        return $"Item '{itemGuid}' deleted.";
+    }
+
+    [McpServerTool(Name = "fargo_items_update")]
+    [Description("Update an existing item: move it to (or out of) a parent container and adjust its partitions. Only the supplied changes are applied.")]
+    public static async Task<string> UpdateItemAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item to update.")] Guid itemGuid,
+        [Description("The GUID of the parent item container to move this item into. Leave null to keep the current container.")] Guid? parentItemContainerGuid = null,
+        [Description("When true, removes the item from its current parent container. Takes precedence over parentItemContainerGuid.")] bool? removeFromParentItemContainer = null,
+        [Description("The GUIDs of the partitions to add the item to.")] Guid[]? partitionsToAdd = null,
+        [Description("The GUIDs of the partitions to remove the item from.")] Guid[]? partitionsToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ItemUpdateDto
+        {
+            ParentItemContainerGuid = parentItemContainerGuid,
+            RemoveFromParentItemContainer = removeFromParentItemContainer,
+            PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList(),
+            PartitionsToRemove = partitionsToRemove?.Select(g => (Guid?)g).ToList()
+        };
+
+        await client.V1.Items[itemGuid].PatchAsync(body, cancellationToken: cancellationToken);
+
+        return $"Item '{itemGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_items_get_location")]
+    [Description("Get the location of an item: the chain of parent container items from the item up to its root container. When 'at' is supplied, the location is reconstructed from the item's containment history as it was at that instant.")]
+    public static async Task<IReadOnlyList<ItemSummary>> GetItemLocationAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item.")] Guid itemGuid,
+        [Description("Optional instant (ISO 8601 UTC, e.g. 2026-03-01T12:00:00Z) at which to evaluate the location. When omitted, the current location is returned.")] DateTimeOffset? at = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var result = await client.V1.Items[itemGuid].Location.GetAsync(request =>
+        {
+            if (at.HasValue)
+            {
+                request.QueryParameters.At = at.Value;
+            }
+        }, cancellationToken);
+
+        return result?.Select(i => i.ToSummary()).ToArray() ?? [];
+    }
+
+    [McpServerTool(Name = "fargo_items_list_moviments")]
+    [Description("List the movement history of an item: each time it was moved between containers and when.")]
+    public static async Task<IReadOnlyList<ItemMovimentSummary>> ListItemMovimentsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item.")] Guid itemGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var result = await client.V1.Items[itemGuid].Moviments.GetAsync(cancellationToken: cancellationToken);
+
+        return result?.Select(m => m.ToSummary()).ToArray() ?? [];
+    }
+
+    [McpServerTool(Name = "fargo_item_events_move")]
+    [Description("Record a movement event: a quantity of an event-tracked article moved between containers (or into/out of no container). Provide a destination for a receipt, an origin for a dispatch, or both for a transfer. Returns the recorded event's GUID.")]
+    public static async Task<string> MoveItemAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the event-tracked article being moved.")] Guid articleGuid,
+        [Description("The strictly positive quantity moved.")] double quantity,
+        [Description("The GUID of the origin container. Omit for a receipt from outside any container.")] Guid? fromItemContainerGuid = null,
+        [Description("The GUID of the destination container. Omit for a dispatch to outside any container.")] Guid? toItemContainerGuid = null,
+        [Description("Optional instant (ISO 8601 UTC) at which the movement occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ItemEventCreateDto
+        {
+            EventType = ItemEventTypes.Moviment,
+            ArticleGuid = articleGuid,
+            Quantity = new Scalar { Double = quantity },
+            FromItemContainerGuid = fromItemContainerGuid,
+            ToItemContainerGuid = toItemContainerGuid,
+            OccuredAt = occuredAt
+        };
+
+        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+
+        return $"Movement event '{guid}' recorded for article '{articleGuid}'.";
+    }
+
+    [McpServerTool(Name = "fargo_item_events_create")]
+    [Description("Record a creation event: a quantity of an event-tracked article that entered stock, optionally at a container. Event-based stock is not unit-tracked, so a single event can create many units at once. Returns the recorded event's GUID.")]
+    public static async Task<string> CreateItemEventAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the event-tracked article.")] Guid articleGuid,
+        [Description("The strictly positive quantity created.")] double quantity,
+        [Description("The GUID of the container the quantity was created in. Omit for outside any container.")] Guid? itemContainerGuid = null,
+        [Description("Optional instant (ISO 8601 UTC) at which the creation occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ItemEventCreateDto
+        {
+            EventType = ItemEventTypes.Creation,
+            ArticleGuid = articleGuid,
+            Quantity = new Scalar { Double = quantity },
+            ItemContainerGuid = itemContainerGuid,
+            OccuredAt = occuredAt
+        };
+
+        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+
+        return $"Creation event '{guid}' recorded for article '{articleGuid}'.";
+    }
+
+    [McpServerTool(Name = "fargo_item_events_delete")]
+    [Description("Record a deletion event: a quantity of an event-tracked article that left stock, optionally from a container. Event-based stock is not unit-tracked, so you describe how much left and from where rather than an item GUID. Returns the recorded event's GUID.")]
+    public static async Task<string> DeleteItemEventAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the event-tracked article.")] Guid articleGuid,
+        [Description("The strictly positive quantity deleted.")] double quantity,
+        [Description("The GUID of the container the quantity was deleted from. Omit for outside any container.")] Guid? itemContainerGuid = null,
+        [Description("Optional instant (ISO 8601 UTC) at which the deletion occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new ItemEventCreateDto
+        {
+            EventType = ItemEventTypes.Deletion,
+            ArticleGuid = articleGuid,
+            Quantity = new Scalar { Double = quantity },
+            ItemContainerGuid = itemContainerGuid,
+            OccuredAt = occuredAt
+        };
+
+        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+
+        return $"Deletion event '{guid}' recorded for article '{articleGuid}'.";
+    }
+
+    [McpServerTool(Name = "fargo_item_events_list")]
+    [Description("List item events (such as stock movements of event-tracked articles), optionally filtered by article, event type, and time period. Requires the ReadItemEvents permission; only events whose article is accessible to the caller are returned.")]
+    public static async Task<IReadOnlyList<ItemEventSummary>> ListItemEventsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("Only return events for this event-tracked article GUID.")] Guid? articleGuid = null,
+        [Description("Only return events of this type. 1 = moviment, 2 = creation, 3 = deletion.")] int? eventType = null,
+        [Description("Only return events that occurred at or after this instant (ISO 8601 UTC).")] DateTimeOffset? periodStart = null,
+        [Description("Only return events that occurred at or before this instant (ISO 8601 UTC).")] DateTimeOffset? periodEnd = null,
+        [Description("Page number to retrieve, starting at 1.")] int? page = null,
+        [Description("Maximum number of events to return per page.")] int? limit = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var result = await client.V1.Item.Events.GetAsync(request =>
+        {
+            if (articleGuid.HasValue)
+            {
+                request.QueryParameters.ArticleGuid = articleGuid.Value;
+            }
+
+            if (eventType.HasValue)
+            {
+                request.QueryParameters.EventType = eventType.Value;
+            }
+
+            if (periodStart.HasValue)
+            {
+                request.QueryParameters.PeriodStart = periodStart.Value;
+            }
+
+            if (periodEnd.HasValue)
+            {
+                request.QueryParameters.PeriodEnd = periodEnd.Value;
+            }
+
+            if (page.HasValue)
+            {
+                request.QueryParameters.Page = page.Value;
+            }
+
+            if (limit.HasValue)
+            {
+                request.QueryParameters.Limit = limit.Value;
+            }
+        }, cancellationToken);
+
+        return result?.Items?.Select(e => e.ToSummary()).ToArray() ?? [];
+    }
+
+    [McpServerTool(Name = "fargo_items_get_inventory")]
+    [Description("Get the inventory of an item treated as a container: the count of contained items grouped by article. When 'at' is supplied, the inventory is reconstructed from the item containment history as it was at that instant.")]
+    public static async Task<IReadOnlyList<ItemContainerInventorySummary>> GetItemInventoryAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item (container).")] Guid itemGuid,
+        [Description("Optional instant (ISO 8601 UTC, e.g. 2026-03-01T12:00:00Z) at which to evaluate the inventory. When omitted, the current inventory is returned.")] DateTimeOffset? at = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var result = await client.V1.Items[itemGuid].Inventory.GetAsync(request =>
+        {
+            if (at.HasValue)
+            {
+                request.QueryParameters.At = at.Value;
+            }
+        }, cancellationToken);
+
+        return result?.Select(i => i.ToSummary()).ToArray() ?? [];
+    }
+}

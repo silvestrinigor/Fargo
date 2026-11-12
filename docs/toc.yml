@@ -34,6 +34,8 @@
       href: server/cross-cutting.md
     - name: Operations
       href: server/operations.md
+    - name: Real-time Updates (SignalR)
+      href: server/realtime.md
 - name: CLI
   href: cli/overview.md
   items:
@@ -60,8 +62,12 @@
           href: cli/reference/user-group.md
         - name: User
           href: cli/reference/user.md
+        - name: Service Account
+          href: cli/reference/service-account.md
         - name: Audit
           href: cli/reference/audit.md
+        - name: Realtime
+          href: cli/reference/realtime.md
 - name: Web API
   href: web-api/overview.md
   items:
@@ -78,3 +84,10 @@
       href: mcp/overview.md
     - name: Getting Started
       href: mcp/getting-started.md
+- name: Contributing
+  href: contributing/code-documentation.md
+  items:
+    - name: Code Documentation
+      href: contributing/code-documentation.md
+- name: API
+  href: api/

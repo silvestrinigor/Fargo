@@ -2,7 +2,7 @@
 
 This guide takes you from a fresh checkout to running commands against a Fargo
 server. Examples refer to the client as `fargo`; you can also run it with
-`dotnet run --project src/client/Fargo.Cli -- <command>`.
+`dotnet run --project src/Fargo.Cli -- <command>`.
 
 ## 1. Point the CLI at a server
 
@@ -44,7 +44,8 @@ fargo user get 00000000-0000-0000-0000-000000000004
 Create, update, and delete:
 
 ```bash
-fargo article create --name "Widget" --type pack
+fargo article create --name "Widget"
+fargo article create --name "Bulk sand" --tracking-mode event
 fargo partition create --name "Warehouse A"
 fargo user update 00000000-0000-0000-0000-000000000004 --active false
 fargo item delete 22222222-2222-2222-2222-222222222222

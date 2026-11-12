@@ -3,8 +3,8 @@
 `Fargo.Mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) (MCP)
 server that exposes the Fargo API as a set of tools an AI agent can call. It lets
 MCP-capable hosts — such as Claude Desktop, Claude Code, Cursor, or VS Code's MCP
-client — list, read, and manage Fargo articles, items, partitions, users, user
-groups, and audit logs through natural-language-driven tool calls.
+client — list, read, and manage Fargo articles, items, item events, partitions,
+users, user groups, and audit logs through natural-language-driven tool calls.
 
 Under the hood it is a thin layer over the same strongly-typed
 [`Fargo.ClientHttp`](~/api/Fargo.ClientHttp.FargoApiClient.yml) Kiota client that
@@ -31,12 +31,25 @@ Tools are grouped by resource and named `fargo_<resource>_<action>`:
 
 | Resource | Tools | Access |
 | --- | --- | --- |
-| Articles | `fargo_articles_list`, `fargo_articles_get_by_barcode`, `fargo_articles_create`, `fargo_articles_delete_by_barcode` | Read/write |
-| Items | `fargo_items_list`, `fargo_items_get`, `fargo_items_create`, `fargo_items_delete` | Read/write |
-| Partitions | `fargo_partitions_list`, `fargo_partitions_get`, `fargo_partitions_create`, `fargo_partitions_delete` | Read/write |
-| Users | `fargo_users_list`, `fargo_users_get` | Read-only |
-| User groups | `fargo_usergroups_list`, `fargo_usergroups_get` | Read-only |
-| Audit logs | `fargo_auditlogs_list` | Read-only |
+| Articles | `fargo_articles_list`, `fargo_articles_get`, `fargo_articles_get_by_barcode`, `fargo_articles_create`, `fargo_articles_update`, `fargo_articles_delete`, `fargo_articles_get_inventory` | Read/write |
+| Items | `fargo_items_list`, `fargo_items_get`, `fargo_items_create`, `fargo_items_update`, `fargo_items_delete`, `fargo_items_get_location`, `fargo_items_list_moviments`, `fargo_items_get_inventory` | Read/write |
+| Item events | `fargo_item_events_list`, `fargo_item_events_create`, `fargo_item_events_delete`, `fargo_item_events_move` | Read/write |
+| Partitions | `fargo_partitions_list`, `fargo_partitions_get`, `fargo_partitions_create`, `fargo_partitions_update`, `fargo_partitions_delete` | Read/write |
+| Users | `fargo_users_list`, `fargo_users_get`, `fargo_users_create`, `fargo_users_update`, `fargo_users_delete` | Read/write |
+| User groups | `fargo_usergroups_list`, `fargo_usergroups_get`, `fargo_usergroups_create`, `fargo_usergroups_update`, `fargo_usergroups_delete` | Read/write |
+| Service accounts | `fargo_serviceaccounts_list`, `fargo_serviceaccounts_get`, `fargo_serviceaccounts_create`, `fargo_serviceaccounts_update`, `fargo_serviceaccounts_rotate_secret`, `fargo_serviceaccounts_delete` | Read/write |
+| Audit logs | `fargo_auditlogs_list`, `fargo_auditlogs_get` | Read-only |
+
+The list tools for articles, items, partitions, users and user groups accept
+`search` and `sort` in addition to paging. Article update, delete and inventory
+are addressed by GUID; use `fargo_articles_get_by_barcode` to resolve a barcode
+to a GUID first.
+
+> **Secrets.** `fargo_serviceaccounts_create` and
+> `fargo_serviceaccounts_rotate_secret` return the new client secret once, in the
+> tool result, so it passes through the model's context and the host's logs. The
+> user tools also take passwords as arguments. Only approve these tools in
+> sessions you trust.
 
 Each tool's parameters and description are declared on the tool itself and
 surfaced live by the MCP host, so the host's own tool list is the authoritative

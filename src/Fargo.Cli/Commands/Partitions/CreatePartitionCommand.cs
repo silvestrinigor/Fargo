@@ -1,0 +1,58 @@
+using Fargo.Cli.Output;
+using Fargo.ClientHttp;
+using Fargo.ClientHttp.Models;
+using System.CommandLine;
+
+namespace Fargo.Cli.Commands.Partitions;
+
+public sealed class CreatePartitionCommand : Command
+{
+    public CreatePartitionCommand(FargoApiClient client)
+        : base("create", """
+            Create a new partition, optionally nested under a parent.
+
+            When --parent is omitted, the partition is created under the global
+            partition (if you have access to it); otherwise you must supply a
+            parent partition you can access.
+
+            Examples:
+              fargo partition create --name "Warehouse A"
+              fargo partition create --name "Aisle 1" --parent 00000000-0000-0000-0000-000000000001
+            """)
+    {
+        var nameOption = new Option<string>("--name")
+        {
+            Description = "Name of the partition.",
+            Required = true
+        };
+
+        var parentOption = new Option<Guid?>("--parent")
+        {
+            Description = "GUID of the parent partition."
+        };
+
+        Add(nameOption);
+        Add(parentOption);
+
+        SetAction(async (parseResult, cancellationToken) =>
+        {
+            var name = parseResult.GetValue(nameOption)!;
+            var parent = parseResult.GetValue(parentOption);
+
+            var dto = new PartitionCreateDto
+            {
+                Name = name,
+                ParentPartitionGuid = parent
+            };
+
+            var guid = await client.V1.Partitions.PostAsync(dto, cancellationToken: cancellationToken);
+
+            StatusWriter.Success(
+                "Partition created.",
+                ("GUID", guid?.ToString()),
+                ("Name", name));
+
+            return 0;
+        });
+    }
+}

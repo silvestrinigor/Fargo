@@ -76,6 +76,8 @@ Options:
   --page <page>              Page number to retrieve (starts at 1). Disables interactive paging.
   --limit <limit>            Maximum number of users per page. Disables interactive paging.
   --partitions <partitions>  Only show users under these partition GUIDs (space-separated).
+  --sort <sort>              Sort field, optionally prefixed with '-' for descending (e.g. -name). Fields: guid, nameid, firstname, lastname, isactive.
+  --search <search>          Case-insensitive text to match against the user nameid.
   --username <username>      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help             Show help and usage information

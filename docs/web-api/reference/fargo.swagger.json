@@ -1,11 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Fargo.ServiceHttp | v1",
-    "version": "1.0.0"
+    "title": "GetDocument.Insider | v1",
+    "description": "GetDocument Command-line Tool inside man",
+    "version": "1"
   },
   "paths": {
-    "/articles/{articleGuid}": {
+    "/v1/articles/{articleGuid}": {
       "get": {
         "tags": [
           "Articles"
@@ -93,7 +94,7 @@
         }
       }
     },
-    "/articles/{articleBarcode}": {
+    "/v1/articles/{articleBarcode}": {
       "get": {
         "tags": [
           "Articles"
@@ -126,7 +127,7 @@
         }
       }
     },
-    "/articles/{articleGuid}/inventory": {
+    "/v1/articles/{articleGuid}/inventory": {
       "get": {
         "tags": [
           "Articles"
@@ -180,7 +181,7 @@
         }
       }
     },
-    "/articles": {
+    "/v1/articles": {
       "get": {
         "tags": [
           "Articles"
@@ -216,6 +217,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {
@@ -261,7 +272,7 @@
         }
       }
     },
-    "/items/{itemGuid}": {
+    "/v1/items/{itemGuid}": {
       "get": {
         "tags": [
           "Items"
@@ -349,7 +360,7 @@
         }
       }
     },
-    "/items/{itemGuid}/location": {
+    "/v1/items/{itemGuid}/location": {
       "get": {
         "tags": [
           "Items"
@@ -391,7 +402,7 @@
         }
       }
     },
-    "/items/{itemGuid}/moviments": {
+    "/v1/items/{itemGuid}/moviments": {
       "get": {
         "tags": [
           "Items"
@@ -427,7 +438,7 @@
         }
       }
     },
-    "/items/{itemGuid}/inventory": {
+    "/v1/items/{itemGuid}/inventory": {
       "get": {
         "tags": [
           "Items"
@@ -469,7 +480,7 @@
         }
       }
     },
-    "/items": {
+    "/v1/items": {
       "get": {
         "tags": [
           "Items"
@@ -504,6 +515,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {
@@ -549,7 +570,101 @@
         }
       }
     },
-    "/users/{userGuid}": {
+    "/v1/item/events": {
+      "get": {
+        "tags": [
+          "ItemEvents"
+        ],
+        "summary": "Gets multiple item events",
+        "description": "Retrieves a paginated list of item events, optionally filtered by article, event type, and time period, including the total number of matching entries. Requires the ReadItemEvents permission; only events whose article is accessible to the caller are returned.",
+        "operationId": "GetItemEvents",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "default": 1000,
+            "maximum": 1000,
+            "minimum": 1
+          },
+          {
+            "in": "query",
+            "name": "articleGuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "query",
+            "name": "eventType",
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "periodStart",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "in": "query",
+            "name": "periodEnd",
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfItemEventDto"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ItemEvents"
+        ],
+        "summary": "Records an item event",
+        "description": "Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.",
+        "operationId": "CreateItemEvent",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ItemEventCreateDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}": {
       "get": {
         "tags": [
           "Users"
@@ -637,7 +752,7 @@
         }
       }
     },
-    "/users": {
+    "/v1/users": {
       "get": {
         "tags": [
           "Users"
@@ -672,6 +787,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {
@@ -717,7 +842,7 @@
         }
       }
     },
-    "/user-groups/{userGroupGuid}": {
+    "/v1/user-groups/{userGroupGuid}": {
       "get": {
         "tags": [
           "UserGroups"
@@ -805,7 +930,7 @@
         }
       }
     },
-    "/user-groups": {
+    "/v1/user-groups": {
       "get": {
         "tags": [
           "UserGroups"
@@ -840,6 +965,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {
@@ -885,7 +1020,7 @@
         }
       }
     },
-    "/partitions/{partitionGuid}": {
+    "/v1/partitions/{partitionGuid}": {
       "get": {
         "tags": [
           "Partitions"
@@ -973,7 +1108,7 @@
         }
       }
     },
-    "/partitions": {
+    "/v1/partitions": {
       "get": {
         "tags": [
           "Partitions"
@@ -1009,6 +1144,16 @@
               "format": "uuid"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1054,7 +1199,7 @@
         }
       }
     },
-    "/identity/login": {
+    "/v1/identity/login": {
       "post": {
         "tags": [
           "Identity"
@@ -1091,7 +1236,7 @@
         }
       }
     },
-    "/identity/logout": {
+    "/v1/identity/logout": {
       "post": {
         "tags": [
           "Identity"
@@ -1122,7 +1267,7 @@
         }
       }
     },
-    "/identity/refresh": {
+    "/v1/identity/refresh": {
       "post": {
         "tags": [
           "Identity"
@@ -1159,7 +1304,7 @@
         }
       }
     },
-    "/identity/password": {
+    "/v1/identity/password": {
       "put": {
         "tags": [
           "Identity"
@@ -1193,7 +1338,47 @@
         }
       }
     },
-    "/audit-logs/{auditLogGuid}": {
+    "/v1/identity/service-token": {
+      "post": {
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Authenticates a service account",
+        "description": "Validates service-account client credentials (client id + secret) and returns a short-lived access token. Services re-exchange their credentials for a new token when the current one nears expiry; no refresh token is issued.",
+        "operationId": "ServiceToken",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceTokenRequestDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ServiceTokenResultDto"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/v1/audit-logs/{auditLogGuid}": {
       "get": {
         "tags": [
           "AuditLogs"
@@ -1226,7 +1411,7 @@
         }
       }
     },
-    "/audit-logs": {
+    "/v1/audit-logs": {
       "get": {
         "tags": [
           "AuditLogs"
@@ -1294,6 +1479,196 @@
             "schema": {
               "$ref": "#/definitions/PagedResultOfAuditLogDto"
             }
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}": {
+      "get": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Gets a single service account",
+        "description": "Retrieves a single service account by its unique identifier. Never returns the secret.",
+        "operationId": "GetServiceAccount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountDto"
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Updates a service account",
+        "description": "Updates mutable service-account state: description, active flag, permissions and partition accesses.",
+        "operationId": "UpdateServiceAccount",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountUpdateDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Deletes a service account",
+        "description": "Deletes the specified service account. Any tokens it holds stop validating.",
+        "operationId": "DeleteServiceAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/service-accounts": {
+      "get": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Gets multiple service accounts",
+        "description": "Retrieves a paginated list of service accounts, including the total number of matching entries.",
+        "operationId": "GetServiceAccounts",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfServiceAccountDto"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Creates a new service account",
+        "description": "Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated).",
+        "operationId": "CreateServiceAccount",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountCreateDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountCreatedDto"
+            }
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}/rotate-secret": {
+      "post": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Rotates a service account's secret",
+        "description": "Generates a new client secret (returned EXACTLY ONCE) and invalidates all tokens previously issued to the account.",
+        "operationId": "RotateServiceAccountSecret",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccountCreatedDto"
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1452,6 +1827,9 @@
             }
           ]
         },
+        "trackingMode": {
+          "$ref": "#/definitions/ArticleTrackingMode"
+        },
         "partitionsToAdd": {
           "type": "array",
           "description": "The optional identifiers of partitions to associate with the article.",
@@ -1600,6 +1978,7 @@
         "name",
         "description",
         "articleType",
+        "trackingMode",
         "shelfLife",
         "color",
         "mass",
@@ -1625,6 +2004,9 @@
         },
         "articleType": {
           "$ref": "#/definitions/ArticleType"
+        },
+        "trackingMode": {
+          "$ref": "#/definitions/ArticleTrackingMode"
         },
         "shelfLife": {
           "type": "string",
@@ -1699,9 +2081,9 @@
       ],
       "properties": {
         "totalCount": {
-          "description": "The total number of items available in inventory for this article.",
-          "format": "int32",
-          "pattern": "^-?(?:0|[1-9]\\d*)$"
+          "description": "The total quantity available in inventory for this article.\r\nFor entity-tracked articles this is a whole number of items; for\r\nevent-tracked articles it is the net quantity derived from movement events\r\n(received minus dispatched) and may be fractional.",
+          "format": "double",
+          "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"
         }
       }
     },
@@ -1740,6 +2122,10 @@
           "$ref": "#/definitions/Scalar"
         }
       }
+    },
+    "ArticleTrackingMode": {
+      "type": "integer",
+      "description": "Determines how the stock of an Article is tracked."
     },
     "ArticleType": {
       "type": "integer",
@@ -2009,6 +2395,7 @@
     },
     "ItemContainerInventoryDto": {
       "type": "object",
+      "description": "Represents the inventory of a single article contained in a container.",
       "required": [
         "articleGuid",
         "totalCount"
@@ -2016,11 +2403,13 @@
       "properties": {
         "articleGuid": {
           "type": "string",
+          "description": "The article the quantity belongs to.",
           "format": "uuid"
         },
         "totalCount": {
-          "format": "int32",
-          "pattern": "^-?(?:0|[1-9]\\d*)$"
+          "description": "The total quantity of the article in the container. For entity-tracked\r\narticles this is a whole number of items; for event-tracked articles it is\r\nthe net quantity derived from movement events (received minus dispatched) and\r\nmay be fractional.",
+          "format": "double",
+          "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"
         }
       }
     },
@@ -2084,6 +2473,126 @@
         }
       }
     },
+    "ItemEventCreateDto": {
+      "type": "object",
+      "description": "Describes a new item event to record against an event-tracked article.",
+      "required": [
+        "eventType",
+        "articleGuid",
+        "quantity"
+      ],
+      "properties": {
+        "eventType": {
+          "$ref": "#/definitions/ItemEventType"
+        },
+        "articleGuid": {
+          "type": "string",
+          "description": "The unique identifier of the event-tracked article the event concerns.",
+          "format": "uuid"
+        },
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "fromItemContainerGuid": {
+          "type": "string",
+          "description": "For a movement, the origin container, or `null` for a receipt\r\nfrom outside any container.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "toItemContainerGuid": {
+          "type": "string",
+          "description": "For a movement, the destination container, or `null` for a\r\ndispatch to outside any container.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "itemContainerGuid": {
+          "type": "string",
+          "description": "For a creation or deletion, the container the quantity was created in or\r\ndeleted from, or `null` when outside any container.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "occuredAt": {
+          "type": "string",
+          "description": "The instant, in UTC, at which the event occurred. When\r\n`null`, the server records the current instant.",
+          "format": "date-time",
+          "x-nullable": true
+        }
+      }
+    },
+    "ItemEventDto": {
+      "type": "object",
+      "description": "Represents a data transfer object for an item event recorded against an\r\nevent-tracked article.",
+      "required": [
+        "guid",
+        "articleGuid",
+        "eventType",
+        "occuredAt",
+        "moviment",
+        "lifecycle"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "description": "The unique identifier of the item event.",
+          "format": "uuid"
+        },
+        "articleGuid": {
+          "type": "string",
+          "description": "The unique identifier of the event-tracked article the event concerns.",
+          "format": "uuid"
+        },
+        "eventType": {
+          "$ref": "#/definitions/ItemEventType"
+        },
+        "occuredAt": {
+          "type": "string",
+          "description": "The instant, in UTC, at which the event occurred.",
+          "format": "date-time"
+        },
+        "moviment": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        },
+        "lifecycle": {
+          "allOf": [
+            {
+              "x-nullable": true
+            }
+          ]
+        }
+      }
+    },
+    "ItemEventType": {
+      "type": "integer",
+      "description": "Identifies the kind of event recorded against an event-tracked article."
+    },
+    "ItemLifecycleEventDto": {
+      "type": "object",
+      "description": "Represents the creation/deletion payload of an item event.",
+      "required": [
+        "quantity",
+        "itemContainerGuid",
+        "noContainer"
+      ],
+      "properties": {
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "itemContainerGuid": {
+          "type": "string",
+          "description": "The container the quantity was created in or deleted from, or\r\n`null` when outside any container, or when the container has\r\nsince been deleted.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "noContainer": {
+          "type": "boolean",
+          "description": "Whether the event originally had no container."
+        }
+      }
+    },
     "ItemMovimentDto": {
       "type": "object",
       "required": [
@@ -2099,6 +2608,42 @@
         "occurredAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "ItemMovimentEventDto": {
+      "type": "object",
+      "description": "Represents the movement payload of an item event.",
+      "required": [
+        "quantity",
+        "fromItemContainerGuid",
+        "fromNoContainer",
+        "toItemContainerGuid",
+        "toNoContainer"
+      ],
+      "properties": {
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "fromItemContainerGuid": {
+          "type": "string",
+          "description": "The origin container, or `null` when the movement originated\r\noutside any container, or when the origin container has since been deleted.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "fromNoContainer": {
+          "type": "boolean",
+          "description": "Whether the movement originally had no origin container."
+        },
+        "toItemContainerGuid": {
+          "type": "string",
+          "description": "The destination container, or `null` when the movement left\r\nthe quantity outside any container, or when the destination container has\r\nsince been deleted.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "toNoContainer": {
+          "type": "boolean",
+          "description": "Whether the movement originally had no destination container."
         }
       }
     },
@@ -2307,6 +2852,53 @@
         }
       }
     },
+    "PagedResultOfItemEventDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/ItemEventDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
     "PagedResultOfPartitionDto": {
       "type": "object",
       "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
@@ -2322,6 +2914,53 @@
           "description": "The items on the current page.",
           "items": {
             "$ref": "#/definitions/PartitionDto"
+          }
+        },
+        "totalCount": {
+          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "The 1-based index of the current page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "description": "The maximum number of items per page.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page after the current one exists."
+        },
+        "hasPreviousPage": {
+          "type": "boolean",
+          "description": "Gets a value indicating whether a page before the current one exists."
+        }
+      }
+    },
+    "PagedResultOfServiceAccountDto": {
+      "type": "object",
+      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The items on the current page.",
+          "items": {
+            "$ref": "#/definitions/ServiceAccountDto"
           }
         },
         "totalCount": {
@@ -2531,6 +3170,186 @@
           "type": "number"
         }
       ]
+    },
+    "ServiceAccountCreatedDto": {
+      "type": "object",
+      "description": "Result of creating (or rotating the secret of) a service account. The\r\nplaintext string ServiceAccountCreatedDto.ClientSecret is returned exactly once and is never\r\nretrievable again.",
+      "required": [
+        "guid",
+        "clientId",
+        "clientSecret"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "clientId": {
+          "type": "string"
+        },
+        "clientSecret": {
+          "type": "string"
+        }
+      }
+    },
+    "ServiceAccountCreateDto": {
+      "type": "object",
+      "description": "Data required to create a service account.",
+      "required": [
+        "clientId"
+      ],
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "description": "The unique client identifier."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional human-readable description.",
+          "x-nullable": true
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether the account is active on creation. Defaults to true.",
+          "default": true
+        },
+        "permissionsToAdd": {
+          "type": "array",
+          "description": "Permissions to grant on creation.",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToAdd": {
+          "type": "array",
+          "description": "Partition accesses to grant on creation.",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "ServiceAccountDto": {
+      "type": "object",
+      "description": "Read model for a service account. Never exposes the secret.",
+      "required": [
+        "guid",
+        "clientId",
+        "description",
+        "isActive",
+        "permissions",
+        "partitionAccessGuids"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "clientId": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "isActive": {
+          "type": "boolean"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          }
+        },
+        "partitionAccessGuids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    "ServiceAccountUpdateDto": {
+      "type": "object",
+      "description": "Mutable service-account state to apply in an update.",
+      "properties": {
+        "description": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "isActive": {
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "permissionsToAdd": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "permissionsToRemove": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "ServiceTokenRequestDto": {
+      "type": "object",
+      "description": "Request body for the service-account client-credentials token endpoint.",
+      "required": [
+        "clientId",
+        "clientSecret"
+      ],
+      "properties": {
+        "clientId": {
+          "type": "string"
+        },
+        "clientSecret": {
+          "type": "string"
+        }
+      }
+    },
+    "ServiceTokenResultDto": {
+      "type": "object",
+      "description": "Result of a successful service-account (client-credentials) authentication.",
+      "required": [
+        "accessToken",
+        "expiresAt"
+      ],
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "description": "The generated access token used to authenticate API requests."
+        },
+        "expiresAt": {
+          "type": "string",
+          "description": "The date and time when the access token expires.",
+          "format": "date-time"
+        }
+      }
     },
     "Token": {
       "type": "string",
@@ -3043,6 +3862,9 @@
       "name": "Items"
     },
     {
+      "name": "ItemEvents"
+    },
+    {
       "name": "Users"
     },
     {
@@ -3056,6 +3878,9 @@
     },
     {
       "name": "AuditLogs"
+    },
+    {
+      "name": "ServiceAccounts"
     }
   ]
 }

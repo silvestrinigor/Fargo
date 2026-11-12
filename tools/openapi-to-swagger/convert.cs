@@ -6,7 +6,7 @@
 // Usage:
 //   dotnet run tools/openapi-to-swagger/convert.cs -- <input-openapi.json> <output.swagger.json>
 //
-// Run it after regenerating src/server/Fargo.ServiceHttp/Fargo.ServiceHttp.json
+// Run it after regenerating src/Fargo.ServiceHttp/Fargo.ServiceHttp.json
 // to refresh docs/web-api/reference/fargo.swagger.json.
 
 using Microsoft.OpenApi;
@@ -45,7 +45,7 @@ if (diagnostic?.Errors is { Count: > 0 })
 await using var streamWriter = new StreamWriter(outputPath);
 var writer = new OpenApiJsonWriter(streamWriter);
 
-document.SerializeAsV2(writer);
+document?.SerializeAsV2(writer);
 
 Console.WriteLine($"Converted '{inputPath}' to Swagger 2.0 at '{outputPath}'.");
 

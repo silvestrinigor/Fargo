@@ -1,0 +1,83 @@
+using Fargo.Application.Common.Paging;
+using Fargo.Core.Common;
+using Fargo.Core.Entities.Partitions;
+using Fargo.Core.Informations;
+using Fargo.Infrastructure.Persistence;
+using Fargo.Infrastructure.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
+
+namespace Fargo.Infrastructure.Tests.Repositories;
+
+public class PartitionRepositoryTests
+{
+    private static FargoDbContext NewContext()
+    {
+        var options = new DbContextOptionsBuilder<FargoDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+        return new FargoDbContext(options);
+    }
+
+    /// <summary>
+    /// Regression: the global (root) partition must be returned when the actor
+    /// has direct access to it. Previously the repository filter only matched
+    /// partitions whose parent was in the access set and excluded roots, so the
+    /// global partition was never listed even for an admin that could access it.
+    /// </summary>
+    [Fact(Skip = "Ordered list paging over a TPT hierarchy is not supported by the EF Core InMemory provider (throws 'At least one object must implement IComparable' while shaping the base/derived join). Covered by the PostgreSQL integration checks instead.")]
+    public async Task GetManyInfo_WhenAccessSetContainsGlobalPartition_ReturnsGlobalPartition()
+    {
+        await using var context = NewContext();
+
+        var global = Partition.CreateGlobalPartition(Name.FromString("Global"));
+        var child = Partition.CreatePartition(Name.FromString("Child"), global);
+
+        context.Partitions.AddRange(global, child);
+        await context.SaveChangesAsync();
+
+        var repository = new PartitionRepository(context);
+
+        // Actor has direct access to the global partition only.
+        var accessGuids = new[] { FargoCoreWellKnowGuids.GlobalPartitionGuid };
+
+        var result = await repository.GetManyInfo(
+            new Pagination(new Page(1), new Limit(50)),
+            accessGuids);
+
+        var guids = result.Items.Select(p => p.Guid).ToList();
+
+        Assert.Contains(FargoCoreWellKnowGuids.GlobalPartitionGuid, guids);
+        // The child of an accessible partition is still returned.
+        Assert.Contains(child.Guid, guids);
+    }
+
+    [Fact(Skip = "Ordered list paging over a TPT hierarchy is not supported by the EF Core InMemory provider (throws 'At least one object must implement IComparable' while shaping the base/derived join). Covered by the PostgreSQL integration checks instead.")]
+    public async Task GetManyInfo_WhenAccessSetContainsChildPartition_ReturnsThatPartitionAndItsChildren()
+    {
+        await using var context = NewContext();
+
+        var global = Partition.CreateGlobalPartition(Name.FromString("Global"));
+        var branch = Partition.CreatePartition(Name.FromString("Branch"), global);
+        var leaf = Partition.CreatePartition(Name.FromString("Leaf"), branch);
+        var other = Partition.CreatePartition(Name.FromString("Other"), global);
+
+        context.Partitions.AddRange(global, branch, leaf, other);
+        await context.SaveChangesAsync();
+
+        var repository = new PartitionRepository(context);
+
+        var accessGuids = new[] { branch.Guid };
+
+        var result = await repository.GetManyInfo(
+            new Pagination(new Page(1), new Limit(50)),
+            accessGuids);
+
+        var guids = result.Items.Select(p => p.Guid).ToList();
+
+        Assert.Contains(branch.Guid, guids);   // direct access
+        Assert.Contains(leaf.Guid, guids);     // child of accessible
+        Assert.DoesNotContain(global.Guid, guids);
+        Assert.DoesNotContain(other.Guid, guids);
+    }
+}
