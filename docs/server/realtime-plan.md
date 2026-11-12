@@ -23,7 +23,7 @@ it is built on its own rather than bundled with the query features.
 
 ### Transport
 - Add the `Microsoft.AspNetCore.SignalR` server package and a `FargoHub : Hub`
-  under `src/server/Fargo.ServiceHttp/RealTime/`. Map it at `/hubs/fargo`.
+  under `src/Fargo.ServiceHttp/RealTime/`. Map it at `/hubs/fargo`.
 - Require authentication on the hub (`[Authorize]`) and reuse the existing JWT
   bearer scheme. Browsers cannot set `Authorization` headers on the WebSocket
   handshake, so configure `JwtBearerOptions.Events.OnMessageReceived` to read the

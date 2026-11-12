@@ -8,4 +8,4 @@ Use the table of contents to browse namespaces and types.
 
 > [!TIP]
 > Looking for the HTTP endpoints instead? See the
-> [Web API Reference](~/docs/web-api/reference/fargo.swagger.json).
+> [Web API Reference](~/web-api/reference/fargo.swagger.json).

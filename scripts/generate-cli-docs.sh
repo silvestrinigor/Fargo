@@ -6,11 +6,11 @@
 # For each command group it writes docs/cli/reference/<group>.md containing the
 # group's help and each subcommand's help, plus a reference/toc.yml.
 #
-# Run it before `docfx docfx.json`. The docs CI workflow runs it automatically.
+# Run it before `docfx docs/docfx.json`. The docs CI workflow runs it automatically.
 
 set -e
 
-CLI_PROJECT="src/client/Fargo.Cli/Fargo.Cli.csproj"
+CLI_PROJECT="src/Fargo.Cli/Fargo.Cli.csproj"
 BUILD_DIR="$(pwd)/artifacts/cli-docs"
 CLI_DLL="$BUILD_DIR/fargo.dll"
 REFERENCE_DIR="docs/cli/reference"

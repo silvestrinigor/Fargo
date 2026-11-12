@@ -6,7 +6,7 @@
 // Usage:
 //   dotnet run tools/openapi-to-swagger/convert.cs -- <input-openapi.json> <output.swagger.json>
 //
-// Run it after regenerating src/server/Fargo.ServiceHttp/Fargo.ServiceHttp.json
+// Run it after regenerating src/Fargo.ServiceHttp/Fargo.ServiceHttp.json
 // to refresh docs/web-api/reference/fargo.swagger.json.
 
 using Microsoft.OpenApi;

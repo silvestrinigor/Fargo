@@ -7,15 +7,15 @@
 #      (via the OpenApiGenerateDocuments MSBuild setting).
 #   2. Converts that document to Swagger 2.0 for DocFX.
 #
-# Run it before `docfx docfx.json`. The docs CI workflow runs it automatically.
+# Run it before `docfx docs/docfx.json`. The docs CI workflow runs it automatically.
 
 set -e
 
-OPENAPI_JSON="src/server/Fargo.ServiceHttp/Fargo.ServiceHttp.json"
+OPENAPI_JSON="src/Fargo.ServiceHttp/Fargo.ServiceHttp.json"
 SWAGGER_JSON="docs/web-api/reference/fargo.swagger.json"
 
 echo "Generating OpenAPI document from the HTTP API project..."
-dotnet build src/server/Fargo.ServiceHttp/Fargo.ServiceHttp.csproj \
+dotnet build src/Fargo.ServiceHttp/Fargo.ServiceHttp.csproj \
     -c Release \
     --nologo
 

@@ -107,7 +107,7 @@ fargo article list --verbose
 ## Running the Application
 
 ```bash
-dotnet run --project src/server/Fargo.AppHost
+dotnet run --project src/Fargo.AppHost
 ```
 
 ## Running Tests

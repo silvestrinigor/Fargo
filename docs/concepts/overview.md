@@ -7,7 +7,7 @@ see what, how items live inside containers, and how audit logs are scoped — st
 here.
 
 For implementation detail (types, interfaces, database schema), see the
-[Server](~/docs/server/overview.md) section and the
+[Server](~/server/overview.md) section and the
 [.NET API Reference](~/api/index.md).
 
 ## The mental model

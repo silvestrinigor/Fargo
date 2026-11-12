@@ -92,4 +92,4 @@ timeouts, circuit breaker) and service discovery by default.
 - **Response compression** (`AddResponseCompression` / `UseResponseCompression`).
 - **HTTPS redirection**, and **HSTS** outside development.
 - **OpenAPI** document generation; the document is mapped at `/openapi` in
-  development and is the source of the [Web API Reference](~/docs/web-api/reference/fargo.swagger.json).
+  development and is the source of the [Web API Reference](~/web-api/reference/fargo.swagger.json).

@@ -1,7 +1,7 @@
 # CLI Overview
 
 `fargo` is the command-line client for the Fargo inventory API. It wraps the
-[Web API](~/docs/web-api/overview.md) with a convenient terminal interface,
+[Web API](~/web-api/overview.md) with a convenient terminal interface,
 stores your session token, and targets a configurable server.
 
 For the full, generated list of commands and options, see the
@@ -12,7 +12,7 @@ For the full, generated list of commands and options, see the
 The CLI is the `Fargo.Cli` project:
 
 ```bash
-dotnet run --project src/client/Fargo.Cli -- <command> [options]
+dotnet run --project src/Fargo.Cli -- <command> [options]
 ```
 
 In the examples throughout these docs the client is referred to as `fargo`

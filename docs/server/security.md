@@ -30,7 +30,7 @@ The identity endpoints (`/identity`) implement the standard flow:
 4. **Change password** — updates the password; a user may be required to change
    their password before continuing.
 
-See the [Web API Overview](~/docs/web-api/overview.md#authentication) for the
+See the [Web API Overview](~/web-api/overview.md#authentication) for the
 HTTP-level details.
 
 ### Service accounts

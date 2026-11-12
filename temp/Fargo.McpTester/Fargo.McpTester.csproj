@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\client\Fargo.ClientHttp\Fargo.ClientHttp.csproj" />
+    <ProjectReference Include="..\..\src\Fargo.ClientHttp\Fargo.ClientHttp.csproj" />
   </ItemGroup>
 
 </Project>

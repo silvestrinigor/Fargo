@@ -20,7 +20,7 @@
 
 set -euo pipefail
 
-CLI_PROJECT="src/client/Fargo.Cli/Fargo.Cli.csproj"
+CLI_PROJECT="src/Fargo.Cli/Fargo.Cli.csproj"
 RIDS=("win-x64" "linux-x64")
 
 RELEASE_DIR="artifacts/release"

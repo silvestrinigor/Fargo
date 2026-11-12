@@ -14,7 +14,7 @@ This guide walks through running Fargo locally.
 From the repository root:
 
 ```bash
-dotnet run --project src/server/Fargo.AppHost
+dotnet run --project src/Fargo.AppHost
 ```
 
 The Aspire AppHost starts the services in order:

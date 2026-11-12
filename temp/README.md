@@ -21,7 +21,7 @@ tab (circuit) and sends your current access token on every MCP request.
 
    ```powershell
    $env:FARGO_SERVER = "http://localhost:5534"   # your Fargo API
-   dotnet run --project src/client/Fargo.Mcp -- --transport http
+   dotnet run --project src/Fargo.Mcp -- --transport http
    ```
 
 3. Give the tester an LLM token (GitHub personal access token with the

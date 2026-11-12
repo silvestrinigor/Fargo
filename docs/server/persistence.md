@@ -79,8 +79,8 @@ From the repository root, after changing the model or an entity configuration:
 
 ```bash
 dotnet ef migrations add <MigrationName> \
-  --project src/server/Fargo.Infrastructure \
-  --startup-project src/server/Fargo.Infrastructure
+  --project src/Fargo.Infrastructure \
+  --startup-project src/Fargo.Infrastructure
 ```
 
 Column and table names follow the snake_case convention automatically. Review

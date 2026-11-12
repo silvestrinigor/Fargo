@@ -45,7 +45,7 @@ verify configuration:
 $env:FARGO_SERVER = "https://localhost:7563"
 $env:FARGO_USERNAME = "admin"
 $env:FARGO_PASSWORD = "<password>"
-dotnet run --project src/client/Fargo.Mcp
+dotnet run --project src/Fargo.Mcp
 ```
 
 ```bash
@@ -53,7 +53,7 @@ dotnet run --project src/client/Fargo.Mcp
 export FARGO_SERVER="https://localhost:7563"
 export FARGO_USERNAME="admin"
 export FARGO_PASSWORD="<password>"
-dotnet run --project src/client/Fargo.Mcp
+dotnet run --project src/Fargo.Mcp
 ```
 
 The process waits for MCP messages on stdin. It is designed to be driven by a
@@ -72,7 +72,7 @@ Using `dotnet run` against the project:
   "mcpServers": {
     "fargo": {
       "command": "dotnet",
-      "args": ["run", "--project", "/absolute/path/to/src/client/Fargo.Mcp"],
+      "args": ["run", "--project", "/absolute/path/to/src/Fargo.Mcp"],
       "env": {
         "FARGO_SERVER": "https://localhost:7563",
         "FARGO_USERNAME": "admin",
@@ -87,7 +87,7 @@ Or, after publishing the server to a self-contained executable, point `command`
 at the built binary:
 
 ```bash
-dotnet publish src/client/Fargo.Mcp -c Release -o ./publish/fargo-mcp
+dotnet publish src/Fargo.Mcp -c Release -o ./publish/fargo-mcp
 ```
 
 ```json
@@ -124,7 +124,7 @@ without a bearer token get `401`.
 
 ```powershell
 $env:FARGO_SERVER = "http://localhost:5534"
-dotnet run --project src/client/Fargo.Mcp -- --transport http
+dotnet run --project src/Fargo.Mcp -- --transport http
 ```
 
 The endpoint is `http://localhost:5290/mcp` by default; change it with

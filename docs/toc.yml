@@ -82,3 +82,5 @@
       href: mcp/overview.md
     - name: Getting Started
       href: mcp/getting-started.md
+- name: API
+  href: api/
