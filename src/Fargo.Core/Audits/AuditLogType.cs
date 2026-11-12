@@ -34,4 +34,6 @@ public enum AuditLogType
     SupplyOrderCancelled = 14,
 
     SupplyOrderClosed = 15,
+
+    PermissionsChanged = 16,
 }

@@ -54,22 +54,6 @@ namespace Fargo.ClientHttp.Models
 #else
         public List<Guid?> PartitionsToRemove { get; set; }
 #endif
-        /// <summary>The permissionsToAdd property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<int?>? PermissionsToAdd { get; set; }
-#nullable restore
-#else
-        public List<int?> PermissionsToAdd { get; set; }
-#endif
-        /// <summary>The permissionsToRemove property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<int?>? PermissionsToRemove { get; set; }
-#nullable restore
-#else
-        public List<int?> PermissionsToRemove { get; set; }
-#endif
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ServiceAccountUpdateDto"/> and sets the default values.
         /// </summary>
@@ -100,8 +84,6 @@ namespace Fargo.ClientHttp.Models
                 { "partitionAccessesToRemove", n => { PartitionAccessesToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionsToRemove", n => { PartitionsToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "permissionsToAdd", n => { PermissionsToAdd = n.GetCollectionOfPrimitiveValues<int?>()?.AsList(); } },
-                { "permissionsToRemove", n => { PermissionsToRemove = n.GetCollectionOfPrimitiveValues<int?>()?.AsList(); } },
             };
         }
         /// <summary>
@@ -116,8 +98,6 @@ namespace Fargo.ClientHttp.Models
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToRemove", PartitionAccessesToRemove);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToRemove", PartitionsToRemove);
-            writer.WriteCollectionOfPrimitiveValues<int?>("permissionsToAdd", PermissionsToAdd);
-            writer.WriteCollectionOfPrimitiveValues<int?>("permissionsToRemove", PermissionsToRemove);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

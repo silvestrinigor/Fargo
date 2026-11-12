@@ -25,6 +25,8 @@ public static class UserGroupEndpointRouteBuilderExtension
 
         group.MapSetUserGroupActive();
 
+        group.MapSetUserGroupPermissions();
+
         group.MapDeleteUserGroup();
     }
 
@@ -115,7 +117,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         builder.MapPost("/", CreateUserGroup)
             .WithName("CreateUserGroup")
             .WithSummary("Creates a new user group")
-            .WithDescription("Creates a new user group with optional partitions and permissions. Returns the generated identifier.")
+            .WithDescription("Creates a new user group with optional partitions and permissions. Returns the generated identifier. Granting permissions requires the ChangeUserGroupPermissions permission.")
             .Produces<Guid>(StatusCodes.Status200OK);
 
         return builder;
@@ -140,7 +142,7 @@ public static class UserGroupEndpointRouteBuilderExtension
         builder.MapPut("/{userGroupGuid:guid}", UpdateUserGroup)
             .WithName("UpdateUserGroup")
             .WithSummary("Replaces an existing user group")
-            .WithDescription("Replaces all user group state including partitions and permissions.")
+            .WithDescription("Updates user group state: name, description, parent group and partitions. Use the is-active and permissions endpoints to change those.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -185,6 +187,32 @@ public static class UserGroupEndpointRouteBuilderExtension
     }
 
     #endregion Set active
+    #region Set permissions
+
+    private static IEndpointRouteBuilder MapSetUserGroupPermissions(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{userGroupGuid:guid}/permissions", SetPermissions)
+            .WithName("SetUserGroupPermissions")
+            .WithSummary("Grants and revokes permissions of a user group")
+            .WithDescription("Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. Requires the ChangeUserGroupPermissions permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetPermissions(
+        Guid userGroupGuid,
+        PermissionsChangeDto request,
+        ICommandHandler<UserGroupSetPermissionsCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new UserGroupSetPermissionsCommand(userGroupGuid, request), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set permissions
     #region Delete
 
     private static IEndpointRouteBuilder MapDeleteUserGroup(this IEndpointRouteBuilder builder)

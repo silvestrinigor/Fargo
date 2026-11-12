@@ -87,26 +87,6 @@ public sealed class UserUpdateCommandHandler(
             }
         }
 
-        if (command.Update.PermissionsToAdd is { Count: > 0 } permissionsToAdd)
-        {
-            foreach (var permission in permissionsToAdd.Distinct())
-            {
-                actor.ThrowIfPermissionDenied(permission);
-
-                user.Actor.AddPermission(permission);
-            }
-        }
-
-        if (command.Update.PermissionsToRemove is { Count: > 0 } permissionsToRemove)
-        {
-            foreach (var permission in permissionsToRemove.Distinct())
-            {
-                actor.ThrowIfPermissionDenied(permission);
-
-                user.Actor.RemovePermission(permission);
-            }
-        }
-
         if (command.Update.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
         {
             foreach (var partitionGuid in partitionsToAdd.Distinct())

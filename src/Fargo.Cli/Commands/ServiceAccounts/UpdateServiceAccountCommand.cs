@@ -17,7 +17,6 @@ public sealed class UpdateServiceAccountCommand : Command
 
             Examples:
               fargo service-account update 00000000-0000-0000-0000-000000000010 --description "CI runner"
-              fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
               fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
             """)
     {
@@ -29,18 +28,6 @@ public sealed class UpdateServiceAccountCommand : Command
         var descriptionOption = new Option<string?>("--description")
         {
             Description = "New description."
-        };
-
-        var addPermissionsOption = new Option<int[]?>("--add-permissions")
-        {
-            Description = "ActionType permission codes to grant (space-separated).",
-            AllowMultipleArgumentsPerToken = true
-        };
-
-        var removePermissionsOption = new Option<int[]?>("--remove-permissions")
-        {
-            Description = "ActionType permission codes to revoke (space-separated).",
-            AllowMultipleArgumentsPerToken = true
         };
 
         var addPartitionMembershipsOption = new Option<Guid[]?>("--add-partition-memberships")
@@ -69,8 +56,6 @@ public sealed class UpdateServiceAccountCommand : Command
 
         Add(guidArgument);
         Add(descriptionOption);
-        Add(addPermissionsOption);
-        Add(removePermissionsOption);
         Add(addPartitionMembershipsOption);
         Add(removePartitionMembershipsOption);
         Add(addPartitionAccessesOption);
@@ -83,8 +68,6 @@ public sealed class UpdateServiceAccountCommand : Command
             var dto = new ServiceAccountUpdateDto
             {
                 Description = parseResult.GetValue(descriptionOption),
-                PermissionsToAdd = ToIntList(parseResult.GetValue(addPermissionsOption)),
-                PermissionsToRemove = ToIntList(parseResult.GetValue(removePermissionsOption)),
                 PartitionsToAdd = ToGuidList(parseResult.GetValue(addPartitionMembershipsOption)),
                 PartitionsToRemove = ToGuidList(parseResult.GetValue(removePartitionMembershipsOption)),
                 PartitionAccessesToAdd = ToGuidList(parseResult.GetValue(addPartitionAccessesOption)),
@@ -98,9 +81,6 @@ public sealed class UpdateServiceAccountCommand : Command
             return 0;
         });
     }
-
-    private static List<int?>? ToIntList(int[]? values)
-        => values is { Length: > 0 } ? values.Select(v => (int?)v).ToList() : null;
 
     private static List<Guid?>? ToGuidList(Guid[]? values)
         => values is { Length: > 0 } ? values.Select(v => (Guid?)v).ToList() : null;

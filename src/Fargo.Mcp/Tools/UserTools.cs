@@ -85,7 +85,7 @@ public static class UserTools
         [Description("Last name of the user.")] string? lastName = null,
         [Description("Description of the user.")] string? description = null,
         [Description("Whether the user is active. Defaults to the server default (active).")] bool? isActive = null,
-        [Description("Permissions to grant the user directly. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
+        [Description("Permissions to grant the user directly; requires the ChangeUserPermissions permission. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
         [Description("GUIDs of the partitions the user belongs to (its membership).")] Guid[]? partitionsToAdd = null,
         [Description("GUIDs of the user groups to add the user to.")] Guid[]? userGroupsToAdd = null,
         [Description("GUIDs of the partitions the user is granted access to.")] Guid[]? partitionAccessesToAdd = null,
@@ -133,8 +133,6 @@ public static class UserTools
         [Description("A new password to set for the user.")] string? password = null,
         [Description("The new default password validity as an ISO-8601 duration, e.g. 'P90D'.")] string? defaultPasswordExpirationPeriod = null,
         [Description("Set true to clear the default password expiration period.")] bool? removeDefaultPasswordExpirationPeriod = null,
-        [Description("Permissions to grant. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
-        [Description("Permissions to revoke (same codes as permissionsToAdd).")] int[]? permissionsToRemove = null,
         [Description("GUIDs of partitions to add to the user's membership.")] Guid[]? partitionsToAdd = null,
         [Description("GUIDs of partitions to remove from the user's membership.")] Guid[]? partitionsToRemove = null,
         [Description("GUIDs of user groups to add the user to.")] Guid[]? userGroupsToAdd = null,
@@ -151,8 +149,6 @@ public static class UserTools
             FirstName = firstName,
             LastName = lastName,
             Description = description,
-            PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
-            PermissionsToRemove = ToolInput.ToIntList(permissionsToRemove),
             PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
             PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove),
             UserGroupsToAdd = ToolInput.ToGuidList(userGroupsToAdd),
@@ -178,6 +174,29 @@ public static class UserTools
         await client.V1.Users[userGuid].PutAsync(body, cancellationToken: cancellationToken);
 
         return $"User '{userGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_users_set_permissions")]
+    [Description("Grant and revoke permissions of a user in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. The caller cannot change its own permissions. Requires the ChangeUserPermissions permission, which is separate from the permission to update.")]
+    public static async Task<string> SetUserPermissionsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the user.")] Guid userGuid,
+        [Description("Permissions to grant. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
+        [Description("Permissions to revoke (same codes as permissionsToAdd).")] int[]? permissionsToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new PermissionsChangeDto
+        {
+            PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
+            PermissionsToRemove = ToolInput.ToIntList(permissionsToRemove)
+        };
+
+        await client.V1.Users[userGuid].Permissions.PutAsync(body, cancellationToken: cancellationToken);
+
+        return $"User '{userGuid}' permissions updated.";
     }
 
     [McpServerTool(Name = "fargo_users_set_active")]

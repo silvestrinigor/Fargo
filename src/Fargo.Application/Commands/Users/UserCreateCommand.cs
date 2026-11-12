@@ -74,6 +74,8 @@ public sealed class UserCreateCommandHandler(
 
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserPermissions);
+
             var requestedActions = permissions.Distinct();
 
             foreach (var action in requestedActions)

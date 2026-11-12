@@ -65,7 +65,7 @@ public static class ServiceAccountTools
         [Description("Unique client identifier (nameid format) of the service account.")] string clientId,
         [Description("Optional human-readable description.")] string? description = null,
         [Description("Whether the account is active. Defaults to true.")] bool isActive = true,
-        [Description("Permissions to grant. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
+        [Description("Permissions to grant; requires the ChangeServiceAccountPermissions permission. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
         [Description("GUIDs of the partitions the account belongs to (its membership / scope).")] Guid[]? partitionsToAdd = null,
         [Description("GUIDs of the partitions the account is granted access to.")] Guid[]? partitionAccessesToAdd = null,
         CancellationToken cancellationToken = default)
@@ -95,8 +95,6 @@ public static class ServiceAccountTools
         FargoAuthenticator authenticator,
         [Description("The GUID of the service account to update.")] Guid serviceAccountGuid,
         [Description("The new description.")] string? description = null,
-        [Description("Permissions to grant. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
-        [Description("Permissions to revoke (same codes as permissionsToAdd).")] int[]? permissionsToRemove = null,
         [Description("GUIDs of partitions to add to the account's membership.")] Guid[]? partitionsToAdd = null,
         [Description("GUIDs of partitions to remove from the account's membership.")] Guid[]? partitionsToRemove = null,
         [Description("GUIDs of partitions to grant the account access to.")] Guid[]? partitionAccessesToAdd = null,
@@ -108,8 +106,6 @@ public static class ServiceAccountTools
         var body = new ServiceAccountUpdateDto
         {
             Description = description,
-            PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
-            PermissionsToRemove = ToolInput.ToIntList(permissionsToRemove),
             PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
             PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove),
             PartitionAccessesToAdd = ToolInput.ToGuidList(partitionAccessesToAdd),
@@ -119,6 +115,29 @@ public static class ServiceAccountTools
         await client.V1.ServiceAccounts[serviceAccountGuid].PutAsync(body, cancellationToken: cancellationToken);
 
         return $"Service account '{serviceAccountGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_serviceaccounts_set_permissions")]
+    [Description("Grant and revoke permissions of a service account in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. The caller cannot change its own permissions. Requires the ChangeServiceAccountPermissions permission, which is separate from the permission to update.")]
+    public static async Task<string> SetServiceAccountPermissionsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the service account.")] Guid serviceAccountGuid,
+        [Description("Permissions to grant. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
+        [Description("Permissions to revoke (same codes as permissionsToAdd).")] int[]? permissionsToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new PermissionsChangeDto
+        {
+            PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
+            PermissionsToRemove = ToolInput.ToIntList(permissionsToRemove)
+        };
+
+        await client.V1.ServiceAccounts[serviceAccountGuid].Permissions.PutAsync(body, cancellationToken: cancellationToken);
+
+        return $"Service account '{serviceAccountGuid}' permissions updated.";
     }
 
     [McpServerTool(Name = "fargo_serviceaccounts_set_active")]

@@ -119,4 +119,38 @@ public class UserCreateCommandHandlerTests
         await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
             () => CreateHandler().HandleAsync(command));
     }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithoutChangeUserPermissions_ShouldThrowPermissionDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid, [ActionType.CreateUser, ActionType.CreateItem]);
+        userRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+
+        var command = new UserCreateCommand(
+            new UserCreateDto(new Nameid("newuser"), PermissionsToAdd: [ActionType.CreateItem]));
+
+        await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+
+        userRepository.DidNotReceive().Add(Arg.Any<User>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithChangeUserPermissions_ShouldGrantThem()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid,
+            [ActionType.CreateUser, ActionType.ChangeUserPermissions, ActionType.CreateItem]);
+        userRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+
+        var command = new UserCreateCommand(
+            new UserCreateDto(new Nameid("newuser"), PermissionsToAdd: [ActionType.CreateItem]));
+
+        await CreateHandler().HandleAsync(command);
+
+        userRepository.Received(1).Add(Arg.Is<User>(u => u.Actor.Permissions.Contains(ActionType.CreateItem)));
+    }
 }

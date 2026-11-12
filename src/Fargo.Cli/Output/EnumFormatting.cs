@@ -32,6 +32,18 @@ public enum AuditLogType
     EntityUpdated = 2,
     EntityDeleted = 3,
     ItemEventRecorded = 4,
+    Authenticated = 5,
+    LoggedOut = 6,
+    TokenRefreshed = 7,
+    ServiceTokenIssued = 8,
+    PasswordChanged = 9,
+    ServiceAccountSecretRotated = 10,
+    SystemInitialized = 11,
+    SupplyOrderPlaced = 12,
+    SupplyOrderReceived = 13,
+    SupplyOrderCancelled = 14,
+    SupplyOrderClosed = 15,
+    PermissionsChanged = 16,
 }
 
 /// <summary>
@@ -87,6 +99,9 @@ public enum ActionType
     ActivateUserGroup = 32,
     ActivateServiceAccount = 33,
     MoveItem = 34,
+    ChangeUserPermissions = 35,
+    ChangeUserGroupPermissions = 36,
+    ChangeServiceAccountPermissions = 37,
 }
 
 /// <summary>

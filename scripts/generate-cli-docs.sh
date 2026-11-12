@@ -23,9 +23,9 @@ CLI_GROUPS=(
     "article|Article|list tree get get-by-barcode inventory create update update-by-barcode delete delete-by-barcode"
     "item|Item|list get create update move remove-from-container delete location moviments inventory"
     "partition|Partition|list tree get create update delete"
-    "user-group|User Group|list tree get create update set-active delete"
-    "user|User|list get create update set-active delete"
-    "service-account|Service Account|list get create update set-active rotate-secret delete"
+    "user-group|User Group|list tree get create update set-active set-permissions delete"
+    "user|User|list get create update set-active set-permissions delete"
+    "service-account|Service Account|list get create update set-active set-permissions rotate-secret delete"
     "audit|Audit|list get"
     "realtime|Realtime|watch"
 )

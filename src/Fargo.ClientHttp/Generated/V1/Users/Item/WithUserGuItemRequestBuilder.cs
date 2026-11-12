@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using Fargo.ClientHttp.Models;
 using Fargo.ClientHttp.V1.Users.Item.IsActive;
+using Fargo.ClientHttp.V1.Users.Item.Permissions;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions.Serialization;
 using Microsoft.Kiota.Abstractions;
@@ -22,6 +23,11 @@ namespace Fargo.ClientHttp.V1.Users.Item
         public global::Fargo.ClientHttp.V1.Users.Item.IsActive.IsActiveRequestBuilder IsActive
         {
             get => new global::Fargo.ClientHttp.V1.Users.Item.IsActive.IsActiveRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The permissions property</summary>
+        public global::Fargo.ClientHttp.V1.Users.Item.Permissions.PermissionsRequestBuilder Permissions
+        {
+            get => new global::Fargo.ClientHttp.V1.Users.Item.Permissions.PermissionsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.V1.Users.Item.WithUserGuItemRequestBuilder"/> and sets the default values.
@@ -75,7 +81,7 @@ namespace Fargo.ClientHttp.V1.Users.Item
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.UserDto>(requestInfo, global::Fargo.ClientHttp.Models.UserDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Replaces all user state including partitions, user groups, and permissions.
+        /// Updates user state: names, description, authentication, partitions and user groups. Use the is-active and permissions endpoints to change those.
         /// </summary>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -131,7 +137,7 @@ namespace Fargo.ClientHttp.V1.Users.Item
             return requestInfo;
         }
         /// <summary>
-        /// Replaces all user state including partitions, user groups, and permissions.
+        /// Updates user state: names, description, authentication, partitions and user groups. Use the is-active and permissions endpoints to change those.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

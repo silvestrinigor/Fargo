@@ -27,6 +27,8 @@ public sealed class ServiceAccountSetActiveCommandHandler(
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.Actor);
 
+        actor.ThrowIfAccessDenied(account.Actor);
+
         if (command.IsActive)
         {
             account.Actor.Activate();

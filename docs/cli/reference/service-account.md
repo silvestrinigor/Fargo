@@ -53,7 +53,6 @@ Commands:
   
                               Examples:
                                 fargo service-account update 00000000-0000-0000-0000-000000000010 --description "CI runner"
-                                fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
                                 fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
   set-active <guid> <active>  Activate or deactivate a service account.
   
@@ -62,6 +61,16 @@ Commands:
                               Examples:
                                 fargo service-account set-active 00000000-0000-0000-0000-000000000010 true
                                 fargo service-account set-active 00000000-0000-0000-0000-000000000010 false
+  set-permissions <guid>      Grant and revoke permissions of a service account.
+  
+                              Permissions are numeric ActionType codes (space-separated). This is a
+                              separate operation from update and requires the ChangeServiceAccountPermissions
+                              permission. You must hold every permission you grant or revoke.
+                              You cannot change your own permissions.
+  
+                              Examples:
+                                fargo service-account set-permissions 00000000-0000-0000-0000-000000000010 --add 4 6
+                                fargo service-account set-permissions 00000000-0000-0000-0000-000000000010 --add 4 --remove 2
   rotate-secret <guid>        Rotate a service account's secret. The new secret is printed EXACTLY
                               ONCE and all tokens previously issued to the account stop validating.
   
@@ -151,7 +160,7 @@ Options:
   --client-id <client-id> (REQUIRED)                       Unique client identifier (nameid format) for the service account.
   --description <description>                              Optional human-readable description.
   --active                                                 Whether the account is active. Defaults to true.
-  --permissions <permissions>                              ActionType permission codes to grant (space-separated).
+  --permissions <permissions>                              ActionType permission codes to grant (space-separated). Requires the ChangeServiceAccountPermissions permission.
   --partition-memberships <partition-memberships>          Partition GUIDs the account belongs to - its partition membership (space-separated).
   --partition-accesses, --partitions <partition-accesses>  Partition GUIDs to grant access to (space-separated). Alias: --partitions.
   --username <username>                                    Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
@@ -174,7 +183,6 @@ Description:
   
   Examples:
     fargo service-account update 00000000-0000-0000-0000-000000000010 --description "CI runner"
-    fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
     fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
 
 Usage:
@@ -185,8 +193,6 @@ Arguments:
 
 Options:
   --description <description>                                                   New description.
-  --add-permissions <add-permissions>                                           ActionType permission codes to grant (space-separated).
-  --remove-permissions <remove-permissions>                                     ActionType permission codes to revoke (space-separated).
   --add-partition-memberships <add-partition-memberships>                       Partition GUIDs to add to the account's membership (space-separated).
   --remove-partition-memberships <remove-partition-memberships>                 Partition GUIDs to remove from the account's membership (space-separated).
   --add-partition-accesses, --add-partitions <add-partition-accesses>           Partition GUIDs to grant access to (space-separated). Alias: --add-partitions.
@@ -219,6 +225,38 @@ Arguments:
   <active>  true to activate, false to deactivate.
 
 Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo service-account set-permissions`
+
+```text
+Description:
+  Grant and revoke permissions of a service account.
+  
+  Permissions are numeric ActionType codes (space-separated). This is a
+  separate operation from update and requires the ChangeServiceAccountPermissions
+  permission. You must hold every permission you grant or revoke.
+  You cannot change your own permissions.
+  
+  Examples:
+    fargo service-account set-permissions 00000000-0000-0000-0000-000000000010 --add 4 6
+    fargo service-account set-permissions 00000000-0000-0000-0000-000000000010 --add 4 --remove 2
+
+Usage:
+  fargo service-account set-permissions <guid> [options]
+
+Arguments:
+  <guid>  The a service account GUID.
+
+Options:
+  --add <add>            ActionType permission codes to grant (space-separated).
+  --remove <remove>      ActionType permission codes to revoke (space-separated).
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information

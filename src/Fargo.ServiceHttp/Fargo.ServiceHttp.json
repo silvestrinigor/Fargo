@@ -838,7 +838,7 @@
           "Users"
         ],
         "summary": "Replaces an existing user",
-        "description": "Replaces all user state including partitions, user groups, and permissions.",
+        "description": "Updates user state: names, description, authentication, partitions and user groups. Use the is-active and permissions endpoints to change those.",
         "operationId": "UpdateUser",
         "parameters": [
           {
@@ -969,7 +969,7 @@
           "Users"
         ],
         "summary": "Creates a new user",
-        "description": "Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier.",
+        "description": "Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier. Granting permissions requires the ChangeUserPermissions permission.",
         "operationId": "CreateUser",
         "requestBody": {
           "content": {
@@ -1035,6 +1035,45 @@
         }
       }
     },
+    "/v1/users/{userGuid}/permissions": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Grants and revokes permissions of a user",
+        "description": "Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. A caller cannot change its own permissions. Requires the ChangeUserPermissions permission, which is separate from the edit permission.",
+        "operationId": "SetUserPermissions",
+        "parameters": [
+          {
+            "name": "userGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/v1/user-groups/{userGroupGuid}": {
       "get": {
         "tags": [
@@ -1075,7 +1114,7 @@
           "UserGroups"
         ],
         "summary": "Replaces an existing user group",
-        "description": "Replaces all user group state including partitions and permissions.",
+        "description": "Updates user group state: name, description, parent group and partitions. Use the is-active and permissions endpoints to change those.",
         "operationId": "UpdateUserGroup",
         "parameters": [
           {
@@ -1206,7 +1245,7 @@
           "UserGroups"
         ],
         "summary": "Creates a new user group",
-        "description": "Creates a new user group with optional partitions and permissions. Returns the generated identifier.",
+        "description": "Creates a new user group with optional partitions and permissions. Returns the generated identifier. Granting permissions requires the ChangeUserGroupPermissions permission.",
         "operationId": "CreateUserGroup",
         "requestBody": {
           "content": {
@@ -1257,6 +1296,45 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ActiveStateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/permissions": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Grants and revokes permissions of a user group",
+        "description": "Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. Requires the ChangeUserGroupPermissions permission, which is separate from the edit permission.",
+        "operationId": "SetUserGroupPermissions",
+        "parameters": [
+          {
+            "name": "userGroupGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionsChangeDto"
               }
             }
           },
@@ -1782,7 +1860,7 @@
           "ServiceAccounts"
         ],
         "summary": "Updates a service account",
-        "description": "Updates mutable service-account state: description, permissions and partition accesses. Use the is-active endpoint to activate or deactivate.",
+        "description": "Updates mutable service-account state: description and partition accesses. Use the is-active endpoint to activate or deactivate.",
         "operationId": "UpdateServiceAccount",
         "parameters": [
           {
@@ -1888,7 +1966,7 @@
           "ServiceAccounts"
         ],
         "summary": "Creates a new service account",
-        "description": "Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated).",
+        "description": "Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated). Granting permissions requires the ChangeServiceAccountPermissions permission.",
         "operationId": "CreateServiceAccount",
         "requestBody": {
           "content": {
@@ -1938,6 +2016,45 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ActiveStateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}/permissions": {
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Grants and revokes permissions of a service account",
+        "description": "Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. A caller cannot change its own permissions. Requires the ChangeServiceAccountPermissions permission, which is separate from the edit permission.",
+        "operationId": "SetServiceAccountPermissions",
+        "parameters": [
+          {
+            "name": "serviceAccountGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionsChangeDto"
               }
             }
           },
@@ -4079,6 +4196,30 @@
         "description": "A plaintext password: 9 to 512 characters, no spaces, with at least one letter, one digit and\r\none special (non-letter, non-digit) character.",
         "format": "password"
       },
+      "PermissionsChangeDto": {
+        "type": "object",
+        "properties": {
+          "permissionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          },
+          "permissionsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          }
+        },
+        "description": "Request body of the dedicated permission endpoints: the permissions to grant and to revoke in\r\none request. At least one must be given, and no permission may appear in both."
+      },
       "Scalar": {
         "oneOf": [
           {
@@ -4218,24 +4359,6 @@
               "null",
               "string"
             ]
-          },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "permissionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
           },
           "partitionsToAdd": {
             "type": [
@@ -4903,24 +5026,6 @@
               "boolean"
             ]
           },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "permissionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
           "partitionsToAdd": {
             "type": [
               "null",
@@ -4995,24 +5100,6 @@
                 "$ref": "#/components/schemas/UserAuthenticationUpdateDto"
               }
             ]
-          },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "permissionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
           },
           "partitionsToAdd": {
             "type": [

@@ -55,6 +55,8 @@ public sealed class UserGroupCreateCommandHandler(
 
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserGroupPermissions);
+
             var requestedActions = permissions.Distinct();
 
             foreach (var action in requestedActions)

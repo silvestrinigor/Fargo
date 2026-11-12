@@ -82,4 +82,20 @@ public class ServiceAccountSetActiveCommandHandlerTests
         await Assert.ThrowsAsync<EntityNotFoundFargoApplicationException>(
             () => CreateHandler().HandleAsync(new ServiceAccountSetActiveCommand(Guid.NewGuid(), false)));
     }
+
+    [Fact]
+    public async Task HandleAsync_WhenActorHasNoAccessToTheAccountPartition_ShouldThrowAccessDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.ActivateServiceAccount]);
+        var global = Fargo.Core.Entities.Partitions.Partition.CreateGlobalPartition(new Name("global"));
+        var restricted = Fargo.Core.Entities.Partitions.Partition.CreatePartition(new Name("restricted"), global);
+        var account = ExistingAccount();
+        account.Actor.AddPartition(restricted);
+        Existing(account);
+
+        await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(new ServiceAccountSetActiveCommand(account.ActorGuid, false)));
+
+        Assert.True(account.Actor.IsActive);
+    }
 }

@@ -118,4 +118,38 @@ public class UserGroupCreateCommandHandlerTests
         userGroupRepository.DidNotReceive().Add(Arg.Any<UserGroup>());
         await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithoutChangeUserGroupPermissions_ShouldThrowPermissionDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid, [ActionType.CreateUserGroup, ActionType.CreateItem]);
+        userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+
+        var command = new UserGroupCreateCommand(
+            new UserGroupCreateDto(new Nameid("editors"), PermissionsToAdd: [ActionType.CreateItem]));
+
+        await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+
+        userGroupRepository.DidNotReceive().Add(Arg.Any<UserGroup>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithChangeUserGroupPermissions_ShouldGrantThem()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid,
+            [ActionType.CreateUserGroup, ActionType.ChangeUserGroupPermissions, ActionType.CreateItem]);
+        userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+
+        var command = new UserGroupCreateCommand(
+            new UserGroupCreateDto(new Nameid("editors"), PermissionsToAdd: [ActionType.CreateItem]));
+
+        await CreateHandler().HandleAsync(command);
+
+        userGroupRepository.Received(1).Add(Arg.Is<UserGroup>(g => g.Permissions.Contains(ActionType.CreateItem)));
+    }
 }

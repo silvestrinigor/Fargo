@@ -25,6 +25,8 @@ public static class ServiceAccountEndpointRouteBuilderExtension
         group.MapUpdateServiceAccount();
 
         group.MapSetServiceAccountActive();
+
+        group.MapSetServiceAccountPermissions();
         group.MapRotateServiceAccountSecret();
         group.MapDeleteServiceAccount();
     }
@@ -103,7 +105,7 @@ public static class ServiceAccountEndpointRouteBuilderExtension
         builder.MapPost("/", Create)
             .WithName("CreateServiceAccount")
             .WithSummary("Creates a new service account")
-            .WithDescription("Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated).")
+            .WithDescription("Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated). Granting permissions requires the ChangeServiceAccountPermissions permission.")
             .Produces<ServiceAccountCreatedDto>(StatusCodes.Status200OK);
 
         return builder;
@@ -128,7 +130,7 @@ public static class ServiceAccountEndpointRouteBuilderExtension
         builder.MapPut("/{serviceAccountGuid:guid}", Update)
             .WithName("UpdateServiceAccount")
             .WithSummary("Updates a service account")
-            .WithDescription("Updates mutable service-account state: description, permissions and partition accesses. Use the is-active endpoint to activate or deactivate.")
+            .WithDescription("Updates mutable service-account state: description and partition accesses. Use the is-active endpoint to activate or deactivate.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -173,6 +175,32 @@ public static class ServiceAccountEndpointRouteBuilderExtension
     }
 
     #endregion Set active
+    #region Set permissions
+
+    private static IEndpointRouteBuilder MapSetServiceAccountPermissions(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{serviceAccountGuid:guid}/permissions", SetPermissions)
+            .WithName("SetServiceAccountPermissions")
+            .WithSummary("Grants and revokes permissions of a service account")
+            .WithDescription("Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. A caller cannot change its own permissions. Requires the ChangeServiceAccountPermissions permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetPermissions(
+        Guid serviceAccountGuid,
+        PermissionsChangeDto request,
+        ICommandHandler<ServiceAccountSetPermissionsCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new ServiceAccountSetPermissionsCommand(serviceAccountGuid, request), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set permissions
     #region Rotate secret
 
     private static IEndpointRouteBuilder MapRotateServiceAccountSecret(this IEndpointRouteBuilder builder)

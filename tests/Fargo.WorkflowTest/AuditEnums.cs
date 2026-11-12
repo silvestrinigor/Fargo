@@ -55,6 +55,7 @@ internal static class AuditLogTypes
     public const int EntityUpdated = 2;
     public const int EntityDeleted = 3;
     public const int ItemEventRecorded = 4;
+    public const int PermissionsChanged = 16;
 
     public static string Name(int? code) => code switch
     {
@@ -62,6 +63,7 @@ internal static class AuditLogTypes
         EntityUpdated => "EntityUpdated",
         EntityDeleted => "EntityDeleted",
         ItemEventRecorded => "ItemEventRecorded",
+        PermissionsChanged => "PermissionsChanged",
         null => "(none)",
         _ => $"AuditLogType({code})",
     };

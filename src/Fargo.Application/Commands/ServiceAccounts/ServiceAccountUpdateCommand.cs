@@ -32,31 +32,13 @@ public sealed class ServiceAccountUpdateCommandHandler(
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.Actor);
 
+        actor.ThrowIfAccessDenied(account.Actor);
+
         var accountActor = account.Actor;
 
         if (command.Update.Description is { } description)
         {
             accountActor.Description = new Description(description);
-        }
-
-        if (command.Update.PermissionsToAdd is { } permissionsToAdd)
-        {
-            foreach (var permission in permissionsToAdd)
-            {
-                actor.ThrowIfPermissionDenied(permission);
-
-                accountActor.AddPermission(permission);
-            }
-        }
-
-        if (command.Update.PermissionsToRemove is { } permissionsToRemove)
-        {
-            foreach (var permission in permissionsToRemove)
-            {
-                actor.ThrowIfPermissionDenied(permission);
-
-                accountActor.RemovePermission(permission);
-            }
         }
 
         if (command.Update.PartitionsToAdd is { } partitionMembershipsToAdd)

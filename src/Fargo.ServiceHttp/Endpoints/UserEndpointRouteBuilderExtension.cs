@@ -25,6 +25,8 @@ public static class UserEndpointRouteBuilderExtension
 
         group.MapSetUserActive();
 
+        group.MapSetUserPermissions();
+
         group.MapDeleteUser();
     }
 
@@ -116,7 +118,7 @@ public static class UserEndpointRouteBuilderExtension
         builder.MapPost("/", CreateUser)
             .WithName("CreateUser")
             .WithSummary("Creates a new user")
-            .WithDescription("Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier.")
+            .WithDescription("Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier. Granting permissions requires the ChangeUserPermissions permission.")
             .Produces<Guid>(StatusCodes.Status200OK);
 
         return builder;
@@ -143,7 +145,7 @@ public static class UserEndpointRouteBuilderExtension
         builder.MapPut("/{userGuid:guid}", UpdateUser)
             .WithName("UpdateUser")
             .WithSummary("Replaces an existing user")
-            .WithDescription("Replaces all user state including partitions, user groups, and permissions.")
+            .WithDescription("Updates user state: names, description, authentication, partitions and user groups. Use the is-active and permissions endpoints to change those.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -190,6 +192,32 @@ public static class UserEndpointRouteBuilderExtension
     }
 
     #endregion Set active
+    #region Set permissions
+
+    private static IEndpointRouteBuilder MapSetUserPermissions(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{userGuid:guid}/permissions", SetPermissions)
+            .WithName("SetUserPermissions")
+            .WithSummary("Grants and revokes permissions of a user")
+            .WithDescription("Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. A caller cannot change its own permissions. Requires the ChangeUserPermissions permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetPermissions(
+        Guid userGuid,
+        PermissionsChangeDto request,
+        ICommandHandler<UserSetPermissionsCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new UserSetPermissionsCommand(userGuid, request), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set permissions
     #region Delete
 
     private static IEndpointRouteBuilder MapDeleteUser(this IEndpointRouteBuilder builder)

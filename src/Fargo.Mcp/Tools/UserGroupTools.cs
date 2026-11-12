@@ -83,7 +83,7 @@ public static class UserGroupTools
         [Description("Optional description of the user group.")] string? description = null,
         [Description("Whether the group is active. Defaults to the server default (active).")] bool? isActive = null,
         [Description("GUID of the parent user group, if this group should be nested.")] Guid? parentUserGroup = null,
-        [Description("Permissions to grant the group. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
+        [Description("Permissions to grant the group; requires the ChangeUserGroupPermissions permission. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
         [Description("GUIDs of the partitions the group belongs to (its membership).")] Guid[]? partitionsToAdd = null,
         [Description("GUIDs of the partitions the group is granted access to.")] Guid[]? partitionAccessesToAdd = null,
         CancellationToken cancellationToken = default)
@@ -113,8 +113,6 @@ public static class UserGroupTools
         [Description("The new description.")] string? description = null,
         [Description("GUID of the new parent user group.")] Guid? parentUserGroup = null,
         [Description("Set true to detach the group from its current parent.")] bool? removeParentUserGroup = null,
-        [Description("Permissions to grant. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
-        [Description("Permissions to revoke (same codes as permissionsToAdd).")] int[]? permissionsToRemove = null,
         [Description("GUIDs of partitions to add to the group's membership.")] Guid[]? partitionsToAdd = null,
         [Description("GUIDs of partitions to remove from the group's membership.")] Guid[]? partitionsToRemove = null,
         [Description("GUIDs of partitions to grant the group access to.")] Guid[]? partitionAccessesToAdd = null,
@@ -129,8 +127,6 @@ public static class UserGroupTools
             Description = description,
             ParentUserGroup = parentUserGroup,
             RemoveParentUserGroup = removeParentUserGroup,
-            PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
-            PermissionsToRemove = ToolInput.ToIntList(permissionsToRemove),
             PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
             PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove),
             PartitionAccessesToAdd = ToolInput.ToGuidList(partitionAccessesToAdd),
@@ -140,6 +136,29 @@ public static class UserGroupTools
         await client.V1.UserGroups[userGroupGuid].PutAsync(body, cancellationToken: cancellationToken);
 
         return $"User group '{userGroupGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_usergroups_set_permissions")]
+    [Description("Grant and revoke permissions of a user group in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. Requires the ChangeUserGroupPermissions permission, which is separate from the permission to update.")]
+    public static async Task<string> SetUserGroupPermissionsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the user group.")] Guid userGroupGuid,
+        [Description("Permissions to grant. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
+        [Description("Permissions to revoke (same codes as permissionsToAdd).")] int[]? permissionsToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new PermissionsChangeDto
+        {
+            PermissionsToAdd = ToolInput.ToIntList(permissionsToAdd),
+            PermissionsToRemove = ToolInput.ToIntList(permissionsToRemove)
+        };
+
+        await client.V1.UserGroups[userGroupGuid].Permissions.PutAsync(body, cancellationToken: cancellationToken);
+
+        return $"User group '{userGroupGuid}' permissions updated.";
     }
 
     [McpServerTool(Name = "fargo_usergroups_set_active")]

@@ -119,4 +119,35 @@ public class ServiceAccountCreateCommandHandlerTests
         await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
             () => CreateHandler().HandleAsync(command));
     }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithoutChangeServiceAccountPermissions_ShouldThrowPermissionDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid, [ActionType.CreateServiceAccount, ActionType.CreateItem]);
+
+        var command = new ServiceAccountCreateCommand(
+            new ServiceAccountCreateDto("svc", PermissionsToAdd: [ActionType.CreateItem]));
+
+        await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+
+        serviceAccountRepository.DidNotReceive().Add(Arg.Any<ServiceAccount>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithChangeServiceAccountPermissions_ShouldGrantThem()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid,
+            [ActionType.CreateServiceAccount, ActionType.ChangeServiceAccountPermissions, ActionType.CreateItem]);
+
+        var command = new ServiceAccountCreateCommand(
+            new ServiceAccountCreateDto("svc", PermissionsToAdd: [ActionType.CreateItem]));
+
+        await CreateHandler().HandleAsync(command);
+
+        serviceAccountRepository.Received(1).Add(
+            Arg.Is<ServiceAccount>(a => a.Actor.Permissions.Contains(ActionType.CreateItem)));
+    }
 }

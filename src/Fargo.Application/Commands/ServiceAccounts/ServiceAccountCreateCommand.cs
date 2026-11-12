@@ -58,8 +58,10 @@ public sealed class ServiceAccountCreateCommandHandler(
             account.RotateAuthVersion();
         }
 
-        if (command.Create.PermissionsToAdd is { } permissions)
+        if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeServiceAccountPermissions);
+
             foreach (var permission in permissions)
             {
                 actor.ThrowIfPermissionDenied(permission);

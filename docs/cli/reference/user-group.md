@@ -61,6 +61,15 @@ Commands:
                               Examples:
                                 fargo user-group set-active 00000000-0000-0000-0000-000000000003 true
                                 fargo user-group set-active 00000000-0000-0000-0000-000000000003 false
+  set-permissions <guid>      Grant and revoke permissions of a user group.
+  
+                              Permissions are numeric ActionType codes (space-separated). This is a
+                              separate operation from update and requires the ChangeUserGroupPermissions
+                              permission. You must hold every permission you grant or revoke.
+  
+                              Examples:
+                                fargo user-group set-permissions 00000000-0000-0000-0000-000000000003 --add 4 6
+                                fargo user-group set-permissions 00000000-0000-0000-0000-000000000003 --add 4 --remove 2
   delete <guid>               Delete a user group by GUID.
   
                               Examples:
@@ -224,6 +233,37 @@ Arguments:
   <active>  true to activate, false to deactivate.
 
 Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user-group set-permissions`
+
+```text
+Description:
+  Grant and revoke permissions of a user group.
+  
+  Permissions are numeric ActionType codes (space-separated). This is a
+  separate operation from update and requires the ChangeUserGroupPermissions
+  permission. You must hold every permission you grant or revoke.
+  
+  Examples:
+    fargo user-group set-permissions 00000000-0000-0000-0000-000000000003 --add 4 6
+    fargo user-group set-permissions 00000000-0000-0000-0000-000000000003 --add 4 --remove 2
+
+Usage:
+  fargo user-group set-permissions <guid> [options]
+
+Arguments:
+  <guid>  The a user group GUID.
+
+Options:
+  --add <add>            ActionType permission codes to grant (space-separated).
+  --remove <remove>      ActionType permission codes to revoke (space-separated).
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information

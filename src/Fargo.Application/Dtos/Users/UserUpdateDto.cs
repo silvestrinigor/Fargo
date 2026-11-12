@@ -9,8 +9,6 @@ public sealed record UserUpdateDto(
     LastName? LastName = null,
     Description? Description = null,
     UserAuthenticationUpdateDto? Authentication = null,
-    IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
-    IReadOnlyCollection<ActionType>? PermissionsToRemove = null,
     IReadOnlyCollection<Guid>? PartitionsToAdd = null,
     IReadOnlyCollection<Guid>? PartitionsToRemove = null,
     IReadOnlyCollection<Guid>? UserGroupsToAdd = null,

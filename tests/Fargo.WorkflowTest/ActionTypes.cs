@@ -42,6 +42,9 @@ internal static class ActionTypes
     public const int ActivateUserGroup = 32;
     public const int ActivateServiceAccount = 33;
     public const int MoveItem = 34;
+    public const int ChangeUserPermissions = 35;
+    public const int ChangeUserGroupPermissions = 36;
+    public const int ChangeServiceAccountPermissions = 37;
 
     public static string Name(int code) => code switch
     {
@@ -79,6 +82,9 @@ internal static class ActionTypes
         ActivateUserGroup => "ActivateUserGroup",
         ActivateServiceAccount => "ActivateServiceAccount",
         MoveItem => "MoveItem",
+        ChangeUserPermissions => "ChangeUserPermissions",
+        ChangeUserGroupPermissions => "ChangeUserGroupPermissions",
+        ChangeServiceAccountPermissions => "ChangeServiceAccountPermissions",
         _ => $"Action({code})",
     };
 }

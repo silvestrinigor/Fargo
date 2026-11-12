@@ -8,8 +8,6 @@ public sealed record UserGroupUpdateDto(
     Description? Description = null,
     Guid? ParentUserGroup = null,
     bool? RemoveParentUserGroup = null,
-    IReadOnlyCollection<ActionType>? PermissionsToAdd = null,
-    IReadOnlyCollection<ActionType>? PermissionsToRemove = null,
     IReadOnlyCollection<Guid>? PartitionsToAdd = null,
     IReadOnlyCollection<Guid>? PartitionsToRemove = null,
     IReadOnlyCollection<Guid>? PartitionAccessesToAdd = null,

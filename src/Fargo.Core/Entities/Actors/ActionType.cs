@@ -61,5 +61,20 @@ public enum ActionType
     /// <summary>
     /// Places an item inside a container or removes it from its container.
     /// </summary>
-    MoveItem = 34
+    MoveItem = 34,
+
+    /// <summary>
+    /// Grants and revokes the direct permissions of a user.
+    /// </summary>
+    ChangeUserPermissions = 35,
+
+    /// <summary>
+    /// Grants and revokes the permissions of a user group, which every member inherits.
+    /// </summary>
+    ChangeUserGroupPermissions = 36,
+
+    /// <summary>
+    /// Grants and revokes the permissions of a service account.
+    /// </summary>
+    ChangeServiceAccountPermissions = 37
 }

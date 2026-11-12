@@ -127,4 +127,22 @@ public class ServiceAccountUpdateCommandHandlerTests
         await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
             () => CreateHandler().HandleAsync(command));
     }
+
+    [Fact]
+    public async Task HandleAsync_WhenActorHasNoAccessToTheAccountPartition_ShouldThrowAccessDenied()
+    {
+        var global = Partition.CreateGlobalPartition(new Name("global"));
+        var restricted = Partition.CreatePartition(new Name("restricted"), global);
+        var account = ExistingAccount();
+        account.Actor.AddPartition(restricted);
+        Existing(account);
+
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.EditServiceAccount]);
+
+        var command = new ServiceAccountUpdateCommand(
+            account.ActorGuid, new ServiceAccountUpdateDto(Description: "x"));
+
+        await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+    }
 }

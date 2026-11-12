@@ -13,6 +13,7 @@ public sealed class UsersCommand : Command
         Add(new CreateUserCommand(client));
         Add(new UpdateUserCommand(client));
         Add(new SetUserActiveCommand(client));
+        Add(new SetUserPermissionsCommand(client));
         Add(new DeleteUserCommand(client));
     }
 }
