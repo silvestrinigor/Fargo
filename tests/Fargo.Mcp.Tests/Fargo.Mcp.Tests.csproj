@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\client\Fargo.Mcp\Fargo.Mcp.csproj" />
+    <ProjectReference Include="..\..\src\Fargo.Mcp\Fargo.Mcp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
