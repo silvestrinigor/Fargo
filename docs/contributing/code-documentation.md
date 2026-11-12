@@ -1,4 +1,4 @@
-# Code documentation
+# Code Documentation
 
 XML documentation comments (`///`) are for what the signature cannot tell you.
 A comment that repeats the name of a member costs reading time and drifts out of
@@ -83,3 +83,8 @@ Task<Article?> GetByGuidAsync(Guid articleGuid, CancellationToken cancellationTo
 
 Missing-documentation warnings (CS1591) are turned off in `.editorconfig`, so
 leaving a member undocumented is a deliberate, supported choice.
+
+## Next steps
+
+- [Writing Documentation](writing-documentation.md): the rules for the pages of
+  this site.

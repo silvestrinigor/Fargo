@@ -95,7 +95,7 @@ quantities use [UnitsNet](https://github.com/angularsen/UnitsNet) types such as
 
 An audit log is created for every create, update, and delete. It captures the
 acting actor, the affected entity and its type, the
-[`AuditLogType`](#auditlogtype), the time, and a metadata bag describing the
+[`AuditLogType`](xref:Fargo.Core.Audits.AuditLogType), the time, and a metadata bag describing the
 change. Its partition scope is derived from the audited entity (for partition
 actions, from the affected partition's parent), so audit logs follow the same
 access rules as the entities they describe. Metadata is an open set of typed

@@ -93,7 +93,7 @@ reference any cache.
 
 ## Permissions
 
-Permissions are values of [`ActionType`](xref:Fargo.Core.Actors.ActionType) — a
+Permissions are values of [`ActionType`](xref:Fargo.Core.Entities.Actors.ActionType) — a
 create / delete / edit permission per resource plus a few specific actions such
 as `ChangeAnotherUserPassword`, `ChangeUserGroupMembers`, `ReadAuditLogs`,
 `ReadItemEvents`, and the service-account actions (`CreateServiceAccount`, `ReadServiceAccount`, `EditServiceAccount`, `DeleteServiceAccount`).

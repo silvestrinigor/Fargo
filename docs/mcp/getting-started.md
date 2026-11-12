@@ -40,7 +40,7 @@ immediately with a descriptive error.
 You normally let the MCP host start the server, but you can run it manually to
 verify configuration:
 
-```bash
+```powershell
 # PowerShell
 $env:FARGO_SERVER = "https://localhost:7563"
 $env:FARGO_USERNAME = "admin"

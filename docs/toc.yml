@@ -89,5 +89,7 @@
   items:
     - name: Code Documentation
       href: contributing/code-documentation.md
+    - name: Writing Documentation
+      href: contributing/writing-documentation.md
 - name: API
   href: api/
