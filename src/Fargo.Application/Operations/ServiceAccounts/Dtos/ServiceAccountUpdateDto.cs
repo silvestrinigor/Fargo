@@ -2,7 +2,6 @@ using Fargo.Core.Entities.Actors;
 
 namespace Fargo.Application.Operations.ServiceAccounts.Dtos;
 
-/// <summary>Mutable service-account state to apply in an update.</summary>
 public sealed record ServiceAccountUpdateDto(
     string? Description = null,
     bool? IsActive = null,

@@ -5,29 +5,15 @@ namespace Fargo.ServiceHttp.Versioning;
 public static class FargoVersionedEndpointRouteBuilderExtensions
 {
     /// <summary>
-    /// The current API version. Version 1 is the baseline every endpoint starts
-    /// at; a later version is introduced per endpoint only when that endpoint
-    /// gets a breaking change (Model A, per-endpoint versioning).
+    /// Version 1 is the baseline every endpoint starts at; a later version is introduced per endpoint only when
+    /// that endpoint gets a breaking change.
     /// </summary>
     public static readonly ApiVersion V1 = new(1);
 
     /// <summary>
-    /// Creates a versioned route group mounted under the <c>/v{version}</c>
-    /// segment, declaring the versions the group's endpoints implement.
+    /// Creates a route group under the <c>/v{version}</c> segment, declaring the versions its endpoints implement
+    /// (default <see cref="V1"/>). <paramref name="apiName"/> groups the endpoints in the API explorer.
     /// </summary>
-    /// <param name="builder">The root endpoint route builder.</param>
-    /// <param name="apiName">
-    /// The logical API name used to group the endpoints for the API explorer
-    /// (for example "Articles").
-    /// </param>
-    /// <param name="path">
-    /// The resource path appended after the version segment (for example
-    /// "/articles"). A leading slash is optional.
-    /// </param>
-    /// <param name="versions">
-    /// The versions the group's endpoints support. Defaults to <see cref="V1"/>.
-    /// </param>
-    /// <returns>A route group builder scoped to the declared version(s).</returns>
     public static RouteGroupBuilder MapVersionedGroup(
         this IEndpointRouteBuilder builder,
         string apiName,

@@ -11,10 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Infrastructure.DependencyInjection;
 
-/// <summary>
-/// Registers credentials, tokens, JWT options and the request-bound actor and
-/// client context.
-/// </summary>
 public static class SecurityServiceCollectionExtensions
 {
     extension(IServiceCollection services)

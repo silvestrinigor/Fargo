@@ -15,7 +15,6 @@ public interface IFargoAccessTokenSource
     /// <summary>
     /// Gets the access token to send, or <see langword="null"/> when there is none.
     /// </summary>
-    /// <param name="cancellationToken">A token that cancels the operation.</param>
     Task<string?> GetAccessTokenAsync(CancellationToken cancellationToken = default);
 }
 
@@ -23,10 +22,8 @@ public interface IFargoAccessTokenSource
 /// Returns the access token held by the <see cref="ITokenStore"/>, without
 /// refreshing it.
 /// </summary>
-/// <param name="tokenStore">The token store.</param>
 public sealed class StoredAccessTokenSource(ITokenStore tokenStore) : IFargoAccessTokenSource
 {
-    /// <inheritdoc />
     public async Task<string?> GetAccessTokenAsync(CancellationToken cancellationToken = default)
         => (await tokenStore.GetAsync(cancellationToken))?.AccessToken;
 }
@@ -37,11 +34,8 @@ public sealed class StoredAccessTokenSource(ITokenStore tokenStore) : IFargoAcce
 /// access token. Opt in with
 /// <c>UseFargoRefreshingAccessTokens()</c>.
 /// </summary>
-/// <param name="refresher">The refresher sharing <paramref name="tokenStore"/>.</param>
-/// <param name="tokenStore">The token store.</param>
 public sealed class RefreshingAccessTokenSource(FargoTokenRefresher refresher, ITokenStore tokenStore) : IFargoAccessTokenSource
 {
-    /// <inheritdoc />
     public async Task<string?> GetAccessTokenAsync(CancellationToken cancellationToken = default)
     {
         await refresher.EnsureValidAsync(cancellationToken);

@@ -5,9 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Operations.Audits;
 
-/// <summary>
-/// Registers the Audits use-case handlers.
-/// </summary>
 public static class AuditLogServiceCollectionExtensions
 {
     extension(IServiceCollection services)

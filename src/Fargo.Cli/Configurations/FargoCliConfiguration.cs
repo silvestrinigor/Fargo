@@ -5,8 +5,7 @@ public sealed class FargoCliConfiguration
     public required Uri Server { get; set; }
 
     /// <summary>
-    /// The real-time service URL used by <c>fargo realtime watch</c>. It is a
-    /// separate service from the API, so it has its own setting.
+    /// Separate from <see cref="Server"/> because the real-time service is not part of the API.
     /// </summary>
     public Uri? RealtimeServer { get; set; }
 

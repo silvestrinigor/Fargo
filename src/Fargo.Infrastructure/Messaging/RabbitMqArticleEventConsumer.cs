@@ -32,12 +32,6 @@ namespace Fargo.Infrastructure.Messaging;
 /// to <see cref="RabbitMqConsumerOptions.MaxRetryDelay"/>.
 /// </para>
 /// </remarks>
-/// <param name="connectionFactory">Returns the broker connection; called on each subscribe attempt.</param>
-/// <param name="handler">Receives the article events.</param>
-/// <param name="eventOptions">Provides the exchange name.</param>
-/// <param name="consumerOptions">The consumer options.</param>
-/// <param name="timeProvider">The clock used for retry delays.</param>
-/// <param name="logger">The logger.</param>
 public sealed class RabbitMqArticleEventConsumer(
     Func<IConnection> connectionFactory,
     IArticleEventHandler handler,
@@ -47,12 +41,8 @@ public sealed class RabbitMqArticleEventConsumer(
     ILogger<RabbitMqArticleEventConsumer> logger
 ) : BackgroundService
 {
-    /// <summary>
-    /// The binding key of the consumer queue: every article event.
-    /// </summary>
     public const string BindingKey = "article.*";
 
-    /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Resolving the connection can block while the client retries; leave
@@ -99,12 +89,6 @@ public sealed class RabbitMqArticleEventConsumer(
         }
     }
 
-    /// <summary>
-    /// Subscribes and consumes until the channel closes.
-    /// </summary>
-    /// <param name="onSubscribed">Called once the subscription is in place.</param>
-    /// <param name="stoppingToken">Stops consuming.</param>
-    /// <returns>The reason the channel closed.</returns>
     private async Task<string> ConsumeUntilClosedAsync(Action onSubscribed, CancellationToken stoppingToken)
     {
         var exchange = eventOptions.Value.ExchangeName;
@@ -185,17 +169,9 @@ public sealed class RabbitMqArticleEventConsumer(
     }
 
     /// <summary>
-    /// Reads an article event from a delivered message.
+    /// Returns <see langword="null"/>, with the reason in <paramref name="dropReason"/>, when the message has
+    /// another schema version or is not a complete article event.
     /// </summary>
-    /// <param name="body">The message body.</param>
-    /// <param name="properties">The message properties.</param>
-    /// <param name="dropReason">
-    /// When the method returns <see langword="null"/>, why the message is not usable.
-    /// </param>
-    /// <returns>
-    /// The event, or <see langword="null"/> when the message has another schema
-    /// version or is not a complete article event.
-    /// </returns>
     public static ArticleEventMessage? ParseDelivery(
         ReadOnlySpan<byte> body,
         IReadOnlyBasicProperties properties,
@@ -218,9 +194,6 @@ public sealed class RabbitMqArticleEventConsumer(
         return message;
     }
 
-    /// <summary>
-    /// Gets the wait after <paramref name="consecutiveFailures"/> failures in a row.
-    /// </summary>
     internal static TimeSpan GetRetryDelay(RabbitMqConsumerOptions settings, int consecutiveFailures)
     {
         var exponent = Math.Min(Math.Max(consecutiveFailures - 1, 0), 30);

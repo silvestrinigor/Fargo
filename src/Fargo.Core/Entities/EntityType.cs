@@ -1,37 +1,11 @@
 namespace Fargo.Core.Entities;
 
-/// <summary>
-/// Represents a entity type.
-/// </summary>
 public enum EntityType
 {
-    /// <summary>
-    /// Article entity.
-    /// </summary>
     Article = 0,
-
-    /// <summary>
-    /// Item entity.
-    /// </summary>
     Item = 1,
-
-    /// <summary>
-    /// Actor entity (a user or a service account).
-    /// </summary>
     Actor = 2,
-
-    /// <summary>
-    /// User group entity.
-    /// </summary>
     UserGroup = 3,
-
-    /// <summary>
-    /// Partition entity.
-    /// </summary>
     Partition = 4,
-
-    /// <summary>
-    /// Supply order entity.
-    /// </summary>
     SupplyOrder = 5
 }

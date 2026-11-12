@@ -6,7 +6,6 @@ using Fargo.Core.Entities.Actors;
 
 namespace Fargo.Application.Operations.ServiceAccounts;
 
-/// <summary>Query for a single service account by id.</summary>
 public sealed record ServiceAccountSingleQuery(
     Guid ServiceAccountGuid
 ) : IQuery<ServiceAccountDto?>;

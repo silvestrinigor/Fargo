@@ -3,29 +3,8 @@ using Fargo.Application.Operations.Users.Dtos;
 
 namespace Fargo.Application.Persistence.Repositories;
 
-/// <summary>
-/// Defines read-only queries for user information.
-/// </summary>
 public interface IUserQueryRepository
 {
-    /// <summary>
-    /// Gets user information by its unique identifier.
-    /// </summary>
-    /// <param name="userGuid">
-    /// The unique identifier of the user.
-    /// </param>
-    /// <param name="childOfAnyOfThesePartitions">
-    /// An optional collection of partition identifiers. When specified,
-    /// only users associated with a partition that is a child of any of
-    /// the specified partitions are considered.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// The user information if a matching user is found; otherwise,
-    /// <see langword="null"/>.
-    /// </returns>
     Task<UserDto?> GetInfoByGuidAsync(
         Guid userGuid,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,
@@ -33,25 +12,9 @@ public interface IUserQueryRepository
     );
 
     /// <summary>
-    /// Gets a paginated collection of user information.
+    /// Ordered by <paramref name="sort"/>, or by nameid then guid when it is null.
     /// </summary>
-    /// <param name="pagination">
-    /// The pagination parameters used to determine the requested page
-    /// and the number of users to return.
-    /// </param>
-    /// <param name="childOfAnyOfThesePartitions">
-    /// An optional collection of partition identifiers. When specified,
-    /// only users associated with a partition that is a child of any of
-    /// the specified partitions are considered.
-    /// </param>
-    /// <param name="sort">Optional sort specification; when null, results are ordered by nameid then guid.</param>
-    /// <param name="search">Optional case-insensitive text matched against the user nameid.</param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// A read-only collection containing the requested page of user information.
-    /// </returns>
+    /// <param name="search">Case-insensitive text matched against the user nameid.</param>
     Task<PagedResult<UserDto>> GetManyInfoAsync(
         Pagination pagination,
         IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null,

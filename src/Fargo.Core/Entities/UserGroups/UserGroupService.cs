@@ -4,22 +4,12 @@ using Fargo.Core.Informations;
 namespace Fargo.Core.Entities.UserGroups;
 
 /// <summary>
-/// User group core service.
+/// User group rules that need to read other groups, so <see cref="UserGroup"/> cannot enforce them
+/// alone.
 /// </summary>
 public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
 {
-    /// <summary>
-    /// Validates that the specified <see cref="Nameid"/> is available for use by a
-    /// user group.
-    /// </summary>
-    /// <param name="nameid">The name identifier to validate.</param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <exception cref="FargoCoreException">
-    /// Thrown when another user group already uses the specified
-    /// <see cref="Nameid"/>.
-    /// </exception>
+    /// <exception cref="FargoCoreException">Another group already uses the nameid.</exception>
     public async Task ValidateUserGroupNameidIsAvailableAsync(Nameid nameid, CancellationToken cancellationToken = default)
     {
         var alreadyExistsWithName = await userGroupRepository.ExistsByNameidAsync(nameid, cancellationToken);
@@ -30,18 +20,8 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
         }
     }
 
-    /// <summary>
-    /// Validates that the specified user group can be deleted.
-    /// </summary>
-    /// <param name="userGroup">
-    /// The user group to validate.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
     /// <exception cref="FargoCoreException">
-    /// Thrown when attempting to delete the built-in administrators user group
-    /// or when the user group has one or more child user groups.
+    /// The group is the administrators group or has child groups.
     /// </exception>
     public async Task ValidateUserGroupCanBeDeletedAsync(UserGroup userGroup, CancellationToken cancellationToken = default)
     {
@@ -60,31 +40,11 @@ public sealed class UserGroupService(IUserGroupRepository userGroupRepository)
     }
 
     /// <summary>
-    /// Validates that assigning the specified parent user group to the specified
-    /// child user group would result in a valid hierarchy.
+    /// Call before <see cref="UserGroup.SetParentUserGroup(UserGroup)"/>, which cannot detect cycles
+    /// on its own. Hold <see cref="IUserGroupRepository.AcquireHierarchyLockAsync"/> so concurrent
+    /// re-parents cannot each pass and together create a cycle.
     /// </summary>
-    /// <param name="parentUserGroup">
-    /// The user group that will become the parent.
-    /// </param>
-    /// <param name="childUserGroup">
-    /// The user group that will become the child.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="parentUserGroup"/> or
-    /// <paramref name="childUserGroup"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="FargoCoreException">
-    /// Thrown when the assignment would create a circular user group hierarchy.
-    /// </exception>
-    /// <remarks>
-    /// This method should be called before
-    /// <see cref="UserGroup.SetParentUserGroup(UserGroup)"/> because validating
-    /// the complete hierarchy requires access to other user groups through the
-    /// repository.
-    /// </remarks>
+    /// <exception cref="FargoCoreException">The assignment would create a cycle.</exception>
     public async Task ValidateParentUserGroupAssignmentHierarchyAsync(
         UserGroup parentUserGroup, UserGroup childUserGroup, CancellationToken cancellationToken = default)
     {

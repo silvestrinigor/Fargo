@@ -14,10 +14,9 @@ namespace Fargo.WorkflowTest;
 ///    reconstructed from containment history (<c>at</c>).
 ///  • Item-container inventory (<c>GET /v1/items/{guid}/inventory</c>): the
 ///    per-article contents of a container, computed recursively.
-///  • The event-based tracking path (<c>POST/GET /v1/item/events</c>): because
-///    the public API can only create entity-tracked articles, the scenario
-///    asserts that recording an item event against such an article is rejected,
-///    and that listing item events honours its filters and permission.
+///  • The event-based tracking path (<c>POST/GET /v1/item/events</c>): the scenario
+///    asserts that recording an item event against an entity-tracked article is
+///    rejected, and that listing item events honours its filters and permission.
 ///
 /// Containment layout built for the assertions (all items are of one article):
 ///
@@ -71,7 +70,7 @@ internal sealed class InventoryScenario(
             new ItemUpdateDto { ParentItemContainerGuid = shelf },
             cancellationToken: cancellationToken);
 
-        // One product article, tracked as entities (the only mode the API creates).
+        // One product article, tracked as entities.
         var articleGuid = await _admin.V1.Articles.PostAsync(
             new ArticleCreateDto { Name = N("inv-widget"), ArticleType = ArticleTypeDefault },
             cancellationToken: cancellationToken)
@@ -227,10 +226,9 @@ internal sealed class InventoryScenario(
     {
         Log.Step("Inventory: verifying the item-events (event-tracked) path");
 
-        // The public API only creates entity-tracked articles. Recording an item
-        // event against such an article must be rejected by the server (the
-        // domain forbids events on non-event-tracked articles). Accept 400 (the
-        // domain invariant surfaces as a bad request) or 403/404.
+        // Recording an item event against an entity-tracked article must be rejected
+        // by the server (the domain forbids events on non-event-tracked articles).
+        // Accept 400 (the domain invariant surfaces as a bad request) or 403/404.
         await _check.DeniedAsync(
             "recording a movement event against an entity-tracked article is rejected",
             () => _admin.V1.Item.Events.PostAsync(

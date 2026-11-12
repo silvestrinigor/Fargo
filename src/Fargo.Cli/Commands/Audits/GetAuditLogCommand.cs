@@ -75,11 +75,6 @@ public sealed class GetAuditLogCommand : Command
         }
     }
 
-    /// <summary>
-    /// Renders an audit metadata value. Values arrive as Kiota untyped nodes
-    /// when parsed from JSON; scalars become their text form and objects/arrays
-    /// are rendered compactly.
-    /// </summary>
     private static string Render(object? value)
     {
         return value switch

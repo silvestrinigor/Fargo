@@ -7,9 +7,7 @@ using System.ComponentModel;
 namespace Fargo.Mcp.Tools;
 
 /// <summary>
-/// MCP tools for working with Fargo users. Mirrors the <c>fargo user</c> CLI
-/// surface. Passwords are accepted as tool arguments (create and admin reset) and
-/// are never returned.
+/// Passwords are accepted as tool arguments (create and admin reset) and are never returned.
 /// </summary>
 [McpServerToolType]
 public static class UserTools

@@ -9,13 +9,9 @@ namespace Fargo.ServiceRealtime.Notifications;
 public static class ArticleEventNotifications
 {
     /// <summary>
-    /// Creates the notification for an article event.
+    /// Returns <see langword="null"/> when the event type is not one of the known
+    /// <see cref="ArticleEventTypes"/>.
     /// </summary>
-    /// <param name="message">The article event.</param>
-    /// <returns>
-    /// The notification, or <see langword="null"/> when the event type is not
-    /// one of the known <see cref="ArticleEventTypes"/>.
-    /// </returns>
     public static EntityChangedNotification? ToNotification(ArticleEventMessage message)
     {
         ArgumentNullException.ThrowIfNull(message);

@@ -7,18 +7,8 @@ using Fargo.Mcp.Configuration;
 namespace Fargo.Mcp.Authentication;
 
 /// <summary>
-/// Owns authentication for the MCP server's Fargo API client.
-///
-/// Depending on configuration it either:
-/// <list type="bullet">
-///   <item>uses a static <c>FARGO_ACCESS_TOKEN</c> as the bearer token, or</item>
-///   <item>logs in with <c>FARGO_USERNAME</c>/<c>FARGO_PASSWORD</c> and keeps the
-///     resulting access token refreshed as it nears expiry.</item>
-/// </list>
-///
-/// Tools call <see cref="EnsureAuthenticatedAsync"/> before each request so a
-/// long-lived server session keeps a valid token without re-reading
-/// configuration.
+/// Owns authentication for the MCP server's Fargo API client: either a static <c>FARGO_ACCESS_TOKEN</c>, or a
+/// login with <c>FARGO_USERNAME</c>/<c>FARGO_PASSWORD</c> whose token is refreshed as it nears expiry.
 /// </summary>
 public sealed class FargoAuthenticator
 {
@@ -49,8 +39,7 @@ public sealed class FargoAuthenticator
     }
 
     /// <summary>
-    /// Ensures the token store holds a valid access token for the configured
-    /// Fargo server, performing an initial login or a refresh when needed.
+    /// Tools call this before each request, so a long-lived session keeps a valid token.
     /// </summary>
     public async Task EnsureAuthenticatedAsync(CancellationToken cancellationToken = default)
     {
@@ -98,7 +87,6 @@ public sealed class FargoAuthenticator
     {
         var tokens = await _tokenStore.GetAsync(cancellationToken);
 
-        // Still valid: nothing to do.
         if (tokens is not null && tokens.ExpiresAt - ExpiryBuffer > DateTimeOffset.UtcNow)
         {
             return;
@@ -121,8 +109,8 @@ public sealed class FargoAuthenticator
 
     private async Task<bool> TryRefreshAsync(CancellationToken cancellationToken)
     {
-        // The shared refresher sends the stored refresh token; the store was
-        // just read under this authenticator's lock, so it is the same token.
+        // The shared refresher sends the stored refresh token; the store was just read under this
+        // authenticator's lock, so it is the same token.
         return await _refresher.RefreshAsync(cancellationToken);
     }
 

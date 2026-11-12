@@ -14,22 +14,17 @@ namespace Fargo.ServiceRealtime.Hubs;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A connection requires a valid Fargo access token, validated exactly as the
-/// API validates it (signature, lifetime, and the actor's active state and auth
-/// version). Browsers, which cannot set headers on a WebSocket handshake, pass
-/// it in the <c>access_token</c> query parameter.
+/// A connection requires a valid Fargo access token, validated as the API validates it (signature,
+/// lifetime, the actor's active state and auth version). Browsers pass it in the <c>access_token</c>
+/// query parameter, accepted only under <c>/hubs</c>.
 /// </para>
 /// <para>
-/// On connect the actor's partition access is resolved and kept with the
-/// connection; an actor that is not found or is inactive is disconnected. The
-/// access is refreshed periodically by
-/// <see cref="Services.RealtimeAccessRefreshService"/>, and the connection
-/// closes when the token expires.
+/// On connect the actor's partition access is resolved and kept with the connection; an actor that is
+/// not found or is inactive is disconnected. <see cref="Services.RealtimeAccessRefreshService"/> refreshes
+/// the access periodically and disconnects actors that became inactive. The connection closes when the
+/// token expires.
 /// </para>
 /// </remarks>
-/// <param name="actorResolver">Resolves the actor's authorization context.</param>
-/// <param name="registry">The open connections.</param>
-/// <param name="logger">The logger.</param>
 [Authorize]
 public sealed class FargoHub(
     ActorResolver actorResolver,
@@ -37,12 +32,8 @@ public sealed class FargoHub(
     ILogger<FargoHub> logger
 ) : Hub<IFargoRealtimeClient>
 {
-    /// <summary>
-    /// The path the hub is mapped at (<see cref="FargoRealtimeHub.Path"/>).
-    /// </summary>
     public const string Path = FargoRealtimeHub.Path;
 
-    /// <inheritdoc />
     public override async Task OnConnectedAsync()
     {
         var actorGuid = Context.User.GetFargoActorGuid();
@@ -73,7 +64,6 @@ public sealed class FargoHub(
         await base.OnConnectedAsync();
     }
 
-    /// <inheritdoc />
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         registry.Remove(Context.ConnectionId);

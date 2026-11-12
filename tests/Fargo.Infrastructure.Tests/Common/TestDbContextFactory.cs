@@ -3,10 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fargo.Infrastructure.Tests.Common;
 
-/// <summary>
-/// Creates isolated in-memory <see cref="FargoDbContext"/> instances for
-/// repository tests.
-/// </summary>
 /// <remarks>
 /// Each call uses a unique database name so tests are fully isolated. The
 /// EF Core in-memory provider is a LINQ in-process query engine: it supports

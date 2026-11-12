@@ -3,41 +3,16 @@ using System.Globalization;
 
 namespace Fargo.Application.Common.Paging;
 
-/// <summary>
-/// Represents the page index used in paginated queries.
-/// </summary>
 public readonly struct Page : IParsable<Page>
 {
-    /// <summary>
-    /// Minimum allowed page value.
-    /// </summary>
     public const int MinValue = 1;
 
-    /// <summary>
-    /// Maximum allowed page value.
-    /// </summary>
     public const int MaxValue = int.MaxValue;
 
-    /// <summary>
-    /// Gets the page value.
-    /// </summary>
     public int Value { get; }
 
-    /// <summary>
-    /// Gets the first valid page (<c>1</c>).
-    /// </summary>
-    /// <remarks>
-    /// Provides a safe starting page for pagination operations.
-    /// </remarks>
     public static Page FirstPage => new(1);
 
-    /// <summary>
-    /// Initializes a new instance of <see cref="Page"/>.
-    /// </summary>
-    /// <param name="value">The page number.</param>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the page value is outside the allowed range.
-    /// </exception>
     public Page(int value)
     {
         if (value < MinValue || value > MaxValue)
@@ -55,19 +30,10 @@ public readonly struct Page : IParsable<Page>
         Value = 1;
     }
 
-    /// <summary>
-    /// Implicitly converts <see cref="Page"/> to <see cref="int"/>.
-    /// </summary>
     public static implicit operator int(Page page) => page.Value;
 
-    /// <summary>
-    /// Explicitly converts an <see cref="int"/> to <see cref="Page"/>.
-    /// </summary>
     public static explicit operator Page(int value) => new(value);
 
-    /// <summary>
-    /// Parses a string into a <see cref="Page"/>.
-    /// </summary>
     public static Page Parse(string s, IFormatProvider? provider)
     {
         if (TryParse(s, provider, out var result))
@@ -78,9 +44,6 @@ public readonly struct Page : IParsable<Page>
         throw new FormatException($"Invalid Page value: '{s}'.");
     }
 
-    /// <summary>
-    /// Attempts to parse a string into a <see cref="Page"/>.
-    /// </summary>
     public static bool TryParse(
         [NotNullWhen(true)] string? s,
         IFormatProvider? provider,

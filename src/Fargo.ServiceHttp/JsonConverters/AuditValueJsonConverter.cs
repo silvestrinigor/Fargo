@@ -4,12 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace Fargo.ServiceHttp.JsonConverters;
 
-/// <summary>
-/// Converts <see cref="AuditValue"/> instances to and from JSON values.
-/// </summary>
 public sealed class AuditValueJsonConverter : JsonConverter<AuditValue>
 {
-    /// <inheritdoc />
     public override AuditValue Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
@@ -43,7 +39,6 @@ public sealed class AuditValueJsonConverter : JsonConverter<AuditValue>
         };
     }
 
-    /// <inheritdoc />
     public override void Write(
         Utf8JsonWriter writer,
         AuditValue value,

@@ -4,12 +4,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Persistence.Configurations;
 
-/// <summary>
-/// Maps the shared <c>entities</c> table that is the root of the Table-Per-Type
-/// (TPT) hierarchy. Every concrete aggregate deriving from <see cref="Entity"/>
-/// contributes exactly one row here, keyed by its <see cref="Entity.Guid"/> and
-/// tagged with its <see cref="Entity.EntityType"/>.
-/// </summary>
 public sealed class EntityConfiguration : IEntityTypeConfiguration<Entity>
 {
     public void Configure(EntityTypeBuilder<Entity> builder)

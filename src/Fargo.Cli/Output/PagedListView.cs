@@ -1,12 +1,9 @@
 namespace Fargo.Cli.Output;
 
 /// <summary>
-/// One fetched page, normalized from an entity-specific paged-result envelope
-/// into the shape the pager needs. GUID/metadata extraction is done by the
-/// caller because the generated <c>PagedResultOf*Dto</c> types share no common
-/// base type.
+/// One fetched page, normalized from an entity-specific paged-result envelope. The caller extracts it
+/// because the generated <c>PagedResultOf*Dto</c> types share no common base type.
 /// </summary>
-/// <typeparam name="TItem">The row type rendered in the table.</typeparam>
 public sealed record PageData<TItem>(
     IReadOnlyList<TItem> Items,
     int TotalCount,
@@ -16,29 +13,16 @@ public sealed record PageData<TItem>(
     bool HasPreviousPage);
 
 /// <summary>
-/// Drives list output with paging: a single non-interactive fetch when the user
-/// pins a page/limit (or output is redirected), or an interactive pager that
-/// reads 'n'/'p'/'q' to move between server pages. Shared by every
-/// <c>&lt;entity&gt; list</c> command so they behave identically.
+/// Drives list output with paging: a single non-interactive fetch when the user pins a page/limit
+/// (or input is redirected), or an interactive pager that reads 'n'/'p'/'q' to move between pages.
 /// </summary>
 public static class PagedListView
 {
-    /// <summary>Default page size used when the user does not pass --limit.</summary>
     public const int DefaultPageSize = 20;
 
-    /// <summary>
-    /// Runs the list view.
-    /// </summary>
-    /// <typeparam name="TItem">The row type.</typeparam>
-    /// <param name="page">The explicit page from --page, or <see langword="null"/>.</param>
-    /// <param name="limit">The explicit limit from --limit, or <see langword="null"/>.</param>
     /// <param name="fetch">
-    /// Fetches a page: given a 1-based page index and a limit, returns the
-    /// normalized page data (or <see langword="null"/> when the server returned
-    /// nothing).
-    /// </param>
-    /// <param name="renderer">
-    /// Writes a page of rows as a table. Called once per displayed page.
+    /// Given a 1-based page index and a limit, returns the page, or <see langword="null"/> when the server
+    /// returned nothing.
     /// </param>
     public static async Task RunAsync<TItem>(
         int? page,
@@ -48,7 +32,7 @@ public static class PagedListView
         CancellationToken cancellationToken = default)
     {
         // A single, non-interactive fetch is used when the user pins a page or
-        // limit, or when output is redirected (no interactive terminal to read
+        // limit, or when input is redirected (no interactive terminal to read
         // key presses from).
         var oneShot = page.HasValue || limit.HasValue || Console.IsInputRedirected;
 
@@ -137,10 +121,6 @@ public static class PagedListView
         }
     }
 
-    /// <summary>
-    /// Builds the navigation prompt based on which moves are available, or
-    /// <see langword="null"/> when there is nothing to navigate (single page).
-    /// </summary>
     private static string? BuildPrompt(bool hasNext, bool hasPrevious)
     {
         var options = new List<string>();
@@ -165,9 +145,6 @@ public static class PagedListView
         return $"[{string.Join(", ", options)}]: ";
     }
 
-    /// <summary>
-    /// Prints the paging summary used by the one-shot (non-interactive) path.
-    /// </summary>
     private static void PrintStaticFooter<TItem>(PageData<TItem>? result)
     {
         if (result is null || result.TotalCount <= 0)

@@ -10,8 +10,7 @@ using Fargo.Core.Entities.SupplyOrders;
 namespace Fargo.Application.Operations.SupplyOrders;
 
 /// <summary>
-/// Retrieves multiple supply orders, optionally filtered by status and a
-/// case-insensitive text search over the reference and description.
+/// The text search is case-insensitive over the reference and description.
 /// </summary>
 public sealed record SupplyOrdersQuery(
     Pagination WithPagination,

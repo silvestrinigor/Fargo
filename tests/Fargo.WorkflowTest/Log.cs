@@ -1,9 +1,5 @@
 namespace Fargo.WorkflowTest;
 
-/// <summary>
-/// Minimal colourised console logger for the workflow driver. Keeps the output
-/// readable as a narrated sequence of steps.
-/// </summary>
 internal static class Log
 {
     private static int stepNumber;

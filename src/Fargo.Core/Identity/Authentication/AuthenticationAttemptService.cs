@@ -1,17 +1,15 @@
 namespace Fargo.Core.Identity.Authentication;
 
 /// <summary>
-/// Provides authentication attempt tracking and rate limiting.
+/// Rate limits authentication. Failures are counted since the last success and an attempt is
+/// refused until the longest applicable lock expires, measured from the last failure:
+/// 5 failures for the same IP and identifier lock for 5 minutes, 20 failures from one IP lock for
+/// 1 minute, and 5 failures for one identifier lock for 15 minutes.
 /// </summary>
-/// <param name="attemptRepository">
-/// The repository used to persist and query authentication attempts.
-/// </param>
-/// <param name="timeProvider">Supplies the current time.</param>
 public sealed class AuthenticationAttemptService(
     IAuthenticationAttemptRepository attemptRepository,
     TimeProvider timeProvider) : IAuthenticationAttemptService
 {
-    /// <inheritdoc/>
     public async Task<AuthenticationAttemptAllowResults> IsAllowedAsync(string identifier, string ipAddress, CancellationToken cancellationToken)
     {
         var lastSuccessAuth = await attemptRepository.GetLastSuccessAuthenticationAttemptAsync(ipAddress, identifier, cancellationToken);
@@ -55,7 +53,6 @@ public sealed class AuthenticationAttemptService(
         static TimeSpan Max(TimeSpan a, TimeSpan b) => a > b ? a : b;
     }
 
-    /// <inheritdoc/>
     public Task RegisterFailureAsync(string identifier, string ipAddress, CancellationToken cancellationToken)
     {
         var attempt = new AuthenticationAttempt(identifier, ipAddress, successful: false, timeProvider.GetUtcNow());
@@ -65,7 +62,6 @@ public sealed class AuthenticationAttemptService(
         return Task.CompletedTask;
     }
 
-    /// <inheritdoc/>
     public Task RegisterSuccessAsync(string identifier, string ipAddress, CancellationToken cancellationToken)
     {
         var attempt = new AuthenticationAttempt(identifier, ipAddress, successful: true, timeProvider.GetUtcNow());

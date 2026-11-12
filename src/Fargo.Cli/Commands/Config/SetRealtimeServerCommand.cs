@@ -49,9 +49,6 @@ public sealed class SetRealtimeServerCommand : Command
     }
 }
 
-/// <summary>
-/// Validates real-time service URLs given on the command line.
-/// </summary>
 internal static class RealtimeServerUrl
 {
     public static bool TryParse(string? value, out Uri server)

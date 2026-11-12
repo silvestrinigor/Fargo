@@ -11,15 +11,9 @@ using Fargo.Core.Audits;
 
 namespace Fargo.Application.Auditing;
 
-/// <summary>
-/// Resolves the <see cref="AuditLogType"/> that classifies a command, based on
-/// the command's CLR type.
-/// </summary>
 /// <remarks>
-/// The mapping is explicit and total: every command that flows through the
-/// audited command pipeline must have an entry. An unmapped command throws, so a
-/// newly added command cannot be audited with an unintended, silently-defaulted
-/// classification — it forces a deliberate choice.
+/// The mapping is explicit and total: an unmapped command throws, so a new command cannot be
+/// audited with a silently defaulted classification.
 /// </remarks>
 public static class AuditLogTypeResolver
 {
@@ -79,14 +73,8 @@ public static class AuditLogTypeResolver
         [typeof(SupplyOrderCloseCommand)] = AuditLogType.SupplyOrderClosed,
     };
 
-    /// <summary>
-    /// Resolves the <see cref="AuditLogType"/> for the specified command type.
-    /// </summary>
-    /// <param name="commandType">The CLR type of the command.</param>
-    /// <returns>The <see cref="AuditLogType"/> that classifies the command.</returns>
     /// <exception cref="NotSupportedException">
-    /// Thrown when <paramref name="commandType"/> has no mapping. Add an entry to
-    /// this resolver when introducing a new audited command.
+    /// <paramref name="commandType"/> has no mapping.
     /// </exception>
     public static AuditLogType Resolve(Type commandType)
     {

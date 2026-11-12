@@ -1,22 +1,17 @@
 namespace Fargo.Cli.Output;
 
-/// <summary>
-/// A node in a renderable tree: a label plus zero or more child nodes.
-/// </summary>
 public sealed class TreeNode(string label)
 {
     public string Label { get; } = label;
 
     public List<TreeNode> Children { get; } = new();
 
-    /// <summary>Adds an existing child node and returns it for chaining.</summary>
     public TreeNode Add(TreeNode child)
     {
         Children.Add(child);
         return child;
     }
 
-    /// <summary>Adds a child node by label and returns the created node.</summary>
     public TreeNode Add(string label)
     {
         var child = new TreeNode(label);
@@ -26,22 +21,10 @@ public sealed class TreeNode(string label)
 }
 
 /// <summary>
-/// Renders a <see cref="TreeNode"/> hierarchy to standard output using
-/// box-drawing branch connectors, e.g.:
-///
-/// <code>
-/// ├─ group-a
-/// │  ├─ user-1
-/// │  └─ user-2
-/// └─ group-b
-///    └─ user-3
-/// </code>
+/// Renders a <see cref="TreeNode"/> hierarchy to standard output with box-drawing branch connectors.
 /// </summary>
 public static class TreeWriter
 {
-    /// <summary>
-    /// Writes a forest (multiple top-level nodes with no shared root).
-    /// </summary>
     public static void WriteForest(IReadOnlyList<TreeNode> roots)
     {
         for (var i = 0; i < roots.Count; i++)

@@ -10,9 +10,6 @@ using Fargo.Core.Identity.Credentials;
 
 namespace Fargo.Application.Operations.Users;
 
-/// <summary>
-/// Command used to create a new user.
-/// </summary>
 public sealed record UserCreateCommand(
     UserCreateDto Create
 ) : ICommand<Guid>;

@@ -33,10 +33,6 @@ public class IdentityPasswordChangeCommandHandlerTests
         string nameid = ValidNameid, string currentPassword = CurrentPassword)
         => new(new IdentityPasswordUpdateDto(nameid, NewPassword, currentPassword));
 
-    /// <summary>
-    /// Builds an active user with a stored password hash and configures the
-    /// repository so both nameid lookup and actor resolution return it.
-    /// </summary>
     private User ConfigureExistingUser(bool withPasswordHash = true)
     {
         var user = Actor.NewUser(new Nameid(ValidNameid)).User!;

@@ -5,21 +5,15 @@ using System.Security.Claims;
 namespace Fargo.Infrastructure.Security;
 
 /// <summary>
-/// Reads the Fargo actor identity from a validated token's claims.
+/// Shared by the HTTP request actor (<see cref="CurrentUserActor"/>) and hosts that have a
+/// <see cref="ClaimsPrincipal"/> without an HTTP request, such as a SignalR hub.
 /// </summary>
-/// <remarks>
-/// Shared by the HTTP request actor (<see cref="CurrentUserActor"/>) and hosts
-/// that have a <see cref="ClaimsPrincipal"/> without a current HTTP request,
-/// such as a SignalR hub.
-/// </remarks>
 public static class FargoClaimsPrincipalExtensions
 {
     extension(ClaimsPrincipal? principal)
     {
         /// <summary>
-        /// Gets the actor identifier from the subject claim, or
-        /// <see cref="Guid.Empty"/> when the principal is not authenticated or
-        /// the claim is missing or invalid.
+        /// Returns <see cref="Guid.Empty"/> when the principal is not authenticated or the claim is missing or invalid.
         /// </summary>
         public Guid GetFargoActorGuid()
         {
@@ -36,8 +30,7 @@ public static class FargoClaimsPrincipalExtensions
         }
 
         /// <summary>
-        /// Gets the actor type from the actor-type claim; a token without it is a
-        /// user token.
+        /// A token without the actor-type claim is a user token.
         /// </summary>
         public ActorType GetFargoActorType()
         {

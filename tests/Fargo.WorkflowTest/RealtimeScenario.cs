@@ -137,10 +137,6 @@ internal sealed class RealtimeScenario(
         return guid;
     }
 
-    /// <summary>
-    /// Creates a user with access to one partition, clears its first-login
-    /// password change, logs it in, and returns its own token store.
-    /// </summary>
     private async Task<(Guid Guid, ITokenStore Tokens)> CreateUserWithAccessAsync(
         string baseName,
         Guid partitionGuid,

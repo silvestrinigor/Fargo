@@ -6,9 +6,6 @@ using Fargo.Core.Entities.SupplyOrders;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Cancels a supply order.
-/// </summary>
 public sealed record SupplyOrderCancelCommand(Guid SupplyOrderGuid) : ICommand;
 
 public sealed class SupplyOrderCancelCommandHandler(

@@ -10,7 +10,6 @@ using Fargo.Core.Informations;
 
 namespace Fargo.Application.Operations.ServiceAccounts;
 
-/// <summary>Command to update a service account's mutable state.</summary>
 public sealed record ServiceAccountUpdateCommand(
     Guid ServiceAccountGuid,
     ServiceAccountUpdateDto Update

@@ -39,7 +39,7 @@ public static class DependencyInjectionExtension
             client.BaseAddress = connectionContext.BaseAddressOverride ?? baseAddress;
         })
         // Registered before the Kiota handlers so it is the outermost handler and
-        // sees the final response, letting it translate 401/403 into typed
+        // sees the final response, letting it translate 400/401/403 into typed
         // exceptions before Kiota raises its generic ApiException.
         .AddHttpMessageHandler<ProblemDetailsHandler>()
         .AttachKiotaHandlers();

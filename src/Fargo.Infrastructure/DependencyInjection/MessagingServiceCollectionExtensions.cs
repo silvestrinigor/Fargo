@@ -9,18 +9,13 @@ using RabbitMQ.Client;
 
 namespace Fargo.Infrastructure.DependencyInjection;
 
-/// <summary>
-/// Registers the integration-event publisher and consumer.
-/// </summary>
 public static class MessagingServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
         /// <summary>
-        /// Registers <see cref="RabbitMqEventPublisher"/> as the
-        /// <see cref="IEventPublisher"/>. Requires an <see cref="IConnection"/>
-        /// registration, for example from the Aspire RabbitMQ client integration
-        /// (added by the host that publishes).
+        /// Requires an <see cref="IConnection"/> registration, for example from the Aspire RabbitMQ client
+        /// integration (added by the host that publishes).
         /// </summary>
         internal IServiceCollection AddFargoMessaging(IConfiguration configuration)
         {
@@ -39,17 +34,14 @@ public static class MessagingServiceCollectionExtensions
         }
 
         /// <summary>
-        /// Registers <see cref="RabbitMqArticleEventConsumer"/> as a hosted
-        /// service that subscribes to every article event. Unlike the publisher,
-        /// this is opt-in, because it starts a background subscription: only the
-        /// host that reacts to events (the real-time service) calls it.
+        /// Registers <see cref="RabbitMqArticleEventConsumer"/> as a hosted service that subscribes to every
+        /// article event. Opt-in, because it starts a background subscription: only the host that reacts to
+        /// events (the real-time service) calls it.
         /// </summary>
         /// <remarks>
-        /// Requires an <see cref="IArticleEventHandler"/> registration (provided
-        /// by the host) and an <see cref="IConnection"/> registration, for
-        /// example from the Aspire RabbitMQ client integration.
+        /// Requires an <see cref="IArticleEventHandler"/> registration (provided by the host) and an
+        /// <see cref="IConnection"/> registration.
         /// </remarks>
-        /// <param name="configuration">The configuration holding the <c>RabbitMqConsumer</c> section.</param>
         public IServiceCollection AddFargoArticleEventConsumer(IConfiguration configuration)
         {
             services

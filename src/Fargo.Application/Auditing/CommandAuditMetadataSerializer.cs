@@ -4,23 +4,15 @@ using System.Reflection;
 
 namespace Fargo.Application.Auditing;
 
-/// <summary>
-/// Serializes a command object's data into an <see cref="AuditMetadata"/> tree
-/// for audit logging.
-/// </summary>
 /// <remarks>
-/// The serializer reflects over the command's public readable properties and
-/// maps each to an <see cref="AuditValue"/>. Sensitive values (passwords,
-/// secrets, tokens and hashes, matched by property name) are redacted so secrets
+/// Values whose property name contains password, secret, token or hash are redacted so secrets
 /// never reach the audit store.
 /// </remarks>
 public static class CommandAuditMetadataSerializer
 {
     private const string redactedPlaceholder = "[REDACTED]";
 
-    // Property-name fragments that mark a value as sensitive. Matched
-    // case-insensitively as substrings so e.g. "Password", "NewPassword",
-    // "ClientSecret", "RefreshToken", "SecretHash" are all redacted.
+    // Matched case-insensitively as substrings, so "NewPassword" and "RefreshToken" are redacted.
     private static readonly string[] sensitiveNameFragments =
     [
         "password",
@@ -29,15 +21,9 @@ public static class CommandAuditMetadataSerializer
         "hash",
     ];
 
-    // Guards against runaway/cyclic graphs. Command/DTO graphs are shallow, so a
-    // small bound is safe and avoids pathological recursion.
+    // Guards against cyclic graphs; command graphs are shallow.
     private const int maxDepth = 8;
 
-    /// <summary>
-    /// Builds an <see cref="AuditMetadata"/> snapshot from the specified command.
-    /// </summary>
-    /// <param name="command">The command whose data is captured.</param>
-    /// <returns>The metadata describing the command's data.</returns>
     public static AuditMetadata Serialize(object command)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -119,7 +105,6 @@ public static class CommandAuditMetadataSerializer
             return new AuditValue.Number(Convert.ToDecimal(value));
         }
 
-        // Stop descending at the depth bound: render as string rather than recurse.
         if (depth >= maxDepth)
         {
             return new AuditValue.String(value.ToString() ?? string.Empty);
@@ -146,8 +131,7 @@ public static class CommandAuditMetadataSerializer
                 members[childName] = ToAuditValue(childName, childValue, depth + 1);
             }
 
-            // A value object with no readable members (or only its own string
-            // form) is most useful rendered as its string representation.
+            // A value object with no readable members is best rendered as its string form.
             if (members.Count == 0)
             {
                 return new AuditValue.String(value.ToString() ?? string.Empty);

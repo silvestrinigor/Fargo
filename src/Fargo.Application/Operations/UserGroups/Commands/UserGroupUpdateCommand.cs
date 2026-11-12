@@ -8,13 +8,9 @@ using Fargo.Core.Entities.UserGroups;
 
 namespace Fargo.Application.Operations.UserGroups;
 
-/// <summary>
-/// Command used to update an existing user group from an API update payload.
-/// </summary>
 /// <remarks>
-/// Implements <see cref="ITransactionalCommand"/>: on the re-parent path the
-/// handler acquires a hierarchy advisory lock that must be held until commit, so
-/// it runs inside a single explicit transaction owned by the pipeline.
+/// Implements <see cref="ITransactionalCommand"/>: on the re-parent path the handler takes a hierarchy
+/// advisory lock that must be held until commit.
 /// </remarks>
 public sealed record UserGroupUpdateCommand(
     Guid UserGroupGuid, UserGroupUpdateDto Update

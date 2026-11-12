@@ -7,7 +7,6 @@ using Fargo.Core.Entities.Actors.ServiceAccounts;
 
 namespace Fargo.Application.Operations.ServiceAccounts;
 
-/// <summary>Command to delete a service account.</summary>
 public sealed record ServiceAccountDeleteCommand(
     Guid ServiceAccountGuid
 ) : ICommand;

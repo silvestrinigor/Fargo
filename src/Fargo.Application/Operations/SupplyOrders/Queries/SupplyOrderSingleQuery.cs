@@ -6,9 +6,6 @@ using Fargo.Core.Entities.Actors;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Retrieves a single supply order by its identifier.
-/// </summary>
 public sealed record SupplyOrderSingleQuery(Guid SupplyOrderGuid) : IQuery<SupplyOrderDto?>;
 
 public sealed class SupplyOrderSingleQueryHandler(

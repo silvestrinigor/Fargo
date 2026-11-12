@@ -4,75 +4,36 @@ using Fargo.Core.Informations;
 namespace Fargo.Core.Entities.Partitions;
 
 /// <summary>
-/// Represents a partition used to isolate and scope access to core entities.
+/// A node of the hierarchy that scopes access to entities.
 /// </summary>
 /// <remarks>
-/// Partitions define hierarchical access boundaries in the system.
+/// Access flows down the hierarchy: access to a partition grants access to the entities of its
+/// descendants, never of its parent or of other branches.
 ///
-/// A partition may reference a parent partition, forming a hierarchy.
-/// Access inheritance flows from parent to child, but not from child to parent.
-///
-/// This means that a user with access to a parent partition can also access
-/// entities belonging to its descendant partitions. However, a user with access
-/// only to a child partition cannot access entities belonging to its parent
-/// partition or to other branches of the hierarchy.
-///
-/// The system contains a unique global partition at the top of the hierarchy.
-/// The global partition has access to all entities contained in its descendant
-/// partitions. Access to this partition is restricted to highly privileged users.
+/// A single global partition is the root of the hierarchy. Access to it is restricted to highly
+/// privileged users.
 /// </remarks>
 public class Partition : Entity, IConcurrencyVersioned
 {
-    /// <summary>
-    /// Gets a value indicating whether this is the global partition.
-    /// </summary>
     public bool IsGlobalPartition => Guid == FargoCoreWellKnowGuids.GlobalPartitionGuid;
 
-    /// <summary>
-    /// Gets or sets the name of the partition.
-    /// </summary>
     public required Name Name { get; set; }
 
-    /// <summary>
-    /// Gets or sets the description of the partition.
-    /// </summary>
     public Description Description { get; set; } = Description.Empty;
 
     /// <summary>
-    /// Gets the unique identifier of the parent partition, if any.
+    /// <see langword="null"/> only for the global partition, the root of the hierarchy.
     /// </summary>
-    /// <remarks>
-    /// A <see langword="null"/> value indicates that this is the global partition,
-    /// which is the root of the partition hierarchy.
-    /// </remarks>
     public Guid? ParentPartitionGuid { get; private set; }
 
-    /// <summary>
-    /// Gets the parent partition of the current partition, if any.
-    /// </summary>
-    /// <remarks>
-    /// The parent partition defines the hierarchical relationship between partitions,
-    /// enabling access inheritance from parent to child.
-    /// </remarks>
     public Partition? ParentPartition { get; private set; }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Partition"/> class.
-    /// Intended only for factory methods and Entity Framework.
-    /// </summary>
+    // Required by EF Core and the factory methods.
     private Partition()
     {
         EntityType = EntityType.Partition;
     }
 
-    /// <summary>
-    /// Creates a new child partition.
-    /// </summary>
-    /// <param name="name">The name of the partition.</param>
-    /// <param name="parentPartition">
-    /// The parent of the newly created partition.
-    /// </param>
-    /// <returns>A new <see cref="Partition"/> instance.</returns>
     public static Partition CreatePartition(Name name, Partition parentPartition)
     {
         var partition = new Partition
@@ -85,11 +46,6 @@ public class Partition : Entity, IConcurrencyVersioned
         return partition;
     }
 
-    /// <summary>
-    /// Creates the global partition.
-    /// </summary>
-    /// <param name="name">The name of the global partition.</param>
-    /// <returns>The global <see cref="Partition"/>.</returns>
     public static Partition CreateGlobalPartition(Name name)
     {
         var globalPartition = new Partition
@@ -102,24 +58,11 @@ public class Partition : Entity, IConcurrencyVersioned
     }
 
     /// <summary>
-    /// Assigns the specified partition as the parent of the current partition.
+    /// Does <b>not</b> detect circular hierarchies; validate with
+    /// <see cref="PartitionService"/> first.
     /// </summary>
-    /// <param name="parentPartition">
-    /// The partition to assign as the parent.
-    /// </param>
-    /// <remarks>
-    /// This method validates only invariants that can be enforced by this
-    /// <see cref="Partition"/> instance. It does <b>not</b> validate the overall
-    /// partition hierarchy or detect circular parent-child relationships.
-    ///
-    /// Before calling this method, the application should validate the proposed
-    /// assignment using <see cref="PartitionService"/> to ensure that assigning
-    /// <paramref name="parentPartition"/> as the parent will not introduce an
-    /// invalid hierarchy.
-    /// </remarks>
     /// <exception cref="FargoCoreException">
-    /// Thrown when attempting to assign a parent to the global partition or when
-    /// attempting to assign the partition as its own parent.
+    /// The partition is the global partition, or <paramref name="parentPartition"/> is itself.
     /// </exception>
     public void SetParentPartition(Partition parentPartition)
     {
@@ -143,18 +86,10 @@ public class Partition : Entity, IConcurrencyVersioned
     }
 
     /// <summary>
-    /// Validates the invariants, intrinsic to this partition, that must hold for
-    /// it to be deleted.
+    /// Checks only what this partition can tell on its own; the presence of child partitions is
+    /// checked by <see cref="PartitionService"/>.
     /// </summary>
-    /// <remarks>
-    /// This method validates only invariants that can be enforced by this
-    /// <see cref="Partition"/> instance. It does <b>not</b> validate constraints
-    /// that require access to other partitions, such as the presence of child
-    /// partitions. Those must be validated through <see cref="PartitionService"/>.
-    /// </remarks>
-    /// <exception cref="FargoCoreException">
-    /// Thrown when attempting to delete the global partition.
-    /// </exception>
+    /// <exception cref="FargoCoreException">The partition is the global partition.</exception>
     public void ValidateCanBeDeleted()
     {
         if (IsGlobalPartition)

@@ -253,6 +253,11 @@ dotnet_diagnostic.CS1591.severity = silent
 # CS1591: Missing XML comment for publicly visible type or member
 dotnet_diagnostic.CS1591.severity = silent
 
+# CS1573: Parameter has no matching param tag while other parameters have one.
+# Only parameters whose meaning is not obvious are documented
+# (docs/contributing/code-documentation.md), so partial param docs are intended.
+dotnet_diagnostic.CS1573.severity = silent
+
 # Fargo.Application: namespaces must mirror folders (enforced in the IDE / dotnet format).
 [src/Fargo.Application/**.cs]
 dotnet_diagnostic.IDE0130.severity = warning

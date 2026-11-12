@@ -3,12 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.ServiceHttp.ExceptionHandlers;
 
-/// <summary>
-/// Shared helpers for the Fargo exception handlers. Centralizes the common
-/// problem-details tail (<c>Instance</c>, <c>traceId</c>, <c>errorType</c>) and
-/// the final <see cref="IProblemDetailsService.WriteAsync"/> call so each
-/// handler only has to describe what is unique about its exception.
-/// </summary>
 internal static class ProblemDetailsWriter
 {
     /// <summary>

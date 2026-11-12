@@ -7,38 +7,20 @@ using System.Diagnostics;
 
 namespace Fargo.Application.Logging;
 
-/// <summary>
-/// Shared, source-generated logging primitives for application handlers.
-///
-/// <para>
-/// Handlers no longer log their own start/finish. The
-/// <see cref="LoggingCommandHandlerDecorator{TCommand}"/> /
-/// <see cref="LoggingQueryHandlerDecorator{TQuery, TResponse}"/> wrap every
-/// handler and use <see cref="BeginOperation"/> to emit a consistent
-/// <em>started</em> event, a terminal <em>completed</em> (with elapsed
-/// milliseconds) or <em>failed</em> (with elapsed milliseconds and the
-/// exception) event, and to attach the operation name — and, when available,
-/// the current actor's identity — as a logging scope so every nested log entry
-/// is correlated.
-/// </para>
-/// </summary>
+/// <remarks>
+/// The command and query logging decorators wrap every handler and use <see cref="BeginOperation"/> so
+/// each operation emits a started event and a terminal completed or failed event with the elapsed
+/// milliseconds. The operation name and, when available, the actor identity are attached as a logging
+/// scope so nested log entries are correlated.
+/// </remarks>
 public static partial class HandlerLog
 {
     /// <summary>
-    /// Begins an operation: opens a correlation scope (operation name plus, when
-    /// supplied, the actor identity) and logs the <em>started</em> event. Call
-    /// <see cref="OperationLog.Complete"/> on success or
-    /// <see cref="OperationLog.Fail"/> on error; disposing the returned handle
-    /// emits the terminal event with the measured duration.
+    /// Opens a correlation scope and logs the started event. Call <see cref="OperationLog.Complete"/> or
+    /// <see cref="OperationLog.Fail"/>; disposing the handle emits the terminal event.
     /// </summary>
-    /// <param name="logger">The logger.</param>
-    /// <param name="operation">
-    /// A stable operation label derived from the message type (e.g.
-    /// "ArticleDeleteCommand").
-    /// </param>
     /// <param name="actor">
-    /// The current actor, or <see langword="null"/> for actor-less operations
-    /// (e.g. login, system initialization) or hosts without an actor context.
+    /// Null for actor-less operations (login, system initialization) or hosts without an actor context.
     /// </param>
     public static OperationLog BeginOperation(this ILogger logger, string operation, ICurrentActor? actor = null)
         => new(logger, operation, actor);
@@ -59,17 +41,10 @@ public static partial class HandlerLog
         this ILogger logger, string operation, long elapsedMilliseconds, string exceptionType, FargoErrorType errorType, string reason);
 }
 
-/// <summary>
-/// Tracks a single handler invocation: holds the correlation scope and a
-/// stopwatch, and on <see cref="Dispose"/> emits the terminal log event.
-///
-/// <para>
-/// Call <see cref="Complete"/> on the success path or <see cref="Fail"/> with
-/// the thrown exception on the error path. If the handle is disposed without
-/// either having been called, the operation is still recorded as failed (with
-/// no exception) so a terminal event is never missing.
-/// </para>
-/// </summary>
+/// <remarks>
+/// If the handle is disposed without <see cref="Complete"/> or <see cref="Fail"/>, the operation is still
+/// recorded as failed (with no exception), so a terminal event is never missing.
+/// </remarks>
 public sealed class OperationLog : IDisposable
 {
     private readonly ILogger logger;
@@ -91,13 +66,10 @@ public sealed class OperationLog : IDisposable
         logger.OperationStarted(operation);
     }
 
-    /// <summary>Marks the operation as successful.</summary>
     public void Complete() => completed = true;
 
-    /// <summary>Marks the operation as failed with the given exception.</summary>
     public void Fail(Exception exception) => failure = exception;
 
-    /// <inheritdoc />
     public void Dispose()
     {
         if (disposed)
@@ -115,9 +87,7 @@ public sealed class OperationLog : IDisposable
         }
         else if (TryGetExpectedFailure(failure, out var errorType))
         {
-            // Business and validation rejections are mapped to HTTP responses by
-            // the exception handlers; they are expected outcomes, so log them as
-            // a warning without a stack trace.
+            // Expected outcomes (mapped to HTTP responses by the exception handlers): warn, no stack trace.
             if (logger.IsEnabled(LogLevel.Warning))
             {
                 logger.OperationRejected(

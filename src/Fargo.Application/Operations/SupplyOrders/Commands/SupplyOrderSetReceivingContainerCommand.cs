@@ -8,8 +8,7 @@ using Fargo.Core.Entities.SupplyOrders;
 namespace Fargo.Application.Operations.SupplyOrders;
 
 /// <summary>
-/// Sets or clears the receiving container of a draft supply order. A
-/// <see langword="null"/> container receives goods at the root.
+/// A <see langword="null"/> container receives goods at the root.
 /// </summary>
 public sealed record SupplyOrderSetReceivingContainerCommand(
     Guid SupplyOrderGuid,

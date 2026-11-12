@@ -5,8 +5,7 @@ internal static class BearerToken
     private const string Scheme = "Bearer ";
 
     /// <summary>
-    /// Extracts the token from an <c>Authorization: Bearer &lt;token&gt;</c> header
-    /// value, or returns null when the header is missing or not a bearer token.
+    /// Returns null when the header is missing or is not a bearer token.
     /// </summary>
     public static string? Parse(string? authorizationHeader)
     {

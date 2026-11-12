@@ -12,33 +12,28 @@ namespace Fargo.ClientRealtime;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Notifications carry no entity state: handle <see cref="EntityChanged"/> by
-/// reading the entity again through the API.
+/// Nothing connects until <see cref="StartAsync"/>. Notifications carry no entity state: handle
+/// <see cref="EntityChanged"/> by reading the entity again through the API.
 /// </para>
 /// <para>
-/// <b>Tokens.</b> Every connect and reconnect asks the
-/// <see cref="IFargoAccessTokenSource"/> for a token. The real-time service
-/// closes a connection when its token expires, so a long-lived client needs a
-/// source that returns a fresh token, for example
-/// <see cref="RefreshingAccessTokenSource"/>. Whether and when tokens are
-/// refreshed is the application's decision.
+/// <b>Tokens.</b> Every connect and reconnect asks the <see cref="IFargoAccessTokenSource"/> for a
+/// token, and the service closes a connection when its token expires. Nothing refreshes tokens
+/// unless the application opts in, for example with <see cref="RefreshingAccessTokenSource"/>.
 /// </para>
 /// <para>
-/// <b>Connection loss.</b> After <see cref="StartAsync"/> succeeds, the client
-/// keeps reconnecting until <see cref="StopAsync"/>, whether the connection
-/// dropped or the server closed it. <see cref="Reconnecting"/> is raised when it
-/// is lost and <see cref="Resynchronized"/> when it is back. Events are not kept
-/// for disconnected clients, so re-read the data you show on
+/// <b>Connection loss.</b> After <see cref="StartAsync"/> succeeds, the client keeps reconnecting
+/// until <see cref="StopAsync"/>, whether the connection dropped or the server closed it.
+/// <see cref="Reconnecting"/> is raised when it is lost and <see cref="Resynchronized"/> when it is
+/// back. Events are not kept for disconnected clients, so re-read the data you show on
 /// <see cref="Resynchronized"/>.
 /// </para>
 /// <para>
-/// <b>Duplicates.</b> Delivery is at-least-once; an event identifier seen in the
-/// last <see cref="FargoRealtimeClientOptions.DuplicateWindow"/> events is not
-/// raised again.
+/// <b>Duplicates.</b> Delivery is at-least-once; an event identifier seen in the last
+/// <see cref="FargoRealtimeClientOptions.DuplicateWindow"/> events is not raised again.
 /// </para>
 /// <para>
-/// <b>Handlers.</b> An exception thrown by a handler is logged and does not
-/// affect the connection or the other handlers.
+/// <b>Handlers.</b> An exception thrown by a handler is logged and does not affect the connection
+/// or the other handlers.
 /// </para>
 /// </remarks>
 public sealed class FargoRealtimeClient : IAsyncDisposable
@@ -53,12 +48,6 @@ public sealed class FargoRealtimeClient : IAsyncDisposable
     private CancellationTokenSource? restartCancellation;
     private Task restartTask = Task.CompletedTask;
 
-    /// <summary>
-    /// Initializes a new client. Nothing connects until <see cref="StartAsync"/>.
-    /// </summary>
-    /// <param name="options">The client options; <see cref="FargoRealtimeClientOptions.RealtimeBaseAddress"/> is required.</param>
-    /// <param name="tokenSource">Supplies the access token for each connect and reconnect.</param>
-    /// <param name="logger">The logger; optional.</param>
     public FargoRealtimeClient(
         FargoRealtimeClientOptions options,
         IFargoAccessTokenSource tokenSource,
@@ -121,25 +110,14 @@ public sealed class FargoRealtimeClient : IAsyncDisposable
     /// </summary>
     public event Func<Exception?, Task>? Closed;
 
-    /// <summary>
-    /// Gets the hub address the client connects to.
-    /// </summary>
     public Uri HubUri { get; }
 
-    /// <summary>
-    /// Gets the connection state.
-    /// </summary>
     public HubConnectionState State => connection.State;
 
     /// <summary>
-    /// Connects to the hub.
+    /// Connects to the hub. A failure of this first connect is thrown to the caller, who decides
+    /// whether to retry; only connections lost after a successful start are re-established.
     /// </summary>
-    /// <remarks>
-    /// A failure of this first connect is thrown to the caller, who decides
-    /// whether to retry; only connections lost after a successful start are
-    /// re-established automatically.
-    /// </remarks>
-    /// <param name="cancellationToken">A token that cancels the connect.</param>
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         lock (gate)
@@ -155,7 +133,6 @@ public sealed class FargoRealtimeClient : IAsyncDisposable
     /// <summary>
     /// Disconnects and stops reconnecting.
     /// </summary>
-    /// <param name="cancellationToken">A token that cancels the disconnect.</param>
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         Task pendingRestart;
@@ -172,7 +149,6 @@ public sealed class FargoRealtimeClient : IAsyncDisposable
         await connection.StopAsync(cancellationToken);
     }
 
-    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         await StopAsync();
@@ -187,8 +163,7 @@ public sealed class FargoRealtimeClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// Appends the hub path to the real-time base address, keeping any path the
-    /// base address already has.
+    /// Keeps any path the base address already has.
     /// </summary>
     internal static Uri GetHubUri(Uri realtimeBaseAddress)
     {

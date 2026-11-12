@@ -4,41 +4,16 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Persistence.Configurations;
 
-/// <summary>
-/// Configures the EF Core mapping for
-/// <see cref="ItemParentContainerHistoryPostgresTemporal"/>, the temporal history
-/// of item containment.
-/// </summary>
-/// <remarks>
-/// This configuration maps only what EF needs to materialize and relate the
-/// entity: the surrogate key, the <c>tstzrange</c> validity column with its
-/// default, and the foreign keys to the audited item and the recorded container.
-/// The two behaviours that make the table temporal — rejecting overlapping
-/// periods and opening/closing periods as an item moves — live in the database
-/// (a GiST exclusion constraint and a trigger) and are created by raw SQL in the
-/// corresponding migration, as explained in <see cref="Configure"/>.
-/// </remarks>
 public sealed class ItemParentContainerHistoryPostgresTemporalConfiguration : IEntityTypeConfiguration<ItemParentContainerHistoryPostgresTemporal>
 {
     /// <summary>
-    /// Applies the schema mapping for the item containment history table.
+    /// The validity column defaults to <c>tstzrange(now(), 'infinity', '[)')</c>, so a row created directly
+    /// starts now and stays open until closed. The history trigger sets the period explicitly, so the default is
+    /// only a fallback.
     /// </summary>
-    /// <param name="builder">The builder used to configure the entity type.</param>
     /// <remarks>
-    /// <para>
-    /// The validity column is given the default <c>tstzrange(now(), 'infinity',
-    /// '[)')</c> so that a row created directly starts "now" and stays open until
-    /// closed. The trigger that maintains history sets the period explicitly, so
-    /// in practice the default only applies to the trigger's own inserts as a
-    /// fallback.
-    /// </para>
-    /// <para>
-    /// The item foreign key cascades on delete, matching the existing item history
-    /// convention (<c>ItemMoviment</c>): a deleted item takes its history with it.
-    /// The container foreign key is set to <see langword="null"/> on delete so that
-    /// removing a former container does not erase the fact that the item once lived
-    /// there — the period is preserved with a null container reference.
-    /// </para>
+    /// The item foreign key cascades on delete, like <c>ItemMoviment</c>. The container foreign key is set to
+    /// <see langword="null"/> on delete, so removing a former container keeps the fact that the item lived there.
     /// </remarks>
     public void Configure(EntityTypeBuilder<ItemParentContainerHistoryPostgresTemporal> builder)
     {

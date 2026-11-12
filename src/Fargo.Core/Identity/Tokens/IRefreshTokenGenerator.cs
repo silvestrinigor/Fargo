@@ -1,19 +1,9 @@
 namespace Fargo.Core.Identity.Tokens;
 
 /// <summary>
-/// Defines the contract for generating refresh tokens used by the
-/// authentication system.
-///
-/// Implementations are responsible for generating cryptographically secure
-/// random tokens suitable for authentication workflows.
+/// Generates cryptographically secure random refresh tokens.
 /// </summary>
 public interface IRefreshTokenGenerator
 {
-    /// <summary>
-    /// Generates a new refresh token.
-    /// </summary>
-    /// <returns>
-    /// A newly generated <see cref="Token"/>.
-    /// </returns>
     Token Generate();
 }

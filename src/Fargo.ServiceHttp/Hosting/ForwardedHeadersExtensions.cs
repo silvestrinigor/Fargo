@@ -4,28 +4,15 @@ using System.Net;
 namespace Fargo.ServiceHttp.Hosting;
 
 /// <summary>
-/// Configures forwarded-headers handling for running behind a reverse proxy or
-/// ingress (TLS termination, load balancer).
+/// Forwarded-headers handling for running behind a reverse proxy or ingress.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Without this, the app sees the proxy's address as the client IP and the
-/// request scheme as the proxy-to-app scheme. That breaks HTTPS detection and —
-/// critically — collapses the per-IP rate-limit partitions (login throttling,
-/// the global limiter) into a single bucket for all clients.
-/// </para>
-/// <para>
-/// Configuration (section <c>ForwardedHeaders</c>):
-/// <list type="bullet">
-///   <item><description><c>Enabled</c> — turn processing on (default: off; enable when deployed behind a proxy).</description></item>
-///   <item><description><c>KnownProxies</c> — IP addresses of trusted proxies.</description></item>
-///   <item><description><c>KnownNetworks</c> — trusted CIDR networks, e.g. <c>10.0.0.0/8</c>.</description></item>
-/// </list>
-/// When enabled but no known proxies/networks are configured, the trusted lists
-/// are cleared so headers are accepted from any immediate peer. This is only
-/// safe when the app is exclusively reachable through the proxy; otherwise set
-/// <c>KnownProxies</c>/<c>KnownNetworks</c> to the real proxy addresses.
-/// </para>
+/// Without it the app sees the proxy's address as the client IP, which breaks HTTPS detection and collapses
+/// the per-IP rate-limit partitions (login throttling, the global limiter) into one bucket for all clients.
+/// Configured in the <c>ForwardedHeaders</c> section: <c>Enabled</c> (default off), <c>KnownProxies</c> and
+/// <c>KnownNetworks</c> (CIDR, for example <c>10.0.0.0/8</c>). When enabled with neither list, the trusted
+/// lists are cleared so headers are accepted from any peer. That is only safe when the app is reachable
+/// exclusively through the proxy.
 /// </remarks>
 public static class ForwardedHeadersExtensions
 {
@@ -52,7 +39,7 @@ public static class ForwardedHeadersExtensions
 
             if (knownProxies.Length == 0 && knownNetworks.Length == 0)
             {
-                // Trust the immediate peer only (the proxy in front of us).
+                // Clearing the defaults (loopback only) trusts any peer.
                 options.KnownProxies.Clear();
                 options.KnownIPNetworks.Clear();
                 return;
@@ -82,9 +69,8 @@ public static class ForwardedHeadersExtensions
     }
 
     /// <summary>
-    /// Applies forwarded-headers processing. Must run before HTTPS redirection,
-    /// authentication, and rate limiting so the real client IP and scheme are
-    /// seen by everything downstream. No-op when not enabled in configuration.
+    /// Must run before HTTPS redirection, authentication and rate limiting so they see the real client IP and
+    /// scheme. No-op unless enabled in configuration.
     /// </summary>
     public static IApplicationBuilder UseFargoForwardedHeaders(
         this WebApplication app)

@@ -3,6 +3,10 @@ using Fargo.Application.Operations.Items.Dtos;
 
 namespace Fargo.Application.Persistence.Repositories;
 
+/// <remarks>
+/// For every <c>childOfAnyOfThesePartitions</c> parameter, null applies no partition filter and an
+/// empty collection matches nothing.
+/// </remarks>
 public interface IItemQueryRepository
 {
     Task<ItemDto?> GetInfoByGuidAsync(
@@ -18,25 +22,10 @@ public interface IItemQueryRepository
     );
 
     /// <summary>
-    /// Gets the location hierarchy of an item as it existed at a specific instant,
-    /// ordered from the item itself outward to its root container.
+    /// The chain of items that contained the item at <paramref name="at"/>, from the item outward to its
+    /// root container. Empty when no containment history covers the instant (for example, the item did
+    /// not yet exist).
     /// </summary>
-    /// <param name="itemGuid">The unique identifier of the item.</param>
-    /// <param name="at">
-    /// The instant, in UTC, at which the containment hierarchy is evaluated. Each
-    /// link of the chain is resolved from the containment history valid at this
-    /// instant.
-    /// </param>
-    /// <param name="childOfAnyOfThesePartitions">
-    /// When provided, restricts the result to items accessible through any of
-    /// these partitions.
-    /// </param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>
-    /// The chain of items that contained the queried item at <paramref name="at"/>,
-    /// ordered by depth. An empty collection when the item had no containment
-    /// history covering that instant (for example, it did not yet exist).
-    /// </returns>
     Task<IReadOnlyCollection<ItemDto>> GetLocationInfoByGuidAtInstantOrderedByDepthAsync(
         Guid itemGuid,
         DateTimeOffset at,
@@ -65,24 +54,13 @@ public interface IItemQueryRepository
     );
 
     /// <summary>
-    /// Gets the article inventory of a container as it existed at a specific
-    /// instant, reconstructed from the item containment history.
+    /// Per-article counts in the container as it was at <paramref name="at"/>, reconstructed from the item
+    /// containment history.
     /// </summary>
-    /// <param name="itemContainerGuid">The container item to inspect.</param>
-    /// <param name="at">
-    /// The instant, in UTC, at which the inventory is evaluated. Containment is
-    /// resolved from the history row valid at this instant for each item.
-    /// </param>
-    /// <param name="articleGuids">
-    /// When provided, restricts the inventory to these articles.
-    /// </param>
     /// <param name="includeDescendents">
-    /// When <see langword="true"/>, counts items nested in descendant containers
-    /// (as they were nested at the instant) as well as direct children; otherwise
-    /// only items directly inside the container at the instant are counted.
+    /// Also count items nested in descendant containers (as nested at the instant); otherwise only direct
+    /// children are counted.
     /// </param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The per-article counts contained in the container at that instant.</returns>
     Task<IReadOnlyCollection<ItemContainerInventoryDto>> GetInventoryInfoByGuidAtInstantAsync(
         Guid itemContainerGuid,
         DateTimeOffset at,
@@ -92,31 +70,13 @@ public interface IItemQueryRepository
     );
 
     /// <summary>
-    /// Gets the event-based inventory contained in a container, computed as the
-    /// net of signed movement quantities per event-tracked article.
+    /// Net quantity per event-tracked article in the container: quantities moved in minus quantities
+    /// moved out, from <c>item_moviment_events</c>.
     /// </summary>
     /// <remarks>
-    /// For each event-tracked article, the net quantity is the sum of quantities
-    /// moved into the container set minus the sum of quantities moved out of it,
-    /// derived from <c>item_moviment_events</c>. When <paramref name="at"/> is
-    /// provided, only events that occurred at or before that instant are
-    /// considered; otherwise all events are considered. Only non-zero net
-    /// quantities are returned. Entity-tracked articles are not included.
+    /// A null <paramref name="at"/> means now; otherwise only events at or before that instant count.
+    /// Only non-zero net quantities are returned, and entity-tracked articles are not included.
     /// </remarks>
-    /// <param name="itemContainerGuid">The container item to inspect.</param>
-    /// <param name="articleGuids">
-    /// When provided, restricts the inventory to these articles.
-    /// </param>
-    /// <param name="includeDescendents">
-    /// When <see langword="true"/>, counts quantities in descendant containers as
-    /// well as the container itself.
-    /// </param>
-    /// <param name="at">
-    /// The instant, in UTC, at which the inventory is evaluated. When
-    /// <see langword="null"/>, the current inventory is returned.
-    /// </param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The per-article net quantities contained in the container.</returns>
     Task<IReadOnlyCollection<ItemContainerInventoryDto>> GetEventInventoryInfoByGuidAsync(
         Guid itemContainerGuid,
         IReadOnlyCollection<Guid>? articleGuids = null,

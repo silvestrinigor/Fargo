@@ -1,108 +1,40 @@
 namespace Fargo.Core.Identity.Tokens;
 
 /// <summary>
-/// Represents a refresh token used to obtain a new access token
-/// without requiring the user to authenticate again.
+/// A long-lived credential used to obtain a new access token without authenticating again. Only
+/// the hash of the token is persisted. It is unusable once expired or revoked.
 /// </summary>
-/// <remarks>
-/// Refresh tokens are long-lived credentials associated with a user.
-/// Only the hashed token value is persisted; the original token value
-/// must not be stored.
-///
-/// A refresh token can become unusable when it expires or is revoked.
-/// </remarks>
 public sealed class RefreshToken
 {
-    /// <summary>
-    /// Default number of days before a refresh token expires.
-    /// </summary>
     private const short defaultExpirationDays = 10;
 
-    /// <summary>
-    /// Gets the unique identifier of the refresh token.
-    /// </summary>
     public Guid Guid { get; private init; } = Guid.NewGuid();
 
-    /// <summary>
-    /// Gets the default expiration duration applied to newly created refresh tokens.
-    /// </summary>
     public static TimeSpan DefaultExpirationTimeSpan { get; } = TimeSpan.FromDays(defaultExpirationDays);
 
-    /// <summary>
-    /// Gets the unique identifier of the user associated with this refresh token.
-    /// </summary>
     public Guid UserGuid { get; private init; }
 
-    /// <summary>
-    /// Gets the hashed value of the refresh token.
-    /// </summary>
-    /// <remarks>
-    /// The original token value must never be persisted. The stored hash is used
-    /// to validate refresh token requests without exposing the token itself.
-    /// </remarks>
     public required TokenHash TokenHash { get; init; }
 
-    /// <summary>
-    /// Gets the date and time when the refresh token expires.
-    /// </summary>
-    /// <remarks>
-    /// Newly created refresh tokens expire after
-    /// <see cref="DefaultExpirationTimeSpan"/> from their creation time.
-    /// </remarks>
     public DateTimeOffset ExpiresAt { get; private init; }
 
-    /// <summary>
-    /// Gets the date and time when the refresh token was revoked.
-    /// </summary>
-    /// <remarks>
-    /// A <see langword="null"/> value indicates that the refresh token has not
-    /// been revoked.
-    /// </remarks>
     public DateTimeOffset? RevokedAt { get; private set; }
 
     /// <summary>
-    /// Determines whether the refresh token has expired at the given instant.
+    /// A token is already expired at exactly <see cref="ExpiresAt"/>.
     /// </summary>
-    /// <param name="now">The instant, in UTC, to evaluate against.</param>
     public bool IsExpiredAt(DateTimeOffset now) => ExpiresAt <= now;
 
-    /// <summary>
-    /// Determines whether the refresh token can be used at the given instant to
-    /// obtain a new access token.
-    /// </summary>
-    /// <remarks>
-    /// A refresh token is usable only while it has not expired and has not been
-    /// revoked.
-    /// </remarks>
-    /// <param name="now">The instant, in UTC, to evaluate against.</param>
     public bool IsUsableAt(DateTimeOffset now) => !IsExpiredAt(now) && RevokedAt is null;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RefreshToken"/> class.
-    /// </summary>
-    /// <remarks>
-    /// Intended only for Entity Framework Core materialization.
-    /// </remarks>
+    // Required by EF Core.
     private RefreshToken()
     {
     }
 
     /// <summary>
-    /// Creates a new refresh token for the specified user.
+    /// The token expires <see cref="DefaultExpirationTimeSpan"/> after <paramref name="createdAt"/>.
     /// </summary>
-    /// <param name="userGuid">
-    /// The unique identifier of the user that owns the refresh token.
-    /// </param>
-    /// <param name="tokenHash">
-    /// The hashed value of the refresh token.
-    /// </param>
-    /// <param name="createdAt">
-    /// The instant, in UTC, at which the token is created. The token expires
-    /// <see cref="DefaultExpirationTimeSpan"/> after it.
-    /// </param>
-    /// <returns>
-    /// A new <see cref="RefreshToken"/> instance.
-    /// </returns>
     public static RefreshToken Create(Guid userGuid, TokenHash tokenHash, DateTimeOffset createdAt)
         => new()
         {
@@ -112,12 +44,8 @@ public sealed class RefreshToken
         };
 
     /// <summary>
-    /// Revokes the refresh token.
+    /// Idempotent: revoking an already revoked token keeps the original revocation time.
     /// </summary>
-    /// <remarks>
-    /// If the refresh token has already been revoked, this method has no effect.
-    /// </remarks>
-    /// <param name="revokedAt">The instant, in UTC, at which the token is revoked.</param>
     public void Revoke(DateTimeOffset revokedAt)
     {
         RevokedAt ??= revokedAt;

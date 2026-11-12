@@ -5,121 +5,56 @@ using Fargo.Core.Entities.Partitions;
 namespace Fargo.Core.Entities.Items;
 
 /// <summary>
-/// Represents an item in the system.
+/// An individual physical unit of an <see cref="Article"/>.
 /// </summary>
 /// <remarks>
-/// An item is a concrete instance associated with a specific
-/// <see cref="Article"/>. While an <see cref="Article"/> defines the
-/// descriptive information of a product type, an <see cref="Item"/>
-/// represents an individual unit of that article.
-///
-/// An item is partitioned data and defines its own partition scope
-/// independently of the associated <see cref="Article"/>.
-///
-/// Although the item is related to an article, access to the item is not
-/// determined by the article's partitions. Instead, a user may access the item
-/// if the item has no partition (public), or if they have access to at least
-/// one partition associated directly with the item.
-///
-/// Every item is always associated with the global partition. The global
-/// partition defines the base partition scope of the item and cannot be removed.
+/// An item defines its own partition scope independently of its article: a user may access it if
+/// it has no partition (public) or if they have access to at least one of its own partitions.
+/// Every item belongs to the global partition, which cannot be removed.
 /// </remarks>
 public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 {
-    /// <summary>
-    /// Gets the unique identifier of the associated <see cref="Article"/>.
-    /// </summary>
     public Guid ArticleGuid { get; private init; }
 
-    /// <summary>
-    /// Gets the article associated with this item.
-    /// </summary>
-    /// <remarks>
-    /// The associated article defines the descriptive classification of the item,
-    /// but does not determine the partition access scope of this entity.
-    /// </remarks>
     public Article Article { get; private init; }
 
     /// <summary>
-    /// Gets the unique identifier of the parent container item.
+    /// <see langword="null"/> when the item is not placed inside another item.
     /// </summary>
-    /// <remarks>
-    /// A <see langword="null"/> value indicates that the item is not currently
-    /// placed inside another item.
-    /// </remarks>
     public Guid? ParentItemContainerGuid { get; private set; }
 
     /// <summary>
-    /// Gets the container item that directly contains this item, if any.
+    /// <see langword="null"/> when the item is not placed inside another item.
     /// </summary>
-    /// <remarks>
-    /// Items can be placed inside container items, allowing nested containment
-    /// relationships where a container may itself be placed inside another
-    /// container.
-    ///
-    /// A <see langword="null"/> value indicates that the item is not currently
-    /// placed inside another item.
-    /// </remarks>
     public Item? ParentItemContainer { get; private set; }
 
     /// <summary>
-    /// Gets a value indicating whether the item is fixed in its current container location.
+    /// A fixed item can be neither moved into another container nor removed from its container.
     /// </summary>
     public bool IsFixed { get; private set; } = false;
 
-    /// <summary>
-    /// Gets the partitions directly associated with the item.
-    /// </summary>
-    /// <remarks>
-    /// Every item is always associated with the global partition.
-    /// The global partition defines the base partition scope of the item
-    /// and cannot be removed.
-    ///
-    /// Additional partitions may be associated with the item.
-    /// </remarks>
     public IReadOnlyCollection<ItemPartition> Partitions => partitions;
 
-    /// <summary>
-    /// Gets the unique identifiers of the partitions associated with the item.
-    /// </summary>
     public IReadOnlyCollection<Guid> PartitionGuids => [.. partitions.Select(p => p.PartitionGuid)];
 
     private readonly List<ItemPartition> partitions = [];
 
     /// <summary>
-    /// Gets the movement history of the item.
+    /// A movement is recorded whenever the parent container changes; removing the item from a
+    /// container records a movement with no destination.
     /// </summary>
-    /// <remarks>
-    /// A movement is recorded whenever the item's parent container changes.
-    /// Moving an item into a container records the destination container,
-    /// while removing the item from a container records a movement with no
-    /// destination container.
-    /// </remarks>
     public IReadOnlyCollection<ItemMoviment> Moviments => moviments;
 
     private readonly List<ItemMoviment> moviments = [];
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    /// <summary>
-    /// Initializes a new item entity.
-    /// </summary>
-    /// <remarks>
-    /// Required by Entity Framework.
-    /// </remarks>
+    // Required by EF Core.
     private Item()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
         EntityType = EntityType.Item;
     }
 
-    /// <summary>
-    /// Initializes a new item entity associated with the specified article.
-    /// </summary>
-    /// <param name="article">The article associated with the item.</param>
-    /// <remarks>
-    /// Every item is automatically associated with the global partition when
-    /// it is created. This association is mandatory and cannot be removed.
-    /// </remarks>
     private Item(Article article)
     {
         ArgumentNullException.ThrowIfNull(article);
@@ -139,38 +74,22 @@ public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
         partitions.Add(new ItemPartition(this, FargoCoreWellKnowGuids.GlobalPartitionGuid));
     }
 
-    /// <summary>
-    /// Creates a new item associated with the specified <paramref name="article"/>.
-    /// </summary>
-    /// <param name="article">The article associated with the item.</param>
-    /// <returns>A new <see cref="Item"/> instance.</returns>
+    /// <exception cref="FargoCoreException">
+    /// The article is not entity-tracked.
+    /// </exception>
     public static Item CreateItem(Article article)
         => new(article);
 
     /// <summary>
-    /// Places the item inside the specified container item.
+    /// Places the item inside a container item and records a movement.
     /// </summary>
-    /// <param name="parentItemContainer">
-    /// The container item that will become the item's parent.
-    /// </param>
     /// <remarks>
-    /// This operation updates the item's current parent container and records
-    /// a movement in the item's movement history.
-    ///
-    /// The method validates invariants that can be determined from the current
-    /// item and the specified parent, including that the parent is not the item
-    /// itself, that the parent represents a container article, and that the item
-    /// is not fixed.
-    ///
-    /// Validation requiring traversal of the complete containment hierarchy,
-    /// such as detecting indirect circular references, is performed by
-    /// <see cref="ItemService"/>.
+    /// Checks only what the item and the parent show: the parent is not the item itself, is a
+    /// container article, and the item is not fixed. Checks that traverse the hierarchy, such as
+    /// indirect circular references, are done by <see cref="ItemService"/>.
     /// </remarks>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="parentItemContainer"/> is null.
-    /// </exception>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the specified parent is invalid or the item is fixed.
+    /// The parent is the item itself or not a container, or the item is fixed.
     /// </exception>
     public void PlaceInsideContainer(Item parentItemContainer)
     {
@@ -202,21 +121,10 @@ public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
     }
 
     /// <summary>
-    /// Removes the item from its current parent container, leaving the item
-    /// without a parent container.
+    /// Clears the parent container and records a movement with no destination.
     /// </summary>
-    /// <remarks>
-    /// After this operation, <see cref="ParentItemContainer"/> and
-    /// <see cref="ParentItemContainerGuid"/> are <see langword="null"/>,
-    /// meaning that the item is not currently contained by any other item.
-    ///
-    /// A movement record is added to the item's movement history to represent
-    /// that the item is no longer inside a container.
-    ///
-    /// A fixed item cannot be removed from its current container.
-    /// </remarks>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the item is fixed.
+    /// The item is fixed.
     /// </exception>
     public void RemoveFromContainers()
     {
@@ -234,44 +142,25 @@ public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
         moviments.Add(new ItemMoviment(Guid, null, DateTimeOffset.UtcNow));
     }
 
-    /// <summary>
-    /// Fixes the item in its current location.
-    /// </summary>
     /// <remarks>
-    /// A fixed item cannot be moved into another container or removed from its
-    /// current parent container.
-    ///
-    /// Fixing an item does not change its current parent container.
-    /// If the item is already fixed, this operation has no effect.
+    /// Idempotent; the parent container is unchanged.
     /// </remarks>
     public void Fix()
     {
         IsFixed = true;
     }
 
-    /// <summary>
-    /// Removes the fixed state from the item.
-    /// </summary>
     /// <remarks>
-    /// After this operation, the item can be moved into another container or
-    /// removed from its current parent container.
-    ///
-    /// Unfixing an item does not change its current parent container.
-    /// If the item is already unfixed, this operation has no effect.
+    /// Idempotent; the parent container is unchanged.
     /// </remarks>
     public void Unfix()
     {
         IsFixed = false;
     }
 
-    /// <summary>
-    /// Associates the item with the specified partition.
-    /// If the association already exists, no action is taken.
-    /// </summary>
-    /// <param name="partition">The partition to associate.</param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
-    /// </exception>
+    /// <remarks>
+    /// Idempotent: nothing happens if the item already has the partition.
+    /// </remarks>
     public void AddPartition(Partition partition)
     {
         ArgumentNullException.ThrowIfNull(partition);
@@ -284,21 +173,11 @@ public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
         partitions.Add(new ItemPartition(this, partition));
     }
 
-    /// <summary>
-    /// Removes the association between the item and the specified partition.
-    /// </summary>
     /// <remarks>
-    /// The global partition is mandatory for every item and therefore cannot
-    /// be removed.
-    ///
-    /// If the item is not associated with the specified partition,
-    /// no action is taken.
+    /// Nothing happens if the item does not have the partition.
     /// </remarks>
-    /// <param name="partitionGuid">
-    /// The identifier of the partition to remove.
-    /// </param>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when attempting to remove the global partition.
+    /// <exception cref="FargoCoreException">
+    /// <paramref name="partitionGuid"/> is the global partition, which is mandatory.
     /// </exception>
     public void RemovePartition(Guid partitionGuid)
     {

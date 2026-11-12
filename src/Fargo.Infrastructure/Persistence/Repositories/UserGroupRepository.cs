@@ -20,22 +20,16 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
 
     public void Remove(UserGroup userGroup) => userGroups.Remove(userGroup);
 
-    // Fixed key for the single, global user-group-hierarchy advisory lock. A cycle
-    // can span several groups whose only shared node is somewhere along their
-    // paths, so a per-group key does not reliably serialize the conflicting
-    // re-parents. One global key serializes every re-parent, which is correct for
-    // cycles of any size. This is cheap in practice because the caller only takes
-    // the lock when assigning a parent group, not on every user-group update.
+    // Single global key: a cycle can span groups whose only shared node is along their paths, so a per-group
+    // key cannot reliably serialize the conflicting re-parents. Cheap in practice, because the caller takes
+    // the lock only when assigning a parent group.
     private const long HierarchyLockKey = 0x_7A60_C017_A10C_3703;
 
     public async Task AcquireHierarchyLockAsync(CancellationToken cancellationToken = default)
     {
-        // PostgreSQL transaction-scoped advisory lock: acquired for the given key,
-        // released automatically when the surrounding transaction commits or rolls
-        // back, so no manual unlock is needed. It must run inside a transaction
-        // (the user-group-update command runs under the transactional unit-of-work
-        // decorator), otherwise the lock would release at the end of this single
-        // statement.
+        // Transaction-scoped advisory lock: released when the surrounding transaction ends, so it must run
+        // inside one (the user-group-update command runs under the transactional unit-of-work
+        // decorator); otherwise it would release after this statement.
         FormattableString query = $"SELECT pg_advisory_xact_lock({HierarchyLockKey})";
 
         await context.Database.ExecuteSqlInterpolatedAsync(query, cancellationToken);

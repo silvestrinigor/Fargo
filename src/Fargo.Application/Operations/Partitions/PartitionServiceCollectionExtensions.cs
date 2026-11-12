@@ -5,9 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Operations.Partitions;
 
-/// <summary>
-/// Registers the Partitions use-case handlers.
-/// </summary>
 public static class PartitionServiceCollectionExtensions
 {
     extension(IServiceCollection services)

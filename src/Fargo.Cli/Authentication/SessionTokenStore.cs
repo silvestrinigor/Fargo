@@ -3,11 +3,9 @@ using Fargo.ClientAuthentication;
 namespace Fargo.Cli.Authentication;
 
 /// <summary>
-/// Wraps the persistent token store with an optional in-memory override used
-/// for a single CLI invocation. When the user supplies <c>--username</c> and
-/// <c>--password</c> on any command, the resulting tokens are kept only for the
-/// duration of the process and never written to the persistent store, so an
-/// existing logged-in session is left untouched.
+/// Wraps the persistent token store with an optional in-memory override for a single invocation.
+/// Tokens obtained through <c>--username</c> and <c>--password</c> stay in memory and are never
+/// written to the persistent store, so an existing logged-in session is left untouched.
 /// </summary>
 public sealed class SessionTokenStore : ITokenStore
 {
@@ -21,8 +19,8 @@ public sealed class SessionTokenStore : ITokenStore
     }
 
     /// <summary>
-    /// Sets tokens that live only for the current invocation. These take
-    /// precedence over the persisted tokens and are never saved.
+    /// Sets tokens that live only for this invocation. They take precedence over the persisted
+    /// tokens and are never saved.
     /// </summary>
     public void SetSessionOverride(AuthTokens tokens)
     {

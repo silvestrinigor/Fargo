@@ -3,9 +3,6 @@ using System.Text;
 
 namespace Fargo.ClientAuthentication.Tests;
 
-/// <summary>
-/// Stands in for the API's refresh endpoint and records what it receives.
-/// </summary>
 internal sealed class FakeRefreshHandler : HttpMessageHandler
 {
     private int callCount;

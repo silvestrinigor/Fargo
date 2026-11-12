@@ -28,7 +28,6 @@ internal static class ActionTypes
     public const int ReadAuditLogs = 18;
     public const int ReadItemEvents = 19;
 
-    /// <summary>Returns a human-readable name for a permission code.</summary>
     public static string Name(int code) => code switch
     {
         CreateArticle => "CreateArticle",

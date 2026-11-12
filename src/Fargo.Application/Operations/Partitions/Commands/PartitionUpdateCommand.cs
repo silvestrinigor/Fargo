@@ -7,13 +7,9 @@ using Fargo.Core.Entities.Partitions;
 
 namespace Fargo.Application.Operations.Partitions;
 
-/// <summary>
-/// Command used to update an existing partition from an API update payload.
-/// </summary>
 /// <remarks>
-/// Implements <see cref="ITransactionalCommand"/>: on the re-parent path the
-/// handler acquires a hierarchy advisory lock that must be held until commit, so
-/// it runs inside a single explicit transaction owned by the pipeline.
+/// Implements <see cref="ITransactionalCommand"/>: on the re-parent path the handler takes a hierarchy
+/// advisory lock that must be held until commit.
 /// </remarks>
 public sealed record PartitionUpdateCommand(
     Guid PartitionGuid,

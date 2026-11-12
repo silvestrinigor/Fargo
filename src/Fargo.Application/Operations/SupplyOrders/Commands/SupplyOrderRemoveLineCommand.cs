@@ -6,9 +6,6 @@ using Fargo.Core.Entities.SupplyOrders;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Removes a line from a draft supply order.
-/// </summary>
 public sealed record SupplyOrderRemoveLineCommand(
     Guid SupplyOrderGuid,
     Guid ArticleGuid

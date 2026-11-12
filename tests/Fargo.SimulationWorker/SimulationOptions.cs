@@ -11,16 +11,12 @@ namespace Fargo.SimulationWorker;
 /// </remarks>
 public sealed class SimulationOptions
 {
-    /// <summary>The configuration section name used for binding these options.</summary>
     public const string SectionName = "SimulationWorker";
 
-    /// <summary>Base address of the running Fargo HTTP API.</summary>
     public required Uri Server { get; init; }
 
-    /// <summary>Username of the bootstrap administrator used to set up the world.</summary>
     public required string Username { get; init; }
 
-    /// <summary>Password of the bootstrap administrator.</summary>
     public required string Password { get; init; }
 
     /// <summary>
@@ -44,13 +40,10 @@ public sealed class SimulationOptions
     /// </summary>
     public string RunTag { get; init; } = string.Empty;
 
-    /// <summary>Seed for the random generators, so runs are reproducible.</summary>
     public int Seed { get; init; } = 20260101;
 
-    /// <summary>Minimum think-time between an operator's actions, in milliseconds.</summary>
     public int MinThinkTimeMs { get; init; } = 250;
 
-    /// <summary>Maximum think-time between an operator's actions, in milliseconds.</summary>
     public int MaxThinkTimeMs { get; init; } = 1500;
 
     /// <summary>
@@ -67,7 +60,6 @@ public sealed class SimulationOptions
     /// </summary>
     public int MaxIterationsPerOperator { get; init; }
 
-    /// <summary>Interval, in seconds, between periodic metrics summaries.</summary>
     public int MetricsIntervalSeconds { get; init; } = 15;
 
     /// <summary>

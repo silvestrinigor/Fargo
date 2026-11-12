@@ -2,9 +2,6 @@ using Fargo.Core.Entities.Actors;
 
 namespace Fargo.ServiceRealtime;
 
-/// <summary>
-/// Source-generated log messages of the real-time host.
-/// </summary>
 internal static partial class RealtimeLog
 {
     [LoggerMessage(Level = LogLevel.Debug, Message = "Connection {ConnectionId} opened for {ActorType} {ActorGuid}.")]

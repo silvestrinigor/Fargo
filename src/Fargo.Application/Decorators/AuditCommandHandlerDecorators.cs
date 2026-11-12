@@ -6,32 +6,16 @@ using Fargo.Core.Audits;
 namespace Fargo.Application.Decorators;
 
 /// <summary>
-/// Cross-cutting audit logging for command handlers. These decorators record an
-/// <see cref="AuditLog"/> describing the command an actor executed, so handlers
-/// themselves contain no audit code.
-///
-/// <para>
-/// The audit is recorded only when the inner handler completes successfully, and
-/// only when an authenticated actor is present. In actor-less contexts (such as
-/// the seed worker running <c>InitializeSystemCommand</c>, or an unauthenticated
-/// login attempt) there is no acting actor to attribute the command to, so no
-/// audit is recorded. The current actor is therefore an optional dependency
-/// (<c>ICurrentActor?</c>), supplied as <see langword="null"/> by the
-/// registration layer when the service is not registered.
-/// </para>
-///
-/// <para>
-/// These decorators sit inside the unit-of-work decorator in the handler
-/// pipeline, so the added audit log is persisted by the same save/transaction
-/// that commits the command's own changes.
-/// </para>
+/// Records an <see cref="AuditLog"/> for each command, only after the inner handler succeeds and only
+/// when an authenticated actor is present. Actor-less contexts (the seed worker, an unauthenticated
+/// login) record nothing, so <c>ICurrentActor?</c> is optional.
 /// </summary>
+/// <remarks>
+/// Sits inside the unit-of-work decorator, so the audit log is saved by the same save or transaction
+/// as the command's own changes.
+/// </remarks>
 internal static class AuditCommandHandlerDecorator
 {
-    /// <summary>
-    /// Records an audit log for the executed command when an authenticated actor
-    /// is present.
-    /// </summary>
     public static void Record<TCommand>(
         TCommand command,
         ICurrentActor? currentActor,
@@ -54,7 +38,6 @@ internal static class AuditCommandHandlerDecorator
     }
 }
 
-/// <summary>Audit decorator for a command handler with no response.</summary>
 public sealed class AuditCommandHandlerDecorator<TCommand>(
     ICommandHandler<TCommand> inner,
     ICurrentActor? currentActor,
@@ -69,7 +52,6 @@ public sealed class AuditCommandHandlerDecorator<TCommand>(
     }
 }
 
-/// <summary>Audit decorator for a command handler that returns a response.</summary>
 public sealed class AuditCommandHandlerDecorator<TCommand, TResponse>(
     ICommandHandler<TCommand, TResponse> inner,
     ICurrentActor? currentActor,

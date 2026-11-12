@@ -43,9 +43,6 @@ internal sealed class TestHubServer : IAsyncDisposable
         return new TestHubServer(app);
     }
 
-    /// <summary>
-    /// Creates a client wired to this server through the test handler.
-    /// </summary>
     public FargoRealtimeClient CreateClient(IFargoAccessTokenSource tokenSource, int duplicateWindow = 1000)
     {
         var server = app.GetTestServer();
@@ -71,9 +68,6 @@ internal sealed class TestHubServer : IAsyncDisposable
         await app.DisposeAsync();
     }
 
-    /// <summary>
-    /// What the hub has seen.
-    /// </summary>
     internal sealed class HubState
     {
         public ConcurrentDictionary<string, HubCallerContext> Connections { get; } = new();

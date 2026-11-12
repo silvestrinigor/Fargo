@@ -5,83 +5,39 @@ using UnitsNet.NumberExtensions.NumberToScalar;
 namespace Fargo.Core.Entities.Articles;
 
 /// <summary>
-/// Defines one article that is allowed to be inserted into a container article,
-/// optionally constrained by the maximum quantity of that article the container
-/// may hold.
+/// One article allowed inside a container article, optionally capped by a maximum quantity.
 /// </summary>
 /// <remarks>
-/// When a container defines one or more allowed articles, only those articles
-/// may be inserted into the container. Each allowed article may further be
-/// bounded by a <see cref="MaxQuantity"/>; when <see cref="MaxQuantity"/> is
-/// <see langword="null"/>, no quantity cap applies.
-///
-/// A maximum quantity may only be defined for an entity-tracked allowed article
-/// (<see cref="ArticleTrackingMode.Entity"/>): event-tracked articles record
-/// stock as aggregate movement events rather than as individually placed items,
-/// so a per-item quantity cap is not meaningful for them.
+/// A maximum quantity is only valid for an entity-tracked allowed article
+/// (<see cref="ArticleTrackingMode.Entity"/>): event-tracked articles record stock as aggregate
+/// movement events, so a per-item cap is not meaningful for them.
 /// </remarks>
 public sealed class ArticleContainerAllowedArticle
 {
-    /// <summary>
-    /// Gets the unique identifier of the container article that owns this
-    /// allowance.
-    /// </summary>
     public Guid ContainerArticleGuid { get; private init; }
 
-    /// <summary>
-    /// Gets the container that owns this allowance.
-    /// </summary>
     public ArticleContainer Container { get; private init; } = null!;
 
-    /// <summary>
-    /// Gets the unique identifier of the article allowed inside the container.
-    /// </summary>
     public Guid AllowedArticleGuid { get; private init; }
 
-    /// <summary>
-    /// Gets the article allowed inside the container.
-    /// </summary>
     public Article AllowedArticle { get; private init; } = null!;
 
     /// <summary>
-    /// Gets the maximum quantity of the allowed article the container may hold,
-    /// or <see langword="null"/> when no quantity cap applies.
+    /// <see langword="null"/> when no quantity cap applies.
     /// </summary>
     public Scalar? MaxQuantity { get; private init; }
 
-    /// <summary>
-    /// Initializes a new <see cref="ArticleContainerAllowedArticle"/> instance.
-    /// </summary>
-    /// <remarks>
-    /// Required by Entity Framework.
-    /// </remarks>
+    // Required by EF Core.
     private ArticleContainerAllowedArticle()
     {
     }
 
-    /// <summary>
-    /// Initializes a new allowed-article constraint for a container.
-    /// </summary>
-    /// <param name="container">
-    /// The container that allows the article.
-    /// </param>
-    /// <param name="allowedArticle">
-    /// The article allowed inside the container.
-    /// </param>
-    /// <param name="maxQuantity">
-    /// The maximum quantity of the allowed article the container may hold, or
-    /// <see langword="null"/> to impose no quantity cap.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="container"/> or <paramref name="allowedArticle"/>
-    /// is <see langword="null"/>.
-    /// </exception>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the container allows itself, or when a maximum quantity is
-    /// supplied for an allowed article that is not entity-tracked.
+    /// The container allows itself, or a maximum quantity is given for an article that is not
+    /// entity-tracked.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="maxQuantity"/> is less than or equal to zero.
+    /// <paramref name="maxQuantity"/> is less than or equal to zero.
     /// </exception>
     internal ArticleContainerAllowedArticle(ArticleContainer container, Article allowedArticle, Scalar? maxQuantity)
     {

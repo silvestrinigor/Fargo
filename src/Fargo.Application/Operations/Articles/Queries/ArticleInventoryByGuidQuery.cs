@@ -7,19 +7,9 @@ using Fargo.Core.Entities.Articles;
 
 namespace Fargo.Application.Operations.Articles;
 
-/// <summary>
-/// Represents a query for retrieving article inventory information by article GUID,
-/// optionally as it existed at a specific point in time.
-/// This query can optionally include specific item container GUIDs and control whether descendant items are included in the results.
-/// </summary>
-/// <param name="ArticleGuid">The unique identifier of the article to retrieve inventory for</param>
-/// <param name="InsideItemContainerGuids">Optional collection of item container GUIDs to filter the inventory by</param>
-/// <param name="IncludeDescendents">Flag indicating whether descendant items should be included in the results (defaults to true)</param>
 /// <param name="At">
-/// The instant, in UTC, at which the inventory is evaluated. When
-/// <see langword="null"/>, the current inventory is returned. When provided, the
-/// inventory is reconstructed from the item containment history as it was at that
-/// instant.
+/// UTC instant to evaluate the inventory at, rebuilt from the containment history.
+/// <see langword="null"/> returns the current inventory.
 /// </param>
 public sealed record ArticleInventoryByGuidQuery(
     Guid ArticleGuid,
@@ -28,25 +18,12 @@ public sealed record ArticleInventoryByGuidQuery(
     DateTimeOffset? At = null
 ) : IQuery<ArticleInventoryDto?>;
 
-/// <summary>
-/// Handles queries to retrieve inventory information for a specific article.
-/// </summary>
 public sealed class ArticleInventoryQueryHandler(
     ActorResolver actorService,
     IArticleQueryRepository articleRepository,
     ICurrentActor currentActor
 ) : IQueryHandler<ArticleInventoryByGuidQuery, ArticleInventoryDto?>
 {
-    /// <summary>
-    /// Processes the inventory lookup for an article.
-    /// </summary>
-    /// <param name="query">The query containing the Article GUID and optional container filters.</param>
-    /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
-    /// <returns>A task that returns the <see cref="ArticleInventoryDto"/> if found; otherwise, null.</returns>
-    /// <remarks>
-    /// If <see cref="ArticleInventoryByGuidQuery.IncludeDescendents"/> is true and container IDs are provided, 
-    /// the handler will recursively resolve all descendant container IDs before fetching inventory data.
-    /// </remarks>
     public async Task<ArticleInventoryDto?> HandleAsync(ArticleInventoryByGuidQuery query, CancellationToken cancellationToken = default)
     {
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);

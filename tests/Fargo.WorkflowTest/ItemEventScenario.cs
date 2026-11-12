@@ -4,8 +4,7 @@ using Fargo.ClientHttp.Models;
 namespace Fargo.WorkflowTest;
 
 /// <summary>
-/// Exercises and verifies the event-based (event-tracked) workflow end to end,
-/// now that the API can create event-tracked articles:
+/// Exercises and verifies the event-based (event-tracked) workflow end to end:
 ///
 ///  1. Create an event-tracked article ("bulk-grain") and two container items.
 ///  2. Record a Creation event, a sequence of Moviment events (receipt into a

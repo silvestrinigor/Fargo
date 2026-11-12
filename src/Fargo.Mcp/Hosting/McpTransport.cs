@@ -1,8 +1,5 @@
 namespace Fargo.Mcp.Hosting;
 
-/// <summary>
-/// Decides which MCP transport the process should host.
-/// </summary>
 internal static class McpTransport
 {
     public const string EnvironmentVariable = "FARGO_MCP_TRANSPORT";

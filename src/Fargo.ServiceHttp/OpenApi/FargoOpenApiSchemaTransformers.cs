@@ -10,25 +10,16 @@ using UnitsNet;
 
 namespace Fargo.ServiceHttp.OpenApi;
 
-/// <summary>
-/// Provides static methods for applying custom schema transformations to OpenAPI specifications
-/// for specific types used in the Fargo application.
-/// </summary>
 public static class FargoOpenApiSchemaTransformers
 {
     /// <summary>
-    /// Applies type-specific schema transformations to OpenAPI schemas.
-    /// Unwraps <see cref="Nullable{T}"/> before comparing so that both
-    /// <c>Name</c> and <c>Name?</c> resolve to the same rules.
+    /// Unwraps <see cref="Nullable{T}"/> first, so <c>Name</c> and <c>Name?</c> resolve to the same rules.
     /// </summary>
     public static void ApplyFargoTypes(OpenApiSchema schema, Type? jsonTypeInfo)
     {
-        // Unwrap Nullable<T> so e.g. Name? resolves to the same rules as Name.
         var type = jsonTypeInfo is null
             ? null
             : Nullable.GetUnderlyingType(jsonTypeInfo) ?? jsonTypeInfo;
-
-        // ── String value objects ─────────────────────────────────────────────
 
         if (type == typeof(Name))
         {
@@ -88,7 +79,6 @@ public static class FargoOpenApiSchemaTransformers
             schema.Pattern = @"^\d{13}$";
         }
 
-        // ── Color ────────────────────────────────────────────────────────────
         // Serialized as a CSS hex color string, e.g. "#RRGGBB".
 
         if (type == typeof(Color))
@@ -98,8 +88,7 @@ public static class FargoOpenApiSchemaTransformers
             schema.Example = JsonValue.Create("#FFFFFF");
         }
 
-        // ── UnitsNet quantity objects ─────────────────────────────────────────
-        // Serialized as { "value": number, "unit": string }.
+        // UnitsNet quantities are serialized as { "value": number, "unit": string }.
 
         if (type == typeof(Mass))
         {
@@ -123,8 +112,7 @@ public static class FargoOpenApiSchemaTransformers
             schema.Required = new HashSet<string> { "value", "unit" };
         }
 
-        // ── Scalar ───────────────────────────────────────────────────────────
-        // Serialized as a plain number (default unit) or "<value> <unit>" string.
+        // Scalar is a plain number (default unit) or a "<value> <unit>" string.
 
         if (type == typeof(Scalar))
         {
@@ -136,9 +124,6 @@ public static class FargoOpenApiSchemaTransformers
         }
     }
 
-    /// <summary>
-    /// Applies parameter-specific schema transformations to OpenAPI schemas.
-    /// </summary>
     public static void ApplyFargoParameters(OpenApiSchema schema, Type? parameterType)
     {
         if (parameterType == typeof(Barcode))

@@ -6,9 +6,6 @@ using Fargo.Core.Entities.Partitions;
 
 namespace Fargo.Application.Operations.Partitions;
 
-/// <summary>
-/// Command used to delete a partition.
-/// </summary>
 public sealed record PartitionDeleteCommand(Guid PartitionGuid) : ICommand;
 
 public sealed class PartitionDeleteCommandHandler(

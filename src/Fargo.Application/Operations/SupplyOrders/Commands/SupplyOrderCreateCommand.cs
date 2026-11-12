@@ -10,9 +10,6 @@ using Fargo.Core.Entities.SupplyOrders;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Creates a new draft supply order and returns its identifier.
-/// </summary>
 public sealed record SupplyOrderCreateCommand(SupplyOrderCreateDto Create) : ICommand<Guid>;
 
 public sealed class SupplyOrderCreateCommandHandler(

@@ -8,9 +8,6 @@ using UnitsNet;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Adds a line to a draft supply order.
-/// </summary>
 public sealed record SupplyOrderAddLineCommand(
     Guid SupplyOrderGuid,
     Guid ArticleGuid,

@@ -6,7 +6,6 @@ namespace Fargo.RealtimeContracts;
 /// permissions and partition access to that read.
 /// </summary>
 /// <param name="EntityType">The kind of entity, one of <see cref="EntityTypes"/>.</param>
-/// <param name="Guid">The unique identifier of the entity.</param>
 /// <param name="ChangeType">One of <see cref="ChangeTypes"/>.</param>
 /// <param name="EventId">The event identifier; delivery is at-least-once, so a client may see it twice.</param>
 /// <param name="OccurredAt">The instant, in UTC, at which the change was saved.</param>
@@ -22,7 +21,6 @@ public sealed record EntityChangedNotification(
     /// </summary>
     public static class EntityTypes
     {
-        /// <summary>An article.</summary>
         public const string Article = "article";
     }
 
@@ -31,13 +29,13 @@ public sealed record EntityChangedNotification(
     /// </summary>
     public static class ChangeTypes
     {
-        /// <summary>The entity was created.</summary>
         public const string Created = "created";
 
-        /// <summary>The entity, or one of its parts, was edited.</summary>
+        /// <summary>
+        /// The entity, or one of its parts, was edited.
+        /// </summary>
         public const string Edited = "edited";
 
-        /// <summary>The entity was deleted.</summary>
         public const string Deleted = "deleted";
     }
 }

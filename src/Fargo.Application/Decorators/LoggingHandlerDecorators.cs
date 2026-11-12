@@ -6,31 +6,15 @@ using Microsoft.Extensions.Logging;
 namespace Fargo.Application.Decorators;
 
 /// <summary>
-/// Cross-cutting logging for command/query handlers. These decorators wrap the
-/// real handler and emit the uniform started / completed / failed events (with
-/// duration and an actor-correlated scope) via <see cref="HandlerLog"/>, so
-/// handlers themselves contain no start/finish logging.
-///
-/// <para>
-/// The current actor is an optional dependency (<c>ICurrentActor?</c>): it is
-/// present in the HTTP host (where <c>ICurrentActor</c> is registered and the
-/// request is authenticated) and absent in actor-less contexts such as the seed
-/// worker or the login/refresh flows, in which case only the operation name is
-/// attached to the scope. The registration layer supplies <see langword="null"/>
-/// when the service is not registered, so the decorator depends on the actor
-/// abstraction directly instead of reaching into the service provider.
-/// </para>
+/// Emits the uniform started, completed and failed events, with duration and an actor-correlated
+/// scope, via <see cref="HandlerLog"/>. <c>ICurrentActor?</c> is optional: without an actor (the seed
+/// worker, login and refresh) only the operation name is attached to the scope.
 /// </summary>
 internal static class LoggingHandlerDecorator
 {
-    /// <summary>
-    /// Derives a stable operation label from the message type (its simple name,
-    /// e.g. <c>ArticleDeleteCommand</c>).
-    /// </summary>
     public static string OperationName<TMessage>() => typeof(TMessage).Name;
 }
 
-/// <summary>Logging decorator for a command handler with no response.</summary>
 public sealed class LoggingCommandHandlerDecorator<TCommand>(
     ICommandHandler<TCommand> inner,
     ICurrentActor? currentActor,
@@ -56,7 +40,6 @@ public sealed class LoggingCommandHandlerDecorator<TCommand>(
     }
 }
 
-/// <summary>Logging decorator for a command handler that returns a response.</summary>
 public sealed class LoggingCommandHandlerDecorator<TCommand, TResponse>(
     ICommandHandler<TCommand, TResponse> inner,
     ICurrentActor? currentActor,
@@ -83,7 +66,6 @@ public sealed class LoggingCommandHandlerDecorator<TCommand, TResponse>(
     }
 }
 
-/// <summary>Logging decorator for a query handler.</summary>
 public sealed class LoggingQueryHandlerDecorator<TQuery, TResponse>(
     IQueryHandler<TQuery, TResponse> inner,
     ICurrentActor? currentActor,

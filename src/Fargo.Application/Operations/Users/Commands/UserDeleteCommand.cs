@@ -7,9 +7,6 @@ using Fargo.Core.Entities.Actors.Users;
 
 namespace Fargo.Application.Operations.Users;
 
-/// <summary>
-/// Command used to delete a user.
-/// </summary>
 public sealed record UserDeleteCommand(Guid UserGuid) : ICommand;
 
 public sealed class UserDeleteCommandHandler(

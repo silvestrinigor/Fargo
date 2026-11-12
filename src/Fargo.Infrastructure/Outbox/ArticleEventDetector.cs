@@ -28,15 +28,8 @@ namespace Fargo.Infrastructure.Outbox;
 public static class ArticleEventDetector
 {
     /// <summary>
-    /// Detects the article events of the pending changes.
+    /// Requires change detection to have already run on <paramref name="changeTracker"/>.
     /// </summary>
-    /// <param name="changeTracker">
-    /// The change tracker, on which change detection must already have run.
-    /// </param>
-    /// <returns>
-    /// The event type and article identifier of each event, in the order the
-    /// articles were first seen in the change tracker.
-    /// </returns>
     public static IReadOnlyList<(string EventType, Guid ArticleGuid)> Detect(ChangeTracker changeTracker)
     {
         ArgumentNullException.ThrowIfNull(changeTracker);

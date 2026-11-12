@@ -7,16 +7,12 @@ using Microsoft.Extensions.Options;
 namespace Fargo.ServiceOutbox.Services;
 
 /// <summary>
-/// Drives the outbox publish and purge commands continuously in the background.
+/// Owns only scheduling: a full batch is followed immediately by the next one; an empty or partial batch waits
+/// <see cref="OutboxOptions.PollInterval"/>. After a failure the wait doubles, up to
+/// <see cref="OutboxOptions.MaxRetryDelay"/>, and resets on the next success. Published messages past their
+/// retention are purged every <see cref="OutboxOptions.PurgeInterval"/>. The publishing and purging rules live
+/// in the application command handlers.
 /// </summary>
-/// <remarks>
-/// This host owns only scheduling: a full batch is followed immediately by the
-/// next one; an empty or partial batch waits <see cref="OutboxOptions.PollInterval"/>.
-/// After a failure the wait doubles, up to <see cref="OutboxOptions.MaxRetryDelay"/>,
-/// and resets on the next success. Published messages past their retention are
-/// purged every <see cref="OutboxOptions.PurgeInterval"/>. The publishing and
-/// purging rules themselves live in the application command handlers.
-/// </remarks>
 public sealed class OutboxRelayService(
     IServiceScopeFactory scopeFactory,
     IOptions<OutboxOptions> options,
@@ -24,7 +20,6 @@ public sealed class OutboxRelayService(
     ILogger<OutboxRelayService> logger
 ) : BackgroundService
 {
-    /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var settings = options.Value;
@@ -96,9 +91,6 @@ public sealed class OutboxRelayService(
         }
     }
 
-    /// <summary>
-    /// Gets the wait after <paramref name="consecutiveFailures"/> failures in a row.
-    /// </summary>
     internal static TimeSpan GetRetryDelay(OutboxOptions settings, int consecutiveFailures)
     {
         var exponent = Math.Min(consecutiveFailures - 1, 30);

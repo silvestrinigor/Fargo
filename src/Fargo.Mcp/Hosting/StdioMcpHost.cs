@@ -26,12 +26,8 @@ internal static class StdioMcpHost
 
         builder.Services.AddSingleton(options);
 
-        // Registers the generated Kiota client and its auth plumbing against the
-        // configured server, including the in-memory ITokenStore the authenticator
-        // writes the bearer token to.
         builder.Services.AddFargoHttpClient(options.Server);
 
-        // Handles login / token refresh; tools call it before each API request.
         builder.Services.AddSingleton<FargoAuthenticator>();
 
         builder.Services

@@ -213,8 +213,8 @@ public sealed class ArticleCreateCommand : Command
             var kitComponents = parseResult.GetValue(kitComponentOption);
             var partitions = parseResult.GetValue(partitionsOption);
 
-            // Infer the article type from the options the user supplied, and
-            // reject combinations that imply more than one type.
+            // The type is inferred from which option groups were supplied; groups that imply
+            // more than one type are rejected.
             int articleType;
             try
             {
@@ -358,13 +358,6 @@ public sealed class ArticleCreateCommand : Command
         });
     }
 
-    /// <summary>
-    /// Determines the article type from which groups of options were supplied.
-    /// Exactly one type-signalling group may be present; when none are present
-    /// the article is a plain default article. Throws a
-    /// <see cref="FormatException"/> when the supplied options imply more than
-    /// one article type.
-    /// </summary>
     private static int InferArticleType(
         bool variationPresent,
         bool packPresent,
@@ -393,11 +386,6 @@ public sealed class ArticleCreateCommand : Command
         return present.Count == 1 ? present[0].Type : ArticleTypeDefault;
     }
 
-    /// <summary>
-    /// Parses the <c>--tracking-mode</c> option. Accepts 'entity' or 'event'
-    /// (case-insensitive); when omitted, defaults to entity tracking. Throws a
-    /// <see cref="FormatException"/> for any other value.
-    /// </summary>
     private static int ParseTrackingMode(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))

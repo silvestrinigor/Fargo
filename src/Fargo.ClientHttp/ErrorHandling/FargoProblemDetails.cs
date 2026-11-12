@@ -30,8 +30,8 @@ public sealed class FargoProblemDetails
     public Dictionary<string, JsonElement>? Extensions { get; set; }
 
     /// <summary>
-    /// Reads an extension value as a string, returning <c>null</c> when it is
-    /// absent or not a scalar that can be represented as text.
+    /// Reads an extension value as text: strings as is, other values as their raw JSON. Returns
+    /// <c>null</c> when it is absent or JSON <c>null</c>.
     /// </summary>
     public string? GetExtensionString(string name)
     {

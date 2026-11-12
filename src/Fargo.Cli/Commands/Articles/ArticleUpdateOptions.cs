@@ -4,10 +4,9 @@ using System.CommandLine;
 namespace Fargo.Cli.Commands.Articles;
 
 /// <summary>
-/// Declares the full set of options that map onto <see cref="ArticleUpdateDto"/>
-/// and builds the DTO from a parse result. Shared by the GUID-addressed
-/// <c>update</c> command and the barcode-addressed <c>update-by-barcode</c>
-/// command so both expose an identical surface.
+/// Declares the options that map onto <see cref="ArticleUpdateDto"/> and builds the DTO from a
+/// parse result. Shared by <c>update</c> and <c>update-by-barcode</c> so both expose an identical
+/// surface.
 /// </summary>
 internal sealed class ArticleUpdateOptions
 {
@@ -93,7 +92,6 @@ internal sealed class ArticleUpdateOptions
         AllowMultipleArgumentsPerToken = true
     };
 
-    /// <summary>Adds every update option to the given command.</summary>
     public void AddTo(Command command)
     {
         command.Add(Name);
@@ -115,7 +113,6 @@ internal sealed class ArticleUpdateOptions
     }
 
     /// <summary>
-    /// Builds the <see cref="ArticleUpdateDto"/> from the parsed options.
     /// Throws <see cref="FormatException"/> when a measure option is malformed.
     /// </summary>
     public ArticleUpdateDto Build(ParseResult parseResult)

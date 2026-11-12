@@ -6,16 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Fargo.ServiceHttp.ExceptionHandlers;
 
 /// <summary>
-/// Translates an EF Core <see cref="DbUpdateConcurrencyException"/> — raised when
-/// a tracked aggregate's concurrency token (the PostgreSQL <c>xmin</c>) no longer
-/// matches the row at save time — into an RFC 7807 <c>409 Conflict</c> response.
-///
-/// Without this handler the exception would fall through to the default
-/// framework handler and surface as a 500, masking what is really a recoverable
-/// "the resource changed under you; re-read and retry" condition.
-///
-/// Registered ahead of the generic Fargo handlers so the concurrency case is
-/// matched before any broader database-exception handling.
+/// Turns a <see cref="DbUpdateConcurrencyException"/> (the <c>xmin</c> concurrency token no longer matches)
+/// into a 409 Conflict instead of a 500, because it is recoverable: re-read and retry. Registered ahead of
+/// the generic Fargo handlers so it matches first.
 /// </summary>
 public sealed class FargoConcurrencyConflictExceptionHandler(
     IProblemDetailsService problemDetailsService) : IExceptionHandler

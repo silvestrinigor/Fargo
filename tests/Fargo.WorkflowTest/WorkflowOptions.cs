@@ -11,12 +11,8 @@ namespace Fargo.WorkflowTest;
 /// </remarks>
 public sealed class WorkflowOptions
 {
-    /// <summary>
-    /// The configuration section name used for binding these options.
-    /// </summary>
     public const string SectionName = "Workflow";
 
-    /// <summary>Base address of the running Fargo HTTP API.</summary>
     public required Uri Server { get; init; }
 
     /// <summary>
@@ -33,19 +29,15 @@ public sealed class WorkflowOptions
     /// </summary>
     public bool RunRealtimeScenario { get; init; } = true;
 
-    /// <summary>Username used to authenticate against the API.</summary>
     public required string Username { get; init; }
 
-    /// <summary>Password used to authenticate against the API.</summary>
     public required string Password { get; init; }
 
     /// <summary>Number of container items to create (e.g. shelves/boxes).</summary>
     public int Containers { get; init; }
 
-    /// <summary>Number of distinct product articles to create.</summary>
     public int Articles { get; init; }
 
-    /// <summary>Number of concrete items to create per product article.</summary>
     public int ItemsPerArticle { get; init; }
 
     /// <summary>Number of random relocations to perform after the initial placement.</summary>
@@ -112,19 +104,14 @@ public sealed class WorkflowOptions
     /// </summary>
     public int PartitionTreeFanout { get; init; } = 3;
 
-    /// <summary>Depth of the partition hierarchy built by the large-tree scenario.</summary>
     public int PartitionTreeDepth { get; init; } = 3;
 
-    /// <summary>Number of user groups the large-tree scenario creates.</summary>
     public int LargeTreeUserGroups { get; init; } = 12;
 
-    /// <summary>Number of users the large-tree scenario creates.</summary>
     public int LargeTreeUsers { get; init; } = 20;
 
-    /// <summary>Number of product articles the large-tree scenario creates.</summary>
     public int LargeTreeArticles { get; init; } = 15;
 
-    /// <summary>Number of items created per article in the large-tree scenario.</summary>
     public int LargeTreeItemsPerArticle { get; init; } = 6;
 
     /// <summary>

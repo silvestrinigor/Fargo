@@ -10,23 +10,14 @@ using Fargo.Core.Informations;
 
 namespace Fargo.Application.Operations.Identity;
 
-/// <summary>
-/// Command used to authenticate a service account via the client-credentials
-/// flow and obtain a short-lived access token.
-/// </summary>
-/// <param name="ClientId">The service account's unique client identifier.</param>
-/// <param name="ClientSecret">The plaintext client secret.</param>
 public sealed record ServiceTokenCommand(
     string ClientId,
     string ClientSecret
 ) : ICommand<ServiceTokenResultDto>;
 
 /// <summary>
-/// Handles the service-account client-credentials flow: it enforces the same
-/// authentication-attempt lockout users get, validates the client id and secret,
-/// and issues a short-lived access token when the account exists, is active, and
-/// the secret matches. The token carries a service actor-type claim so the rest
-/// of the pipeline resolves the caller as an <c>ActorType.Service</c> actor.
+/// Applies the same authentication-attempt lockout as user login. The token carries a service
+/// actor-type claim, so the caller resolves as an <c>ActorType.Service</c> actor.
 /// </summary>
 public sealed class ServiceTokenCommandHandler(
     IServiceAccountRepository serviceAccountRepository,

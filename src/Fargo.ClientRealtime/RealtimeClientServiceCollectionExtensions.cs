@@ -23,9 +23,6 @@ public static class RealtimeClientServiceCollectionExtensions
         /// <c>UseFargoRefreshingAccessTokens()</c> to refresh before expiry, or
         /// register your own source.
         /// </remarks>
-        /// <param name="apiBaseAddress">The base address of the Fargo API, used to refresh tokens.</param>
-        /// <param name="realtimeBaseAddress">The base address of the real-time service.</param>
-        /// <param name="configure">Optionally adjusts the client options.</param>
         public IServiceCollection AddFargoRealtimeClient(
             Uri apiBaseAddress,
             Uri realtimeBaseAddress,

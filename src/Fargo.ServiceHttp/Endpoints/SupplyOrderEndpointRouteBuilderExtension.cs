@@ -120,7 +120,6 @@ public static class SupplyOrderEndpointRouteBuilderExtension
 
     #region Lines
 
-    /// <summary>Request body for adding or changing a supply order line.</summary>
     public sealed record SupplyOrderLineQuantityRequest(Scalar OrderedQuantity);
 
     private static IEndpointRouteBuilder MapAddSupplyOrderLine(this IEndpointRouteBuilder builder)
@@ -201,7 +200,6 @@ public static class SupplyOrderEndpointRouteBuilderExtension
 
     #region Receiving container
 
-    /// <summary>Request body for setting the receiving container.</summary>
     public sealed record SupplyOrderReceivingContainerRequest(Guid? ReceivingContainerGuid);
 
     private static IEndpointRouteBuilder MapSetSupplyOrderReceivingContainer(this IEndpointRouteBuilder builder)

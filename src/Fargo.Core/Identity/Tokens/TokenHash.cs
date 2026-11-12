@@ -1,39 +1,15 @@
 namespace Fargo.Core.Identity.Tokens;
 
 /// <summary>
-/// Represents a hashed token stored by the system.
+/// The hash of a token: at most 512 characters, no whitespace. The original token must never be
+/// persisted, only its hash.
 /// </summary>
-/// <remarks>
-/// This value object ensures that only a valid token hash is stored.
-/// The original token must never be persisted — only its hash.
-///
-/// The hash value is normalized to uppercase when stored, ensuring a
-/// canonical representation and enabling efficient ordinal comparisons.
-///
-/// Validation ignores case differences and rejects whitespace.
-/// </remarks>
 public readonly struct TokenHash : IEquatable<TokenHash>
 {
-    /// <summary>
-    /// Maximum allowed length for the token hash.
-    /// </summary>
     public const int MaxLength = 512;
 
-    /// <summary>
-    /// Gets the underlying hash value.
-    /// </summary>
     public string Value { get; }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TokenHash"/> value object.
-    /// </summary>
-    /// <param name="value">The hashed token value.</param>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the value is null, empty, or contains whitespace.
-    /// </exception>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the hash length is outside the allowed range.
-    /// </exception>
     public TokenHash(string value)
     {
         Validate(value);
@@ -41,61 +17,32 @@ public readonly struct TokenHash : IEquatable<TokenHash>
         Value = value;
     }
 
-    /// <summary>
-    /// Creates a <see cref="TokenHash"/> from the specified string.
-    /// </summary>
-    /// <param name="value">The hashed token value.</param>
-    /// <returns>A new <see cref="TokenHash"/> instance.</returns>
     public static TokenHash FromString(string value)
         => new(value);
 
-    /// <summary>
-    /// Determines whether the current token hash is equal to another token hash.
-    /// </summary>
-    /// <param name="other">The other token hash to compare.</param>
-    /// <returns><see langword="true"/> if both hashes are equal; otherwise <see langword="false"/>.</returns>
     public bool Equals(TokenHash other)
         => string.Equals(Value, other.Value, StringComparison.Ordinal);
 
-    /// <summary>
-    /// Determines whether the current token hash is equal to the specified object.
-    /// </summary>
     public override bool Equals(object? obj)
         => obj is TokenHash other && Equals(other);
 
-    /// <summary>
-    /// Returns a hash code for the current token hash.
-    /// </summary>
     public override int GetHashCode()
         => Value.GetHashCode(StringComparison.Ordinal);
 
-    /// <summary>
-    /// Determines whether two <see cref="TokenHash"/> instances are equal.
-    /// </summary>
     public static bool operator ==(TokenHash left, TokenHash right)
         => left.Equals(right);
 
-    /// <summary>
-    /// Determines whether two <see cref="TokenHash"/> instances are different.
-    /// </summary>
     public static bool operator !=(TokenHash left, TokenHash right)
         => !left.Equals(right);
 
     /// <summary>
-    /// Returns the string representation of the token hash.
+    /// Always returns <c>[REDACTED]</c>.
     /// </summary>
     public override string ToString() => "[REDACTED]";
 
-    /// <summary>
-    /// Explicitly converts a <see cref="string"/> to <see cref="TokenHash"/>.
-    /// </summary>
     public static explicit operator TokenHash(string value)
         => new(value);
 
-    /// <summary>
-    /// Validates the token hash value.
-    /// </summary>
-    /// <param name="value">The hash value to validate.</param>
     private static void Validate(string value)
     {
         if (string.IsNullOrWhiteSpace(value))

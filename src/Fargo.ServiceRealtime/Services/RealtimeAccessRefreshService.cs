@@ -10,9 +10,8 @@ namespace Fargo.ServiceRealtime.Services;
 /// partition access of each actor with an open connection.
 /// </summary>
 /// <remarks>
-/// Partition access is otherwise resolved only when a connection opens. With
-/// the refresh, an access change reaches open connections within one interval,
-/// and the connections of an actor that was deleted or deactivated are closed.
+/// Access is otherwise resolved only when a connection opens. An access change reaches open connections
+/// within one interval, and the connections of an actor that was deleted or deactivated are closed.
 /// Each actor is resolved once per pass, however many connections it has.
 /// </remarks>
 public sealed class RealtimeAccessRefreshService(
@@ -23,7 +22,6 @@ public sealed class RealtimeAccessRefreshService(
     ILogger<RealtimeAccessRefreshService> logger
 ) : BackgroundService
 {
-    /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer = new PeriodicTimer(options.Value.AccessRefreshInterval, timeProvider);
@@ -64,14 +62,9 @@ public sealed class RealtimeAccessRefreshService(
     }
 
     /// <summary>
-    /// Refreshes the partition access of every open connection.
+    /// <paramref name="resolveAccess"/> returns <see langword="null"/> when the actor no longer exists or is
+    /// inactive; its connections are then aborted.
     /// </summary>
-    /// <param name="registry">The open connections.</param>
-    /// <param name="resolveAccess">
-    /// Returns the partitions an actor can access now, or <see langword="null"/>
-    /// when the actor no longer exists or is inactive.
-    /// </param>
-    /// <param name="cancellationToken">A token that cancels the refresh.</param>
     internal static async Task RefreshAsync(
         RealtimeConnectionRegistry registry,
         Func<Guid, ActorType, CancellationToken, Task<IReadOnlySet<Guid>?>> resolveAccess,

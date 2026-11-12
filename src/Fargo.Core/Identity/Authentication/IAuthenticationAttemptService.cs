@@ -1,29 +1,10 @@
 namespace Fargo.Core.Identity.Authentication;
 
-/// <summary>
-/// Defines the contract for tracking authentication attempts and enforcing
-/// rate limiting.
-/// </summary>
 public interface IAuthenticationAttemptService
 {
     /// <summary>
-    /// Determines whether an authentication attempt is currently allowed for the
-    /// specified identifier and IP address.
+    /// Checks whether an attempt is currently allowed; if not, the result says how long to wait.
     /// </summary>
-    /// <param name="identifier">
-    /// The identifier of the actor attempting to authenticate.
-    /// </param>
-    /// <param name="ipAddress">
-    /// The IP address from which the attempt originates.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// An <see cref="AuthenticationAttemptAllowResults"/> describing whether the
-    /// attempt is allowed and, if not, how long the caller should wait before
-    /// retrying.
-    /// </returns>
     Task<AuthenticationAttemptAllowResults> IsAllowedAsync(
         string identifier,
         string ipAddress,
@@ -31,17 +12,8 @@ public interface IAuthenticationAttemptService
     );
 
     /// <summary>
-    /// Registers a failed authentication attempt.
+    /// Records a failed attempt. The attempt is only added to the repository, not saved.
     /// </summary>
-    /// <param name="identifier">
-    /// The identifier of the actor that attempted to authenticate.
-    /// </param>
-    /// <param name="ipAddress">
-    /// The IP address from which the attempt originated.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
     Task RegisterFailureAsync(
         string identifier,
         string ipAddress,
@@ -49,17 +21,9 @@ public interface IAuthenticationAttemptService
     );
 
     /// <summary>
-    /// Registers a successful authentication attempt.
+    /// Records a successful attempt, which resets the failure count. The attempt is only added to the
+    /// repository, not saved.
     /// </summary>
-    /// <param name="identifier">
-    /// The identifier of the actor that authenticated.
-    /// </param>
-    /// <param name="ipAddress">
-    /// The IP address from which the attempt originated.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
     Task RegisterSuccessAsync(
         string identifier,
         string ipAddress,

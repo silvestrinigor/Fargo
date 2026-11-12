@@ -4,24 +4,20 @@ using System.Net.Sockets;
 namespace Fargo.Cli.ErrorHandling;
 
 /// <summary>
-/// Renders Fargo API errors as concise, user-friendly console messages and maps
-/// them to process exit codes. Centralizes the handling of API error responses
-/// (400 with validation errors, 401, 403, and other non-success statuses) and
-/// connectivity failures so every command surfaces the same clear output
-/// instead of raw stack traces.
+/// Renders Fargo API errors and connectivity failures as concise console messages and maps them to
+/// exit codes, so every command reports failures the same way.
 /// </summary>
 public static class ApiErrorReporter
 {
     /// <summary>
-    /// When enabled (via the <c>--verbose</c> global flag), error output also
-    /// includes technical diagnostics: the exception type, inner exceptions,
-    /// and stack trace. Off by default so normal output stays concise.
+    /// Set by <c>--verbose</c>: error output also includes exception types, inner exceptions and the
+    /// stack trace.
     /// </summary>
     public static bool Verbose { get; set; }
 
     /// <summary>
-    /// Writes a message for <paramref name="exception"/> to standard error and
-    /// returns the exit code the process should use.
+    /// Writes a message for the exception to standard error and returns the exit code. Throws the
+    /// exception again when <see cref="CanReport"/> is <see langword="false"/>.
     /// </summary>
     public static int Report(Exception exception)
     {
@@ -62,19 +58,15 @@ public static class ApiErrorReporter
     }
 
     /// <summary>
-    /// Pure predicate (no output) that reports whether <paramref name="exception"/>
-    /// is a user-facing error this reporter knows how to render. Safe to use in
-    /// an exception filter (<c>catch ... when</c>); the actual rendering should
-    /// happen in the catch body via <see cref="Report"/>.
+    /// Reports whether <see cref="Report"/> can render the exception. Has no side effects, so it is safe
+    /// in an exception filter.
     /// </summary>
     public static bool CanReport(Exception exception) =>
         exception is FargoApiException || IsConnectivityError(exception);
 
     /// <summary>
-    /// Attempts to report <paramref name="exception"/> as a known, user-facing
-    /// error (a Fargo API error or a connectivity failure). Returns
-    /// <c>true</c> and sets <paramref name="exitCode"/> when handled; returns
-    /// <c>false</c> for exceptions that should propagate.
+    /// Calls <see cref="Report"/> when <see cref="CanReport"/> accepts the exception; otherwise returns
+    /// <see langword="false"/> so the exception propagates.
     /// </summary>
     public static bool TryReport(Exception exception, out int exitCode)
     {
@@ -88,12 +80,6 @@ public static class ApiErrorReporter
         return true;
     }
 
-    /// <summary>
-    /// Determines whether <paramref name="exception"/> represents a failure to
-    /// reach the server (connection refused, DNS failure, TLS handshake error,
-    /// request timeout, dropped connection, ...) rather than an HTTP error
-    /// response from the API.
-    /// </summary>
     private static bool IsConnectivityError(Exception exception)
     {
         // Unwrap to inspect inner exceptions too: the HTTP/timeout stack often
@@ -125,11 +111,6 @@ public static class ApiErrorReporter
             + "'fargo config show' or pass --server <url>).");
     }
 
-    /// <summary>
-    /// Writes field-level validation errors (field: message) for a bad-request
-    /// response, when the problem details carry an <c>errors</c> map. Does
-    /// nothing when there are none.
-    /// </summary>
     private static void WriteValidationErrors(FargoApiException exception)
     {
         var problem = exception.Problem;
@@ -164,11 +145,6 @@ public static class ApiErrorReporter
     /// </summary>
     public static void WriteVerboseDiagnostics(Exception exception) => WriteVerboseDetails(exception);
 
-    /// <summary>
-    /// When <see cref="Verbose"/> is enabled, writes technical diagnostics for
-    /// <paramref name="exception"/> (type, status code, inner exceptions and
-    /// stack trace) to standard error, below the user-facing message.
-    /// </summary>
     private static void WriteVerboseDetails(Exception exception)
     {
         if (!Verbose)

@@ -22,9 +22,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Fargo.Application.DependencyInjection;
 
 /// <summary>
-/// Entry point for registering the Fargo application layer. Each feature owns its
-/// handler registrations (see <c>Operations/&lt;Feature&gt;/*ServiceCollectionExtensions.cs</c>);
-/// this class only composes them together with the domain services they depend on.
+/// Each feature owns its handler registrations (*ServiceCollectionExtensions.cs under Operations);
+/// this class only composes them with the domain services they depend on.
 /// </summary>
 public static class ApplicationServiceCollectionExtensions
 {
@@ -46,8 +45,7 @@ public static class ApplicationServiceCollectionExtensions
 
         private IServiceCollection AddFargoDomainServices()
         {
-            // Stateless system clock; one instance serves every consumer. Handlers
-            // and domain services take the current time from here so time-dependent
+            // One instance serves every consumer; handlers take the time from here so time-dependent
             // behaviour (token expiry, lockout windows) is deterministic in tests.
             services.TryAddSingleton(TimeProvider.System);
 

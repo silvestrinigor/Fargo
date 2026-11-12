@@ -3,52 +3,20 @@ using System.Globalization;
 
 namespace Fargo.Application.Common.Paging;
 
-/// <summary>
-/// Represents the maximum number of items returned in a paginated query.
-/// </summary>
 /// <remarks>
-/// This value object ensures that pagination limits stay within
-/// a safe and controlled range.
-///
-/// It implements <see cref="IParsable{TSelf}"/> so it can be automatically
-/// parsed from query parameters in ASP.NET.
+/// A limit built through the constructor is within <see cref="MinValue"/> and <see cref="MaxValue"/>;
+/// the default value is <see cref="int.MaxValue"/>, meaning no practical limit.
 /// </remarks>
 public readonly struct Limit : IParsable<Limit>
 {
-    /// <summary>
-    /// Minimum allowed limit value.
-    /// </summary>
     public const int MinValue = 1;
 
-    /// <summary>
-    /// Maximum allowed limit value.
-    /// </summary>
     public const int MaxValue = 1000;
 
-    /// <summary>
-    /// Gets the limit value.
-    /// </summary>
     public int Value { get; }
 
-    /// <summary>
-    /// Gets the maximum valid limit.
-    /// </summary>
-    /// <remarks>
-    /// This property represents the largest number of items
-    /// that can be requested in a paginated query.
-    ///
-    /// It is equivalent to creating a new instance with
-    /// <see cref="MaxValue"/>.
-    /// </remarks>
     public static Limit MaxLimit => new(MaxValue);
 
-    /// <summary>
-    /// Initializes a new instance of <see cref="Limit"/>.
-    /// </summary>
-    /// <param name="value">The limit value.</param>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the value is outside the allowed range.
-    /// </exception>
     public Limit(int value)
     {
         if (value < MinValue || value > MaxValue)
@@ -66,19 +34,10 @@ public readonly struct Limit : IParsable<Limit>
         Value = int.MaxValue;
     }
 
-    /// <summary>
-    /// Implicitly converts <see cref="Limit"/> to <see cref="int"/>.
-    /// </summary>
     public static implicit operator int(Limit limit) => limit.Value;
 
-    /// <summary>
-    /// Explicitly converts an <see cref="int"/> to <see cref="Limit"/>.
-    /// </summary>
     public static explicit operator Limit(int value) => new(value);
 
-    /// <summary>
-    /// Parses a string into a <see cref="Limit"/>.
-    /// </summary>
     public static Limit Parse(string s, IFormatProvider? provider)
     {
         if (TryParse(s, provider, out var result))
@@ -89,9 +48,6 @@ public readonly struct Limit : IParsable<Limit>
         throw new FormatException($"Invalid Limit value: '{s}'.");
     }
 
-    /// <summary>
-    /// Attempts to parse a string into a <see cref="Limit"/>.
-    /// </summary>
     public static bool TryParse(
         [NotNullWhen(true)] string? s,
         IFormatProvider? provider,

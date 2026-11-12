@@ -5,10 +5,8 @@ using System.Globalization;
 namespace Fargo.Cli.Commands.Articles;
 
 /// <summary>
-/// Renders the full details of an <see cref="ArticleDto"/> as a key/value block,
-/// surfacing every field exposed by the API (barcodes, colour, dimensions, mass,
-/// container, pack, variation, kit components, and partitions). Shared by the
-/// <c>get</c> and <c>get-by-barcode</c> commands so both show the same detail.
+/// Renders an <see cref="ArticleDto"/> as a key/value block. Shared by <c>get</c> and
+/// <c>get-by-barcode</c> so both show the same detail.
 /// </summary>
 internal static class ArticleDetailRenderer
 {

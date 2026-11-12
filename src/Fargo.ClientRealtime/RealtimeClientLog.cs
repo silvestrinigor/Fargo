@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.ClientRealtime;
 
-/// <summary>
-/// Source-generated log messages of the real-time client.
-/// </summary>
 internal static partial class RealtimeClientLog
 {
     [LoggerMessage(Level = LogLevel.Information, Message = "Connected to {HubUri}.")]

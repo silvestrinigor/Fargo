@@ -11,15 +11,10 @@ namespace Fargo.ClientRealtime;
 /// which leaves a long-running client disconnected for good after a short
 /// outage.
 /// </remarks>
-/// <param name="maxDelay">The longest wait between attempts.</param>
 internal sealed class ReconnectPolicy(TimeSpan maxDelay) : IRetryPolicy
 {
-    /// <inheritdoc />
     public TimeSpan? NextRetryDelay(RetryContext retryContext) => GetDelay(retryContext.PreviousRetryCount);
 
-    /// <summary>
-    /// Gets the wait before the attempt that follows <paramref name="previousAttempts"/> failed ones.
-    /// </summary>
     internal TimeSpan GetDelay(long previousAttempts)
     {
         if (previousAttempts <= 0)

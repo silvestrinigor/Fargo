@@ -6,16 +6,10 @@ using System.CommandLine;
 namespace Fargo.Cli.Commands.Partitions;
 
 /// <summary>
-/// Renders partitions as a hierarchy, nesting child partitions under their
-/// parent. Built from the existing GET /partitions endpoint only; no new
-/// backend endpoint is required.
+/// Renders partitions as a tree, nesting each partition under its parent.
 /// </summary>
 /// <remarks>
-/// Nesting uses <see cref="PartitionDto.ParentPartitionGuid"/>, the parent
-/// partition GUID. Each node is tagged with its type (<c>[partition]</c>),
-/// mirroring the <c>user-group tree</c> visualization. Partitions whose parent
-/// is not among the visible partitions (or which have no parent) appear at the
-/// root level.
+/// A partition whose parent is not among the visible partitions appears at the root level.
 /// </remarks>
 public sealed class TreePartitionsCommand : Command
 {
@@ -34,8 +28,6 @@ public sealed class TreePartitionsCommand : Command
         {
             var partitions = (await client.V1.Partitions.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
 
-            // Index partitions and their parent/child relationships. The parent
-            // link lives in ParentPartitionGuid (the parent partition GUID).
             var partitionsByGuid = new Dictionary<Guid, PartitionDto>();
             var childrenByParent = new Dictionary<Guid, List<PartitionDto>>();
             var rootPartitions = new List<PartitionDto>();
@@ -88,10 +80,6 @@ public sealed class TreePartitionsCommand : Command
         });
     }
 
-    /// <summary>
-    /// Builds a tree node for a partition and recursively for its children.
-    /// Guards against cycles via <paramref name="visited"/>.
-    /// </summary>
     private static TreeNode BuildPartitionNode(
         PartitionDto partition,
         IReadOnlyDictionary<Guid, List<PartitionDto>> childrenByParent,

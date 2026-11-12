@@ -1,37 +1,13 @@
 namespace Fargo.ServiceSeed.Options;
 
-/// <summary>
-/// Provides extension methods for configuring the worker.
-/// </summary>
 public static class SeedOptionsServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
         /// <summary>
-        /// Registers and validates the configuration used to create the
-        /// default administrator account during system initialization.
+        /// Binds and validates the seed options (<c>DefaultAdmin</c>, administrators group, global partition).
+        /// <c>ValidateOnStart()</c> makes the host fail fast when any of them is missing or invalid.
         /// </summary>
-        /// <param name="configuration">
-        /// The application configuration instance used to bind the
-        /// default administrator settings.
-        /// </param>
-        /// <returns>
-        /// The same <see cref="IServiceCollection"/> instance to allow
-        /// method chaining.
-        /// </returns>
-        /// <remarks>
-        /// This method binds the <see cref="DefaultAdminOptions"/> configuration
-        /// from the <c>DefaultAdmin</c> section of the application configuration.
-        ///
-        /// The configuration is validated during application startup to ensure
-        /// that the required administrator credentials are provided.
-        /// The validation process guarantees that both the administrator
-        /// identifier and password are present before the system initialization
-        /// process executes.
-        ///
-        /// The use of <c>ValidateOnStart()</c> ensures that the application fails
-        /// fast if the configuration is missing or invalid.
-        /// </remarks>
         public IServiceCollection AddFargoSeedOptions(IConfiguration configuration)
         {
             services

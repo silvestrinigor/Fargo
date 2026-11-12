@@ -77,9 +77,6 @@ public sealed class RabbitMqEventPublisherTests : IAsyncLifetime
             IntegrationEventJson.Serialize(message));
     }
 
-    /// <summary>
-    /// Declares the exchange as the publisher does and binds a fresh queue to it.
-    /// </summary>
     private async Task<(IChannel Channel, string Queue)> BindQueueAsync(string exchangeName, string bindingKey)
     {
         var channel = await connection.CreateChannelAsync();

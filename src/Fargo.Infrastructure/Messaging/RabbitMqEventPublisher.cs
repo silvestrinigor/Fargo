@@ -25,9 +25,6 @@ namespace Fargo.Infrastructure.Messaging;
 /// </remarks>
 public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
 {
-    /// <summary>
-    /// The message header carrying <see cref="OutboundEvent.SchemaVersion"/>.
-    /// </summary>
     public const string SchemaVersionHeader = "schema-version";
 
     private readonly Func<IConnection> connectionFactory;
@@ -35,11 +32,6 @@ public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
     private readonly SemaphoreSlim gate = new(1, 1);
     private IChannel? channel;
 
-    /// <summary>
-    /// Initializes a new instance.
-    /// </summary>
-    /// <param name="connectionFactory">Returns the broker connection; called on the first publish.</param>
-    /// <param name="options">The publisher options.</param>
     public RabbitMqEventPublisher(Func<IConnection> connectionFactory, IOptions<RabbitMqEventOptions> options)
     {
         ArgumentNullException.ThrowIfNull(connectionFactory);
@@ -49,7 +41,6 @@ public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
         this.options = options.Value;
     }
 
-    /// <inheritdoc />
     public async Task PublishAsync(OutboundEvent outboundEvent, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(outboundEvent);
@@ -88,11 +79,6 @@ public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
         }
     }
 
-    /// <summary>
-    /// Builds the message properties of an event.
-    /// </summary>
-    /// <param name="outboundEvent">The event.</param>
-    /// <returns>The message properties.</returns>
     public static BasicProperties CreateProperties(OutboundEvent outboundEvent)
     {
         ArgumentNullException.ThrowIfNull(outboundEvent);
@@ -112,7 +98,6 @@ public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
         };
     }
 
-    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         await CloseChannelAsync();

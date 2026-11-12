@@ -11,9 +11,6 @@ using Fargo.Core.Identity.Credentials;
 
 namespace Fargo.Application.Operations.Users;
 
-/// <summary>
-/// Command used to update an existing user from an API update payload.
-/// </summary>
 public sealed record UserUpdateCommand(
     Guid UserGuid, UserUpdateDto Update
 ) : ICommand;

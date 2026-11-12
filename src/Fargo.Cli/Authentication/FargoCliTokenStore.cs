@@ -6,10 +6,9 @@ using System.Text.Json;
 namespace Fargo.Cli.Authentication;
 
 /// <summary>
-/// Persists the session token in the OS credential cache, bound to the server
-/// it was issued for. A token obtained against one server is never returned for
-/// a different server, so logging in against <c>--server A</c> and then running
-/// a command against the configured server B will not reuse A's token.
+/// Persists the session token in the OS credential cache, bound to the server it was issued for.
+/// A token obtained against one server is never returned for another, so logging in with
+/// <c>--server A</c> and then running against the configured server B does not reuse A's token.
 /// </summary>
 public class FargoCliTokenStore : ITokenStore
 {
@@ -112,10 +111,6 @@ public class FargoCliTokenStore : ITokenStore
         }
     }
 
-    /// <summary>
-    /// Compares two server URLs by scheme, host and port, ignoring case and any
-    /// trailing slash so equivalent URLs match.
-    /// </summary>
     private static bool SameServer(string? storedServer, Uri? activeServer)
     {
         if (storedServer is null || activeServer is null)

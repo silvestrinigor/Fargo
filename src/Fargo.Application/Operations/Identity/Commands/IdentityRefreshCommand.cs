@@ -9,24 +9,8 @@ using Fargo.Core.Identity.Tokens;
 
 namespace Fargo.Application.Operations.Identity;
 
-/// <summary>
-/// Command used to refresh authentication tokens using a valid refresh token.
-/// </summary>
-/// <param name="RefreshToken">
-/// The refresh token provided by the client.
-/// </param>
 public sealed record IdentityRefreshCommand(Token RefreshToken) : ICommand<IdentityAuthResultDto>;
 
-/// <summary>
-/// Handles the token refresh command by validating the existing refresh token and issuing new access and refresh tokens.
-/// </summary>
-/// <param name="actorService">Resolves actor information for user validation</param>
-/// <param name="userRepository">Provides access to user data for validation</param>
-/// <param name="tokenGenerator">Generates new access tokens</param>
-/// <param name="refreshTokenGenerator">Generates new refresh tokens</param>
-/// <param name="tokenHasher">Hashes refresh tokens for secure storage</param>
-/// <param name="refreshTokenRepository">Manages refresh token persistence</param>
-/// <param name="unitOfWork">Provides transactional consistency for data operations</param>
 public sealed class IdentityRefreshCommandHandler(
     ActorResolver actorService,
     IUserRepository userRepository,
@@ -39,13 +23,8 @@ public sealed class IdentityRefreshCommandHandler(
 ) : ICommandHandler<IdentityRefreshCommand, IdentityAuthResultDto>
 {
     /// <summary>
-    /// Processes the token refresh command by validating the old refresh token, checking user status,
-    /// generating new tokens, and revoking the old refresh token. Returns a new authentication result
-    /// with updated access and refresh tokens.
+    /// Rotates the refresh token: the old one is revoked when the new one is issued.
     /// </summary>
-    /// <param name="command">The refresh command containing the refresh token to validate</param>
-    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
-    /// <returns>A new authentication result containing updated access and refresh tokens</returns>
     public async Task<IdentityAuthResultDto> HandleAsync(IdentityRefreshCommand command, CancellationToken cancellationToken = default)
     {
         var now = timeProvider.GetUtcNow();

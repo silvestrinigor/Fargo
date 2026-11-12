@@ -6,16 +6,12 @@ using System.CommandLine;
 namespace Fargo.Cli.Commands.UserGroups;
 
 /// <summary>
-/// Renders user groups as a hierarchy, nesting child groups under their parent
-/// and member users under each group. Built from existing APIs only
-/// (GET /user-groups and GET /users); no new backend endpoint is required.
+/// Renders user groups as a tree, nesting child groups under their parent and member users
+/// under each group.
 /// </summary>
 /// <remarks>
-/// Group nesting uses <see cref="UserGroupDto.ParentUserGroup"/>, the parent
-/// user-group GUID. User membership comes from
-/// <see cref="UserDto.UserGroups"/>. Each node is tagged with its type
-/// (<c>[group]</c> or <c>[user]</c>). Users that belong to no group appear at
-/// the root level, as siblings of the top-level groups.
+/// Users that belong to no group appear at the root level, next to the top-level groups. A group
+/// whose parent is not among the visible groups is also a root.
 /// </remarks>
 public sealed class TreeUserGroupsCommand : Command
 {
@@ -37,7 +33,6 @@ public sealed class TreeUserGroupsCommand : Command
             var groups = (await client.V1.UserGroups.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
             var users = (await client.V1.Users.GetAsync(cancellationToken: cancellationToken))?.Items ?? [];
 
-            // Index users by each group they belong to (UserDto.UserGroups).
             var usersByGroup = new Dictionary<Guid, List<UserDto>>();
             var ungrouped = new List<UserDto>();
 
@@ -65,8 +60,6 @@ public sealed class TreeUserGroupsCommand : Command
                 }
             }
 
-            // Index groups and their parent/child relationships. The parent link
-            // lives in ParentUserGroup (the parent user-group GUID).
             var groupsByGuid = new Dictionary<Guid, UserGroupDto>();
             var childrenByParent = new Dictionary<Guid, List<UserGroupDto>>();
             var rootGroups = new List<UserGroupDto>();
@@ -108,8 +101,6 @@ public sealed class TreeUserGroupsCommand : Command
                 roots.Add(BuildGroupNode(group, childrenByParent, usersByGroup, visited));
             }
 
-            // Users that belong to no group are shown directly at the root
-            // level, as siblings of the top-level groups.
             foreach (var user in ungrouped.OrderBy(u => u.Nameid, StringComparer.OrdinalIgnoreCase))
             {
                 roots.Add(new TreeNode(UserLabel(user)));
@@ -126,10 +117,6 @@ public sealed class TreeUserGroupsCommand : Command
         });
     }
 
-    /// <summary>
-    /// Builds a tree node for a group: its child groups first, then its member
-    /// users. Guards against cycles via <paramref name="visited"/>.
-    /// </summary>
     private static TreeNode BuildGroupNode(
         UserGroupDto group,
         IReadOnlyDictionary<Guid, List<UserGroupDto>> childrenByParent,

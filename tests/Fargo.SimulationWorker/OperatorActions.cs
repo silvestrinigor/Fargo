@@ -26,7 +26,6 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
 
     // ----- Entity-tracked containment flow -------------------------------------
 
-    /// <summary>Creates a container article + its concrete container item.</summary>
     public async Task<string> CreateContainerAsync(OperatorContext ctx, CancellationToken ct)
     {
         var articleGuid = await ctx.Client.V1.Articles.PostAsync(
@@ -66,7 +65,6 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
         return "create-container";
     }
 
-    /// <summary>Creates an entity-tracked product article (optionally with a barcode).</summary>
     public async Task<string> CreateProductArticleAsync(OperatorContext ctx, CancellationToken ct)
     {
         var dto = new ArticleCreateDto
@@ -91,7 +89,6 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
         return "create-product-article";
     }
 
-    /// <summary>Creates a concrete item of a known product article, placed into a container if one exists.</summary>
     public async Task<string> CreateItemAsync(OperatorContext ctx, CancellationToken ct)
     {
         var article = ctx.PickRandomGuid(ctx.ProductArticles);
@@ -119,7 +116,6 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
         return "create-item";
     }
 
-    /// <summary>Relocates a known item into a different container.</summary>
     public async Task<string> MoveItemAsync(OperatorContext ctx, CancellationToken ct)
     {
         var item = ctx.Items.Where(i => !i.Deleted).ToList() is { Count: > 0 } live
@@ -154,7 +150,6 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
         return "move-item";
     }
 
-    /// <summary>Removes a known item from its container (picking / staging for dispatch).</summary>
     public async Task<string> RemoveItemAsync(OperatorContext ctx, CancellationToken ct)
     {
         var item = ctx.Items.FirstOrDefault(i => !i.Deleted && i.ContainerGuid is not null);
@@ -188,7 +183,6 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
 
     // ----- Event-tracked bulk flow ---------------------------------------------
 
-    /// <summary>Creates an event-tracked bulk article plus two bulk containers.</summary>
     public async Task<string> CreateBulkArticleAsync(OperatorContext ctx, CancellationToken ct)
     {
         var articleGuid = await ctx.Client.V1.Articles.PostAsync(
@@ -214,7 +208,6 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
         return "create-bulk-article";
     }
 
-    /// <summary>Records a receipt of bulk stock from outside into a container.</summary>
     public async Task<string> BulkReceiptAsync(OperatorContext ctx, CancellationToken ct)
     {
         var article = ctx.PickRandomGuid(ctx.EventArticles);
@@ -268,7 +261,6 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
         return "bulk-transfer";
     }
 
-    /// <summary>Dispatches a bulk quantity out of a container to outside stock.</summary>
     public async Task<string> BulkDispatchAsync(OperatorContext ctx, CancellationToken ct)
     {
         var article = ctx.PickRandomGuid(ctx.EventArticles);
@@ -301,7 +293,6 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
 
     // ----- Read-only auditor flow ----------------------------------------------
 
-    /// <summary>Reads back inventory, movements, item events or audit logs.</summary>
     public async Task<string> AuditAsync(OperatorContext ctx, CancellationToken ct)
     {
         switch (ctx.Random.Next(4))

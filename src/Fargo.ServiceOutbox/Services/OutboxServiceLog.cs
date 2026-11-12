@@ -1,8 +1,5 @@
 namespace Fargo.ServiceOutbox.Services;
 
-/// <summary>
-/// Source-generated log messages of the outbox relay host.
-/// </summary>
 internal static partial class OutboxServiceLog
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Outbox relay failed; retrying in {Delay}.")]

@@ -5,9 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Operations.Items;
 
-/// <summary>
-/// Registers the Items use-case handlers.
-/// </summary>
 public static class ItemServiceCollectionExtensions
 {
     extension(IServiceCollection services)

@@ -17,8 +17,8 @@ using Microsoft.Extensions.Hosting;
 //   appsettings.json -> appsettings.{Environment}.json -> environment
 //   variables -> command-line arguments
 // so any value can be overridden without touching the binary, e.g.:
-//   dotnet run --project tests/client/Fargo.SimulationWorker -- --SimulationWorker:Operators=8
-//   dotnet run --project tests/client/Fargo.SimulationWorker -- --SimulationWorker:MaxDurationSeconds=30
+//   dotnet run --project tests/Fargo.SimulationWorker -- --SimulationWorker:Operators=8
+//   dotnet run --project tests/Fargo.SimulationWorker -- --SimulationWorker:MaxDurationSeconds=30
 //   $env:SimulationWorker__Server = "https://localhost:7563"
 
 var builder = Host.CreateApplicationBuilder(args);

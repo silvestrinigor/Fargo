@@ -1,56 +1,15 @@
 namespace Fargo.Core.Entities.Items;
 
-/// <summary>
-/// Defines the repository contract for querying and persisting
-/// <see cref="Item"/> entities.
-/// </summary>
-/// <remarks>
-/// Implementations are responsible for retrieving items from the persistence
-/// layer and tracking changes for creation and deletion. Changes are typically
-/// committed through a unit of work.
-/// </remarks>
 public interface IItemRepository
 {
-    /// <summary>
-    /// Gets an item by its unique identifier.
-    /// </summary>
-    /// <param name="itemGuid">
-    /// The unique identifier of the item.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// The matching <see cref="Item"/> if found; otherwise,
-    /// <see langword="null"/>.
-    /// </returns>
     Task<Item?> GetByGuidAsync(Guid itemGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets the unique identifiers of all descendant container items contained
-    /// within the specified item container.
+    /// Gets the identifiers of the container items nested at any depth inside a container.
     /// </summary>
-    /// <param name="itemContainerGuid">
-    /// The identifier of the item container whose descendant container items should
-    /// be retrieved.
-    /// </param>
-    /// <param name="includeRoot">
-    /// <see langword="true"/> to include the specified item container in the result;
-    /// otherwise, only descendant container items are returned.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// A read-only collection containing the identifiers of the matching
-    /// descendant container items.
-    /// </returns>
     /// <remarks>
-    /// Only items that are containers are included in the result. Descendant items
-    /// that are not containers are ignored.
-    ///
-    /// If the specified item is not a container, an empty collection is returned
-    /// because non-container items cannot contain descendant container items.
+    /// Non-container descendants are ignored. Returns an empty collection when the item is not a
+    /// container. <paramref name="includeRoot"/> adds the item itself to the result.
     /// </remarks>
     Task<IReadOnlyCollection<Guid>> GetContainedDescendantGuidsAsync(
         Guid itemContainerGuid,
@@ -58,73 +17,34 @@ public interface IItemRepository
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Counts the number of items of the specified article that are currently
-    /// placed directly inside the specified container item.
+    /// Counts the items of an article placed directly inside a container; items nested in
+    /// descendant containers are not counted.
     /// </summary>
-    /// <param name="itemContainerGuid">
-    /// The identifier of the container item whose direct contents are counted.
-    /// </param>
-    /// <param name="articleGuid">
-    /// The identifier of the article whose items are counted.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// The number of items of the article directly contained by the container.
-    /// </returns>
-    /// <remarks>
-    /// Only items whose immediate parent is the specified container are counted;
-    /// items nested in descendant containers are not included.
-    /// </remarks>
     Task<int> CountDirectChildrenByArticleAsync(
         Guid itemContainerGuid,
         Guid articleGuid,
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Adds a new item to the persistence context.
-    /// </summary>
-    /// <param name="item">
-    /// The item to add.
-    /// </param>
     /// <remarks>
-    /// The item is tracked by the persistence context. The operation is not
-    /// committed until the associated unit of work is completed.
+    /// Not persisted until the unit of work completes.
     /// </remarks>
     void Add(Item item);
 
-    /// <summary>
-    /// Removes an item from the persistence context.
-    /// </summary>
-    /// <param name="item">
-    /// The item to remove.
-    /// </param>
     /// <remarks>
-    /// The removal is staged in the persistence context and is not committed
-    /// until the associated unit of work is completed.
+    /// Not persisted until the unit of work completes.
     /// </remarks>
     void Remove(Item item);
 
     /// <summary>
-    /// Acquires a single, global transaction-scoped exclusive lock that serializes
-    /// container-into-container moves across the whole item tree.
+    /// Acquires one global, transaction-scoped exclusive lock that serializes container-into-container
+    /// moves. It must be called inside a transaction and is released when the transaction ends.
     /// </summary>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
     /// <remarks>
-    /// The lock protects the check-then-act in the item-move flow: validating that
-    /// a move does not create a circular containment hierarchy reads other items,
-    /// so two concurrent moves could each pass validation and together create a
-    /// cycle. A circular hierarchy can span several containers whose paths only
-    /// share an interior node, so a per-container key would not reliably serialize
-    /// the conflicting moves; one global lock serializes every such move and is
-    /// therefore correct for cycles of any size. It is only meant to be taken when
-    /// moving a non-fixed container item (the sole move that can create a cycle),
-    /// so the common leaf-item move never contends for it. The lock releases
-    /// automatically when the surrounding transaction ends, so it must be called
-    /// inside a transaction.
+    /// Validating that a move creates no circular containment reads other items, so two concurrent
+    /// moves could each pass and together create a cycle. A cycle can span containers whose paths
+    /// only share an interior node, so a per-container key would not serialize the conflicting
+    /// moves; one global lock is correct for cycles of any size. Only moving a non-fixed container
+    /// item can create a cycle, so the common leaf-item move never takes it.
     /// </remarks>
     Task AcquireContainmentLockAsync(CancellationToken cancellationToken = default);
 }

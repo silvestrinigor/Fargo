@@ -5,9 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Operations.Users;
 
-/// <summary>
-/// Registers the Users use-case handlers.
-/// </summary>
 public static class UserServiceCollectionExtensions
 {
     extension(IServiceCollection services)

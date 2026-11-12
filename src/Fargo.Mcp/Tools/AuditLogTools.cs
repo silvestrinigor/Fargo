@@ -5,9 +5,6 @@ using System.ComponentModel;
 
 namespace Fargo.Mcp.Tools;
 
-/// <summary>
-/// MCP tools for reading Fargo audit logs. Audit logs are read-only.
-/// </summary>
 [McpServerToolType]
 public static class AuditLogTools
 {

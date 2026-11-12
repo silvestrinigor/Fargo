@@ -40,7 +40,6 @@ public static class CommandFactory
 
         globalOptions.AddServerToRoot(root);
 
-        // Expose `--verbose` on every command for detailed error diagnostics.
         globalOptions.AddVerboseToRoot(root);
 
         // Expose `fargo --version`, reporting the assembly's informational

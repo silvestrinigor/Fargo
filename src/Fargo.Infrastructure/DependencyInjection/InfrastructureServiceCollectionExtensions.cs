@@ -3,11 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Infrastructure.DependencyInjection;
 
-/// <summary>
-/// Entry point for registering the Fargo infrastructure layer. Each concern owns
-/// its registrations (see <c>DependencyInjection/*ServiceCollectionExtensions.cs</c>);
-/// this class only composes them.
-/// </summary>
 public static class InfrastructureServiceCollectionExtensions
 {
     extension(IServiceCollection services)

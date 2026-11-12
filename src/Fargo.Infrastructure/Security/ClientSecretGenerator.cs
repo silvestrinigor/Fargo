@@ -4,11 +4,6 @@ using System.Security.Cryptography;
 
 namespace Fargo.Infrastructure.Security;
 
-/// <summary>
-/// Generates cryptographically strong client secrets that satisfy the
-/// <see cref="Password"/> policy (at least one letter, one digit and one special
-/// character, no spaces, length within bounds).
-/// </summary>
 public sealed class ClientSecretGenerator : IClientSecretGenerator
 {
     public Password Generate()

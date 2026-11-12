@@ -6,81 +6,38 @@ using UnitsNet;
 namespace Fargo.Core.Events;
 
 /// <summary>
-/// Represents an event recorded against an event-tracked <see cref="Article"/>.
+/// Base record of the stock-event stream of an event-tracked <see cref="Article"/>, which has no
+/// per-unit <see cref="Item"/> rows. The payload is in <see cref="Moviment"/> or
+/// <see cref="Lifecycle"/>, depending on <see cref="ItemEventType"/>.
 /// </summary>
 /// <remarks>
-/// Event-based tracking does not materialize one <see cref="Item"/> row per
-/// physical unit. Instead, changes to the stock of an article are recorded as a
-/// stream of events. An <see cref="ItemEvent"/> is the base record of that
-/// stream: it identifies the article the event concerns, the kind of event, and
-/// the instant it occurred.
-///
-/// The concrete payload of an event is modelled by a related entity such as
-/// <see cref="ItemMovimentEvent"/>, which the event references through its
-/// <see cref="Moviment"/> navigation.
-///
-/// An <see cref="ItemEvent"/> can only be created for an article whose
-/// <see cref="Article.TrackingMode"/> is <see cref="ArticleTrackingMode.Event"/>.
+/// Can only be created for an article whose <see cref="Article.TrackingMode"/> is
+/// <see cref="ArticleTrackingMode.Event"/>.
 /// </remarks>
 public class ItemEvent : Event
 {
-    /// <summary>
-    /// Gets the unique identifier of the <see cref="Article"/> the event concerns.
-    /// </summary>
     public Guid ArticleGuid { get; private init; }
 
-    /// <summary>
-    /// Gets the article the event concerns.
-    /// </summary>
-    /// <remarks>
-    /// The associated article is always event-tracked
-    /// (<see cref="ArticleTrackingMode.Event"/>).
-    /// </remarks>
     public Article Article { get; private init; }
 
-    /// <summary>
-    /// Gets the kind of item event represented by this record.
-    /// </summary>
     public ItemEventType ItemEventType { get; private init; }
 
     /// <summary>
-    /// Gets the movement payload of this event, when its <see cref="ItemEventType"/>
-    /// is <see cref="Events.ItemEventType.Moviment"/>; otherwise <see langword="null"/>.
+    /// The movement payload; <see langword="null"/> unless the type is
+    /// <see cref="Events.ItemEventType.Moviment"/>.
     /// </summary>
     public ItemMovimentEvent? Moviment { get; private set; }
 
     /// <summary>
-    /// Gets the creation/deletion payload of this event, when its
-    /// <see cref="ItemEventType"/> is <see cref="Events.ItemEventType.Creation"/> or
-    /// <see cref="Events.ItemEventType.Deletion"/>; otherwise <see langword="null"/>.
+    /// The creation/deletion payload; <see langword="null"/> unless the type is
+    /// <see cref="Events.ItemEventType.Creation"/> or <see cref="Events.ItemEventType.Deletion"/>.
     /// </summary>
     public ItemLifecycleEvent? Lifecycle { get; private set; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    /// <summary>
-    /// Initializes a new event entity.
-    /// </summary>
-    /// <remarks>
-    /// Required by Entity Framework.
-    /// </remarks>
+    // Required by EF Core.
     private ItemEvent() { }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    /// <summary>
-    /// Initializes a new event for the specified event-tracked article.
-    /// </summary>
-    /// <param name="article">The article the event concerns.</param>
-    /// <param name="eventType">The kind of event.</param>
-    /// <param name="occuredAt">
-    /// The instant, in UTC, at which the event occurred. When
-    /// <see langword="null"/>, the current UTC instant is used.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="article"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="FargoCoreException">
-    /// Thrown when <paramref name="article"/> is not event-tracked
-    /// (<see cref="ArticleTrackingMode.Event"/>).
-    /// </exception>
     internal ItemEvent(Article article, ItemEventType eventType, DateTimeOffset? occuredAt = null)
     {
         ArgumentNullException.ThrowIfNull(article);
@@ -106,35 +63,12 @@ public class ItemEvent : Event
     }
 
     /// <summary>
-    /// Creates a new movement event for an event-tracked article.
+    /// Records a movement of <paramref name="quantity"/> between containers; a <see langword="null"/>
+    /// container means outside any container. A null <paramref name="occuredAt"/> means now (UTC).
     /// </summary>
-    /// <param name="article">The event-tracked article being moved.</param>
-    /// <param name="fromContainer">
-    /// The origin container, or <see langword="null"/> when the quantity entered
-    /// stock from outside any container.
-    /// </param>
-    /// <param name="toContainer">
-    /// The destination container, or <see langword="null"/> when the quantity
-    /// left stock to outside any container.
-    /// </param>
-    /// <param name="quantity">The strictly positive quantity moved.</param>
-    /// <param name="occuredAt">
-    /// The instant, in UTC, at which the movement occurred. When
-    /// <see langword="null"/>, the current UTC instant is used.
-    /// </param>
-    /// <returns>
-    /// A new <see cref="ItemEvent"/> of type <see cref="ItemEventType.Moviment"/>
-    /// with its <see cref="Moviment"/> payload populated.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="article"/> is <see langword="null"/>.
-    /// </exception>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the article is not event-tracked, when
-    /// <paramref name="quantity"/> is not strictly positive, when the origin and
-    /// destination are the same container, when the movement has neither an origin
-    /// nor a destination container, or when a provided container is not a
-    /// container-type article.
+    /// The article is not event-tracked, the quantity is not strictly positive, origin and destination
+    /// are the same container or both missing, or a container is not a container-type article.
     /// </exception>
     public static ItemEvent NewMovimentEvent(
         Article article,
@@ -156,30 +90,11 @@ public class ItemEvent : Event
     }
 
     /// <summary>
-    /// Creates a new creation event for an event-tracked article, recording that
-    /// a quantity of stock was created, optionally inside a container.
+    /// Records the creation of <paramref name="quantity"/> of stock, optionally inside a container.
     /// </summary>
-    /// <param name="article">The event-tracked article the stock belongs to.</param>
-    /// <param name="container">
-    /// The container the quantity was created in, or <see langword="null"/> when
-    /// it was created outside any container.
-    /// </param>
-    /// <param name="quantity">The strictly positive quantity created.</param>
-    /// <param name="occuredAt">
-    /// The instant, in UTC, at which the creation occurred. When
-    /// <see langword="null"/>, the current UTC instant is used.
-    /// </param>
-    /// <returns>
-    /// A new <see cref="ItemEvent"/> of type <see cref="ItemEventType.Creation"/>
-    /// with its <see cref="Lifecycle"/> payload populated.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="article"/> is <see langword="null"/>.
-    /// </exception>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the article is not event-tracked, when
-    /// <paramref name="quantity"/> is not strictly positive, or when
-    /// <paramref name="container"/> is not a container-type article.
+    /// The article is not event-tracked, the quantity is not strictly positive, or the container is not
+    /// a container-type article.
     /// </exception>
     public static ItemEvent NewCreationEvent(
         Article article,
@@ -189,30 +104,11 @@ public class ItemEvent : Event
         => NewLifecycleEvent(article, ItemEventType.Creation, container, quantity, occuredAt);
 
     /// <summary>
-    /// Creates a new deletion event for an event-tracked article, recording that
-    /// a quantity of stock was deleted, optionally from a container.
+    /// Records the deletion of <paramref name="quantity"/> of stock, optionally from a container.
     /// </summary>
-    /// <param name="article">The event-tracked article the stock belongs to.</param>
-    /// <param name="container">
-    /// The container the quantity was deleted from, or <see langword="null"/>
-    /// when it was deleted from outside any container.
-    /// </param>
-    /// <param name="quantity">The strictly positive quantity deleted.</param>
-    /// <param name="occuredAt">
-    /// The instant, in UTC, at which the deletion occurred. When
-    /// <see langword="null"/>, the current UTC instant is used.
-    /// </param>
-    /// <returns>
-    /// A new <see cref="ItemEvent"/> of type <see cref="ItemEventType.Deletion"/>
-    /// with its <see cref="Lifecycle"/> payload populated.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="article"/> is <see langword="null"/>.
-    /// </exception>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the article is not event-tracked, when
-    /// <paramref name="quantity"/> is not strictly positive, or when
-    /// <paramref name="container"/> is not a container-type article.
+    /// The article is not event-tracked, the quantity is not strictly positive, or the container is not
+    /// a container-type article.
     /// </exception>
     public static ItemEvent NewDeletionEvent(
         Article article,

@@ -8,9 +8,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 namespace Fargo.ServiceHttp.Endpoints;
 
 /// <summary>
-/// Management endpoints for service accounts (machine identities). Separate from
-/// the token endpoint under /identity: this group is the admin-facing CRUD
-/// surface, each operation gated by a service-account permission.
+/// Admin-facing CRUD, separate from the token endpoint under /identity; each operation is gated by a
+/// service-account permission.
 /// </summary>
 public static class ServiceAccountEndpointRouteBuilderExtension
 {

@@ -6,13 +6,11 @@ using UnitsNet.Units;
 namespace Fargo.ServiceHttp.JsonConverters;
 
 /// <summary>
-/// Serializes and deserializes <see cref="Density"/> as <c>{ "value": number, "unit": string }</c>.
-/// Reads any UnitsNet density unit abbreviation (e.g. "kg/m³", "g/cm³", "lb/ft³").
-/// Writes the value and unit exactly as stored — no unit conversion on output.
+/// Reads any UnitsNet density unit abbreviation; writes value and unit exactly as stored, with no unit
+/// conversion.
 /// </summary>
 public sealed class DensityJsonConverter : JsonConverter<Density>
 {
-    /// <inheritdoc />
     public override Density Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
@@ -61,7 +59,6 @@ public sealed class DensityJsonConverter : JsonConverter<Density>
         return Density.From(value, unit);
     }
 
-    /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, Density value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();

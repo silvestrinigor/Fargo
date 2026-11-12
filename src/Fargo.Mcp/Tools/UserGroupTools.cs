@@ -7,10 +7,8 @@ using System.ComponentModel;
 namespace Fargo.Mcp.Tools;
 
 /// <summary>
-/// MCP tools for working with Fargo user groups. Mirrors the
-/// <c>fargo user-group</c> CLI surface. Group membership of users is managed from
-/// the user side (<c>fargo_users_update</c> with <c>userGroupsToAdd</c> /
-/// <c>userGroupsToRemove</c>).
+/// Group membership of users is managed from the user side (<c>fargo_users_update</c> with
+/// <c>userGroupsToAdd</c> / <c>userGroupsToRemove</c>).
 /// </summary>
 [McpServerToolType]
 public static class UserGroupTools

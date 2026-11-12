@@ -407,10 +407,8 @@ public sealed class WorkflowRunner
     private static string Short(Guid? guid) =>
         guid is null ? "(none)" : guid.Value.ToString("N")[..8];
 
-    /// <summary>A created container article + its concrete container item.</summary>
     private sealed record ContainerRef(string Name, Guid ArticleGuid, Guid ItemGuid);
 
-    /// <summary>A created product item plus the client-side view of its state.</summary>
     private sealed class ItemRef(string name, Guid articleGuid, Guid itemGuid)
     {
         public string Name { get; } = name;
@@ -420,7 +418,6 @@ public sealed class WorkflowRunner
         /// <summary>Where we last asked the server to put this item (null = loose).</summary>
         public Guid? CurrentContainerGuid { get; set; }
 
-        /// <summary>How many move/remove operations we issued for this item.</summary>
         public int MoveCount { get; set; }
     }
 }

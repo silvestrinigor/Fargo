@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Infrastructure.Messaging;
 
-/// <summary>
-/// Source-generated log messages of the RabbitMQ messaging components.
-/// </summary>
 internal static partial class MessagingLog
 {
     [LoggerMessage(Level = LogLevel.Information, Message = "Consuming {BindingKey} events from exchange {Exchange} through queue {Queue}.")]

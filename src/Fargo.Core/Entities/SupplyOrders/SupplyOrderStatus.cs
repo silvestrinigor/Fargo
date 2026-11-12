@@ -1,7 +1,8 @@
 namespace Fargo.Core.Entities.SupplyOrders;
 
 /// <summary>
-/// Represents the lifecycle state of a <see cref="SupplyOrder"/>.
+/// Lifecycle of a <see cref="SupplyOrder"/>: Draft, then Placed, then PartiallyReceived or Received,
+/// then Closed. An order can be Cancelled until it is received or closed.
 /// </summary>
 public enum SupplyOrderStatus : byte
 {

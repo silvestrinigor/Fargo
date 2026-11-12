@@ -29,10 +29,8 @@ internal sealed class Names(string runTag)
 
     private long _counter;
 
-    /// <summary>Gets the run tag in use (for logging).</summary>
     public string RunTag => _runTag;
 
-    /// <summary>A monotonically increasing, process-unique sequence value.</summary>
     public long Next() => Interlocked.Increment(ref _counter);
 
     /// <summary>
@@ -43,16 +41,10 @@ internal sealed class Names(string runTag)
     /// </summary>
     public string Nameid(string prefix) => $"{prefix}-{_runTag}-{Next():x}".ToLowerInvariant();
 
-    /// <summary>Builds a unique, valid article/partition/group display name.</summary>
     public string Display(string prefix) => $"{prefix}-{_runTag}-{Next():x}";
 
-    /// <summary>Picks a letters-only first name (optionally seeded by an index).</summary>
     public string FirstName(int index) => FirstNames[Math.Abs(index) % FirstNames.Length];
 
-    /// <summary>
-    /// Builds a unique, valid 13-digit EAN-13 (12 payload digits + check digit)
-    /// from the next sequence value, so each article gets a distinct code.
-    /// </summary>
     public string Ean13()
     {
         // 12 payload digits derived from run tag hash + sequence, kept in range.

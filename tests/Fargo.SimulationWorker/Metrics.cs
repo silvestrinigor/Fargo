@@ -2,11 +2,6 @@ using System.Collections.Concurrent;
 
 namespace Fargo.SimulationWorker;
 
-/// <summary>
-/// Thread-safe aggregator for simulation throughput and health. Operators record
-/// each action they attempt; the service prints periodic and final summaries
-/// from the accumulated counters.
-/// </summary>
 internal sealed class Metrics
 {
     private readonly ConcurrentDictionary<string, long> _actions = new();
@@ -22,20 +17,16 @@ internal sealed class Metrics
 
     public long RateLimited => Interlocked.Read(ref _rateLimited);
 
-    /// <summary>Records one successful action of the given kind.</summary>
     public void RecordAction(string action)
     {
         Interlocked.Increment(ref _totalOps);
         _actions.AddOrUpdate(action, 1, (_, v) => v + 1);
     }
 
-    /// <summary>Records a non-fatal error (transient failure, unexpected status).</summary>
     public void RecordError() => Interlocked.Increment(ref _errors);
 
-    /// <summary>Records that a request was throttled (HTTP 429).</summary>
     public void RecordRateLimited() => Interlocked.Increment(ref _rateLimited);
 
-    /// <summary>Renders a one-block human-readable summary of the current totals.</summary>
     public string Summarize()
     {
         var elapsed = DateTimeOffset.UtcNow - _startedAt;

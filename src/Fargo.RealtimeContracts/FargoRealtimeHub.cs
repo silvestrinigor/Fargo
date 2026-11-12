@@ -5,9 +5,6 @@ namespace Fargo.RealtimeContracts;
 /// </summary>
 public static class FargoRealtimeHub
 {
-    /// <summary>
-    /// The path of the hub on the real-time service.
-    /// </summary>
     public const string Path = "/hubs/fargo";
 
     /// <summary>
@@ -16,8 +13,5 @@ public static class FargoRealtimeHub
     /// </summary>
     public const string AccessTokenQueryParameter = "access_token";
 
-    /// <summary>
-    /// The client method invoked for each <see cref="EntityChangedNotification"/>.
-    /// </summary>
     public const string EntityChangedMethod = nameof(IFargoRealtimeClient.EntityChanged);
 }

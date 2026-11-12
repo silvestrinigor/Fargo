@@ -203,13 +203,10 @@ public sealed record ItemEventSummary(
 /// </summary>
 public static class ItemEventTypes
 {
-    /// <summary>A movement of a quantity between containers.</summary>
     public const int Moviment = 1;
 
-    /// <summary>The creation of a unit of stock.</summary>
     public const int Creation = 2;
 
-    /// <summary>The deletion of a previously created unit of stock.</summary>
     public const int Deletion = 3;
 }
 

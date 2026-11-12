@@ -7,7 +7,8 @@ using System.Diagnostics;
 namespace Fargo.ServiceSeed.Services;
 
 /// <summary>
-/// Background service responsible for executing the system seed process during application startup.
+/// Runs the system initialization command once at startup, then stops the host. A failure is recorded on
+/// the tracing activity and rethrown.
 /// </summary>
 public sealed class FargoSeedService(
     IServiceProvider serviceProvider,
@@ -15,37 +16,10 @@ public sealed class FargoSeedService(
     ILogger<FargoSeedService> logger
 ) : BackgroundService
 {
-    /// <summary>
-    /// Gets the name of the <see cref="ActivitySource"/> used for tracing seed operations.
-    /// </summary>
     public const string ActivitySourceName = "Seeds";
 
-    /// <summary>
-    /// Activity source used to emit tracing information for the seed execution.
-    /// </summary>
     private static readonly ActivitySource activitySource = new(ActivitySourceName);
 
-    /// <summary>
-    /// Executes the background seed process.
-    /// </summary>
-    /// <param name="stoppingToken">
-    /// A token that indicates when the background operation should be cancelled.
-    /// </param>
-    /// <returns>
-    /// A task that represents the lifetime of the background execution operation.
-    /// </returns>
-    /// <remarks>
-    /// This method starts a tracing activity, creates a service scope,
-    /// resolves the handler for <see cref="InitializeSystemCommand"/>,
-    /// and executes the command.
-    /// <para>
-    /// If an exception occurs during execution, it is attached to the current activity
-    /// and then rethrown.
-    /// </para>
-    /// <para>
-    /// When the process completes, the host application is instructed to stop.
-    /// </para>
-    /// </remarks>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var activity = activitySource.StartActivity("Seeding database", ActivityKind.Client);

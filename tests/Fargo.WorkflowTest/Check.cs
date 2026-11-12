@@ -14,7 +14,6 @@ internal sealed class Check
 
     public int Failures { get; private set; }
 
-    /// <summary>Asserts a boolean condition.</summary>
     public void That(bool condition, string description)
     {
         if (condition)
@@ -27,7 +26,6 @@ internal sealed class Check
         }
     }
 
-    /// <summary>Asserts two values are equal.</summary>
     public void Equal<T>(T expected, T actual, string description)
     {
         if (EqualityComparer<T>.Default.Equals(expected, actual))

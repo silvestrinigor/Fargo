@@ -3,10 +3,6 @@ using System.Threading.RateLimiting;
 
 namespace Fargo.ServiceHttp.RateLimiting;
 
-/// <summary>
-/// Registers the HTTP service's rate limiter, configured from the
-/// <c>RateLimiting</c> settings section with safe built-in defaults.
-/// </summary>
 public static class FargoRateLimitingExtensions
 {
     public const string GeneralAuthenticatedPolicy = "general-authenticated";
@@ -24,7 +20,6 @@ public static class FargoRateLimitingExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        // Resolve the configured options once at startup to build the limiters.
         var options = configuration
             .GetSection(RateLimitingOptions.SectionName)
             .Get<RateLimitingOptions>() ?? new RateLimitingOptions();

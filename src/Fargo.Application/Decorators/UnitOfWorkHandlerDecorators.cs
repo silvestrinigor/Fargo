@@ -4,21 +4,11 @@ using Fargo.Application.Persistence;
 namespace Fargo.Application.Decorators;
 
 /// <summary>
-/// Commit-on-success unit-of-work decorators for command handlers. These
-/// decorators wrap the real handler and, once it completes normally, commit the
-/// pending changes via <see cref="IUnitOfWork.SaveChangesAsync"/>, so command
-/// handlers no longer perform their own terminal success save.
-///
-/// <para>
-/// The commit is intentionally skipped when the inner handler throws: the
-/// exception is allowed to propagate and no <see cref="IUnitOfWork.SaveChangesAsync"/>
-/// call is made, leaving any in-flight changes uncommitted. Handlers that must
-/// persist on a reject path (for example the login/refresh flows that record a
-/// failed attempt before throwing) continue to call
-/// <see cref="IUnitOfWork.SaveChangesAsync"/> themselves.
-/// </para>
+/// Commits the pending changes via <see cref="IUnitOfWork.SaveChangesAsync"/> once the handler
+/// completes. Nothing is saved when the handler throws, so a handler that must persist on a reject
+/// path (the login and refresh flows record a failed attempt) calls
+/// <see cref="IUnitOfWork.SaveChangesAsync"/> itself before throwing.
 /// </summary>
-/// <remarks>Commit-on-success unit-of-work decorator for a command handler with no response.</remarks>
 public sealed class UnitOfWorkCommandHandlerDecorator<TCommand>(
     ICommandHandler<TCommand> inner,
     IUnitOfWork unitOfWork) : ICommandHandler<TCommand>
@@ -33,20 +23,9 @@ public sealed class UnitOfWorkCommandHandlerDecorator<TCommand>(
 }
 
 /// <summary>
-/// Transactional unit-of-work decorator for a no-response command handler.
-/// Unlike <see cref="UnitOfWorkCommandHandlerDecorator{TCommand}"/>, which saves
-/// once on success in autocommit mode, this decorator runs the inner handler
-/// inside a single explicit database transaction (begin → handler → save →
-/// commit, rolling back on failure).
-///
-/// <para>
-/// It is used for commands whose handler acquires a transaction-scoped database
-/// lock (for example a PostgreSQL advisory lock guarding a read-check-write such
-/// as the item containment-cycle check): the lock must be held until the commit,
-/// which requires the save to happen inside the same transaction the handler
-/// runs in. The handler therefore must NOT open its own transaction — this
-/// decorator owns the single commit for the command.
-/// </para>
+/// Runs the handler and the save in one explicit transaction, for <see cref="ITransactionalCommand"/>
+/// commands that hold a transaction-scoped lock until the commit. The handler must not open its own
+/// transaction: this decorator owns the single commit.
 /// </summary>
 public sealed class TransactionalCommandHandlerDecorator<TCommand>(
     ICommandHandler<TCommand> inner,
@@ -61,7 +40,6 @@ public sealed class TransactionalCommandHandlerDecorator<TCommand>(
     }
 }
 
-/// <summary>Commit-on-success unit-of-work decorator for a command handler that returns a response.</summary>
 public sealed class UnitOfWorkCommandHandlerDecorator<TCommand, TResponse>(
     ICommandHandler<TCommand, TResponse> inner,
     IUnitOfWork unitOfWork) : ICommandHandler<TCommand, TResponse>

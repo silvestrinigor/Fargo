@@ -12,22 +12,14 @@ using UnitsNet;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Receives goods against a supply order, effecting the stock change and
-/// advancing the order's received quantities and status.
-/// </summary>
 /// <remarks>
-/// Runs as an <see cref="ITransactionalCommand"/>: the stock change and the
-/// order update commit atomically. Concurrency against a racing receive on the
-/// same order is handled by the order's optimistic concurrency token (a racing
-/// receive fails with a concurrency exception rather than double-counting).
+/// Runs as an <see cref="ITransactionalCommand"/>, so the stock change and the order update commit
+/// atomically. A racing receive on the same order is rejected by the order's optimistic concurrency
+/// token instead of double-counting.
 ///
-/// For an entity-tracked article each received unit materializes one
-/// <see cref="Item"/> placed into the order's receiving container (or at the
-/// root when the order has none); the received quantity must therefore be a
-/// whole number. For an event-tracked article a single
-/// <see cref="ItemEventType.Creation"/> event records the received quantity,
-/// which may be fractional.
+/// An entity-tracked article materializes one <see cref="Item"/> per received unit, in the order's
+/// receiving container (or at the root), so the quantity must be a whole number. An event-tracked
+/// article records a single <see cref="ItemEventType.Creation"/> event, which may be fractional.
 /// </remarks>
 public sealed record SupplyOrderReceiveCommand(
     Guid SupplyOrderGuid,

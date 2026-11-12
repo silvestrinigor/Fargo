@@ -3,18 +3,11 @@ using System.Globalization;
 namespace Fargo.Mcp.Tools;
 
 /// <summary>
-/// Parses the compact string tokens the MCP tools accept for API value objects
-/// (measures, kit components, allowed articles) and converts plain arrays to the
-/// nullable lists the generated client expects. Mirrors the formats the
-/// <c>fargo</c> CLI accepts. Malformed input throws <see cref="ArgumentException"/>,
-/// which the MCP SDK reports to the model as a tool error.
+/// Parses the compact string tokens the tools accept for API value objects. Malformed input throws
+/// <see cref="ArgumentException"/>, which the MCP SDK reports to the model as a tool error.
 /// </summary>
 internal static class ToolInput
 {
-    /// <summary>
-    /// Description of the numeric permission codes (the server's <c>ActionType</c>
-    /// enum, serialized as integers), shared by the user and service-account tools.
-    /// </summary>
     public const string PermissionCodes =
         "Numeric permission (ActionType) codes: 1 CreateArticle, 2 DeleteArticle, 3 EditArticle, 4 CreateItem, 5 DeleteItem, 6 EditItem, "
         + "7 CreateUser, 8 DeleteUser, 9 EditUser, 10 ChangeAnotherUserPassword, 11 CreateUserGroup, 12 DeleteUserGroup, 13 EditUserGroup, "
@@ -56,10 +49,6 @@ internal static class ToolInput
         return (value, unitPart);
     }
 
-    /// <summary>
-    /// Parses a kit-component token <c>&lt;article-guid&gt;</c> or
-    /// <c>&lt;article-guid&gt;:&lt;quantity&gt;</c>. The quantity is optional.
-    /// </summary>
     public static (Guid ArticleGuid, double? Quantity) ParseKitComponent(string token)
     {
         var (articleGuid, quantity) = SplitGuidAndNumber(token, "kit component", "quantity");
@@ -68,9 +57,8 @@ internal static class ToolInput
     }
 
     /// <summary>
-    /// Parses a container allowed-article token <c>&lt;article-guid&gt;</c> or
-    /// <c>&lt;article-guid&gt;:&lt;max-quantity&gt;</c>. The max quantity is
-    /// optional and, when present, must be positive.
+    /// Parses <c>&lt;article-guid&gt;</c> or <c>&lt;article-guid&gt;:&lt;max-quantity&gt;</c>; a max quantity,
+    /// when present, must be positive.
     /// </summary>
     public static (Guid ArticleGuid, double? MaxQuantity) ParseAllowedArticle(string token)
     {
@@ -85,11 +73,15 @@ internal static class ToolInput
         return (articleGuid, maxQuantity);
     }
 
-    /// <summary>Converts an array of GUIDs to the nullable list the client uses, or <see langword="null"/> when empty.</summary>
+    /// <summary>
+    /// Returns <see langword="null"/> when empty, as the generated client expects nullable lists.
+    /// </summary>
     public static List<Guid?>? ToGuidList(Guid[]? values) =>
         values is { Length: > 0 } ? values.Select(v => (Guid?)v).ToList() : null;
 
-    /// <summary>Converts an array of ints to the nullable list the client uses, or <see langword="null"/> when empty.</summary>
+    /// <summary>
+    /// Returns <see langword="null"/> when empty, as the generated client expects nullable lists.
+    /// </summary>
     public static List<int?>? ToIntList(int[]? values) =>
         values is { Length: > 0 } ? values.Select(v => (int?)v).ToList() : null;
 

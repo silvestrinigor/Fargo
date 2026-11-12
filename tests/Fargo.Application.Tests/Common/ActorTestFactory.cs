@@ -20,11 +20,6 @@ namespace Fargo.Application.Tests.Common;
 /// </remarks>
 public static class ActorTestFactory
 {
-    /// <summary>
-    /// Configures <paramref name="userRepository"/> so that resolving the given
-    /// actor GUID returns an active user actor with the specified permissions and
-    /// partition access. Returns the actor GUID for convenience.
-    /// </summary>
     public static Guid ConfigureUserActor(
         IUserRepository userRepository,
         Guid? actorGuid = null,
@@ -54,10 +49,6 @@ public static class ActorTestFactory
         return guid;
     }
 
-    /// <summary>
-    /// Configures the repository so that resolving the actor GUID returns null
-    /// (actor not found / inactive).
-    /// </summary>
     public static void ConfigureMissingActor(IUserRepository userRepository, Guid actorGuid)
     {
         userRepository
@@ -73,19 +64,12 @@ public static class ActorTestFactory
     public static ActorResolver Resolver(IUserRepository userRepository)
         => new(userRepository, Substitute.For<IServiceAccountRepository>());
 
-    /// <summary>
-    /// Creates a real <see cref="ActorResolver"/> over the given user and
-    /// service-account repositories.
-    /// </summary>
     public static ActorResolver Resolver(
         IUserRepository userRepository,
         IServiceAccountRepository serviceAccountRepository)
         => new(userRepository, serviceAccountRepository);
 }
 
-/// <summary>
-/// A simple <see cref="ICurrentActor"/> stub for tests.
-/// </summary>
 public sealed class TestCurrentActor : ICurrentActor
 {
     public Guid Guid { get; init; } = Guid.NewGuid();

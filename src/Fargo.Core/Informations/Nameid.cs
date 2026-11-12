@@ -3,87 +3,56 @@ using System.Diagnostics.CodeAnalysis;
 namespace Fargo.Core.Informations;
 
 /// <summary>
-/// Represents a nameid.
+/// A case-insensitive identifier of 3 to 100 characters, stored in lower case. It may contain only
+/// letters, digits, '.', '_' and '-', must start and end with a letter or digit, and cannot
+/// contain consecutive special characters.
 /// </summary>
 public readonly struct Nameid :
     IEquatable<Nameid>,
     IParsable<Nameid>
 {
-    /// <summary>
-    /// Maximum length.
-    /// </summary>
     public const int MaxLength = 100;
 
-    /// <summary>
-    /// Minimum length.
-    /// </summary>
     public const int MinLength = 3;
 
-    /// <summary>
-    /// Gets the value.
-    /// </summary>
     public string Value { get; } = "aaa";
 
-    /// <summary>
-    /// Initializes a nameid.
-    /// </summary>
     public Nameid(string value)
     {
         Validate(value);
         Value = value.ToLowerInvariant();
     }
 
-    /// <summary>
-    /// Creates a nameid from a string.
-    /// </summary>
     public static Nameid FromString(string value)
         => new(value);
 
-    /// <inheritdoc />
     public override string ToString()
         => Value;
 
-    /// <inheritdoc />
     public bool Equals(Nameid other)
         => string.Equals(Value, other.Value, StringComparison.OrdinalIgnoreCase);
 
-    /// <inheritdoc />
     public override bool Equals(object? obj)
         => obj is Nameid other && Equals(other);
 
-    /// <inheritdoc />
     public override int GetHashCode()
         => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
 
-    /// <summary>
-    /// Determines whether two nameids are equal.
-    /// </summary>
     public static bool operator ==(Nameid left, Nameid right)
         => left.Equals(right);
 
-    /// <summary>
-    /// Determines whether two nameids are different.
-    /// </summary>
     public static bool operator !=(Nameid left, Nameid right)
         => !left.Equals(right);
 
-    /// <summary>
-    /// Converts a nameid to a string.
-    /// </summary>
     public static implicit operator string(Nameid nameid)
         => nameid.Value;
 
-    /// <summary>
-    /// Converts a string to a nameid.
-    /// </summary>
     public static explicit operator Nameid(string value)
         => new(value);
 
-    /// <inheritdoc />
     public static Nameid Parse(string s, IFormatProvider? provider)
         => new(s);
 
-    /// <inheritdoc />
     public static bool TryParse(
         [NotNullWhen(true)] string? s,
         IFormatProvider? provider,
@@ -101,9 +70,6 @@ public readonly struct Nameid :
         }
     }
 
-    /// <summary>
-    /// Validates the value.
-    /// </summary>
     private static void Validate(string value)
     {
         if (string.IsNullOrWhiteSpace(value))

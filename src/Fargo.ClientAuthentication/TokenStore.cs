@@ -8,7 +8,6 @@ public sealed class TokenStore : ITokenStore
 {
     private AuthTokens? authTokens = null;
 
-    /// <inheritdoc />
     public Task ClearAsync(CancellationToken cancellationToken = default)
     {
         authTokens = null;
@@ -16,13 +15,11 @@ public sealed class TokenStore : ITokenStore
         return Task.CompletedTask;
     }
 
-    /// <inheritdoc />
     public Task<AuthTokens?> GetAsync(CancellationToken cancellationToken = default)
     {
         return Task.FromResult(authTokens);
     }
 
-    /// <inheritdoc />
     public Task SetAsync(AuthTokens tokens, CancellationToken cancellationToken = default)
     {
         authTokens = tokens;

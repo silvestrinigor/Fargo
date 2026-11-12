@@ -4,26 +4,12 @@ using Fargo.Core.Common;
 namespace Fargo.Core.Entities.Articles;
 
 /// <summary>
-/// Provides domain operations and validation rules for <see cref="Article"/> entities.
+/// Article rules that need repository access and so cannot be enforced by <see cref="Article"/>.
 /// </summary>
-/// <remarks>
-/// This service contains business rules that require repository access and
-/// therefore cannot be enforced by the <see cref="Article"/> entity alone.
-/// </remarks>
 public sealed class ArticleService(IArticleRepository articleRepository)
 {
-    /// <summary>
-    /// Validates that the specified article can be deleted.
-    /// </summary>
-    /// <param name="article">
-    /// The article to validate.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the article has associated items or is used as a dependency
-    /// by another article.
+    /// The article has associated items or is a dependency of another article.
     /// </exception>
     public async Task ValidateArticleCanBeDeletedAsync(Article article, CancellationToken cancellationToken = default)
     {
@@ -44,18 +30,8 @@ public sealed class ArticleService(IArticleRepository articleRepository)
         }
     }
 
-    /// <summary>
-    /// Validates that the specified EAN-13 barcode is available for assignment
-    /// to an article.
-    /// </summary>
-    /// <param name="ean13">
-    /// The EAN-13 barcode to validate.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the EAN-13 barcode is already assigned to another article.
+    /// The EAN-13 is already assigned to another article.
     /// </exception>
     public async Task ValidateEan13IsAvailableAsync(Ean13 ean13, CancellationToken cancellationToken = default)
     {

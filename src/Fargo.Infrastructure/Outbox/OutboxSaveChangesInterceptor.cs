@@ -24,10 +24,8 @@ namespace Fargo.Infrastructure.Outbox;
 /// caller loaded <see cref="Article.Partitions"/>.
 /// </para>
 /// </remarks>
-/// <param name="timeProvider">The clock used to stamp the events.</param>
 public sealed class OutboxSaveChangesInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
 {
-    /// <inheritdoc />
     public override InterceptionResult<int> SavingChanges(
         DbContextEventData eventData,
         InterceptionResult<int> result)
@@ -42,7 +40,6 @@ public sealed class OutboxSaveChangesInterceptor(TimeProvider timeProvider) : Sa
         return result;
     }
 
-    /// <inheritdoc />
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
@@ -67,10 +64,6 @@ public sealed class OutboxSaveChangesInterceptor(TimeProvider timeProvider) : Sa
         return ArticleEventDetector.Detect(context.ChangeTracker);
     }
 
-    /// <summary>
-    /// Builds the query for the partition links stored in the database, before
-    /// this save, for the articles that have an event.
-    /// </summary>
     private static IQueryable<PartitionLink> QueryStoredPartitions(
         DbContext context,
         IReadOnlyList<(string EventType, Guid ArticleGuid)> detected)

@@ -5,9 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Operations.ServiceAccounts;
 
-/// <summary>
-/// Registers the ServiceAccounts use-case handlers.
-/// </summary>
 public static class ServiceAccountServiceCollectionExtensions
 {
     extension(IServiceCollection services)

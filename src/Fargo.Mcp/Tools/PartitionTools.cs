@@ -6,10 +6,6 @@ using System.ComponentModel;
 
 namespace Fargo.Mcp.Tools;
 
-/// <summary>
-/// MCP tools for working with Fargo partitions. Mirrors the
-/// <c>fargo partition</c> CLI surface.
-/// </summary>
 [McpServerToolType]
 public static class PartitionTools
 {

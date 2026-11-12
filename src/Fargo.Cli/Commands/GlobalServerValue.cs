@@ -3,10 +3,9 @@ using System.CommandLine;
 namespace Fargo.Cli.Commands;
 
 /// <summary>
-/// Resolves the <c>--server</c> global option ahead of the main command tree so
-/// the override can be applied before the HTTP client is built. Unlike the
-/// credential options, <c>--server</c> is never declared locally by a
-/// subcommand, so reading it via a lightweight probe parse is unambiguous.
+/// Resolves <c>--server</c> ahead of the main command tree so the override can be applied before
+/// the HTTP client is built. Unlike the credential options, <c>--server</c> is never declared by a
+/// subcommand, so a lightweight probe parse is unambiguous.
 /// </summary>
 public sealed class GlobalServerValue
 {
@@ -20,10 +19,8 @@ public sealed class GlobalServerValue
 
     public static GlobalServerValue Parse(string[] args, GlobalOptions globalOptions)
     {
-        // A throwaway root containing only the server option. Unmatched tokens
-        // (the actual command and its other options) are ignored. A dedicated
-        // option instance is used so the shared option can still be attached to
-        // the real command tree without being owned by two parents.
+        // A dedicated option instance is used so the shared one can still be attached to the real
+        // command tree without having two parents. Unmatched tokens are ignored.
         var serverOption = new Option<string?>(globalOptions.Server.Name);
 
         var probe = new RootCommand

@@ -26,19 +26,18 @@ namespace Fargo.ClientAuthentication;
 /// request fails with the API's own authentication error. Network failures are
 /// not caught.
 /// </para>
+/// <para>
+/// The <see cref="HttpClient.BaseAddress"/> of the client must be the API base address.
+/// </para>
 /// </remarks>
 public sealed class FargoTokenRefresher
 {
     /// <summary>
-    /// The default margin before expiry within which
-    /// <see cref="EnsureValidAsync"/> refreshes, so a token does not expire
-    /// in flight.
+    /// How close to expiry <see cref="EnsureValidAsync"/> starts refreshing, so a token does not
+    /// expire in flight.
     /// </summary>
     public static readonly TimeSpan DefaultExpiryBuffer = TimeSpan.FromSeconds(30);
 
-    /// <summary>
-    /// The refresh endpoint, relative to the API base address.
-    /// </summary>
     public const string RefreshPath = "v1/identity/refresh";
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -49,14 +48,6 @@ public sealed class FargoTokenRefresher
     private readonly TimeSpan expiryBuffer;
     private readonly SemaphoreSlim gate = new(1, 1);
 
-    /// <summary>
-    /// Initializes a new instance that sends refreshes through
-    /// <paramref name="httpClient"/>.
-    /// </summary>
-    /// <param name="httpClient">A client whose <see cref="HttpClient.BaseAddress"/> is the API base address.</param>
-    /// <param name="tokenStore">The store holding the tokens to refresh.</param>
-    /// <param name="timeProvider">The clock; defaults to the system clock.</param>
-    /// <param name="expiryBuffer">The refresh margin; defaults to <see cref="DefaultExpiryBuffer"/>.</param>
     public FargoTokenRefresher(
         HttpClient httpClient,
         ITokenStore tokenStore,
@@ -66,14 +57,6 @@ public sealed class FargoTokenRefresher
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance that obtains a client for each refresh, for
-    /// example from an <see cref="IHttpClientFactory"/>.
-    /// </summary>
-    /// <param name="httpClientFactory">Returns a client whose base address is the API base address.</param>
-    /// <param name="tokenStore">The store holding the tokens to refresh.</param>
-    /// <param name="timeProvider">The clock; defaults to the system clock.</param>
-    /// <param name="expiryBuffer">The refresh margin; defaults to <see cref="DefaultExpiryBuffer"/>.</param>
     public FargoTokenRefresher(
         Func<HttpClient> httpClientFactory,
         ITokenStore tokenStore,
@@ -93,11 +76,9 @@ public sealed class FargoTokenRefresher
     /// Refreshes the tokens when the access token has expired or expires within
     /// the expiry buffer; otherwise does nothing.
     /// </summary>
-    /// <param name="cancellationToken">A token that cancels the operation.</param>
     /// <returns>
-    /// <see langword="true"/> when this call refreshed the tokens;
-    /// <see langword="false"/> when no refresh was needed, there are no stored
-    /// tokens, or the API rejected the refresh.
+    /// <see langword="true"/> when this call refreshed the tokens; <see langword="false"/> when no
+    /// refresh was needed, there are no stored tokens, or the API rejected the refresh.
     /// </returns>
     public async Task<bool> EnsureValidAsync(CancellationToken cancellationToken = default)
     {
@@ -127,12 +108,10 @@ public sealed class FargoTokenRefresher
     /// <summary>
     /// Refreshes the tokens now, whatever their expiry.
     /// </summary>
-    /// <param name="cancellationToken">A token that cancels the operation.</param>
     /// <returns>
-    /// <see langword="true"/> when the store holds newly refreshed tokens (by
-    /// this call, or by a concurrent one this call waited for);
-    /// <see langword="false"/> when there are no stored tokens or the API
-    /// rejected the refresh.
+    /// <see langword="true"/> when the store holds newly refreshed tokens (from this call or a
+    /// concurrent one); <see langword="false"/> when there are no stored tokens or the API rejected
+    /// the refresh.
     /// </returns>
     public async Task<bool> RefreshAsync(CancellationToken cancellationToken = default)
     {
@@ -205,8 +184,7 @@ public sealed class FargoTokenRefresher
     }
 
     /// <summary>
-    /// Resolves the refresh endpoint against the client's base address, keeping
-    /// any path the base address has (for example a reverse-proxy prefix).
+    /// Keeps any path the base address has (for example a reverse-proxy prefix).
     /// </summary>
     internal static Uri GetRefreshUri(HttpClient httpClient)
     {

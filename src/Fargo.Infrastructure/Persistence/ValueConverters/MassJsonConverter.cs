@@ -7,17 +7,12 @@ using UnitsNet.Units;
 namespace Fargo.Infrastructure.Persistence.ValueConverters;
 
 /// <summary>
-/// Persists a <see cref="Mass"/> as a JSON object
-/// (<c>{ "value": &lt;number&gt;, "unit": "&lt;abbreviation&gt;" }</c>, e.g.
-/// <c>{ "value": 2.5, "unit": "kg" }</c>) stored in a <c>jsonb</c> column.
+/// Stored as a <c>jsonb</c> object <c>{ "value": 2.5, "unit": "kg" }</c>. Value and unit are kept exactly as
+/// given (no unit conversion) and stay individually queryable.
 /// </summary>
 /// <remarks>
-/// The value and unit are stored exactly as given — no unit conversion is
-/// applied — so the original precision is preserved, and the numeric value and
-/// unit are individually queryable in the database (for example
-/// <c>(mass -&gt; 'value')::numeric</c>). The value is serialized with the
-/// round-trip <c>"R"</c> format and the invariant culture so it deserializes
-/// back to the exact same <see cref="double"/>.
+/// The value is serialized with the round-trip <c>"R"</c> format and the invariant culture so it
+/// deserializes back to the exact same <see cref="double"/>.
 /// </remarks>
 public sealed class MassJsonConverter()
     : ValueConverter<Mass, string>(

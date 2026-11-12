@@ -1,18 +1,14 @@
 namespace Fargo.Cli.Authentication;
 
 /// <summary>
-/// Reads a password from the console without echoing the characters, so the
-/// secret is not visible on screen or captured in shell history.
+/// Reads a password from the console without echoing the typed characters.
 /// </summary>
 public static class PasswordPrompt
 {
     /// <summary>
-    /// Prompts for a password on the standard error stream and reads it with
-    /// masking. When input is redirected (non-interactive), a plain line is read
-    /// instead so the command still works in scripts and pipes.
+    /// Writes the prompt to standard error so redirected output stays clean. When input is
+    /// redirected, a plain line is read instead so the command still works in scripts and pipes.
     /// </summary>
-    /// <param name="prompt">The text shown before the masked input.</param>
-    /// <returns>The entered password, or an empty string if nothing was typed.</returns>
     public static string Read(string prompt = "Password: ")
     {
         Console.Error.Write(prompt);
@@ -49,7 +45,6 @@ public static class PasswordPrompt
                 continue;
             }
 
-            // Ignore other control characters (arrows, function keys, etc.).
             if (char.IsControl(keyInfo.KeyChar))
             {
                 continue;

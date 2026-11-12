@@ -11,37 +11,11 @@ using Fargo.Core.Informations;
 
 namespace Fargo.Application.Operations.Identity;
 
-/// <summary>
-/// Command used to authenticate a user with a nameid and password.
-/// </summary>
-/// <param name="Nameid">
-/// The unique user identifier used for login.
-/// </param>
-/// <param name="Password">
-/// The plaintext password provided for authentication.
-/// </param>
 public sealed record IdentityLoginCommand(
     string Nameid,
     string Password
 ) : ICommand<IdentityAuthResultDto>;
 
-/// <summary>
-/// Handles the authentication login command by validating the client address,
-/// checking authentication attempt limits, validating user credentials, and
-/// generating authentication tokens for successfully authenticated users.
-/// </summary>
-/// <param name="userRepository">Provides access to user data.</param>
-/// <param name="passwordHasher">Verifies password hashes against provided passwords.</param>
-/// <param name="tokenGenerator">Generates access tokens for authenticated users.</param>
-/// <param name="refreshTokenGenerator">Generates refresh tokens for token rotation.</param>
-/// <param name="tokenHasher">Hashes refresh tokens before they are persisted.</param>
-/// <param name="refreshTokenRepository">Manages refresh token persistence.</param>
-/// <param name="attemptService">
-/// Tracks authentication attempts and determines whether another authentication
-/// attempt is currently allowed.
-/// </param>
-/// <param name="clientContext">Provides information about the current client request.</param>
-/// <param name="unitOfWork">Provides transactional consistency for data operations.</param>
 public sealed class IdentityLoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
@@ -55,28 +29,6 @@ public sealed class IdentityLoginCommandHandler(
     TimeProvider timeProvider
 ) : ICommandHandler<IdentityLoginCommand, IdentityAuthResultDto>
 {
-    /// <summary>
-    /// Authenticates a user using the supplied credentials and generates an access
-    /// token and refresh token when authentication succeeds.
-    /// </summary>
-    /// <param name="command">The command containing the user's authentication credentials.</param>
-    /// <param name="cancellationToken">
-    /// A cancellation token that can be used to cancel the asynchronous operation.
-    /// </param>
-    /// <returns>
-    /// A task representing the asynchronous authentication operation. The task result
-    /// contains the generated authentication tokens.
-    /// </returns>
-    /// <exception cref="AuthenticationRateLimitFargoApplicationException">
-    /// Thrown when authentication attempts for the client are currently rate limited.
-    /// </exception>
-    /// <exception cref="InvalidCredentialsFargoApplicationException">
-    /// Thrown when the supplied credentials are invalid or the user cannot authenticate.
-    /// </exception>
-    /// <exception cref="UserPasswordChangeRequiredFargoApplicationException">
-    /// Thrown when the supplied credentials are valid but the user must change
-    /// their password before authentication can be completed.
-    /// </exception>
     public async Task<IdentityAuthResultDto> HandleAsync(IdentityLoginCommand command, CancellationToken cancellationToken = default)
     {
         var shouldLogin = await attemptService.IsAllowedAsync(command.Nameid, clientContext.IpAddress, cancellationToken);

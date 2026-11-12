@@ -368,7 +368,6 @@ internal sealed class IdentityScenario(
         Log.Info($"Cleared password-change requirement for '{nameid}'.");
     }
 
-    /// <summary>Appends the run tag to a base name so repeated runs stay unique.</summary>
     private string N(string baseName) => $"{baseName}-{_tag}";
 
     private static string Short(Guid guid) => guid.ToString("N")[..8];

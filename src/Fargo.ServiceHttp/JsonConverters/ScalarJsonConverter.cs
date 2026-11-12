@@ -19,7 +19,6 @@ public sealed class ScalarJsonConverter : JsonConverter<Scalar>
                 {
                     var text = reader.GetString()!;
 
-                    // Try parsing as just a number first.
                     if (double.TryParse(
                             text,
                             NumberStyles.Float,
@@ -29,7 +28,6 @@ public sealed class ScalarJsonConverter : JsonConverter<Scalar>
                         return Scalar.From(value, ScalarUnit.Amount);
                     }
 
-                    // Otherwise let UnitsNet parse "<value> <unit>".
                     try
                     {
                         return Scalar.Parse(text);
@@ -49,7 +47,6 @@ public sealed class ScalarJsonConverter : JsonConverter<Scalar>
     {
         if (value.Unit == ScalarUnit.Amount)
         {
-            // Write plain number for the default unit.
             writer.WriteNumberValue(value.Value);
         }
         else

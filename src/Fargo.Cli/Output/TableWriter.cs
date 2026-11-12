@@ -1,10 +1,8 @@
 namespace Fargo.Cli.Output;
 
 /// <summary>
-/// Renders a collection of rows as a plain, left-aligned ASCII table with a
-/// header row and a separator. Column widths are computed from the content so
-/// the output stays readable on any console. When there are no rows, a friendly
-/// "No results." line is written instead.
+/// Renders rows as a plain, left-aligned ASCII table with a header and separator, or writes the empty
+/// message when there are no rows.
 /// </summary>
 public sealed class TableWriter<T>
 {
@@ -13,8 +11,7 @@ public sealed class TableWriter<T>
     private string _emptyMessage = "No results.";
 
     /// <summary>
-    /// Adds a column with the given header and a selector that extracts its
-    /// value from a row. Null/empty values are rendered as a dash.
+    /// Null or empty values are rendered as a dash.
     /// </summary>
     public TableWriter<T> Column(string header, Func<T, string?> selector)
     {
@@ -22,14 +19,12 @@ public sealed class TableWriter<T>
         return this;
     }
 
-    /// <summary>Sets the message shown when the collection is empty.</summary>
     public TableWriter<T> EmptyMessage(string message)
     {
         _emptyMessage = message;
         return this;
     }
 
-    /// <summary>Writes the table for <paramref name="rows"/> to standard output.</summary>
     public void Write(IEnumerable<T>? rows)
     {
         var materialized = rows?.ToList() ?? new List<T>();

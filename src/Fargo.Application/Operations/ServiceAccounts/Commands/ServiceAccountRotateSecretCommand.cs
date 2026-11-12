@@ -9,7 +9,7 @@ using Fargo.Core.Identity.Credentials;
 
 namespace Fargo.Application.Operations.ServiceAccounts;
 
-/// <summary>Command to rotate a service account's secret. Returns the new one-time secret.</summary>
+/// <summary>Returns the new one-time secret.</summary>
 public sealed record ServiceAccountRotateSecretCommand(
     Guid ServiceAccountGuid
 ) : ICommand<ServiceAccountCreatedDto>;

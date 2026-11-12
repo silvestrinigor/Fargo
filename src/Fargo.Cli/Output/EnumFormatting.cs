@@ -3,7 +3,7 @@ using System.Text;
 namespace Fargo.Cli.Output;
 
 /// <summary>
-/// Classification of an article. Mirrors the server's ArticleType enum.
+/// Mirrors the server's ArticleType enum.
 /// </summary>
 public enum ArticleType
 {
@@ -15,7 +15,7 @@ public enum ArticleType
 }
 
 /// <summary>
-/// Type of actor that performed an action. Mirrors the server's ActorType enum.
+/// Mirrors the server's ActorType enum.
 /// </summary>
 public enum ActorType
 {
@@ -24,7 +24,7 @@ public enum ActorType
 }
 
 /// <summary>
-/// Kind of change an audit log records. Mirrors the server's AuditLogType enum.
+/// Mirrors the server's AuditLogType enum.
 /// </summary>
 public enum AuditLogType
 {
@@ -35,7 +35,7 @@ public enum AuditLogType
 }
 
 /// <summary>
-/// Type of entity affected by an action. Mirrors the server's EntityType enum.
+/// Mirrors the server's EntityType enum.
 /// </summary>
 public enum EntityType
 {
@@ -49,7 +49,7 @@ public enum EntityType
 }
 
 /// <summary>
-/// Action performed in the system. Mirrors the server's ActionType enum.
+/// Mirrors the server's ActionType enum.
 /// </summary>
 public enum ActionType
 {
@@ -75,8 +75,7 @@ public enum ActionType
 }
 
 /// <summary>
-/// Kind of event recorded against an event-tracked article. Mirrors the
-/// server's ItemEventType enum.
+/// Mirrors the server's ItemEventType enum.
 /// </summary>
 public enum ItemEventType
 {
@@ -86,8 +85,7 @@ public enum ItemEventType
 }
 
 /// <summary>
-/// How the stock of an article is tracked. Mirrors the server's
-/// ArticleTrackingMode enum.
+/// Mirrors the server's ArticleTrackingMode enum.
 /// </summary>
 public enum ArticleTrackingMode
 {
@@ -96,14 +94,12 @@ public enum ArticleTrackingMode
 }
 
 /// <summary>
-/// Formats enum values as human-friendly, kebab-cased names for display, and
-/// renders raw numeric codes through their matching enum name.
+/// Formats enum values as kebab-case names for display.
 /// </summary>
 public static class EnumFormatting
 {
     /// <summary>
-    /// Formats a raw numeric enum code as the kebab-cased name of the enum value
-    /// (e.g. 3 -> "user-group"). Unknown codes are shown as "code (N)".
+    /// Returns <see langword="null"/> for a null code and "unknown (N)" for a code the enum does not define.
     /// </summary>
     public static string? Format<TEnum>(int? code) where TEnum : struct, Enum
     {
@@ -121,16 +117,11 @@ public static class EnumFormatting
         return $"unknown ({code.Value})";
     }
 
-    /// <summary>Formats an enum value as its kebab-cased name.</summary>
     public static string Format<TEnum>(TEnum value) where TEnum : struct, Enum
     {
         return ToKebabCase(value.ToString());
     }
 
-    /// <summary>
-    /// Converts a PascalCase identifier to kebab-case
-    /// (e.g. "UserGroup" -> "user-group", "ReadAuditLogs" -> "read-audit-logs").
-    /// </summary>
     public static string ToKebabCase(string name)
     {
         var builder = new StringBuilder(name.Length + 8);

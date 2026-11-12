@@ -79,23 +79,16 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         return guids;
     }
 
-    // Fixed key for the single, global containment advisory lock. A cycle can
-    // span several containers whose only shared node is somewhere along their
-    // paths, so a per-container key does not reliably serialize the conflicting
-    // moves. One global key serializes every container-into-container move, which
-    // is correct for cycles of any size. This is cheap in practice because the
-    // caller only takes the lock when moving a (non-fixed) CONTAINER item —
-    // leaf-item moves, which dominate traffic, never contend for it.
+    // Single global key: a cycle can span containers whose only shared node is along their paths, so a
+    // per-container key cannot reliably serialize the conflicting moves. Cheap in practice, because the caller
+    // takes the lock only when moving a (non-fixed) container item; leaf-item moves never contend.
     private const long ContainmentLockKey = 0x_7A60_C017_A10C_1701;
 
     public async Task AcquireContainmentLockAsync(CancellationToken cancellationToken = default)
     {
-        // PostgreSQL transaction-scoped advisory lock: acquired for the given key,
-        // released automatically when the surrounding transaction commits or rolls
-        // back, so no manual unlock is needed. It must run inside a transaction
-        // (the item-update command runs under the transactional unit-of-work
-        // decorator), otherwise the lock would release at the end of this single
-        // statement.
+        // Transaction-scoped advisory lock: released when the surrounding transaction ends, so it must run
+        // inside one (the item-update command runs under the transactional unit-of-work
+        // decorator); otherwise it would release after this statement.
         FormattableString query = $"SELECT pg_advisory_xact_lock({ContainmentLockKey})";
 
         await context.Database.ExecuteSqlInterpolatedAsync(query, cancellationToken);

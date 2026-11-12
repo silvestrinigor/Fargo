@@ -15,16 +15,12 @@ namespace Fargo.ServiceRealtime.Notifications;
 /// (<see cref="ArticleEventMessage.PartitionGuids"/>), so routing needs no
 /// database read. An event with no partitions reaches nobody.
 /// </remarks>
-/// <param name="hubContext">Sends to hub connections.</param>
-/// <param name="registry">The open connections and their partition access.</param>
-/// <param name="logger">The logger.</param>
 public sealed class ArticleEventHubNotifier(
     IHubContext<FargoHub, IFargoRealtimeClient> hubContext,
     RealtimeConnectionRegistry registry,
     ILogger<ArticleEventHubNotifier> logger
 ) : IArticleEventHandler
 {
-    /// <inheritdoc />
     public async Task HandleAsync(ArticleEventMessage message, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(message);

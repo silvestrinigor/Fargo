@@ -213,10 +213,6 @@ internal sealed class ArticlePropertiesScenario(
 
     private string N(string baseName) => $"{baseName}-{_tag}";
 
-    /// <summary>
-    /// Builds a valid 13-digit EAN-13 (12 payload digits + check digit) from an
-    /// arbitrary seed string, so each run gets a unique but well-formed barcode.
-    /// </summary>
     private static string GenerateEan13(string seed)
     {
         // Derive 12 stable digits from the seed's hash.

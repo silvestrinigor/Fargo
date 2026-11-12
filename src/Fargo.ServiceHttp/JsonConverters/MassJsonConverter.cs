@@ -6,9 +6,8 @@ using UnitsNet.Units;
 namespace Fargo.ServiceHttp.JsonConverters;
 
 /// <summary>
-/// Serializes and deserializes <see cref="Mass"/> as <c>{ "value": number, "unit": string }</c>.
-/// Reads any UnitsNet mass unit abbreviation (e.g. "g", "kg", "mg", "lb", "oz").
-/// Writes the value and unit exactly as stored — no unit conversion on output.
+/// Reads any UnitsNet mass unit abbreviation; writes value and unit exactly as stored, with no unit
+/// conversion.
 /// </summary>
 public sealed class MassJsonConverter : JsonConverter<Mass>
 {

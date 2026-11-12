@@ -8,29 +8,15 @@ namespace Fargo.Application.IntegrationEvents;
 /// </summary>
 public static class IntegrationEventJson
 {
-    /// <summary>
-    /// The serializer options used for every integration event message.
-    /// </summary>
     public static JsonSerializerOptions Options { get; } = new(JsonSerializerDefaults.Web);
 
-    /// <summary>
-    /// Serializes an article event message.
-    /// </summary>
-    /// <param name="message">The message to serialize.</param>
-    /// <returns>The JSON representation of the message.</returns>
     public static string Serialize(ArticleEventMessage message)
         => JsonSerializer.Serialize(message, Options);
 
     /// <summary>
-    /// Deserializes an article event message published with the current
-    /// <see cref="ArticleEventMessage.SchemaVersion"/>.
+    /// Returns null when the body is not a complete article event (malformed JSON, or a required field
+    /// such as <see cref="ArticleEventMessage.PartitionGuids"/> is missing).
     /// </summary>
-    /// <param name="body">The UTF-8 JSON body of the message.</param>
-    /// <returns>
-    /// The message, or <see langword="null"/> when the body is not a complete
-    /// article event (malformed JSON, or a required field such as
-    /// <see cref="ArticleEventMessage.PartitionGuids"/> is missing).
-    /// </returns>
     public static ArticleEventMessage? DeserializeArticleEvent(ReadOnlySpan<byte> body)
     {
         ArticleEventMessage? message;

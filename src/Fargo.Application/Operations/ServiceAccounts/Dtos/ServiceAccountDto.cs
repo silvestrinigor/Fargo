@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Fargo.Application.Operations.ServiceAccounts.Dtos;
 
-/// <summary>Read model for a service account. Never exposes the secret.</summary>
+/// <summary>Never exposes the secret.</summary>
 public sealed record ServiceAccountDto(
     Guid Guid,
     string ClientId,
@@ -18,12 +18,8 @@ public sealed record ServiceAccountDto(
 public static class ServiceAccountDtoMappings
 {
     /// <summary>
-    /// A reusable projection translated to SQL by EF Core so service-account
-    /// reads materialize straight into <see cref="ServiceAccountDto"/> without
-    /// loading the aggregate. The shared authorization state is read from the
-    /// owning actor. The value objects are cast to string via their registered
-    /// value converters (the same form used elsewhere for EF-translatable
-    /// projections).
+    /// Translated to SQL by EF Core, so reads materialize without loading the aggregate. The value
+    /// objects are cast to string through their registered value converters.
     /// </summary>
     public static readonly Expression<Func<ServiceAccount, ServiceAccountDto>> Projection = account => new ServiceAccountDto(
         account.ActorGuid,

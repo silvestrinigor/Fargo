@@ -14,7 +14,7 @@ using Microsoft.Extensions.Options;
 //   appsettings.json -> appsettings.{Environment}.json -> environment
 //   variables -> command-line arguments
 // so any value can be overridden without touching the binary, e.g.:
-//   dotnet run --project tests/client/Fargo.WorkflowTest -- --Workflow:Server=http://localhost:5534
+//   dotnet run --project tests/Fargo.WorkflowTest -- --Workflow:Server=http://localhost:5534
 //   $env:Workflow__Moves = 50
 
 var builder = Host.CreateApplicationBuilder(args);

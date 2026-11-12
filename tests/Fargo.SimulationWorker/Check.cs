@@ -17,7 +17,6 @@ internal sealed class Check
 
     public long Failed => Interlocked.Read(ref _failed);
 
-    /// <summary>Records a boolean consistency expectation.</summary>
     public void That(string who, bool condition, string description)
     {
         if (condition)
@@ -31,7 +30,6 @@ internal sealed class Check
         }
     }
 
-    /// <summary>Records an equality consistency expectation.</summary>
     public void Equal<T>(string who, T expected, T actual, string description)
     {
         if (EqualityComparer<T>.Default.Equals(expected, actual))
@@ -45,10 +43,6 @@ internal sealed class Check
         }
     }
 
-    /// <summary>
-    /// Asserts an operation the actor should be allowed to perform completes
-    /// without a Fargo API error. A rejection is recorded as a failure.
-    /// </summary>
     public async Task AllowedAsync(string who, string description, Func<Task> operation)
     {
         try

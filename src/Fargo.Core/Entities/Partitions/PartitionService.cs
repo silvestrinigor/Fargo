@@ -3,41 +3,17 @@ using Fargo.Core.Common;
 namespace Fargo.Core.Entities.Partitions;
 
 /// <summary>
-/// Provides domain operations and validations that require access to
-/// <see cref="Partition"/> persistence or multiple partitions.
+/// Partition rules that need to read other partitions, so <see cref="Partition"/> cannot
+/// enforce them alone.
 /// </summary>
-/// <remarks>
-/// This service contains business rules that require repository access and
-/// therefore cannot be enforced by the <see cref="Partition"/> aggregate alone.
-/// </remarks>
 public sealed class PartitionService(IPartitionRepository partitionRepository)
 {
     /// <summary>
-    /// Validates that assigning the specified parent partition to the specified
-    /// child partition would result in a valid partition hierarchy.
+    /// Call before <see cref="Partition.SetParentPartition(Partition)"/>, which cannot detect
+    /// cycles on its own. Hold <see cref="IPartitionRepository.AcquireHierarchyLockAsync"/> so
+    /// concurrent re-parents cannot each pass and together create a cycle.
     /// </summary>
-    /// <param name="parentPartition">
-    /// The partition that will become the parent.
-    /// </param>
-    /// <param name="childPartition">
-    /// The partition that will become the child.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="parentPartition"/> or
-    /// <paramref name="childPartition"/> is <see langword="null"/>.
-    /// </exception>
-    /// <exception cref="FargoCoreException">
-    /// Thrown when the assignment would create a circular partition hierarchy.
-    /// </exception>
-    /// <remarks>
-    /// This method should be called before
-    /// <see cref="Partition.SetParentPartition(Partition)"/> because validating
-    /// the complete hierarchy requires access to other partitions through the
-    /// repository.
-    /// </remarks>
+    /// <exception cref="FargoCoreException">The assignment would create a cycle.</exception>
     public async Task ValidateParentPartitionHierarchyAssignmentAsync(
         Partition parentPartition, Partition childPartition, CancellationToken cancellationToken = default)
     {
@@ -55,23 +31,6 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
         }
     }
 
-    /// <summary>
-    /// Determines whether assigning the specified partition as a parent
-    /// would create a circular hierarchy.
-    /// </summary>
-    /// <param name="candidateParentPartition">
-    /// The partition that would become the parent.
-    /// </param>
-    /// <param name="memberPartitionGuid">
-    /// The identifier of the partition receiving the new parent.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the operation.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> if the assignment would create a circular
-    /// hierarchy; otherwise, <see langword="false"/>.
-    /// </returns>
     private async Task<bool> CreatesCircularHierarchyAsync(
         Partition candidateParentPartition, Guid memberPartitionGuid, CancellationToken cancellationToken)
     {
@@ -90,25 +49,12 @@ public sealed class PartitionService(IPartitionRepository partitionRepository)
     }
 
     /// <summary>
-    /// Validates that the specified partition can be safely deleted.
+    /// A partition cannot be deleted while it has child partitions, which would be left without
+    /// their required parent.
     /// </summary>
-    /// <param name="partition">
-    /// The partition to validate.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token used to cancel the asynchronous operation.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="partition"/> is <see langword="null"/>.
-    /// </exception>
     /// <exception cref="FargoCoreException">
-    /// Thrown when the partition is the global partition or has one or more
-    /// direct child partitions.
+    /// The partition is the global partition or has direct child partitions.
     /// </exception>
-    /// <remarks>
-    /// A partition cannot be deleted while it has child partitions because
-    /// deleting it would leave those partitions without their required parent.
-    /// </remarks>
     public async Task ValidatePartitionCanBeDeletedAsync(Partition partition, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(partition);

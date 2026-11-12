@@ -4,13 +4,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fargo.Infrastructure.Persistence.Configurations;
 
-/// <summary>
-/// Maps the shared <c>events</c> table that is the root of the Table-Per-Type
-/// (TPT) hierarchy. Every concrete event deriving from <see cref="Event"/>
-/// contributes exactly one row here, keyed by its <see cref="Event.Guid"/> and
-/// carrying the properties common to all events: its <see cref="Event.EventType"/>
-/// family and the instant it occurred.
-/// </summary>
 public sealed class EventConfiguration : IEntityTypeConfiguration<Event>
 {
     public void Configure(EntityTypeBuilder<Event> builder)

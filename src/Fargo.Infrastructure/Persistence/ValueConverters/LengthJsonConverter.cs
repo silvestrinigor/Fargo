@@ -7,16 +7,9 @@ using UnitsNet.Units;
 namespace Fargo.Infrastructure.Persistence.ValueConverters;
 
 /// <summary>
-/// Persists a <see cref="Length"/> as a JSON object
-/// (<c>{ "value": &lt;number&gt;, "unit": "&lt;abbreviation&gt;" }</c>, e.g.
-/// <c>{ "value": 10, "unit": "cm" }</c>) stored in a <c>jsonb</c> column.
+/// Stored as a <c>jsonb</c> object <c>{ "value": 10, "unit": "cm" }</c>. Value and unit are kept exactly as
+/// given (no unit conversion) and stay individually queryable.
 /// </summary>
-/// <remarks>
-/// The value and unit are stored exactly as given — no unit conversion is
-/// applied — so the original precision is preserved, and the numeric value and
-/// unit are individually queryable in the database (for example
-/// <c>(x -&gt; 'value')::numeric</c>).
-/// </remarks>
 public sealed class LengthJsonConverter()
     : ValueConverter<Length, string>(
         length => Serialize(length),

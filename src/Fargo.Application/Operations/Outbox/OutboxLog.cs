@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Operations.Outbox;
 
-/// <summary>
-/// Source-generated log messages of the outbox publish and purge operations.
-/// </summary>
 internal static partial class OutboxLog
 {
     [LoggerMessage(Level = LogLevel.Debug, Message = "Outbox published {Published} of {Claimed} claimed messages.")]

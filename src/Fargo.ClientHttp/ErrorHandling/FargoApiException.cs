@@ -1,9 +1,7 @@
 namespace Fargo.ClientHttp.ErrorHandling;
 
 /// <summary>
-/// Base exception for HTTP error responses returned by the Fargo API. Carries
-/// the HTTP status code and, when available, the parsed problem details so
-/// callers can present a meaningful message.
+/// An HTTP error response from the Fargo API, with its status code and parsed problem details.
 /// </summary>
 public class FargoApiException : Exception
 {
@@ -23,8 +21,7 @@ public class FargoApiException : Exception
 }
 
 /// <summary>
-/// Thrown when the API responds with HTTP 401 (Unauthorized), for example when
-/// the access token is missing, expired, or the credentials are invalid.
+/// Thrown when the API responds with HTTP 401 (Unauthorized).
 /// </summary>
 public sealed class UnauthorizedApiException : FargoApiException
 {
@@ -35,8 +32,7 @@ public sealed class UnauthorizedApiException : FargoApiException
 }
 
 /// <summary>
-/// Thrown when the API responds with HTTP 403 (Forbidden), for example when the
-/// authenticated actor lacks permission for the requested action.
+/// Thrown when the API responds with HTTP 403 (Forbidden).
 /// </summary>
 public sealed class ForbiddenApiException : FargoApiException
 {
@@ -47,10 +43,8 @@ public sealed class ForbiddenApiException : FargoApiException
 }
 
 /// <summary>
-/// Thrown when the API responds with HTTP 400 (Bad Request), for example when a
-/// request fails model validation or an application rule rejects the input. The
-/// <see cref="FargoApiException.Problem"/> may carry field-level validation
-/// errors (see <see cref="FargoProblemDetails.GetValidationErrors"/>).
+/// Thrown when the API responds with HTTP 400 (Bad Request). Field-level validation errors are
+/// available from <see cref="FargoProblemDetails.GetValidationErrors"/>.
 /// </summary>
 public sealed class BadRequestApiException : FargoApiException
 {

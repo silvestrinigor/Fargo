@@ -4,20 +4,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Operations.Identity;
 
-/// <summary>
-/// Command used to log out a user by invalidating a refresh token.
-/// </summary>
-/// <param name="RefreshToken">
-/// The refresh token provided by the client.
-/// </param>
 public sealed record IdentityLogoutCommand(Token RefreshToken) : ICommand;
 
-/// <summary>
-/// Handles the authentication logout command by revoking the provided refresh token.
-/// </summary>
-/// <param name="refreshTokenRepository">Provides access to refresh token data.</param>
-/// <param name="tokenHasher">Hashes refresh tokens for secure lookup.</param>
-/// <param name="logger">Logs the execution of the logout process.</param>
 public sealed class IdentityLogoutCommandHandler(
     IRefreshTokenRepository refreshTokenRepository,
     ITokenHasher tokenHasher,
@@ -26,11 +14,8 @@ public sealed class IdentityLogoutCommandHandler(
 ) : ICommandHandler<IdentityLogoutCommand>
 {
     /// <summary>
-    /// Processes the logout command by hashing the provided refresh token and revoking the corresponding stored token.
-    /// If no matching token is found, the operation completes silently.
+    /// Completes silently when no stored token matches.
     /// </summary>
-    /// <param name="command">The logout command containing the refresh token to revoke</param>
-    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
     public async Task HandleAsync(IdentityLogoutCommand command, CancellationToken cancellationToken = default)
     {
         var refreshTokenHash = tokenHasher.Hash(command.RefreshToken);

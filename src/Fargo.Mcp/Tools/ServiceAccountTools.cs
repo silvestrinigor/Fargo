@@ -7,16 +7,11 @@ using System.ComponentModel;
 namespace Fargo.Mcp.Tools;
 
 /// <summary>
-/// MCP tools for working with Fargo service accounts. Mirrors the
-/// <c>fargo service-account</c> CLI surface.
+/// Creating an account and rotating its secret return the new client secret ONCE in the tool result (the
+/// server never stores or re-reveals it). That secret therefore passes through the model's context and the
+/// MCP client's logs, so these tools should only be approved for trusted sessions. List and get never return
+/// secrets.
 /// </summary>
-/// <remarks>
-/// Creating an account and rotating its secret return the new client secret
-/// ONCE in the tool result (the server never stores or re-reveals it). That
-/// secret therefore passes through the model's context and the MCP client's
-/// logs, so these tools should only be approved for trusted sessions. List and
-/// get never return secrets.
-/// </remarks>
 [McpServerToolType]
 public static class ServiceAccountTools
 {

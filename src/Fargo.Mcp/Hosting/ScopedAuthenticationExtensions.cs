@@ -12,12 +12,9 @@ namespace Fargo.Mcp.Hosting;
 internal static class ScopedAuthenticationExtensions
 {
     /// <summary>
-    /// Replaces the singleton token plumbing registered by
-    /// <c>AddFargoHttpClient</c> with scoped equivalents, and builds the
-    /// <see cref="FargoMcpOptions"/> of each scope from the bearer token of the
-    /// current HTTP request. This guarantees one caller's token is never visible
-    /// to another caller. Call after <c>AddFargoHttpClient</c> and
-    /// <c>AddHttpContextAccessor</c>.
+    /// Replaces the singleton token plumbing of <c>AddFargoHttpClient</c> with scoped equivalents and builds
+    /// each scope's <see cref="FargoMcpOptions"/> from the current request's bearer token, so one caller's token
+    /// is never visible to another. Call after <c>AddFargoHttpClient</c> and <c>AddHttpContextAccessor</c>.
     /// </summary>
     public static IServiceCollection AddScopedFargoAuthentication(
         this IServiceCollection services,

@@ -6,9 +6,6 @@ using Fargo.Core.Entities.SupplyOrders;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Places a draft supply order, freezing its lines.
-/// </summary>
 public sealed record SupplyOrderPlaceCommand(Guid SupplyOrderGuid) : ICommand;
 
 public sealed class SupplyOrderPlaceCommandHandler(

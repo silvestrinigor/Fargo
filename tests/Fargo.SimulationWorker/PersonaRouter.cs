@@ -10,10 +10,8 @@ internal sealed class PersonaRouter(OperatorActions actions)
 {
     private readonly OperatorActions _actions = actions;
 
-    /// <summary>A weighted action together with the delegate that performs it.</summary>
     private readonly record struct Weighted(int Weight, Func<OperatorContext, CancellationToken, Task<string>> Run);
 
-    /// <summary>Selects and runs one action for the operator, returning its metric name.</summary>
     public Task<string> RunNextAsync(OperatorContext ctx, CancellationToken ct)
     {
         var menu = MenuFor(ctx.Account.Role);

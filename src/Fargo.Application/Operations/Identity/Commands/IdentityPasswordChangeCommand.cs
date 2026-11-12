@@ -7,20 +7,8 @@ using Fargo.Core.Informations;
 
 namespace Fargo.Application.Operations.Identity;
 
-/// <summary>
-/// Command used by an authenticated user to change their own password.
-/// </summary>
-/// <param name="Passwords">
-/// The current password and the new password.
-/// </param>
 public sealed record IdentityPasswordChangeCommand(IdentityPasswordUpdateDto Passwords) : ICommand;
 
-/// <summary>
-/// Handles the password change command by validating current credentials and updating user authentication information.
-/// </summary>
-/// <param name="userRepository">Provides access to user data.</param>
-/// <param name="passwordHasher">Hashes and verifies password values.</param>
-/// <param name="refreshTokenRepository">Manages refresh token persistence for token invalidation.</param>
 public sealed class IdentityPasswordChangeCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
@@ -29,11 +17,8 @@ public sealed class IdentityPasswordChangeCommandHandler(
 ) : ICommandHandler<IdentityPasswordChangeCommand>
 {
     /// <summary>
-    /// Processes the password change command by validating current credentials, updating the password hash,
-    /// resetting password expiration, and rotating authentication version. All existing refresh tokens are revoked.
+    /// Revokes all existing refresh tokens of the user.
     /// </summary>
-    /// <param name="command">The password change command containing user credentials and new password</param>
-    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete</param>
     public async Task HandleAsync(IdentityPasswordChangeCommand command, CancellationToken cancellationToken = default)
     {
         Nameid nameid;

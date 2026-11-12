@@ -5,28 +5,12 @@ using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 namespace Fargo.Application.Operations.Articles;
 
-/// <summary>
-/// Handles the single-article lookup queries (<see cref="ArticleByGuidQuery"/>
-/// and <see cref="ArticleByBarcodeQuery"/>). Both lookups share the same actor
-/// resolution, partition-scoping, and result shape; only the repository lookup
-/// differs, so they are served by one handler.
-/// </summary>
-/// <param name="actorService">Resolves the current actor and its partition access.</param>
-/// <param name="articleRepository">Provides access to article query data.</param>
-/// <param name="currentActor">Provides information about the currently authenticated actor.</param>
 public sealed class ArticleQueryHandler(
     ActorResolver actorService, IArticleQueryRepository articleRepository,
     ICurrentActor currentActor
 ) : IQueryHandler<ArticleByGuidQuery, ArticleDto?>,
     IQueryHandler<ArticleByBarcodeQuery, ArticleDto?>
 {
-    /// <summary>
-    /// Retrieves an article by its unique identifier within the current actor's
-    /// accessible partitions.
-    /// </summary>
-    /// <exception cref="ActorNotFoundFargoApplicationException">
-    /// Thrown when the current actor cannot be found.
-    /// </exception>
     public async Task<ArticleDto?> HandleAsync(
         ArticleByGuidQuery query, CancellationToken cancellationToken = default)
     {
@@ -37,13 +21,6 @@ public sealed class ArticleQueryHandler(
         return article;
     }
 
-    /// <summary>
-    /// Retrieves an article by its barcode within the current actor's accessible
-    /// partitions.
-    /// </summary>
-    /// <exception cref="ActorNotFoundFargoApplicationException">
-    /// Thrown when the current actor cannot be found.
-    /// </exception>
     public async Task<ArticleDto?> HandleAsync(
         ArticleByBarcodeQuery query, CancellationToken cancellationToken = default)
     {

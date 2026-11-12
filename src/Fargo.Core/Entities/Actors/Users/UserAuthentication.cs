@@ -2,47 +2,29 @@ using Fargo.Core.Identity.Credentials;
 
 namespace Fargo.Core.Entities.Actors.Users;
 
-/// <summary>
-/// Represents the authentication information associated with a user.
-/// </summary>
 public class UserAuthentication
 {
-    /// <summary>
-    /// Gets the unique identifier of the associated user.
-    /// </summary>
     public Guid UserGuid { get; private init; }
 
-    /// <summary>
-    /// Gets the user that owns this authentication information.
-    /// </summary>
     public User User { get; private init; }
 
-    /// <summary>
-    /// Gets or sets the hashed password of the user.
-    /// </summary>
     public PasswordHash? PasswordHash { get; private set; } = null;
 
     /// <summary>
-    /// Gets or sets the amount of time before a password expires.
+    /// <see langword="null"/> means passwords do not expire.
     /// </summary>
     public TimeSpan? DefaultPasswordExpirationPeriod { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the date and time after which the user must change their password.
+    /// Instant from which the user must change their password; <see langword="null"/> when no change
+    /// is required.
     /// </summary>
     public DateTimeOffset? RequirePasswordChangeAt { get; set; } = null;
 
-    /// <summary>
-    /// Determines whether the user is required to change their password at the
-    /// given instant.
-    /// </summary>
-    /// <param name="now">The instant, in UTC, to evaluate against.</param>
     public bool IsPasswordChangeRequiredAt(DateTimeOffset now)
         => RequirePasswordChangeAt is not null && now >= RequirePasswordChangeAt;
 
     /// <summary>
-    /// Gets the current authentication version of the user.
-    ///
     /// Changing this value invalidates all previously issued authentication tokens.
     /// </summary>
     public Guid AuthVersion { get; private set; } = Guid.NewGuid();
@@ -60,50 +42,29 @@ public class UserAuthentication
     }
 
     /// <summary>
-    /// Resets the password expiration date based on the user's
-    /// <see cref="DefaultPasswordExpirationPeriod"/>.
-    ///
-    /// The new expiration date is calculated by adding the configured
-    /// default expiration interval to <paramref name="now"/>.
-    ///
-    /// A value of <see cref="TimeSpan.Zero"/> causes the password to expire
-    /// immediately.
+    /// Sets the expiration to <paramref name="now"/> plus <see cref="DefaultPasswordExpirationPeriod"/>
+    /// (immediately when it is <see cref="TimeSpan.Zero"/>, never when it is <see langword="null"/>).
+    /// Typically called after the user changes their own password.
     /// </summary>
-    /// <remarks>
-    /// This method is typically used after the user successfully changes
-    /// their own password.
-    /// </remarks>
-    /// <param name="now">The instant, in UTC, to calculate the expiration from.</param>
     public void ResetPasswordExpiration(DateTimeOffset now)
         => RequirePasswordChangeAt = now + DefaultPasswordExpirationPeriod;
 
     /// <summary>
-    /// Marks the user's password as requiring an immediate change.
+    /// Requires a change from <paramref name="now"/> until the expiration is reset.
     /// </summary>
-    /// <remarks>
-    /// After calling this method, <see cref="IsPasswordChangeRequiredAt"/> returns
-    /// <see langword="true"/> until the password is changed and its expiration
-    /// is reset.
-    /// </remarks>
-    /// <param name="now">The instant, in UTC, from which the change is required.</param>
     public void MarkPasswordChangeAsRequired(DateTimeOffset now)
     {
         RequirePasswordChangeAt = now;
     }
 
     /// <summary>
-    /// Generates a new authentication version, invalidating all previously issued
-    /// authentication tokens.
+    /// Invalidates all previously issued authentication tokens.
     /// </summary>
     public void RotateAuthVersion()
     {
         AuthVersion = Guid.NewGuid();
     }
 
-    /// <summary>
-    /// Sets the password hash for the entity.
-    /// </summary>
-    /// <param name="passwordHash">The new password hash.</param>
     public void SetPasswordHash(PasswordHash passwordHash)
     {
         PasswordHash = passwordHash;

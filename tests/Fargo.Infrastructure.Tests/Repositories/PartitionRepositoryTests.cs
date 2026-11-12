@@ -52,11 +52,6 @@ public class PartitionRepositoryTests
         Assert.Contains(child.Guid, guids);
     }
 
-    /// <summary>
-    /// When the actor only has access to a non-root partition, that partition
-    /// itself is returned (direct access) and so are its children, but unrelated
-    /// partitions are not.
-    /// </summary>
     [Fact(Skip = "Ordered list paging over a TPT hierarchy is not supported by the EF Core InMemory provider (throws 'At least one object must implement IComparable' while shaping the base/derived join). Covered by the PostgreSQL integration checks instead.")]
     public async Task GetManyInfo_WhenAccessSetContainsChildPartition_ReturnsThatPartitionAndItsChildren()
     {

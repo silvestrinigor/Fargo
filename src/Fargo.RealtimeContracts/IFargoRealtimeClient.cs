@@ -9,6 +9,5 @@ public interface IFargoRealtimeClient
     /// Sent when an entity the client's actor can read changes. Its hub method
     /// name is <see cref="FargoRealtimeHub.EntityChangedMethod"/>.
     /// </summary>
-    /// <param name="notification">The change.</param>
     Task EntityChanged(EntityChangedNotification notification);
 }

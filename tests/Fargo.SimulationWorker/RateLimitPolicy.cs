@@ -20,7 +20,6 @@ internal sealed class RateLimitPolicy(SimulationOptions options, Metrics metrics
     private readonly Metrics _metrics = metrics;
     private readonly Random _random = random;
 
-    /// <summary>Executes an operation that returns a value, with 429 backoff.</summary>
     public async Task<T?> ExecuteAsync<T>(Func<Task<T?>> operation, CancellationToken cancellationToken)
     {
         var attempt = 0;
@@ -39,7 +38,6 @@ internal sealed class RateLimitPolicy(SimulationOptions options, Metrics metrics
         }
     }
 
-    /// <summary>Executes an operation with no return value, with 429 backoff.</summary>
     public async Task ExecuteAsync(Func<Task> operation, CancellationToken cancellationToken)
     {
         await ExecuteAsync<object?>(async () =>

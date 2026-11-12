@@ -1,10 +1,5 @@
 namespace Fargo.SimulationWorker;
 
-/// <summary>
-/// Minimal colourised, thread-safe console logger for the simulation worker.
-/// Lines are tagged with the operator (or "sim") that produced them so the
-/// interleaved output of many concurrent operators stays readable.
-/// </summary>
 internal static class Log
 {
     private static readonly Lock Gate = new();

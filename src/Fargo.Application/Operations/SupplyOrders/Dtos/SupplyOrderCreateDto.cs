@@ -2,19 +2,9 @@ using Fargo.Core.Informations;
 
 namespace Fargo.Application.Operations.SupplyOrders.Dtos;
 
-/// <summary>
-/// The data required to create a supply order.
-/// </summary>
-/// <param name="Reference">The human-facing reference for the order.</param>
-/// <param name="Description">The optional description of the order.</param>
 /// <param name="ReceivingContainerGuid">
-/// The optional container into which goods are received. When null, goods are
-/// received at the root (outside any container). The referenced item must be a
-/// container accessible to the caller.
-/// </param>
-/// <param name="Lines">The optional initial lines of the order.</param>
-/// <param name="PartitionsToAdd">
-/// The optional identifiers of partitions to associate with the order.
+/// <see langword="null"/> receives goods at the root. Otherwise it must be a container accessible to
+/// the caller.
 /// </param>
 public sealed record SupplyOrderCreateDto(
     Name Reference,

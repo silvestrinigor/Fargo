@@ -5,9 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Registers the SupplyOrders use-case handlers.
-/// </summary>
 public static class SupplyOrderServiceCollectionExtensions
 {
     extension(IServiceCollection services)

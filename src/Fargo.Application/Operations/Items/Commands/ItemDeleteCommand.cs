@@ -6,9 +6,6 @@ using Fargo.Core.Entities.Items;
 
 namespace Fargo.Application.Operations.Items;
 
-/// <summary>
-/// Command used to delete an item.
-/// </summary>
 public sealed record ItemDeleteCommand(
     Guid ItemGuid
 ) : ICommand;

@@ -21,13 +21,9 @@ public static class ClientAuthenticationServiceCollectionExtensions
         /// (<see cref="StoredAccessTokenSource"/>, which never refreshes).
         /// </summary>
         /// <remarks>
-        /// Existing registrations of <see cref="ITokenStore"/>,
-        /// <see cref="FargoTokenRefresher"/> and
-        /// <see cref="IFargoAccessTokenSource"/> are kept, so calling this from
-        /// several client libraries is safe and an application may register its
-        /// own store before or after.
+        /// Existing registrations of these services are kept, so several client libraries can call this
+        /// and an application can register its own store.
         /// </remarks>
-        /// <param name="apiBaseAddress">The base address of the Fargo API.</param>
         public IServiceCollection AddFargoClientAuthentication(Uri apiBaseAddress)
         {
             ArgumentNullException.ThrowIfNull(apiBaseAddress);
@@ -40,7 +36,6 @@ public static class ClientAuthenticationServiceCollectionExtensions
         /// base address when the refresh client is created, so it can follow a
         /// runtime override (for example a <c>--server</c> option).
         /// </summary>
-        /// <param name="apiBaseAddress">Returns the base address of the Fargo API.</param>
         public IServiceCollection AddFargoClientAuthentication(Func<IServiceProvider, Uri> apiBaseAddress)
         {
             ArgumentNullException.ThrowIfNull(apiBaseAddress);

@@ -6,9 +6,8 @@ using UnitsNet.Units;
 namespace Fargo.ServiceHttp.JsonConverters;
 
 /// <summary>
-/// Serializes and deserializes <see cref="Length"/> as <c>{ "value": number, "unit": string }</c>.
-/// Reads any UnitsNet length unit abbreviation (e.g. "mm", "cm", "m", "km", "in", "ft").
-/// Writes the value and unit exactly as stored — no unit conversion on output.
+/// Reads any UnitsNet length unit abbreviation; writes value and unit exactly as stored, with no unit
+/// conversion.
 /// </summary>
 public sealed class LengthJsonConverter : JsonConverter<Length>
 {

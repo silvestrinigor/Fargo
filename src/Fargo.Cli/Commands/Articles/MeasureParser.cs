@@ -3,23 +3,15 @@ using System.Globalization;
 namespace Fargo.Cli.Commands.Articles;
 
 /// <summary>
-/// Parses compact command-line tokens for the article value-objects exposed by
-/// the API: measures written as a single <c>value+unit</c> token (for example
-/// <c>2.5kg</c> or <c>10 cm</c>) and kit components written as
-/// <c>&lt;article-guid&gt;:&lt;quantity&gt;</c>.
+/// Parses compact command-line tokens for article values: measures such as <c>2.5kg</c> or
+/// <c>10 cm</c>, kit components and container allowed articles.
 /// </summary>
 internal static class MeasureParser
 {
     /// <summary>
-    /// Splits a measure token such as <c>2.5kg</c>, <c>10cm</c>, or <c>10 cm</c>
-    /// into its numeric value and its unit abbreviation. The numeric part may be
-    /// negative and may use a decimal point. Everything after the number (trimmed)
-    /// is treated as the unit.
+    /// Splits a token such as <c>2.5kg</c> or <c>10 cm</c> into a number and a unit. Everything
+    /// after the number (trimmed) is the unit; a number without a unit is not valid.
     /// </summary>
-    /// <param name="token">The raw token, e.g. <c>2.5kg</c>.</param>
-    /// <param name="value">The parsed numeric value.</param>
-    /// <param name="unit">The parsed unit abbreviation (e.g. <c>kg</c>).</param>
-    /// <returns><see langword="true"/> when the token is a valid value+unit pair.</returns>
     public static bool TryParseMeasure(string? token, out double value, out string unit)
     {
         value = 0;
@@ -32,7 +24,6 @@ internal static class MeasureParser
 
         token = token.Trim();
 
-        // Find the boundary between the leading numeric part and the trailing unit.
         var index = 0;
         while (index < token.Length)
         {
@@ -74,9 +65,8 @@ internal static class MeasureParser
     }
 
     /// <summary>
-    /// Parses a measure token, throwing a <see cref="FormatException"/> with a
-    /// helpful message when the token is malformed. Used when the option has a
-    /// value and a bad value should abort the command.
+    /// Throws a <see cref="FormatException"/> when the token is malformed, so a bad value aborts
+    /// the command.
     /// </summary>
     public static (double Value, string Unit) ParseMeasure(string token, string optionName)
     {
@@ -91,10 +81,8 @@ internal static class MeasureParser
     }
 
     /// <summary>
-    /// Parses a kit-component token of the form
-    /// <c>&lt;article-guid&gt;:&lt;quantity&gt;</c>. The quantity is optional; when
-    /// omitted the token is just the GUID and the quantity is returned as
-    /// <see langword="null"/>.
+    /// Parses <c>&lt;article-guid&gt;:&lt;quantity&gt;</c>. The quantity is optional and is
+    /// <see langword="null"/> when omitted.
     /// </summary>
     public static (Guid ArticleGuid, double? Quantity) ParseKitComponent(string token)
     {
@@ -143,10 +131,9 @@ internal static class MeasureParser
     }
 
     /// <summary>
-    /// Parses a container allowed-article token of the form
-    /// <c>&lt;article-guid&gt;</c> or <c>&lt;article-guid&gt;:&lt;max-quantity&gt;</c>.
-    /// The maximum quantity is optional; when omitted the article is allowed with
-    /// no quantity cap. When present it must be a positive number.
+    /// Parses <c>&lt;article-guid&gt;</c> or <c>&lt;article-guid&gt;:&lt;max-quantity&gt;</c>.
+    /// Without a maximum quantity the article is allowed with no cap (<see langword="null"/>);
+    /// when present it must be greater than zero.
     /// </summary>
     public static (Guid ArticleGuid, double? MaxQuantity) ParseAllowedArticle(string token)
     {

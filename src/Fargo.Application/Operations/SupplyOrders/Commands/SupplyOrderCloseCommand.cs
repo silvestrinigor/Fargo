@@ -6,9 +6,6 @@ using Fargo.Core.Entities.SupplyOrders;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Finalizes a supply order.
-/// </summary>
 public sealed record SupplyOrderCloseCommand(Guid SupplyOrderGuid) : ICommand;
 
 public sealed class SupplyOrderCloseCommandHandler(

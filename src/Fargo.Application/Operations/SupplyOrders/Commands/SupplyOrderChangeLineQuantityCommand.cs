@@ -7,9 +7,6 @@ using UnitsNet;
 
 namespace Fargo.Application.Operations.SupplyOrders;
 
-/// <summary>
-/// Changes the ordered quantity of a line on a draft supply order.
-/// </summary>
 public sealed record SupplyOrderChangeLineQuantityCommand(
     Guid SupplyOrderGuid,
     Guid ArticleGuid,

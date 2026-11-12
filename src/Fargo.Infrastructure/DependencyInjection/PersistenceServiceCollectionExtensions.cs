@@ -28,9 +28,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Fargo.Infrastructure.DependencyInjection;
 
-/// <summary>
-/// Registers the database context, unit of work and repositories.
-/// </summary>
 public static class PersistenceServiceCollectionExtensions
 {
     extension(IServiceCollection services)

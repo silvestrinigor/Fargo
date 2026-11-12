@@ -4,13 +4,9 @@ using System.Text.Json;
 namespace Fargo.ClientHttp.ErrorHandling;
 
 /// <summary>
-/// Inspects HTTP responses and converts non-success status codes into typed
-/// <see cref="FargoApiException"/> instances so commands can surface a clear
-/// message instead of a raw Kiota error. 400 (Bad Request), 401 (Unauthorized)
-/// and 403 (Forbidden) get dedicated exception types; any other error status
-/// (404, 429, 5xx, ...) becomes a generic <see cref="FargoApiException"/>. When
-/// the server returns an RFC 7807 problem details body, its title/detail are
-/// used for the message; otherwise a sensible default is provided.
+/// Converts non-success responses into typed <see cref="FargoApiException"/>s: 400, 401 and 403
+/// have dedicated types and any other error status gets the generic one. The message is the
+/// problem details' detail (prefixed by its title when present); without a detail, a default.
 /// </summary>
 public sealed class ProblemDetailsHandler : DelegatingHandler
 {
@@ -26,7 +22,6 @@ public sealed class ProblemDetailsHandler : DelegatingHandler
         var response = await base.SendAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
-        // Success responses pass straight through to Kiota for deserialization.
         if (response.IsSuccessStatusCode)
         {
             return response;

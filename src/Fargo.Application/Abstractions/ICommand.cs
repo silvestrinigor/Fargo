@@ -1,84 +1,38 @@
 namespace Fargo.Application.Abstractions;
 
-/// <summary>
-/// Represents a command in the application layer.
-///
-/// Commands represent operations that change the state of the system
-/// and do not return a result.
-/// </summary>
 public interface ICommand;
 
-/// <summary>
-/// Represents a command that returns a response.
-/// </summary>
-/// <typeparam name="TResponse">
-/// The type of response returned by the command.
-/// </typeparam>
 public interface ICommand<out TResponse> : ICommand;
 
 /// <summary>
-/// Marks a command whose handler must run inside a single explicit database
-/// transaction (begin → handler → save → commit, rolling back on failure)
-/// rather than the default commit-on-success autocommit save.
-///
-/// <para>
-/// A command implements this when its handler acquires a transaction-scoped
-/// database lock (for example a PostgreSQL advisory lock guarding a
-/// read-check-write) that must be held until the commit. The registration layer
-/// detects this marker and selects the transactional unit-of-work decorator
-/// automatically, so the transactional behaviour cannot be lost by registering
-/// the command with the wrong helper.
-/// </para>
+/// Runs the handler inside one explicit database transaction (begin, handler, save, commit, with
+/// rollback on failure) instead of the default commit-on-success save.
 /// </summary>
+/// <remarks>
+/// For commands whose handler takes a transaction-scoped lock (such as a PostgreSQL advisory lock)
+/// that must be held until the commit. The registration layer detects this marker and selects the
+/// transactional decorator, which owns the commit, so the handler must not open its own transaction.
+/// </remarks>
 public interface ITransactionalCommand : ICommand;
 
 /// <summary>
-/// Marks a command that is intentionally not audited and therefore is exempt
-/// from the total <c>AuditLogType</c> mapping. These are system or background
-/// operations registered outside the audited command pipeline (for example the
-/// outbox relay), not user actions, so they carry no audit classification.
+/// Exempt from the total <c>AuditLogType</c> mapping. For system or background operations registered
+/// outside the audited command pipeline, such as the outbox relay.
 /// </summary>
 public interface INonAuditedCommand : ICommand;
 
-/// <summary>
-/// Defines a handler responsible for executing a command.
-/// </summary>
-/// <typeparam name="TCommand">
-/// The type of command handled by this handler.
-/// </typeparam>
 public interface ICommandHandler<in TCommand>
     where TCommand : ICommand
 {
-    /// <summary>
-    /// Executes the specified command.
-    /// </summary>
-    /// <param name="command">The command to execute.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
     Task HandleAsync(
         TCommand command,
         CancellationToken cancellationToken = default
     );
 }
 
-/// <summary>
-/// Defines a handler responsible for executing a command that produces a response.
-/// </summary>
-/// <typeparam name="TCommand">
-/// The type of command handled by this handler.
-/// </typeparam>
-/// <typeparam name="TResponse">
-/// The type of response returned by the command.
-/// </typeparam>
 public interface ICommandHandler<in TCommand, TResponse>
     where TCommand : ICommand<TResponse>
 {
-    /// <summary>
-    /// Executes the specified command.
-    /// </summary>
-    /// <param name="command">The command to execute.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The response produced by the command.</returns>
     Task<TResponse> HandleAsync(
         TCommand command,
         CancellationToken cancellationToken = default

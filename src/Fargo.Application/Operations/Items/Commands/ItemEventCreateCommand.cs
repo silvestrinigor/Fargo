@@ -10,22 +10,11 @@ using Fargo.Core.Events;
 
 namespace Fargo.Application.Operations.Items;
 
-/// <summary>
-/// Records an item event (movement, creation, or deletion) for an event-tracked
-/// article and returns the identifier of the recorded event.
-/// </summary>
-/// <param name="Create">The event to record.</param>
 public sealed record ItemEventCreateCommand(ItemEventCreateDto Create) : ICommand<Guid>;
 
-/// <summary>
-/// Handles <see cref="ItemEventCreateCommand"/> by recording a movement,
-/// creation, or deletion event for an event-tracked article.
-/// </summary>
 /// <remarks>
-/// Item events are only valid for an article whose
-/// <see cref="Article.TrackingMode"/> is <see cref="ArticleTrackingMode.Event"/>.
-/// Entity-tracked articles record stock through their individual
-/// <see cref="Item"/> instances instead.
+/// Only valid for an event-tracked article; entity-tracked articles record stock through their
+/// individual <see cref="Item"/> instances.
 /// </remarks>
 public sealed class ItemEventCreateCommandHandler(
     ActorResolver actorService,
@@ -35,12 +24,6 @@ public sealed class ItemEventCreateCommandHandler(
     ICurrentActor currentActor
 ) : ICommandHandler<ItemEventCreateCommand, Guid>
 {
-    /// <summary>
-    /// Records the item event described by the command and returns its identifier.
-    /// </summary>
-    /// <param name="command">The command carrying the event to record.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The identifier of the recorded <see cref="ItemEvent"/>.</returns>
     public async Task<Guid> HandleAsync(ItemEventCreateCommand command, CancellationToken cancellationToken = default)
     {
         var create = command.Create;

@@ -18,10 +18,6 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public string ConnectionString => container.GetConnectionString();
 
-    /// <summary>
-    /// Creates a context configured like the application's, including the
-    /// outbox interceptor.
-    /// </summary>
     public FargoDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<FargoDbContext>()

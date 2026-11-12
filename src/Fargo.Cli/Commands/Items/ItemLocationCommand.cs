@@ -6,14 +6,12 @@ using System.CommandLine;
 namespace Fargo.Cli.Commands.Items;
 
 /// <summary>
-/// Shows where an item sits in the container hierarchy as a nested tree, from
-/// the outermost container inward to the item itself.
+/// Shows where an item sits in the container hierarchy as a nested tree, outermost container
+/// first.
 /// </summary>
 /// <remarks>
-/// The API returns the chain ordered from the item outward to its root
-/// container. This command reverses that into a top-down tree so the nesting
-/// reads naturally (root first, the queried item last and marked), and prints a
-/// compact breadcrumb summary above it.
+/// The API returns the chain ordered from the item outward to its root container; this command
+/// reverses it so the tree nests top-down.
 /// </remarks>
 public sealed class ItemLocationCommand : Command
 {
@@ -73,11 +71,8 @@ public sealed class ItemLocationCommand : Command
 
     private static void Render(Guid queriedGuid, DateTimeOffset? at, IReadOnlyList<ItemDto> chain)
     {
-        // The API orders the chain from the item (first element) outward to the
-        // root container (last element). Build an explicit outer-to-inner list
-        // (root first, item last) so the tree nests the natural way. A new list
-        // is reversed in place to avoid any ambiguity between the in-place
-        // List<T>.Reverse() and the LINQ Enumerable.Reverse().
+        // Reverse a copy in place: List<T>.Reverse() and LINQ's Enumerable.Reverse() are easy to
+        // confuse, and the caller's list must not change.
         var outerToInner = new List<ItemDto>(chain);
         outerToInner.Reverse();
 
@@ -93,8 +88,6 @@ public sealed class ItemLocationCommand : Command
         Console.WriteLine(breadcrumb);
         Console.WriteLine();
 
-        // Nested tree: each container holds the next one inward, ending at the
-        // queried item. Depth is counted from the outermost container.
         TreeNode? root = null;
         TreeNode? current = null;
 
@@ -121,8 +114,6 @@ public sealed class ItemLocationCommand : Command
 
     private static string BuildLabel(ItemDto item, int depth, bool isItem)
     {
-        // The outermost entry is the root container; inner entries up to the
-        // item are nested containers; the final entry is the item itself.
         var role = isItem
             ? "item"
             : depth == 0 ? "root container" : "container";

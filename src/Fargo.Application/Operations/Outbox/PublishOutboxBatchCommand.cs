@@ -6,33 +6,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Operations.Outbox;
 
-/// <summary>
-/// Claims the oldest unpublished outbox messages and publishes them, in order,
-/// through the registered <see cref="IEventPublisher"/>.
-/// </summary>
-/// <param name="BatchSize">The maximum number of messages to claim and publish.</param>
 public sealed record PublishOutboxBatchCommand(int BatchSize) : ICommand<OutboxBatchResultDto>, INonAuditedCommand;
 
-/// <summary>
-/// Publishes one batch of waiting outbox messages and marks them processed.
-/// </summary>
 /// <remarks>
-/// <para>
-/// The claimed batch runs in a single transaction owned by
-/// <see cref="IOutboxBatch"/>: the messages are published one at a time and the
-/// processed marks are committed together. Publishing stops at the first
-/// failure, which is recorded on the row; that row and the ones after it are
-/// retried by a later batch, so order is preserved.
-/// </para>
-/// <para>
-/// Delivery is at-least-once: if the process stops after the broker accepted a
-/// message but before the commit, the message is published again.
-/// </para>
-/// <para>
-/// Because the handler owns its transaction and holds the claim locks across
-/// the publish loop, it is registered directly, without the unit-of-work,
-/// transaction or audit decorators.
-/// </para>
+/// The claimed batch runs in the single transaction owned by <see cref="IOutboxBatch"/>. Messages are
+/// published one at a time and stop at the first failure, which is recorded on the row; that row and
+/// the ones after it are retried by a later batch, so order is preserved.
+///
+/// Delivery is at-least-once: if the process stops after the broker accepted a message but before
+/// the commit, the message is published again.
 /// </remarks>
 public sealed class PublishOutboxBatchCommandHandler(
     IOutboxRepository repository,
@@ -41,7 +23,6 @@ public sealed class PublishOutboxBatchCommandHandler(
     ILogger<PublishOutboxBatchCommandHandler> logger)
     : ICommandHandler<PublishOutboxBatchCommand, OutboxBatchResultDto>
 {
-    /// <inheritdoc />
     public async Task<OutboxBatchResultDto> HandleAsync(
         PublishOutboxBatchCommand command,
         CancellationToken cancellationToken = default)

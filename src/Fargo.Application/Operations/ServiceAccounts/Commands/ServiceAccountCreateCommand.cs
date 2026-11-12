@@ -10,7 +10,7 @@ using Fargo.Core.Informations;
 
 namespace Fargo.Application.Operations.ServiceAccounts;
 
-/// <summary>Command to create a service account. Returns its id and one-time secret.</summary>
+/// <summary>Returns the id and the one-time secret.</summary>
 public sealed record ServiceAccountCreateCommand(
     ServiceAccountCreateDto Create
 ) : ICommand<ServiceAccountCreatedDto>;

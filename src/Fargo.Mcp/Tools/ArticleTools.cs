@@ -7,10 +7,8 @@ using System.ComponentModel;
 namespace Fargo.Mcp.Tools;
 
 /// <summary>
-/// MCP tools for working with Fargo articles. Mirrors the <c>fargo article</c>
-/// CLI surface. Only reading supports addressing an article by barcode; update,
-/// delete and inventory are addressed by GUID (the server exposes no barcode
-/// route for them).
+/// Only reading supports addressing an article by barcode; update, delete and inventory are addressed by
+/// GUID (the server exposes no barcode route for them).
 /// </summary>
 [McpServerToolType]
 public static class ArticleTools
@@ -318,11 +316,6 @@ public static class ArticleTools
         return inventory?.ToSummary();
     }
 
-    /// <summary>
-    /// Determines the article type from which groups of options were supplied.
-    /// At most one type-signalling group may be present; with none, the article
-    /// is a plain default article.
-    /// </summary>
     private static int InferArticleType(bool variationPresent, bool packPresent, bool kitPresent, bool containerPresent)
     {
         var signals = new (bool Present, int Type, string Hint)[]
@@ -421,11 +414,6 @@ public static class ArticleTools
         return dimension;
     }
 
-    /// <summary>
-    /// Builds the container portion of an article-create request from the
-    /// compact MCP parameters, or returns <see langword="null"/> when no
-    /// container constraints were supplied.
-    /// </summary>
     private static ArticleContainerDto? BuildContainer(string? containerMaxMass, string[]? allowedArticles)
     {
         var hasMaxMass = !string.IsNullOrWhiteSpace(containerMaxMass);

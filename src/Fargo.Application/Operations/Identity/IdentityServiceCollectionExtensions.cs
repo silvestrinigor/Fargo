@@ -4,9 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.Operations.Identity;
 
-/// <summary>
-/// Registers the Identity use-case handlers.
-/// </summary>
 public static class IdentityServiceCollectionExtensions
 {
     extension(IServiceCollection services)
