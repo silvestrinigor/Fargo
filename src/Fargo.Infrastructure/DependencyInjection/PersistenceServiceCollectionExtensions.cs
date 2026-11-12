@@ -43,6 +43,7 @@ public static class PersistenceServiceCollectionExtensions
             // Stateless, so one instance serves every context.
             services.TryAddSingleton(TimeProvider.System);
             services.TryAddSingleton<OutboxSaveChangesInterceptor>();
+            services.TryAddSingleton<AuthorizationStampSaveChangesInterceptor>();
 
             return services.AddDbContext<FargoDbContext>((sp, opt) =>
             {
@@ -54,7 +55,9 @@ public static class PersistenceServiceCollectionExtensions
                     }
                 ).UseSnakeCaseNamingConvention();
 
-                opt.AddInterceptors(sp.GetRequiredService<OutboxSaveChangesInterceptor>());
+                opt.AddInterceptors(
+                    sp.GetRequiredService<OutboxSaveChangesInterceptor>(),
+                    sp.GetRequiredService<AuthorizationStampSaveChangesInterceptor>());
             });
         }
 

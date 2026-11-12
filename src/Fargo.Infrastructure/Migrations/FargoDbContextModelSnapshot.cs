@@ -753,6 +753,29 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.AuthorizationStamp", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("Value")
+                        .HasColumnType("uuid")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("pk_authorization_stamps");
+
+                    b.ToTable("authorization_stamps", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Value = new Guid("6b2f3c1e-9a4d-4e7b-8c5f-1d2e3f4a5b6c")
+                        });
+                });
+
             modelBuilder.Entity("Fargo.Infrastructure.Persistence.Entities.ItemParentContainerHistoryPostgresTemporal", b =>
                 {
                     b.Property<int>("Id")

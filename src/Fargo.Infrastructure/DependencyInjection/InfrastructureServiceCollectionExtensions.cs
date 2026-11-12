@@ -22,6 +22,7 @@ public static class InfrastructureServiceCollectionExtensions
         /// </remarks>
         public IServiceCollection AddFargoInfrastructure(IConfiguration configuration) => services
         .AddFargoPersistence(configuration)
+        .AddFargoActorAuthorization(configuration)
         .AddFargoSecurityInfrastructure(configuration)
         .AddFargoMessaging(configuration);
     }

@@ -28,9 +28,7 @@ public static class ActorTestFactory
     {
         var guid = actorGuid ?? Guid.NewGuid();
 
-        // CreateUser yields an active user; the resolver only requires the user
-        // to exist and be active. The user's own GUID is irrelevant to the actor
-        // GUID that the resolver reports, but GetByGuidAsync must return non-null.
+        // CreateUser yields an active user; only its existence and active flag matter here.
         var user = Actor.NewUser(new Nameid("tester")).User!;
 
         userRepository
@@ -38,11 +36,11 @@ public static class ActorTestFactory
             .Returns(Task.FromResult<User?>(user));
 
         userRepository
-            .GetAllActivePermissionsFromUserAsync(user.ActorGuid, Arg.Any<CancellationToken>())
+            .GetAllActivePermissionsFromUserAsync(guid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<ActionType>>(permissions ?? []));
 
         userRepository
-            .GetAllActivePartitionAccessGuidsFromUserAsync(user.ActorGuid, Arg.Any<CancellationToken>())
+            .GetAllActivePartitionAccessGuidsFromUserAsync(guid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<Guid>>(
                 partitionAccesses ?? [FargoCoreWellKnowGuids.GlobalPartitionGuid]));
 
@@ -56,18 +54,54 @@ public static class ActorTestFactory
             .Returns(Task.FromResult<User?>(null));
     }
 
-    /// <summary>
-    /// Creates a real <see cref="ActorResolver"/> over the given repository.
-    /// A mocked <see cref="IServiceAccountRepository"/> is supplied because the
-    /// resolver requires one; user-actor tests do not exercise it.
-    /// </summary>
+    // User-actor tests do not exercise the service account repository, but the provider needs one.
     public static ActorResolver Resolver(IUserRepository userRepository)
-        => new(userRepository, Substitute.For<IServiceAccountRepository>());
+        => Resolver(userRepository, Substitute.For<IServiceAccountRepository>());
 
     public static ActorResolver Resolver(
         IUserRepository userRepository,
         IServiceAccountRepository serviceAccountRepository)
-        => new(userRepository, serviceAccountRepository);
+        => new(new RepositoryAuthorizationProvider(userRepository, serviceAccountRepository));
+
+    /// <summary>
+    /// Answers the authorization port from the mocked repositories, without any caching.
+    /// </summary>
+    private sealed class RepositoryAuthorizationProvider(
+        IUserRepository userRepository,
+        IServiceAccountRepository serviceAccountRepository) : IActorAuthorizationProvider
+    {
+        public async Task<ActorAuthorization?> GetAsync(
+            Guid actorGuid,
+            ActorType actorType,
+            CancellationToken cancellationToken = default)
+        {
+            if (actorType == ActorType.Service)
+            {
+                var service = await serviceAccountRepository.GetByGuidAsync(actorGuid, cancellationToken);
+
+                if (service is null || !service.Actor.IsActive)
+                {
+                    return null;
+                }
+
+                var accesses = await serviceAccountRepository.GetAllActivePartitionAccessGuidsAsync(actorGuid, cancellationToken);
+
+                return new ActorAuthorization([.. service.Actor.Permissions], [.. accesses]);
+            }
+
+            var user = await userRepository.GetByGuidAsync(actorGuid, cancellationToken);
+
+            if (user is null || !user.Actor.IsActive)
+            {
+                return null;
+            }
+
+            var permissions = await userRepository.GetAllActivePermissionsFromUserAsync(actorGuid, cancellationToken);
+            var partitionAccesses = await userRepository.GetAllActivePartitionAccessGuidsFromUserAsync(actorGuid, cancellationToken);
+
+            return new ActorAuthorization([.. permissions], [.. partitionAccesses]);
+        }
+    }
 }
 
 public sealed class TestCurrentActor : ICurrentActor

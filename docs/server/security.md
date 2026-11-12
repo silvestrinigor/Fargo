@@ -56,6 +56,41 @@ directly to the actor and what is inherited through the user's group hierarchy.
 Application handlers resolve the principal and enforce authorization before
 touching domain state.
 
+### How the principal is read, and cached
+
+`ActorResolver` (Core) asks the `IActorAuthorizationProvider` port. Infrastructure
+decides whether the answer comes from the cache or the database:
+
+1. **Every request, uncached:** one small query reads the actor's active flag,
+   its auth version and the current **authorization stamp**. Token validation
+   uses the same read, which is kept for the rest of the request, so it runs
+   once. Deactivation, logout and password changes therefore take effect on the
+   next request, as before.
+2. **Permissions and partition accesses:** these are the recursive group and
+   partition queries. They come from a cache keyed by actor and stamp, and are
+   loaded from the database only on a miss.
+
+The stamp is a single-row table (`authorization_stamps`). Its value is replaced
+by a new random `Guid`, in the same transaction, whenever an actor, a partition
+access, a group membership, a user group, a group partition access or a
+partition is added, changed or deleted (`AuthorizationStampSaveChangesInterceptor`).
+A new stamp means a new cache key, so nothing ever has to be removed from the
+cache and every instance sees the change at once. Any such change invalidates
+every actor's entry. That's simpler than working out who is affected, and cheap
+because these changes are rare.
+
+Changes made outside the change tracker (raw SQL, `ExecuteUpdate`,
+`ExecuteDelete`) don't renew the stamp. Renew it explicitly in such code paths.
+
+| `ActorAuthorizationCache` setting | Default | Meaning |
+|---|---|---|
+| `Provider` | `Hybrid` | `Hybrid` uses .NET `HybridCache`, in memory. Registering an `IDistributedCache`, for example Redis with `AddStackExchangeRedisCache`, makes it a shared second level with no code change. `None` disables caching. |
+| `Expiration` | `00:10:00` | A safety limit for unused entries. Freshness comes from the stamp, not from expiry. |
+
+To use a different cache technology, register another
+`IActorAuthorizationCache` (Infrastructure). Core and Application don't
+reference any cache.
+
 ## Permissions
 
 Permissions are values of [`ActionType`](xref:Fargo.Core.Actors.ActionType) — a

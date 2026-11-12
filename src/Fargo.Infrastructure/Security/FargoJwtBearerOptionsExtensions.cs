@@ -1,5 +1,5 @@
-using Fargo.Core.Entities.Actors.ServiceAccounts;
-using Fargo.Core.Entities.Actors.Users;
+using Fargo.Core.Entities.Actors;
+using Fargo.Infrastructure.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
@@ -25,29 +25,18 @@ public static class FargoJwtBearerOptionsExtensions
                     return;
                 }
 
-                var isServiceToken = string.Equals(
-                    actorTypeClaim, FargoJwtClaims.ActorTypeService, StringComparison.Ordinal);
+                var actorType = string.Equals(actorTypeClaim, FargoJwtClaims.ActorTypeService, StringComparison.Ordinal)
+                    ? ActorType.Service
+                    : ActorType.User;
 
-                if (isServiceToken)
-                {
-                    var serviceAccountRepository = context.HttpContext.RequestServices
-                        .GetRequiredService<IServiceAccountRepository>();
+                // Uncached on purpose, so deactivation and token revocation take effect on the next
+                // request. The reader keeps the result for the request, so resolving the actor later
+                // does not read it again.
+                var state = await context.HttpContext.RequestServices
+                    .GetRequiredService<ActorAuthorizationStateReader>()
+                    .GetAsync(subjectGuid, actorType, context.HttpContext.RequestAborted);
 
-                    var service = await serviceAccountRepository.GetByGuidAsync(
-                        subjectGuid, context.HttpContext.RequestAborted);
-
-                    if (service is null || !service.Actor.IsActive || service.AuthVersion != authVersion)
-                    {
-                        context.Fail("Token is no longer valid.");
-                    }
-
-                    return;
-                }
-
-                var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
-                var user = await userRepository.GetByGuidAsync(subjectGuid, context.HttpContext.RequestAborted);
-
-                if (user is null || !user.Actor.IsActive || user.Authentication.AuthVersion != authVersion)
+                if (state is null || !state.IsActive || state.AuthVersion != authVersion)
                 {
                     context.Fail("Token is no longer valid.");
                 }
