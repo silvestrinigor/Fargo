@@ -3,7 +3,6 @@ using Fargo.Cli.Configurations;
 using Fargo.Cli.ErrorHandling;
 using Fargo.ClientAuthentication;
 using Fargo.ClientRealtime;
-using Fargo.RealtimeContracts;
 using System.CommandLine;
 using System.Net;
 

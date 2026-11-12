@@ -1,10 +1,9 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Common.Actors;
 using Fargo.Application.Decorators;
 using Fargo.Application.DependencyInjection;
 using Fargo.Application.IntegrationEvents;
-using Fargo.Application.Operations.Outbox;
-using Fargo.Application.Operations.Outbox.Dtos;
+using Fargo.Application.Commands.Outbox;
+using Fargo.Application.Dtos.Outbox;
 using Fargo.Application.Persistence;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Application.Tests.Common;

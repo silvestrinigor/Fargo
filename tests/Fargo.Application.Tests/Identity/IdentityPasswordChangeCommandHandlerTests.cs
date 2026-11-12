@@ -1,5 +1,6 @@
-using Fargo.Application.Operations.Identity;
-using Fargo.Application.Operations.Identity.Dtos;
+using Fargo.Application.Commands.Identity;
+using Fargo.Application.Dtos.Identity;
+using Fargo.Application.Exceptions.Identity;
 using Fargo.Application.Persistence;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;

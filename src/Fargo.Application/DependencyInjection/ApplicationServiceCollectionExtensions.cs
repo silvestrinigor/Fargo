@@ -1,14 +1,3 @@
-using Fargo.Application.Operations.Articles;
-using Fargo.Application.Operations.Audits;
-using Fargo.Application.Operations.Identity;
-using Fargo.Application.Operations.Initialization;
-using Fargo.Application.Operations.Items;
-using Fargo.Application.Operations.Outbox;
-using Fargo.Application.Operations.Partitions;
-using Fargo.Application.Operations.ServiceAccounts;
-using Fargo.Application.Operations.SupplyOrders;
-using Fargo.Application.Operations.UserGroups;
-using Fargo.Application.Operations.Users;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Articles;
@@ -22,8 +11,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Fargo.Application.DependencyInjection;
 
 /// <summary>
-/// Each feature owns its handler registrations (*ServiceCollectionExtensions.cs under Operations);
-/// this class only composes them with the domain services they depend on.
+/// Each feature owns its handler registrations (the other *ServiceCollectionExtensions.cs files in
+/// this folder); this class only composes them with the domain services they depend on.
 /// </summary>
 public static class ApplicationServiceCollectionExtensions
 {

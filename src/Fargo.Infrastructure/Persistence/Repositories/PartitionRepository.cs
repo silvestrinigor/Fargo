@@ -1,6 +1,5 @@
 using Fargo.Application.Common.Paging;
-using Fargo.Application.Operations.Partitions;
-using Fargo.Application.Operations.Partitions.Dtos;
+using Fargo.Application.Dtos.Partitions;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Partitions;
 using Microsoft.EntityFrameworkCore;

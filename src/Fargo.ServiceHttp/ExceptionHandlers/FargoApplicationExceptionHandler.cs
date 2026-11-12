@@ -1,6 +1,6 @@
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Operations.Identity;
+using Fargo.Application.Exceptions.Identity;
 using Fargo.Core.Common;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;

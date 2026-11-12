@@ -1,6 +1,6 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Operations.Identity;
-using Fargo.Application.Operations.Identity.Dtos;
+using Fargo.Application.Commands.Identity;
+using Fargo.Application.Dtos.Identity;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 

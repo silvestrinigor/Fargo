@@ -46,7 +46,7 @@ cli_help() {
 
 mkdir -p "$REFERENCE_DIR"
 
-# The CLI reference pages are listed in the unified docs/toc.yml, so this
+# The CLI reference pages are listed in the manual sidebar docs/manual/toc.yml, so this
 # script only (re)generates the Markdown pages and does not write a per-folder
 # toc.yml.
 
