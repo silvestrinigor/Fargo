@@ -48,6 +48,34 @@ individual item rows (see [Articles and Items](../concepts/articles-and-items.md
   container on that side, since the FK is set to `NULL` if the container is
   deleted).
 
+### Reference tables
+
+Every enum stored in a column has a **reference table** with `id` and `name`,
+and the column is a foreign key to it. The database can then tell what a number
+means and rejects numbers that are not members of the enum.
+
+| Table | Enum | Referenced by |
+| --- | --- | --- |
+| `entity_types` | `EntityType` | `entities.entity_type` |
+| `event_types` | `EventType` | `events.event_type` |
+| `item_event_types` | `ItemEventType` | `item_events.item_event_type` |
+| `actor_types` | `ActorType` | `actors.actor_type`, `audit_logs.actor_type` |
+| `article_types` | `ArticleType` | `articles.article_type` |
+| `article_tracking_modes` | `ArticleTrackingMode` | `articles.tracking_mode` |
+| `supply_order_statuses` | `SupplyOrderStatus` | `supply_orders.status` |
+| `audit_log_types` | `AuditLogType` | `audit_logs.audit_log_type` |
+| `action_types` | `ActionType` | `actor_permissions`, `user_group_permissions` |
+
+The enum is the only source of truth. The code uses it directly and never reads
+these tables. Their rows are generated from the enum by `EnumLookupConfiguration`
+(EF Core `HasData`), so adding a member and then adding a migration inserts the
+new row. Members are append-only: renumbering or removing one fails while rows
+still use it. `EnumLookupTests` checks that each table matches its enum.
+
+Permissions are rows, not arrays: `actor_permissions` (permissions granted
+directly to an actor) and `user_group_permissions`, each keyed by the owner and
+the `action_type`. Deleting the actor or group deletes its permissions.
+
 ## Repositories
 
 Each resource has two repository interfaces in the application layer:
@@ -98,7 +126,10 @@ dotnet ef migrations add <MigrationName> \
 ```
 
 Column and table names follow the snake_case convention automatically. Review
-the generated migration before committing it.
+the generated migration before committing it. EF Core cannot move data between
+shapes, so when a change replaces a column (as `AddEnumLookupsAndNormalizePermissions`
+did with the jsonb permissions), edit the migration to copy the data in `Up` and
+`Down`, mark the edit with a comment, and test both directions.
 
 ### Applying migrations
 

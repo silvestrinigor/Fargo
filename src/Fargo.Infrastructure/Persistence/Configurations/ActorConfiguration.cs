@@ -16,9 +16,7 @@ public sealed class ActorConfiguration : IEntityTypeConfiguration<Actor>
 
         builder.HasIndex(x => x.Nameid).IsUnique();
 
-        // Directly-granted permissions are a small primitive collection stored as
-        // jsonb on the actor row (matching how user-group permissions are
-        // persisted), rather than as a separate join table.
-        builder.Property(x => x.Permissions).HasColumnType("jsonb");
+        // Permissions is a read-only view of PermissionGrants (the actor_permissions rows).
+        builder.Ignore(x => x.Permissions);
     }
 }

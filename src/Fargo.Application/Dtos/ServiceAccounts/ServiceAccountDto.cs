@@ -26,7 +26,7 @@ public static class ServiceAccountDtoMappings
         (string)account.Actor.Nameid,
         (string)account.Actor.Description,
         account.Actor.IsActive,
-        account.Actor.Permissions,
+        account.Actor.PermissionGrants.Select(grant => grant.ActionType).ToArray(),
         account.Actor.Partitions.Select(partition => partition.PartitionGuid).ToArray(),
         account.Actor.PartitionAccesses.Select(access => access.PartitionGuid).ToArray());
 }

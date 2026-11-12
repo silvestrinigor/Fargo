@@ -38,8 +38,10 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
     public Task<UserGroup?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
     {
         return userGroups
+        .Include(userGroup => userGroup.PermissionGrants)
         .Include(userGroup => userGroup.Partitions)
         .Include(userGroup => userGroup.PartitionAccesses)
+        .AsSplitQuery()
         .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
     }
 
@@ -129,19 +131,21 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
         FormattableString query = $"""
         WITH RECURSIVE user_group_chain AS
         (
-            SELECT guid, permissions, parent_user_group_guid
+            SELECT guid, parent_user_group_guid
             FROM user_groups
             WHERE guid = {userGroupGuid}
 
             UNION
 
-            SELECT parent.guid, parent.permissions, parent.parent_user_group_guid
+            SELECT parent.guid, parent.parent_user_group_guid
             FROM user_groups AS parent
             INNER JOIN user_group_chain AS child
                 ON child.parent_user_group_guid = parent.guid
         )
-        SELECT DISTINCT jsonb_array_elements_text(permissions)::integer AS permission
+        SELECT DISTINCT permission.action_type AS permission
         FROM user_group_chain
+        INNER JOIN user_group_permissions AS permission
+            ON permission.user_group_guid = user_group_chain.guid
         ORDER BY permission;
         """;
 

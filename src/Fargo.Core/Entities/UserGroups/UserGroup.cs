@@ -33,9 +33,14 @@ public class UserGroup : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersione
 
     public UserGroup? ParentUserGroup { get; private set; }
 
-    public IReadOnlyCollection<ActionType> Permissions => permissions;
+    public IReadOnlyCollection<ActionType> Permissions => [.. permissionGrants.Select(grant => grant.ActionType)];
 
-    private readonly List<ActionType> permissions = [];
+    /// <summary>
+    /// The persisted rows behind <see cref="Permissions"/>.
+    /// </summary>
+    public IReadOnlyCollection<UserGroupPermission> PermissionGrants => permissionGrants;
+
+    private readonly List<UserGroupPermission> permissionGrants = [];
 
     public IReadOnlyCollection<UserGroupPartition> Partitions => partitions;
 
@@ -178,16 +183,17 @@ public class UserGroup : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersione
         partitions.RemoveAll(p => p.PartitionGuid == partitionGuid);
     }
 
-    /// <summary>\n    /// Does nothing if the permission is already granted.
+    /// <summary>
+    /// Does nothing if the permission is already granted.
     /// </summary>
     public void AddPermission(ActionType action)
     {
-        if (permissions.Contains(action))
+        if (permissionGrants.Any(grant => grant.ActionType == action))
         {
             return;
         }
 
-        permissions.Add(action);
+        permissionGrants.Add(new UserGroupPermission(this, action));
     }
 
     /// <exception cref="FargoCoreException">The group is the administrators group.</exception>
@@ -200,7 +206,7 @@ public class UserGroup : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersione
                 FargoErrorType.InvalidOperation);
         }
 
-        permissions.RemoveAll(a => a == action);
+        permissionGrants.RemoveAll(grant => grant.ActionType == action);
     }
 
     public void Activate()

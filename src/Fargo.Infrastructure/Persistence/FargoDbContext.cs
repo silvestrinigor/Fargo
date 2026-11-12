@@ -172,7 +172,10 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new SupplyOrderPartitionConfiguration())
         .ApplyConfiguration(new OutboxMessageConfiguration())
         .ApplyConfiguration(new AuthorizationStampConfiguration())
-        .ApplyConfiguration(new IdempotencyRecordConfiguration());
+        .ApplyConfiguration(new IdempotencyRecordConfiguration())
+        .ApplyConfiguration(new ActorPermissionConfiguration())
+        .ApplyConfiguration(new UserGroupPermissionConfiguration())
+        .ApplyEnumLookups();
 
         // Optimistic concurrency: map the PostgreSQL xmin system column as a
         // concurrency token (shadow property) on every mutable aggregate root

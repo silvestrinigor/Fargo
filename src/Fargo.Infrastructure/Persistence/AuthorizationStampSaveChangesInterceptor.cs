@@ -15,9 +15,9 @@ namespace Fargo.Infrastructure.Persistence;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Watched: <see cref="Actor"/> (active flag, permissions), <see cref="ActorPartitionAccess"/>,
-/// <see cref="UserUserGroup"/> (group membership), <see cref="UserGroup"/> (active flag, permissions,
-/// parent), <see cref="UserGroupPartitionAccess"/> and <see cref="Partition"/> (the tree accesses are
+/// Watched: <see cref="Actor"/> (active flag), <see cref="ActorPermission"/>, <see cref="ActorPartitionAccess"/>,
+/// <see cref="UserUserGroup"/> (group membership), <see cref="UserGroup"/> (active flag, parent),
+/// <see cref="UserGroupPermission"/>, <see cref="UserGroupPartitionAccess"/> and <see cref="Partition"/> (the tree accesses are
 /// expanded along). Any of them invalidates every actor's snapshot, which is simpler than working out
 /// who is affected and cheap because such changes are rare.
 /// </para>
@@ -54,6 +54,8 @@ public sealed class AuthorizationStampSaveChangesInterceptor : SaveChangesInterc
     internal static bool AffectsAuthorization(EntityEntry entry)
         => (entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
            && (entry.Entity is Actor
+               or ActorPermission
+               or UserGroupPermission
                or ActorPartitionAccess
                or UserUserGroup
                or UserGroup

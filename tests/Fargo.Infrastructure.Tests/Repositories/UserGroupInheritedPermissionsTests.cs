@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Fargo.Infrastructure.Tests.Repositories;
 
 /// <summary>
-/// The inherited-permissions query is a recursive CTE with PostgreSQL-specific JSON functions, so it
-/// runs against a real PostgreSQL database instead of the in-memory provider.
+/// The inherited-permissions query is a recursive CTE in raw SQL, so it runs against a real PostgreSQL
+/// database instead of the in-memory provider.
 /// </summary>
 public class UserGroupInheritedPermissionsTests(PostgresFixture postgres) : IClassFixture<PostgresFixture>
 {

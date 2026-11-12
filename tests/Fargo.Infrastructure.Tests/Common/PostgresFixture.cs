@@ -38,5 +38,10 @@ public sealed class PostgresFixture : IAsyncLifetime
         await context.Database.MigrateAsync();
     }
 
+    /// <summary>
+    /// Starts an empty database, for tests that apply the migrations themselves.
+    /// </summary>
+    public Task StartWithoutMigratingAsync() => container.StartAsync();
+
     public Task DisposeAsync() => container.DisposeAsync().AsTask();
 }

@@ -172,6 +172,12 @@ namespace Fargo.Infrastructure.Migrations
                     b.HasKey("Guid")
                         .HasName("pk_audit_logs");
 
+                    b.HasIndex("ActorType")
+                        .HasDatabaseName("ix_audit_logs_actor_type");
+
+                    b.HasIndex("AuditLogType")
+                        .HasDatabaseName("ix_audit_logs_audit_log_type");
+
                     b.HasIndex("OccurredAt")
                         .HasDatabaseName("ix_audit_logs_occurred_at");
 
@@ -217,6 +223,25 @@ namespace Fargo.Infrastructure.Migrations
                         .HasDatabaseName("ix_actor_partition_accesses_partition_guid");
 
                     b.ToTable("actor_partition_accesses", (string)null);
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.ActorPermission", b =>
+                {
+                    b.Property<Guid>("ActorGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_guid");
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("integer")
+                        .HasColumnName("action_type");
+
+                    b.HasKey("ActorGuid", "ActionType")
+                        .HasName("pk_actor_permissions");
+
+                    b.HasIndex("ActionType")
+                        .HasDatabaseName("ix_actor_permissions_action_type");
+
+                    b.ToTable("actor_permissions", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.ServiceAccounts.ServiceAccount", b =>
@@ -631,6 +656,25 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("user_group_partition_accesses", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroupPermission", b =>
+                {
+                    b.Property<Guid>("UserGroupGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_group_guid");
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("integer")
+                        .HasColumnName("action_type");
+
+                    b.HasKey("UserGroupGuid", "ActionType")
+                        .HasName("pk_user_group_permissions");
+
+                    b.HasIndex("ActionType")
+                        .HasDatabaseName("ix_user_group_permissions_action_type");
+
+                    b.ToTable("user_group_permissions", (string)null);
+                });
+
             modelBuilder.Entity("Fargo.Core.Events.Event", b =>
                 {
                     b.Property<Guid>("Guid")
@@ -858,6 +902,652 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("item_parent_container_history", (string)null);
                 });
 
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Audits.AuditLogType>", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_audit_log_types");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_audit_log_types_name");
+
+                    b.ToTable("audit_log_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "EntityCreated"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "EntityUpdated"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "EntityDeleted"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "ItemEventRecorded"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Authenticated"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "LoggedOut"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "TokenRefreshed"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "ServiceTokenIssued"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "PasswordChanged"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "ServiceAccountSecretRotated"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "SystemInitialized"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "SupplyOrderPlaced"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Name = "SupplyOrderReceived"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Name = "SupplyOrderCancelled"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Name = "SupplyOrderClosed"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Name = "PermissionsChanged"
+                        });
+                });
+
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Actors.ActionType>", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_action_types");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_action_types_name");
+
+                    b.ToTable("action_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "CreateArticle"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "DeleteArticle"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "EditArticle"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "CreateItem"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "DeleteItem"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "EditItem"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "CreateUser"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "DeleteUser"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "EditUser"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "ChangeAnotherUserPassword"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "CreateUserGroup"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "DeleteUserGroup"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Name = "EditUserGroup"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Name = "ChangeUserGroupMembers"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Name = "CreatePartition"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Name = "DeletePartition"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Name = "EditPartition"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Name = "ReadAuditLogs"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Name = "ReadItemEvents"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Name = "CreateServiceAccount"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Name = "DeleteServiceAccount"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Name = "EditServiceAccount"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Name = "ReadServiceAccount"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Name = "CreateSupplyOrder"
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Name = "EditSupplyOrder"
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Name = "PlaceSupplyOrder"
+                        },
+                        new
+                        {
+                            Id = 27,
+                            Name = "ReceiveSupplyOrder"
+                        },
+                        new
+                        {
+                            Id = 28,
+                            Name = "CancelSupplyOrder"
+                        },
+                        new
+                        {
+                            Id = 29,
+                            Name = "CloseSupplyOrder"
+                        },
+                        new
+                        {
+                            Id = 30,
+                            Name = "ReadSupplyOrders"
+                        },
+                        new
+                        {
+                            Id = 31,
+                            Name = "ActivateUser"
+                        },
+                        new
+                        {
+                            Id = 32,
+                            Name = "ActivateUserGroup"
+                        },
+                        new
+                        {
+                            Id = 33,
+                            Name = "ActivateServiceAccount"
+                        },
+                        new
+                        {
+                            Id = 34,
+                            Name = "MoveItem"
+                        },
+                        new
+                        {
+                            Id = 35,
+                            Name = "ChangeUserPermissions"
+                        },
+                        new
+                        {
+                            Id = 36,
+                            Name = "ChangeUserGroupPermissions"
+                        },
+                        new
+                        {
+                            Id = 37,
+                            Name = "ChangeServiceAccountPermissions"
+                        },
+                        new
+                        {
+                            Id = 38,
+                            Name = "ChangeUserPartitions"
+                        },
+                        new
+                        {
+                            Id = 39,
+                            Name = "ChangeUserGroupPartitions"
+                        },
+                        new
+                        {
+                            Id = 40,
+                            Name = "ChangeServiceAccountPartitions"
+                        },
+                        new
+                        {
+                            Id = 41,
+                            Name = "ChangeUserGroupParent"
+                        },
+                        new
+                        {
+                            Id = 42,
+                            Name = "ChangePartitionParent"
+                        },
+                        new
+                        {
+                            Id = 43,
+                            Name = "RotateServiceAccountSecret"
+                        },
+                        new
+                        {
+                            Id = 44,
+                            Name = "ChangeArticlePartitions"
+                        },
+                        new
+                        {
+                            Id = 45,
+                            Name = "ChangeItemPartitions"
+                        });
+                });
+
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Actors.ActorType>", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("smallint")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_actor_types");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_actor_types_name");
+
+                    b.ToTable("actor_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "User"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Service"
+                        });
+                });
+
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Articles.ArticleTrackingMode>", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("smallint")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_article_tracking_modes");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_article_tracking_modes_name");
+
+                    b.ToTable("article_tracking_modes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "Entity"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Event"
+                        });
+                });
+
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Articles.ArticleType>", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("smallint")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_article_types");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_article_types_name");
+
+                    b.ToTable("article_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "Default"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Variation"
+                        },
+                        new
+                        {
+                            Id = (byte)3,
+                            Name = "Pack"
+                        },
+                        new
+                        {
+                            Id = (byte)4,
+                            Name = "Kit"
+                        },
+                        new
+                        {
+                            Id = (byte)5,
+                            Name = "Container"
+                        });
+                });
+
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.EntityType>", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_entity_types");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_entity_types_name");
+
+                    b.ToTable("entity_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 0,
+                            Name = "Article"
+                        },
+                        new
+                        {
+                            Id = 1,
+                            Name = "Item"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Actor"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "UserGroup"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Partition"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "SupplyOrder"
+                        });
+                });
+
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.SupplyOrders.SupplyOrderStatus>", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("smallint")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_supply_order_statuses");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_supply_order_statuses_name");
+
+                    b.ToTable("supply_order_statuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "Draft"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Placed"
+                        },
+                        new
+                        {
+                            Id = (byte)3,
+                            Name = "PartiallyReceived"
+                        },
+                        new
+                        {
+                            Id = (byte)4,
+                            Name = "Received"
+                        },
+                        new
+                        {
+                            Id = (byte)5,
+                            Name = "Closed"
+                        },
+                        new
+                        {
+                            Id = (byte)6,
+                            Name = "Cancelled"
+                        });
+                });
+
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Events.EventType>", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_event_types");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_event_types_name");
+
+                    b.ToTable("event_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 0,
+                            Name = "Item"
+                        });
+                });
+
+            modelBuilder.Entity("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Events.ItemEventType>", b =>
+                {
+                    b.Property<short>("Id")
+                        .HasColumnType("smallint")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_item_event_types");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_item_event_types_name");
+
+                    b.ToTable("item_event_types", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            Name = "Moviment"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Name = "Creation"
+                        },
+                        new
+                        {
+                            Id = (short)3,
+                            Name = "Deletion"
+                        });
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.Actors.Actor", b =>
                 {
                     b.HasBaseType("Fargo.Core.Entities.Entity");
@@ -882,16 +1572,14 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("nameid");
 
-                    b.PrimitiveCollection<string>("Permissions")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("permissions");
-
                     b.Property<uint>("xmin")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("xid")
                         .HasColumnName("xmin");
+
+                    b.HasIndex("ActorType")
+                        .HasDatabaseName("ix_actors_actor_type");
 
                     b.HasIndex("Nameid")
                         .IsUnique()
@@ -941,6 +1629,12 @@ namespace Fargo.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("xid")
                         .HasColumnName("xmin");
+
+                    b.HasIndex("ArticleType")
+                        .HasDatabaseName("ix_articles_article_type");
+
+                    b.HasIndex("TrackingMode")
+                        .HasDatabaseName("ix_articles_tracking_mode");
 
                     b.ToTable("articles", (string)null);
                 });
@@ -1079,11 +1773,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("parent_user_group_guid");
 
-                    b.PrimitiveCollection<string>("Permissions")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("permissions");
-
                     b.Property<uint>("xmin")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -1115,6 +1804,9 @@ namespace Fargo.Infrastructure.Migrations
                     b.HasIndex("ArticleGuid")
                         .HasDatabaseName("ix_item_events_article_guid");
 
+                    b.HasIndex("ItemEventType")
+                        .HasDatabaseName("ix_item_events_item_event_type");
+
                     b.ToTable("item_events", (string)null);
                 });
 
@@ -1136,6 +1828,20 @@ namespace Fargo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_audit_logs_actors_actor_guid");
+
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Actors.ActorType>", null)
+                        .WithMany()
+                        .HasForeignKey("ActorType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_audit_logs_actor_types_actor_type");
+
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Audits.AuditLogType>", null)
+                        .WithMany()
+                        .HasForeignKey("AuditLogType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_audit_logs_audit_log_types_audit_log_type");
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.ActorPartition", b =>
@@ -1178,6 +1884,25 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Actor");
 
                     b.Navigation("Partition");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Entities.Actors.ActorPermission", b =>
+                {
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Actors.ActionType>", null)
+                        .WithMany()
+                        .HasForeignKey("ActionType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_actor_permissions_action_types_action_type");
+
+                    b.HasOne("Fargo.Core.Entities.Actors.Actor", "Actor")
+                        .WithMany("PermissionGrants")
+                        .HasForeignKey("ActorGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_actor_permissions_actors_actor_guid");
+
+                    b.Navigation("Actor");
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.ServiceAccounts.ServiceAccount", b =>
@@ -1378,6 +2103,16 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("VariationArticle");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.Entity", b =>
+                {
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.EntityType>", null)
+                        .WithMany()
+                        .HasForeignKey("EntityType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_entities_entity_types_entity_type");
+                });
+
             modelBuilder.Entity("Fargo.Core.Entities.Items.ItemMoviment", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Items.Item", null)
@@ -1499,6 +2234,35 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("UserGroup");
                 });
 
+            modelBuilder.Entity("Fargo.Core.Entities.UserGroups.UserGroupPermission", b =>
+                {
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Actors.ActionType>", null)
+                        .WithMany()
+                        .HasForeignKey("ActionType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_group_permissions_action_types_action_type");
+
+                    b.HasOne("Fargo.Core.Entities.UserGroups.UserGroup", "UserGroup")
+                        .WithMany("PermissionGrants")
+                        .HasForeignKey("UserGroupGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_group_permissions_user_groups_user_group_guid");
+
+                    b.Navigation("UserGroup");
+                });
+
+            modelBuilder.Entity("Fargo.Core.Events.Event", b =>
+                {
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Events.EventType>", null)
+                        .WithMany()
+                        .HasForeignKey("EventType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_events_event_types_event_type");
+                });
+
             modelBuilder.Entity("Fargo.Core.Events.ItemLifecycleEvent", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Items.Item", "ItemContainer")
@@ -1575,6 +2339,13 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.Actor", b =>
                 {
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Actors.ActorType>", null)
+                        .WithMany()
+                        .HasForeignKey("ActorType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_actors_actor_types_actor_type");
+
                     b.HasOne("Fargo.Core.Entities.Entity", null)
                         .WithOne()
                         .HasForeignKey("Fargo.Core.Entities.Actors.Actor", "Guid")
@@ -1585,12 +2356,26 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("Fargo.Core.Entities.Articles.Article", b =>
                 {
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Articles.ArticleType>", null)
+                        .WithMany()
+                        .HasForeignKey("ArticleType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_articles_article_types_article_type");
+
                     b.HasOne("Fargo.Core.Entities.Entity", null)
                         .WithOne()
                         .HasForeignKey("Fargo.Core.Entities.Articles.Article", "Guid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_articles_entities_guid");
+
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.Articles.ArticleTrackingMode>", null)
+                        .WithMany()
+                        .HasForeignKey("TrackingMode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_articles_article_tracking_modes_tracking_mode");
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Items.Item", b =>
@@ -1653,6 +2438,13 @@ namespace Fargo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_supply_orders_items_receiving_container_guid");
 
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Entities.SupplyOrders.SupplyOrderStatus>", null)
+                        .WithMany()
+                        .HasForeignKey("Status")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_supply_orders_supply_order_statuses_status");
+
                     b.Navigation("ReceivingContainer");
                 });
 
@@ -1690,6 +2482,13 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_item_events_events_guid");
 
+                    b.HasOne("Fargo.Infrastructure.Persistence.EnumLookup<Fargo.Core.Events.ItemEventType>", null)
+                        .WithMany()
+                        .HasForeignKey("ItemEventType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_events_item_event_types_item_event_type");
+
                     b.Navigation("Article");
                 });
 
@@ -1711,6 +2510,8 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("PartitionAccesses");
 
                     b.Navigation("Partitions");
+
+                    b.Navigation("PermissionGrants");
 
                     b.Navigation("ServiceAccount");
 
@@ -1755,6 +2556,8 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("PartitionAccesses");
 
                     b.Navigation("Partitions");
+
+                    b.Navigation("PermissionGrants");
                 });
 
             modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>

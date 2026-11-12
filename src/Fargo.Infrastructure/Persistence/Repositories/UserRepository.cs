@@ -102,6 +102,7 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
     private static IQueryable<User> IncludeAggregate(IQueryable<User> query)
         => query
         .Include(user => user.UserGroupMemberships)
+        .Include(user => user.Actor).ThenInclude(actor => actor.PermissionGrants)
         .Include(user => user.Actor).ThenInclude(actor => actor.PartitionAccesses)
         .Include(user => user.Actor).ThenInclude(actor => actor.Partitions)
         .Include(user => user.Authentication)
@@ -199,7 +200,6 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             -- Groups directly assigned to the user
             SELECT
                 ug.guid,
-                ug.permissions,
                 ug.parent_user_group_guid
             FROM user_groups ug
             INNER JOIN user_user_groups uug
@@ -215,7 +215,6 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
             -- Parent groups
             SELECT
                 parent.guid,
-                parent.permissions,
                 parent.parent_user_group_guid
             FROM user_groups parent
             INNER JOIN user_group_hierarchy child
@@ -225,16 +224,20 @@ public sealed class UserRepository(FargoDbContext context) : IUserRepository, IU
         all_permissions AS
         (
             -- Direct user permissions
-            SELECT jsonb_array_elements_text(a.permissions)::integer AS permission
-            FROM actors a
+            SELECT ap.action_type AS permission
+            FROM actor_permissions ap
+            INNER JOIN actors a
+                ON a.guid = ap.actor_guid
             WHERE a.guid = {userGuid}
               AND a.is_active = true
 
             UNION ALL
 
             -- Permissions inherited from groups
-            SELECT jsonb_array_elements_text(ugh.permissions)::integer AS permission
+            SELECT ugp.action_type AS permission
             FROM user_group_hierarchy ugh
+            INNER JOIN user_group_permissions ugp
+                ON ugp.user_group_guid = ugh.guid
         )
         SELECT DISTINCT permission
         FROM all_permissions;

@@ -44,9 +44,14 @@ public class Actor : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
     /// <summary>
     /// Permissions granted directly to the actor; those inherited from user groups are not included.
     /// </summary>
-    public IReadOnlyCollection<ActionType> Permissions => permissions;
+    public IReadOnlyCollection<ActionType> Permissions => [.. permissionGrants.Select(grant => grant.ActionType)];
 
-    private readonly List<ActionType> permissions = [];
+    /// <summary>
+    /// The persisted rows behind <see cref="Permissions"/>.
+    /// </summary>
+    public IReadOnlyCollection<ActorPermission> PermissionGrants => permissionGrants;
+
+    private readonly List<ActorPermission> permissionGrants = [];
 
     /// <summary>
     /// Partitions the actor has been granted direct access to. Access inherited through the
@@ -140,9 +145,9 @@ public class Actor : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
     /// </summary>
     public void AddPermission(ActionType action)
     {
-        if (!permissions.Contains(action))
+        if (permissionGrants.All(grant => grant.ActionType != action))
         {
-            permissions.Add(action);
+            permissionGrants.Add(new ActorPermission(this, action));
         }
     }
 
@@ -156,7 +161,7 @@ public class Actor : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
                 FargoErrorType.InvalidOperation);
         }
 
-        permissions.RemoveAll(x => x == action);
+        permissionGrants.RemoveAll(grant => grant.ActionType == action);
     }
 
     /// <summary>
