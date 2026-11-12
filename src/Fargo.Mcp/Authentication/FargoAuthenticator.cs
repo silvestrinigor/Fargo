@@ -1,5 +1,5 @@
 using Fargo.ClientHttp;
-using Fargo.ClientHttp.Authentication;
+using Fargo.ClientAuthentication;
 using Fargo.ClientHttp.ErrorHandling;
 using Fargo.ClientHttp.Models;
 using Fargo.Mcp.Configuration;
@@ -32,16 +32,19 @@ public sealed class FargoAuthenticator
 
     private readonly FargoApiClient _client;
     private readonly ITokenStore _tokenStore;
+    private readonly FargoTokenRefresher _refresher;
     private readonly FargoMcpOptions _options;
     private readonly SemaphoreSlim _gate = new(1, 1);
 
     public FargoAuthenticator(
         FargoApiClient client,
         ITokenStore tokenStore,
+        FargoTokenRefresher refresher,
         FargoMcpOptions options)
     {
         _client = client;
         _tokenStore = tokenStore;
+        _refresher = refresher;
         _options = options;
     }
 
@@ -105,7 +108,7 @@ public sealed class FargoAuthenticator
         // login if that fails or there is nothing to refresh.
         if (tokens is not null && !string.IsNullOrEmpty(tokens.RefreshToken))
         {
-            var refreshed = await TryRefreshAsync(tokens.RefreshToken, cancellationToken);
+            var refreshed = await TryRefreshAsync(cancellationToken);
 
             if (refreshed)
             {
@@ -116,22 +119,11 @@ public sealed class FargoAuthenticator
         await LoginAsync(cancellationToken);
     }
 
-    private async Task<bool> TryRefreshAsync(string refreshToken, CancellationToken cancellationToken)
+    private async Task<bool> TryRefreshAsync(CancellationToken cancellationToken)
     {
-        IdentityAuthResultDto? result;
-
-        try
-        {
-            result = await _client.V1.Identity.Refresh.PostAsync(
-                new IdentityRefreshDto { RefreshToken = refreshToken },
-                cancellationToken: cancellationToken);
-        }
-        catch (FargoApiException)
-        {
-            return false;
-        }
-
-        return await StoreResultAsync(result, cancellationToken);
+        // The shared refresher sends the stored refresh token; the store was
+        // just read under this authenticator's lock, so it is the same token.
+        return await _refresher.RefreshAsync(cancellationToken);
     }
 
     private async Task LoginAsync(CancellationToken cancellationToken)

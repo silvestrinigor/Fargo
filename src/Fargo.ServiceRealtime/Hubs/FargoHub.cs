@@ -1,5 +1,6 @@
 using Fargo.Core.Entities.Actors;
 using Fargo.Infrastructure.Security;
+using Fargo.RealtimeContracts;
 using Fargo.ServiceRealtime.Connections;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -37,9 +38,9 @@ public sealed class FargoHub(
 ) : Hub<IFargoRealtimeClient>
 {
     /// <summary>
-    /// The path the hub is mapped at.
+    /// The path the hub is mapped at (<see cref="FargoRealtimeHub.Path"/>).
     /// </summary>
-    public const string Path = "/hubs/fargo";
+    public const string Path = FargoRealtimeHub.Path;
 
     /// <inheritdoc />
     public override async Task OnConnectedAsync()

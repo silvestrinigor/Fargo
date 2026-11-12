@@ -1,3 +1,4 @@
+using Fargo.RealtimeContracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Fargo.ServiceRealtime.Authentication;
@@ -10,7 +11,7 @@ public static class HubAccessTokenExtensions
     /// <summary>
     /// The query parameter SignalR clients use for the access token.
     /// </summary>
-    public const string AccessTokenQueryParameter = "access_token";
+    public const string AccessTokenQueryParameter = FargoRealtimeHub.AccessTokenQueryParameter;
 
     /// <summary>
     /// The path prefix of every hub.

@@ -98,24 +98,72 @@ Access is kept current in three ways:
 
 `changeType` is `created`, `edited` or `deleted`.
 
-A .NET client:
+### .NET client (`Fargo.ClientRealtime`)
+
+`Fargo.ClientRealtime` wraps the SignalR connection. It depends on
+`Fargo.ClientAuthentication` (token storage and refresh) and
+`Fargo.RealtimeContracts` (the payload above, shared with the server), but not
+on the Kiota HTTP client.
 
 ```csharp
-var connection = new HubConnectionBuilder()
-    .WithUrl("https://realtime.example/hubs/fargo", options =>
-        options.AccessTokenProvider = () => Task.FromResult<string?>(accessToken))
-    .WithAutomaticReconnect()
-    .Build();
+services.AddFargoRealtimeClient(
+    apiBaseAddress: new Uri("https://api.example"),
+    realtimeBaseAddress: new Uri("https://realtime.example"));
 
-connection.On<EntityChanged>("EntityChanged", change =>
+// Optional: refresh the stored token shortly before it expires. Without this,
+// the stored token is sent as is and refreshing is up to you.
+services.UseFargoRefreshingAccessTokens();
+
+var realtime = provider.GetRequiredService<FargoRealtimeClient>();
+
+realtime.EntityChanged += async change =>
 {
-    // Re-fetch change.Guid through the REST API.
-});
+    // Re-read change.Guid through the REST API.
+};
 
-connection.Reconnected += _ => RefreshEverythingAsync();
+realtime.Resynchronized += async () =>
+{
+    // Events were missed while disconnected: re-read what is on screen.
+};
 
-await connection.StartAsync();
+await realtime.StartAsync();
 ```
+
+What the client does for you:
+
+| Concern | Behaviour |
+|---|---|
+| Tokens | Every connect and reconnect asks the registered `IFargoAccessTokenSource` for a token. |
+| Connection loss | After a successful `StartAsync`, it reconnects without limit (0 s, then 1, 2, 4… up to `MaxReconnectDelay`), also when the server closes the connection, until `StopAsync`. |
+| Missed events | Raises `Resynchronized` after every reconnect. |
+| Duplicates | Drops an `eventId` seen in the last `DuplicateWindow` (default 1000) events. |
+| Handler errors | Logged; the connection and the other handlers are unaffected. |
+
+A failure of the first `StartAsync` is thrown to the caller, who decides
+whether to retry.
+
+#### Tokens are your decision
+
+Nothing refreshes tokens automatically, neither the HTTP client nor the
+real-time client:
+
+- **Default (`StoredAccessTokenSource`).** Sends the stored token as is. The
+  server closes the connection when that token expires, so refresh it yourself
+  (`FargoTokenRefresher.EnsureValidAsync`) before it does.
+- **`UseFargoRefreshingAccessTokens()`.** Refreshes shortly before expiry
+  whenever a token is needed. This applies to the HTTP client too, because both
+  share the same source.
+- **Your own `IFargoAccessTokenSource`.** For example, a service account that
+  obtains tokens with client credentials, or a fixed token.
+
+The API revokes a refresh token when it is used, so two refreshes with the same
+token would log the session out. `FargoTokenRefresher` lets only one refresh run
+at a time per token store, and a caller that waited reuses the result. Share one
+token store, and its refresher, between the HTTP and real-time clients of a
+session (dependency injection does this).
+
+Browser clients use the JavaScript SignalR client directly, with the same hub
+path, method name and payload.
 
 ### What clients must handle
 
@@ -160,11 +208,13 @@ connection strings.
 | Partitions in the message | `Fargo.Infrastructure/Outbox/OutboxSaveChangesInterceptor.cs` |
 | Broker consumer | `Fargo.Infrastructure/Messaging/RabbitMqArticleEventConsumer.cs` |
 | Hub, routing, access refresh | `Fargo.ServiceRealtime` (`Hubs/`, `Notifications/`, `Connections/`, `Services/`) |
+| Hub wire contract | `Fargo.RealtimeContracts` |
+| .NET client | `Fargo.ClientRealtime` |
+| Token store, refresh, token sources | `Fargo.ClientAuthentication` |
+| End-to-end check | `tests/Fargo.WorkflowTest/RealtimeScenario.cs` (needs the full stack and `Workflow:RealtimeServer`) |
 
 ## Not done yet
 
-- **A client helper package** (for example `Fargo.ClientRealtime`), with
-  reconnect and typed events.
 - **Events for other entities** (items, partitions, and so on). Each needs its
   own events in the outbox interceptor.
 - **CORS.** Browser clients on another origin need it configured, or a reverse

@@ -1,0 +1,76 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+namespace Fargo.ClientAuthentication;
+
+/// <summary>
+/// Registers the shared Fargo client authentication services.
+/// </summary>
+public static class ClientAuthenticationServiceCollectionExtensions
+{
+    /// <summary>
+    /// The name of the <see cref="HttpClient"/> used to refresh tokens.
+    /// </summary>
+    public const string HttpClientName = "Fargo.ClientAuthentication";
+
+    extension(IServiceCollection services)
+    {
+        /// <summary>
+        /// Registers the token store, the <see cref="FargoTokenRefresher"/> and
+        /// the default <see cref="IFargoAccessTokenSource"/>
+        /// (<see cref="StoredAccessTokenSource"/>, which never refreshes).
+        /// </summary>
+        /// <remarks>
+        /// Existing registrations of <see cref="ITokenStore"/>,
+        /// <see cref="FargoTokenRefresher"/> and
+        /// <see cref="IFargoAccessTokenSource"/> are kept, so calling this from
+        /// several client libraries is safe and an application may register its
+        /// own store before or after.
+        /// </remarks>
+        /// <param name="apiBaseAddress">The base address of the Fargo API.</param>
+        public IServiceCollection AddFargoClientAuthentication(Uri apiBaseAddress)
+        {
+            ArgumentNullException.ThrowIfNull(apiBaseAddress);
+
+            return services.AddFargoClientAuthentication(_ => apiBaseAddress);
+        }
+
+        /// <summary>
+        /// Registers the shared client authentication services, reading the API
+        /// base address when the refresh client is created, so it can follow a
+        /// runtime override (for example a <c>--server</c> option).
+        /// </summary>
+        /// <param name="apiBaseAddress">Returns the base address of the Fargo API.</param>
+        public IServiceCollection AddFargoClientAuthentication(Func<IServiceProvider, Uri> apiBaseAddress)
+        {
+            ArgumentNullException.ThrowIfNull(apiBaseAddress);
+
+            services.AddHttpClient(HttpClientName, (sp, client) => client.BaseAddress = apiBaseAddress(sp));
+
+            services.TryAddSingleton<ITokenStore, TokenStore>();
+
+            // One refresher per token store: its lock is what keeps two callers
+            // from sending the same single-use refresh token.
+            services.TryAddSingleton(sp => new FargoTokenRefresher(
+                () => sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientName),
+                sp.GetRequiredService<ITokenStore>()));
+
+            services.TryAddSingleton<IFargoAccessTokenSource, StoredAccessTokenSource>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// Makes clients refresh the stored tokens shortly before they expire,
+        /// by replacing the <see cref="IFargoAccessTokenSource"/> with
+        /// <see cref="RefreshingAccessTokenSource"/>. Call after
+        /// <c>AddFargoClientAuthentication</c>.
+        /// </summary>
+        public IServiceCollection UseFargoRefreshingAccessTokens()
+        {
+            services.Replace(ServiceDescriptor.Singleton<IFargoAccessTokenSource, RefreshingAccessTokenSource>());
+
+            return services;
+        }
+    }
+}

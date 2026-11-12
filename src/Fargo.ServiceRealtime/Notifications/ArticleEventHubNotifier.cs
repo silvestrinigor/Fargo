@@ -1,4 +1,5 @@
 using Fargo.Application.IntegrationEvents;
+using Fargo.RealtimeContracts;
 using Fargo.ServiceRealtime.Connections;
 using Fargo.ServiceRealtime.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -28,7 +29,7 @@ public sealed class ArticleEventHubNotifier(
     {
         ArgumentNullException.ThrowIfNull(message);
 
-        if (EntityChangedNotification.FromArticleEvent(message) is not { } notification)
+        if (ArticleEventNotifications.ToNotification(message) is not { } notification)
         {
             logger.UnknownEventType(message.EventId, message.EventType);
 

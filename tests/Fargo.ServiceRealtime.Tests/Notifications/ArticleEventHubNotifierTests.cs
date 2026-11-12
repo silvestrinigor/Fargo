@@ -1,4 +1,5 @@
 using Fargo.Application.IntegrationEvents;
+using Fargo.RealtimeContracts;
 using Fargo.ServiceRealtime.Connections;
 using Fargo.ServiceRealtime.Hubs;
 using Fargo.ServiceRealtime.Notifications;
@@ -45,7 +46,8 @@ public class ArticleEventHubNotifierTests
 
         Assert.Equal(["a"], targetedIds);
         await targetedClients.Received(1).EntityChanged(Arg.Is<EntityChangedNotification>(n =>
-            n.EntityType == EntityChangedNotification.ArticleEntityType &&
+            n != null &&
+            n.EntityType == EntityChangedNotification.EntityTypes.Article &&
             n.Guid == message.ArticleGuid &&
             n.ChangeType == EntityChangedNotification.ChangeTypes.Edited &&
             n.EventId == message.EventId &&
@@ -87,9 +89,9 @@ public class ArticleEventHubNotifierTests
     [InlineData(ArticleEventTypes.Created, EntityChangedNotification.ChangeTypes.Created)]
     [InlineData(ArticleEventTypes.Edited, EntityChangedNotification.ChangeTypes.Edited)]
     [InlineData(ArticleEventTypes.Deleted, EntityChangedNotification.ChangeTypes.Deleted)]
-    public void FromArticleEvent_ShouldMapTheChangeType(string eventType, string expected)
+    public void ToNotification_ShouldMapTheChangeType(string eventType, string expected)
     {
-        var notification = EntityChangedNotification.FromArticleEvent(NewEvent(eventType, PartitionA));
+        var notification = ArticleEventNotifications.ToNotification(NewEvent(eventType, PartitionA));
 
         Assert.NotNull(notification);
         Assert.Equal(expected, notification.ChangeType);

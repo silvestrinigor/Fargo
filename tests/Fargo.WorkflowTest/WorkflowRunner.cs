@@ -1,5 +1,5 @@
 using Fargo.ClientHttp;
-using Fargo.ClientHttp.Authentication;
+using Fargo.ClientAuthentication;
 using Fargo.ClientHttp.Models;
 using Microsoft.Extensions.Options;
 
@@ -114,6 +114,17 @@ public sealed class WorkflowRunner
             var clientBuilder = new FargoClientBuilder(_options.Server);
             var largeTree = new LargeTreeScenario(_client, clientBuilder, _options, _runTag, check);
             await largeTree.RunAsync(cancellationToken);
+        }
+
+        // --- Real-time push scenario ---
+        if (_options.RunRealtimeScenario && _options.RealtimeServer is { } realtimeServer)
+        {
+            var realtime = new RealtimeScenario(_client, _tokenStore, _options, _runTag, check);
+            await realtime.RunAsync(realtimeServer, cancellationToken);
+        }
+        else if (_options.RunRealtimeScenario)
+        {
+            Log.Info("Real-time scenario skipped: Workflow:RealtimeServer is not set.");
         }
 
         var totalFailures = inventoryFailures + check.Failures;

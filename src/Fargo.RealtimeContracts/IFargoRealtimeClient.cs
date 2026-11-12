@@ -1,4 +1,4 @@
-namespace Fargo.ServiceRealtime.Hubs;
+namespace Fargo.RealtimeContracts;
 
 /// <summary>
 /// The methods the server calls on connected clients.
@@ -6,8 +6,8 @@ namespace Fargo.ServiceRealtime.Hubs;
 public interface IFargoRealtimeClient
 {
     /// <summary>
-    /// Sent when an entity the client's actor can read changes. The client
-    /// handles it as <c>EntityChanged</c>.
+    /// Sent when an entity the client's actor can read changes. Its hub method
+    /// name is <see cref="FargoRealtimeHub.EntityChangedMethod"/>.
     /// </summary>
     /// <param name="notification">The change.</param>
     Task EntityChanged(EntityChangedNotification notification);

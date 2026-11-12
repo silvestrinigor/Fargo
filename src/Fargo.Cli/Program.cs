@@ -3,7 +3,7 @@ using Fargo.Cli.Commands;
 using Fargo.Cli.Configurations;
 using Fargo.Cli.ErrorHandling;
 using Fargo.ClientHttp;
-using Fargo.ClientHttp.Authentication;
+using Fargo.ClientAuthentication;
 using Fargo.ClientHttp.Extensions;
 using Fargo.ClientHttp.Factories;
 using Fargo.ClientHttp.Models;
@@ -144,12 +144,11 @@ else if (!skipAuthentication && !IsIdentityCommand(parseResult))
     // For any non-identity command, refresh the stored token up front if it has
     // expired, so the request carries a valid access token. The identity
     // commands manage authentication themselves and are skipped.
-    var client = serviceProvider.GetRequiredService<FargoApiClient>();
-    var tokenStore = serviceProvider.GetRequiredService<ITokenStore>();
+    var refresher = serviceProvider.GetRequiredService<FargoTokenRefresher>();
 
     try
     {
-        await TokenRefresher.EnsureValidAsync(client, tokenStore, startupCancellation.Token);
+        await refresher.EnsureValidAsync(startupCancellation.Token);
     }
     catch (OperationCanceledException)
     {

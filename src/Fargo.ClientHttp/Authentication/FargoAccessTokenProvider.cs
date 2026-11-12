@@ -1,14 +1,23 @@
+using Fargo.ClientAuthentication;
 using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace Fargo.ClientHttp.Authentication;
 
+/// <summary>
+/// Supplies Kiota requests with the access token from the registered
+/// <see cref="IFargoAccessTokenSource"/>.
+/// </summary>
+/// <remarks>
+/// With the default source the stored token is sent as is; the application
+/// decides when to refresh (see <see cref="FargoTokenRefresher"/>).
+/// </remarks>
 public sealed class FargoAccessTokenProvider : IAccessTokenProvider
 {
-    private readonly ITokenStore _tokenStore;
+    private readonly IFargoAccessTokenSource _tokenSource;
 
-    public FargoAccessTokenProvider(ITokenStore tokenStore)
+    public FargoAccessTokenProvider(IFargoAccessTokenSource tokenSource)
     {
-        _tokenStore = tokenStore;
+        _tokenSource = tokenSource;
     }
 
     public async Task<string> GetAuthorizationTokenAsync(
@@ -16,16 +25,8 @@ public sealed class FargoAccessTokenProvider : IAccessTokenProvider
         Dictionary<string, object>? additionalAuthenticationContext = null,
         CancellationToken cancellationToken = default)
     {
-        var tokens = await _tokenStore.GetAsync(cancellationToken);
-
-        if (tokens is null)
-        {
-#pragma warning disable CS8603 // Possible null reference return.
-            return null;
-#pragma warning restore CS8603 // Possible null reference return.
-        }
-
-        return tokens.AccessToken;
+        // Kiota sends no Authorization header for an empty token.
+        return await _tokenSource.GetAccessTokenAsync(cancellationToken) ?? string.Empty;
     }
 
     public AllowedHostsValidator AllowedHostsValidator { get; } = new();

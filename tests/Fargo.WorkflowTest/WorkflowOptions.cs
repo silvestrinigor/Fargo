@@ -19,6 +19,20 @@ public sealed class WorkflowOptions
     /// <summary>Base address of the running Fargo HTTP API.</summary>
     public required Uri Server { get; init; }
 
+    /// <summary>
+    /// Base address of the running real-time service. When empty, the
+    /// real-time scenario is skipped.
+    /// </summary>
+    public Uri? RealtimeServer { get; init; }
+
+    /// <summary>
+    /// When true and <see cref="RealtimeServer"/> is set, the workflow runs the
+    /// real-time scenario: it connects users to the hub and verifies that
+    /// article changes are pushed only to users with access to the article's
+    /// partitions.
+    /// </summary>
+    public bool RunRealtimeScenario { get; init; } = true;
+
     /// <summary>Username used to authenticate against the API.</summary>
     public required string Username { get; init; }
 

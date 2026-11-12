@@ -1,3 +1,4 @@
+using Fargo.ClientAuthentication;
 using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.ErrorHandling;
 using Fargo.ClientHttp.Factories;
@@ -14,11 +15,15 @@ public static class DependencyInjectionExtension
 
         services.AddSingleton<ClientConnectionContext>();
 
+        // Token store, refresher and access-token source, shared with the other
+        // Fargo client libraries. The refresher follows the same server override
+        // as the API client.
+        services.AddFargoClientAuthentication(sp =>
+            sp.GetRequiredService<ClientConnectionContext>().BaseAddressOverride ?? baseAddress);
+
         services.AddTransient<ProblemDetailsHandler>();
 
         services.AddSingleton<IAccessTokenProvider, FargoAccessTokenProvider>();
-
-        services.AddSingleton<ITokenStore, TokenStore>();
 
         services.AddSingleton<IAuthenticationProvider>(sp =>
         {
