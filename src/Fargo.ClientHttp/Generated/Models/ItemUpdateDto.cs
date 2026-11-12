@@ -14,8 +14,6 @@ namespace Fargo.ClientHttp.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The parentItemContainerGuid property</summary>
-        public Guid? ParentItemContainerGuid { get; set; }
         /// <summary>The partitionsToAdd property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -32,15 +30,12 @@ namespace Fargo.ClientHttp.Models
 #else
         public List<Guid?> PartitionsToRemove { get; set; }
 #endif
-        /// <summary>The removeFromParentItemContainer property</summary>
-        public bool? RemoveFromParentItemContainer { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ItemUpdateDto"/> and sets the default values.
         /// </summary>
         public ItemUpdateDto()
         {
             AdditionalData = new Dictionary<string, object>();
-            RemoveFromParentItemContainer = false;
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
@@ -60,10 +55,8 @@ namespace Fargo.ClientHttp.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "parentItemContainerGuid", n => { ParentItemContainerGuid = n.GetGuidValue(); } },
                 { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "partitionsToRemove", n => { PartitionsToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "removeFromParentItemContainer", n => { RemoveFromParentItemContainer = n.GetBoolValue(); } },
             };
         }
         /// <summary>
@@ -73,10 +66,8 @@ namespace Fargo.ClientHttp.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteGuidValue("parentItemContainerGuid", ParentItemContainerGuid);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToRemove", PartitionsToRemove);
-            writer.WriteBoolValue("removeFromParentItemContainer", RemoveFromParentItemContainer);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

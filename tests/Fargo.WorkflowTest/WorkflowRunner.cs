@@ -301,9 +301,7 @@ public sealed class WorkflowRunner
         {
             var item = items[i];
 
-            await _client.V1.Items[item.ItemGuid].PatchAsync(
-                new ItemUpdateDto { RemoveFromParentItemContainer = true },
-                cancellationToken: cancellationToken);
+            await _client.V1.Items[item.ItemGuid].Location.DeleteAsync(cancellationToken: cancellationToken);
 
             item.CurrentContainerGuid = null;
             item.MoveCount++;
@@ -314,8 +312,8 @@ public sealed class WorkflowRunner
 
     private async Task MoveIntoAsync(ItemRef item, ContainerRef container, CancellationToken cancellationToken)
     {
-        await _client.V1.Items[item.ItemGuid].PatchAsync(
-            new ItemUpdateDto { ParentItemContainerGuid = container.ItemGuid },
+        await _client.V1.Items[item.ItemGuid].Location.PutAsync(
+            new ItemSetLocationDto { ParentItemContainerGuid = container.ItemGuid },
             cancellationToken: cancellationToken);
 
         item.CurrentContainerGuid = container.ItemGuid;

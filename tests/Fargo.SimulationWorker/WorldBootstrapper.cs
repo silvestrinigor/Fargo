@@ -85,7 +85,7 @@ internal sealed class WorldBootstrapper(
         var entityWriteBundle = new[]
         {
             FargoCodes.CreateArticle, FargoCodes.EditArticle,
-            FargoCodes.CreateItem, FargoCodes.EditItem, FargoCodes.DeleteItem,
+            FargoCodes.CreateItem, FargoCodes.EditItem, FargoCodes.MoveItem, FargoCodes.DeleteItem,
         };
 
         var bundles = new Dictionary<OperatorRole, int[]>
@@ -95,7 +95,7 @@ internal sealed class WorldBootstrapper(
             [OperatorRole.Picker] = entityWriteBundle,
             [OperatorRole.BulkHandler] =
                 [FargoCodes.CreateArticle, FargoCodes.EditArticle, FargoCodes.CreateItem,
-                 FargoCodes.EditItem, FargoCodes.ReadItemEvents],
+                 FargoCodes.EditItem, FargoCodes.MoveItem, FargoCodes.ReadItemEvents],
             [OperatorRole.Auditor] =
                 [FargoCodes.ReadAuditLogs, FargoCodes.ReadItemEvents],
         };

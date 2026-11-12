@@ -86,6 +86,7 @@ public enum ActionType
     ActivateUser = 31,
     ActivateUserGroup = 32,
     ActivateServiceAccount = 33,
+    MoveItem = 34,
 }
 
 /// <summary>

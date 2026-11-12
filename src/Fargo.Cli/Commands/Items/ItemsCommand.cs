@@ -12,6 +12,8 @@ public sealed class ItemsCommand : Command
         Add(new GetItemCommand(client));
         Add(new CreateItemCommand(client));
         Add(new UpdateItemCommand(client));
+        Add(new MoveItemCommand(client));
+        Add(new RemoveItemFromContainerCommand(client));
         Add(new DeleteItemCommand(client));
         Add(new ItemLocationCommand(client));
         Add(new ItemMovimentsCommand(client));

@@ -2,7 +2,6 @@ using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
 using Fargo.Application.Commands.Items;
 using Fargo.Application.Dtos.Items;
-using Fargo.Application.Persistence;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;
@@ -20,12 +19,10 @@ public class ItemUpdateCommandHandlerTests
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IItemRepository itemRepository = Substitute.For<IItemRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
     private ItemUpdateCommandHandler CreateHandler()
         => new(
-            new ItemService(itemRepository),
             ActorTestFactory.Resolver(userRepository),
             itemRepository,
             partitionRepository,
@@ -35,27 +32,25 @@ public class ItemUpdateCommandHandlerTests
         => Item.CreateItem(Article.NewArticle(new Name("Widget")));
 
     [Fact]
-    public async Task HandleAsync_WhenValidPlaceInContainer_ShouldUpdateAndAuditAndSave()
+    public async Task HandleAsync_WhenAddingPartition_ShouldAddPartitionToItem()
     {
-        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.EditItem]);
         var item = NewItem();
         itemRepository.GetByGuidAsync(item.Guid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<Item?>(item));
 
-        var parentContainer = Item.CreateItem(Article.NewArticleContainer(new Name("Box")));
-        itemRepository.GetByGuidAsync(parentContainer.Guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Item?>(parentContainer));
-        itemRepository.GetContainedDescendantGuidsAsync(item.Guid, false, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([]));
+        var global = Partition.CreateGlobalPartition(new Name("global"));
+        var partition = Partition.CreatePartition(new Name("branch"), global);
+        partitionRepository.GetByGuidAsync(partition.Guid, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Partition?>(partition));
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid, [ActionType.EditItem], [FargoCoreWellKnowGuids.GlobalPartitionGuid, partition.Guid]);
 
-        var command = new ItemUpdateCommand(
-            item.Guid, new ItemUpdateDto(ParentItemContainerGuid: parentContainer.Guid));
+        var command = new ItemUpdateCommand(item.Guid, new ItemUpdateDto(PartitionsToAdd: [partition.Guid]));
 
         await CreateHandler().HandleAsync(command);
 
-        Assert.Equal(parentContainer.Guid, item.ParentItemContainerGuid);
+        Assert.Contains(partition.Guid, item.PartitionGuids);
     }
-
     [Fact]
     public async Task HandleAsync_WhenActorNotFound_ShouldThrow()
     {
@@ -97,31 +92,5 @@ public class ItemUpdateCommandHandlerTests
 
         await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
             () => CreateHandler().HandleAsync(new ItemUpdateCommand(item.Guid, new ItemUpdateDto())));
-    }
-
-    [Fact]
-    public async Task HandleAsync_WhenParentContainerWouldCreateCircularHierarchy_ShouldThrowDomainException()
-    {
-        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.EditItem]);
-
-        var item = Item.CreateItem(Article.NewArticleContainer(new Name("Crate")));
-        itemRepository.GetByGuidAsync(item.Guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Item?>(item));
-
-        var parentContainer = Item.CreateItem(Article.NewArticleContainer(new Name("Box")));
-        itemRepository.GetByGuidAsync(parentContainer.Guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Item?>(parentContainer));
-
-        // Parent appears among the item's descendants -> circular assignment.
-        itemRepository.GetContainedDescendantGuidsAsync(item.Guid, false, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([parentContainer.Guid]));
-
-        var command = new ItemUpdateCommand(
-            item.Guid, new ItemUpdateDto(ParentItemContainerGuid: parentContainer.Guid));
-
-        await Assert.ThrowsAsync<FargoCoreException>(
-            () => CreateHandler().HandleAsync(command));
-
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

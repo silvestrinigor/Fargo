@@ -26,6 +26,7 @@ internal static class FargoCodes
     public const int CreateItem = 4;
     public const int DeleteItem = 5;
     public const int EditItem = 6;
+    public const int MoveItem = 34;
     public const int ReadAuditLogs = 18;
     public const int ReadItemEvents = 19;
 }

@@ -108,13 +108,11 @@ public static class ItemTools
     }
 
     [McpServerTool(Name = "fargo_items_update")]
-    [Description("Update an existing item: move it to (or out of) a parent container and adjust its partitions. Only the supplied changes are applied.")]
+    [Description("Update an existing item's partitions. Only the supplied changes are applied. To move the item, use the move and remove-from-container tools.")]
     public static async Task<string> UpdateItemAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
         [Description("The GUID of the item to update.")] Guid itemGuid,
-        [Description("The GUID of the parent item container to move this item into. Leave null to keep the current container.")] Guid? parentItemContainerGuid = null,
-        [Description("When true, removes the item from its current parent container. Takes precedence over parentItemContainerGuid.")] bool? removeFromParentItemContainer = null,
         [Description("The GUIDs of the partitions to add the item to.")] Guid[]? partitionsToAdd = null,
         [Description("The GUIDs of the partitions to remove the item from.")] Guid[]? partitionsToRemove = null,
         CancellationToken cancellationToken = default)
@@ -123,8 +121,6 @@ public static class ItemTools
 
         var body = new ItemUpdateDto
         {
-            ParentItemContainerGuid = parentItemContainerGuid,
-            RemoveFromParentItemContainer = removeFromParentItemContainer,
             PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList(),
             PartitionsToRemove = partitionsToRemove?.Select(g => (Guid?)g).ToList()
         };
@@ -134,6 +130,38 @@ public static class ItemTools
         return $"Item '{itemGuid}' updated.";
     }
 
+    [McpServerTool(Name = "fargo_items_move")]
+    [Description("Place an item inside a container, recording a movement. Requires the MoveItem permission, which is separate from the permission to update. For event-tracked articles use the item event tools instead.")]
+    public static async Task<string> MoveItemAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item to move.")] Guid itemGuid,
+        [Description("The GUID of the destination container item.")] Guid parentItemContainerGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Items[itemGuid].Location.PutAsync(
+            new ItemSetLocationDto { ParentItemContainerGuid = parentItemContainerGuid },
+            cancellationToken: cancellationToken);
+
+        return $"Item '{itemGuid}' moved into container '{parentItemContainerGuid}'.";
+    }
+
+    [McpServerTool(Name = "fargo_items_remove_from_container")]
+    [Description("Remove an item from its current container, recording a movement with no destination. Requires the MoveItem permission. An item that is not in a container is left as it is.")]
+    public static async Task<string> RemoveItemFromContainerAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item to remove from its container.")] Guid itemGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Items[itemGuid].Location.DeleteAsync(cancellationToken: cancellationToken);
+
+        return $"Item '{itemGuid}' removed from its container.";
+    }
     [McpServerTool(Name = "fargo_items_get_location")]
     [Description("Get the location of an item: the chain of parent container items from the item up to its root container. When 'at' is supplied, the location is reconstructed from the item's containment history as it was at that instant.")]
     public static async Task<IReadOnlyList<ItemSummary>> GetItemLocationAsync(

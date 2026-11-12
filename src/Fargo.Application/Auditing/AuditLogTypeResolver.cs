@@ -27,6 +27,8 @@ public static class AuditLogTypeResolver
         // Items
         [typeof(ItemCreateCommand)] = AuditLogType.EntityCreated,
         [typeof(ItemUpdateCommand)] = AuditLogType.EntityUpdated,
+        [typeof(ItemSetLocationCommand)] = AuditLogType.EntityUpdated,
+        [typeof(ItemRemoveFromContainerCommand)] = AuditLogType.EntityUpdated,
         [typeof(ItemDeleteCommand)] = AuditLogType.EntityDeleted,
         [typeof(ItemEventCreateCommand)] = AuditLogType.ItemEventRecorded,
 

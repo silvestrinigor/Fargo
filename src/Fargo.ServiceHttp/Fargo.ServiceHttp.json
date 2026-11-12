@@ -337,8 +337,8 @@
         "tags": [
           "Items"
         ],
-        "summary": "Replaces an existing item",
-        "description": "Replaces mutable item state including partitions and parent container.",
+        "summary": "Updates an existing item",
+        "description": "Updates mutable item state: partition memberships. Use the location endpoint to move the item.",
         "operationId": "UpdateItem",
         "parameters": [
           {
@@ -432,6 +432,70 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Places an item inside a container",
+        "description": "Sets the parent container of the item, recording a movement. Placing an item in the container it is already in does nothing. Requires the MoveItem permission, which is separate from the edit permission.",
+        "operationId": "SetItemLocation",
+        "parameters": [
+          {
+            "name": "itemGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemSetLocationDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Removes an item from its container",
+        "description": "Clears the parent container of the item, recording a movement with no destination. An item that is not in a container is left as it is. Requires the MoveItem permission.",
+        "operationId": "RemoveItemFromContainer",
+        "parameters": [
+          {
+            "name": "itemGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
           },
           "404": {
             "description": "Not Found"
@@ -3346,20 +3410,21 @@
           }
         }
       },
-      "ItemUpdateDto": {
+      "ItemSetLocationDto": {
+        "required": [
+          "parentItemContainerGuid"
+        ],
         "type": "object",
         "properties": {
           "parentItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
+            "type": "string",
             "format": "uuid"
-          },
-          "removeFromParentItemContainer": {
-            "type": "boolean",
-            "default": false
-          },
+          }
+        }
+      },
+      "ItemUpdateDto": {
+        "type": "object",
+        "properties": {
           "partitionsToAdd": {
             "type": [
               "null",

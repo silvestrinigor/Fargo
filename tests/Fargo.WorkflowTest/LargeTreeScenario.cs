@@ -453,8 +453,8 @@ internal sealed class LargeTreeScenario(
 
             try
             {
-                await _admin.V1.Items[item.Guid].PatchAsync(
-                    new ItemUpdateDto { ParentItemContainerGuid = otherContainer },
+                await _admin.V1.Items[item.Guid].Location.PutAsync(
+                    new ItemSetLocationDto { ParentItemContainerGuid = otherContainer },
                     cancellationToken: cancellationToken);
                 item.ContainerGuid = otherContainer;
                 moved++;
@@ -716,8 +716,8 @@ internal sealed class LargeTreeScenario(
             var destination = (i % 2 == 0) ? c1 : c2;
             try
             {
-                await _admin.V1.Items[moveItem].PatchAsync(
-                    new ItemUpdateDto { ParentItemContainerGuid = destination },
+                await _admin.V1.Items[moveItem].Location.PutAsync(
+                    new ItemSetLocationDto { ParentItemContainerGuid = destination },
                     cancellationToken: cancellationToken);
             }
             catch (FargoApiException)

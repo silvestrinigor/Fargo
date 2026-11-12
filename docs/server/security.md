@@ -41,7 +41,9 @@ A service exchanges its credentials for a short-lived access token at `POST /ide
 
 Service accounts are managed under `/service-accounts` (create, read, update, rotate secret, delete), each operation gated by a dedicated permission (`CreateServiceAccount`, `ReadServiceAccount`, `EditServiceAccount`, `DeleteServiceAccount`).
 
-Activating and deactivating are separate from editing. `ActivateUser`, `ActivateUserGroup` and `ActivateServiceAccount` gate `PUT /users/{guid}/is-active`, `PUT /user-groups/{guid}/is-active` and `PUT /service-accounts/{guid}/is-active`. The update endpoints no longer accept an active flag, so holding `EditUser`, `EditUserGroup` or `EditServiceAccount` is not enough to activate or deactivate. Deactivating an account, or rotating its secret, invalidates all tokens previously issued to it.
+Activating and deactivating are separate from editing. `ActivateUser`, `ActivateUserGroup` and `ActivateServiceAccount` gate `PUT /users/{guid}/is-active`, `PUT /user-groups/{guid}/is-active` and `PUT /service-accounts/{guid}/is-active`. The update endpoints no longer accept an active flag, so holding `EditUser`, `EditUserGroup` or `EditServiceAccount` is not enough to activate or deactivate.
+
+Moving an item is separate from editing it. `MoveItem` gates `PUT /items/{guid}/location` (place the item in a container) and `DELETE /items/{guid}/location` (remove it from its container); `PATCH /items/{guid}` now only changes partitions and requires `EditItem`. Deactivating an account, or rotating its secret, invalidates all tokens previously issued to it.
 
 Like a user, a service account is a **partitioned** entity: it carries both a **partition membership** (the partitions it belongs to, which define its scope and drive partition-filtered listings and audit-log partition association) and **partition access** (the partitions it is allowed to reach, expanded down the partition hierarchy). When creating or updating an account, the granting actor must itself have access to every partition it assigns as membership or access. Unlike a user, a service account has no mandatory global-partition membership — it is a scoped machine identity whose memberships are assigned explicitly.
 
@@ -101,6 +103,8 @@ as `ChangeAnotherUserPassword`, `ChangeUserGroupMembers`, `ReadAuditLogs`,
 `ReadItemEvents`, and the service-account actions (`CreateServiceAccount`, `ReadServiceAccount`, `EditServiceAccount`, `DeleteServiceAccount`).
 
 Activating and deactivating are separate from editing. `ActivateUser`, `ActivateUserGroup` and `ActivateServiceAccount` gate `PUT /users/{guid}/is-active`, `PUT /user-groups/{guid}/is-active` and `PUT /service-accounts/{guid}/is-active`. The update endpoints no longer accept an active flag, so holding `EditUser`, `EditUserGroup` or `EditServiceAccount` is not enough to activate or deactivate.
+
+Moving an item is separate from editing it. `MoveItem` gates `PUT /items/{guid}/location` (place the item in a container) and `DELETE /items/{guid}/location` (remove it from its container); `PATCH /items/{guid}` now only changes partitions and requires `EditItem`.
 
 Permissions can be granted directly to a user or to a user group; a user's
 effective permissions are the union of both (including permissions inherited

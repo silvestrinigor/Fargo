@@ -66,8 +66,8 @@ internal sealed class InventoryScenario(
 
         // Nest Tote inside Shelf so Shelf's descendant-inclusive inventory covers
         // Tote's contents.
-        await _admin.V1.Items[tote].PatchAsync(
-            new ItemUpdateDto { ParentItemContainerGuid = shelf },
+        await _admin.V1.Items[tote].Location.PutAsync(
+            new ItemSetLocationDto { ParentItemContainerGuid = shelf },
             cancellationToken: cancellationToken);
 
         // One product article, tracked as entities.
@@ -156,9 +156,7 @@ internal sealed class InventoryScenario(
 
         // Empty the Pallet (remove its single item from all containers) and assert
         // the container now reports no rows for the article (zero-net is dropped).
-        await _admin.V1.Items[layout.PalletItems[0]].PatchAsync(
-            new ItemUpdateDto { RemoveFromParentItemContainer = true },
-            cancellationToken: cancellationToken);
+        await _admin.V1.Items[layout.PalletItems[0]].Location.DeleteAsync(cancellationToken: cancellationToken);
 
         var palletAfter = await _admin.V1.Items[layout.Pallet].Inventory
             .GetAsync(cancellationToken: cancellationToken) ?? [];
@@ -167,8 +165,8 @@ internal sealed class InventoryScenario(
             "emptied Pallet reports no inventory for the article");
 
         // Put it back so later point-in-time checks have a stable 'current' state.
-        await _admin.V1.Items[layout.PalletItems[0]].PatchAsync(
-            new ItemUpdateDto { ParentItemContainerGuid = layout.Pallet },
+        await _admin.V1.Items[layout.PalletItems[0]].Location.PutAsync(
+            new ItemSetLocationDto { ParentItemContainerGuid = layout.Pallet },
             cancellationToken: cancellationToken);
     }
 
@@ -187,8 +185,8 @@ internal sealed class InventoryScenario(
 
         foreach (var item in layout.ToteItems)
         {
-            await _admin.V1.Items[item].PatchAsync(
-                new ItemUpdateDto { ParentItemContainerGuid = layout.Pallet },
+            await _admin.V1.Items[item].Location.PutAsync(
+                new ItemSetLocationDto { ParentItemContainerGuid = layout.Pallet },
                 cancellationToken: cancellationToken);
         }
 

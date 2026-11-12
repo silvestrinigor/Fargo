@@ -87,7 +87,7 @@ namespace Fargo.ClientHttp.V1.Items.Item
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.ItemDto>(requestInfo, global::Fargo.ClientHttp.Models.ItemDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Replaces mutable item state including partitions and parent container.
+        /// Updates mutable item state: partition memberships. Use the location endpoint to move the item.
         /// </summary>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -143,7 +143,7 @@ namespace Fargo.ClientHttp.V1.Items.Item
             return requestInfo;
         }
         /// <summary>
-        /// Replaces mutable item state including partitions and parent container.
+        /// Updates mutable item state: partition memberships. Use the location endpoint to move the item.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

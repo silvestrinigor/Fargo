@@ -28,6 +28,10 @@ public static class ItemEndpointRouteBuilderExtension
 
         group.MapUpdateItem();
 
+        group.MapSetItemLocation();
+
+        group.MapRemoveItemFromContainer();
+
         group.MapDeleteItem();
     }
 
@@ -230,8 +234,8 @@ public static class ItemEndpointRouteBuilderExtension
     {
         builder.MapPatch("/{itemGuid:guid}", UpdateItem)
             .WithName("UpdateItem")
-            .WithSummary("Replaces an existing item")
-            .WithDescription("Replaces mutable item state including partitions and parent container.")
+            .WithSummary("Updates an existing item")
+            .WithDescription("Updates mutable item state: partition memberships. Use the location endpoint to move the item.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -252,6 +256,58 @@ public static class ItemEndpointRouteBuilderExtension
 
     #endregion Update
 
+    #region Set location
+
+    private static IEndpointRouteBuilder MapSetItemLocation(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{itemGuid:guid}/location", SetItemLocation)
+            .WithName("SetItemLocation")
+            .WithSummary("Places an item inside a container")
+            .WithDescription("Sets the parent container of the item, recording a movement. Placing an item in the container it is already in does nothing. Requires the MoveItem permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetItemLocation(
+        Guid itemGuid,
+        ItemSetLocationDto request,
+        ICommandHandler<ItemSetLocationCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ItemSetLocationCommand(itemGuid, request.ParentItemContainerGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    private static IEndpointRouteBuilder MapRemoveItemFromContainer(this IEndpointRouteBuilder builder)
+    {
+        builder.MapDelete("/{itemGuid:guid}/location", RemoveItemFromContainer)
+            .WithName("RemoveItemFromContainer")
+            .WithSummary("Removes an item from its container")
+            .WithDescription("Clears the parent container of the item, recording a movement with no destination. An item that is not in a container is left as it is. Requires the MoveItem permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> RemoveItemFromContainer(
+        Guid itemGuid,
+        ICommandHandler<ItemRemoveFromContainerCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ItemRemoveFromContainerCommand(itemGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set location
     #region Delete
 
     private static IEndpointRouteBuilder MapDeleteItem(this IEndpointRouteBuilder builder)

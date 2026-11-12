@@ -14,6 +14,8 @@ public static class ItemServiceCollectionExtensions
         public IServiceCollection AddFargoItemApplication() => services
         .AddFargoCommandHandler<ItemCreateCommand, Guid, ItemCreateCommandHandler>()
         .AddFargoCommandHandler<ItemUpdateCommand, ItemUpdateCommandHandler>()
+        .AddFargoCommandHandler<ItemSetLocationCommand, ItemSetLocationCommandHandler>()
+        .AddFargoCommandHandler<ItemRemoveFromContainerCommand, ItemRemoveFromContainerCommandHandler>()
         .AddFargoCommandHandler<ItemDeleteCommand, ItemDeleteCommandHandler>()
         .AddFargoCommandHandler<ItemEventCreateCommand, Guid, ItemEventCreateCommandHandler>()
         .AddFargoQueryHandler<ItemSingleQuery, ItemDto?, ItemSingleQueryHandler>()

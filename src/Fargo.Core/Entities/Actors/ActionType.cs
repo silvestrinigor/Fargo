@@ -56,5 +56,10 @@ public enum ActionType
     /// <summary>
     /// Activates or deactivates a service account.
     /// </summary>
-    ActivateServiceAccount = 33
+    ActivateServiceAccount = 33,
+
+    /// <summary>
+    /// Places an item inside a container or removes it from its container.
+    /// </summary>
+    MoveItem = 34
 }
