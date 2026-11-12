@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using Fargo.ClientHttp.Models;
 using Fargo.ClientHttp.V1.Articles.Item.Inventory;
+using Fargo.ClientHttp.V1.Articles.Item.Partitions;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions.Serialization;
 using Microsoft.Kiota.Abstractions;
@@ -22,6 +23,11 @@ namespace Fargo.ClientHttp.V1.Articles.Item
         public global::Fargo.ClientHttp.V1.Articles.Item.Inventory.InventoryRequestBuilder Inventory
         {
             get => new global::Fargo.ClientHttp.V1.Articles.Item.Inventory.InventoryRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The partitions property</summary>
+        public global::Fargo.ClientHttp.V1.Articles.Item.Partitions.PartitionsRequestBuilder Partitions
+        {
+            get => new global::Fargo.ClientHttp.V1.Articles.Item.Partitions.PartitionsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.V1.Articles.Item.ArticleBarcodeItemRequestBuilder"/> and sets the default values.
@@ -75,9 +81,9 @@ namespace Fargo.ClientHttp.V1.Articles.Item
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.ArticleDto>(requestInfo, global::Fargo.ClientHttp.Models.ArticleDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Updates only article fields included in the request body.
+        /// Updates only article fields included in the request body. Use the partitions endpoint to change the partitions of the article.
         /// </summary>
-        /// <param name="body">Represents the changes to apply to an existing article.</param>
+        /// <param name="body">`null` leaves a value unchanged. The `Remove*` flags clear the value and take        precedence over the matching new value.</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -131,10 +137,10 @@ namespace Fargo.ClientHttp.V1.Articles.Item
             return requestInfo;
         }
         /// <summary>
-        /// Updates only article fields included in the request body.
+        /// Updates only article fields included in the request body. Use the partitions endpoint to change the partitions of the article.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
-        /// <param name="body">Represents the changes to apply to an existing article.</param>
+        /// <param name="body">`null` leaves a value unchanged. The `Remove*` flags clear the value and take        precedence over the matching new value.</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable

@@ -1,6 +1,7 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.Common.Paging;
 using Fargo.Application.Commands.Items;
+using Fargo.Application.Dtos;
 using Fargo.Application.Dtos.Items;
 using Fargo.Application.Queries.Items;
 using Fargo.ServiceHttp.Versioning;
@@ -26,7 +27,7 @@ public static class ItemEndpointRouteBuilderExtension
 
         group.MapCreateItem();
 
-        group.MapUpdateItem();
+        group.MapSetItemPartitions();
 
         group.MapSetItemLocation();
 
@@ -228,33 +229,32 @@ public static class ItemEndpointRouteBuilderExtension
 
     #endregion Create
 
-    #region Update
+    #region Set partitions
 
-    private static IEndpointRouteBuilder MapUpdateItem(this IEndpointRouteBuilder builder)
+    private static IEndpointRouteBuilder MapSetItemPartitions(this IEndpointRouteBuilder builder)
     {
-        builder.MapPatch("/{itemGuid:guid}", UpdateItem)
-            .WithName("UpdateItem")
-            .WithSummary("Updates an existing item")
-            .WithDescription("Updates mutable item state: partition memberships. Use the location endpoint to move the item.")
-            .Produces(StatusCodes.Status204NoContent);
+        builder.MapPut("/{itemGuid:guid}/partitions", SetPartitions)
+            .WithName("SetItemPartitions")
+            .WithSummary("Changes the partitions of an item")
+            .WithDescription("Adds and removes the partitions the an item belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Moving the item to another container is a separate operation. Requires the ChangeItemPartitions permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return builder;
     }
 
-    private static async Task<NoContent> UpdateItem(
+    private static async Task<NoContent> SetPartitions(
         Guid itemGuid,
-        ItemUpdateDto request,
-        ICommandHandler<ItemUpdateCommand> handler,
+        PartitionMembershipsChangeDto request,
+        ICommandHandler<ItemSetPartitionsCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ItemUpdateCommand(itemGuid, request);
-
-        await handler.HandleAsync(command, cancellationToken);
+        await handler.HandleAsync(new ItemSetPartitionsCommand(itemGuid, request), cancellationToken);
 
         return TypedResults.NoContent();
     }
 
-    #endregion Update
+    #endregion Set partitions
 
     #region Set location
 

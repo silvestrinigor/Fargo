@@ -40,11 +40,14 @@ Commands:
                                 Examples:
                                   fargo item create --article 11111111-1111-1111-1111-111111111111
                                   fargo item create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
-  update <guid>                 Update an existing item. Only the options you pass are changed.
+  set-partitions <guid>         Change the partitions of an item.
+  
+                                This is a separate operation from update and requires the ChangeItemPartitions
+                                permission. You need access to every partition you touch.
   
                                 Examples:
-                                  fargo item update 22222222-2222-2222-2222-222222222222 --add-partitions 00000000-0000-0000-0000-000000000002
-                                  fargo item update 22222222-2222-2222-2222-222222222222 --remove-partitions 00000000-0000-0000-0000-000000000002
+                                  fargo item set-partitions 22222222-2222-2222-2222-222222222222 --add 00000000-0000-0000-0000-000000000002
+                                  fargo item set-partitions 22222222-2222-2222-2222-222222222222 --add 00000000-0000-0000-0000-000000000002 --remove 00000000-0000-0000-0000-000000000005
   move <guid>                   Place an item inside a container.
   
                                 This is a separate operation from update and requires its own permission.
@@ -172,30 +175,33 @@ Options:
 
 ```
 
-## `fargo item update`
+## `fargo item set-partitions`
 
 ```text
 Description:
-  Update an existing item. Only the options you pass are changed.
+  Change the partitions of an item.
+  
+  This is a separate operation from update and requires the ChangeItemPartitions
+  permission. You need access to every partition you touch.
   
   Examples:
-    fargo item update 22222222-2222-2222-2222-222222222222 --add-partitions 00000000-0000-0000-0000-000000000002
-    fargo item update 22222222-2222-2222-2222-222222222222 --remove-partitions 00000000-0000-0000-0000-000000000002
+    fargo item set-partitions 22222222-2222-2222-2222-222222222222 --add 00000000-0000-0000-0000-000000000002
+    fargo item set-partitions 22222222-2222-2222-2222-222222222222 --add 00000000-0000-0000-0000-000000000002 --remove 00000000-0000-0000-0000-000000000005
 
 Usage:
-  fargo item update <guid> [options]
+  fargo item set-partitions <guid> [options]
 
 Arguments:
-  <guid>  The item GUID.
+  <guid>  The an item GUID.
 
 Options:
-  --add-partitions <add-partitions>        Partition GUIDs to add (space-separated).
-  --remove-partitions <remove-partitions>  Partition GUIDs to remove (space-separated).
-  --username <username>                    Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
-  --password <password>                    Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
-  -?, -h, --help                           Show help and usage information
-  --server <server>                        The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose                            Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+  --add <add>            Partition GUIDs to add (space-separated).
+  --remove <remove>      Partition GUIDs to remove (space-separated).
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

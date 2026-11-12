@@ -107,29 +107,28 @@ public static class ItemTools
         return $"Item '{itemGuid}' deleted.";
     }
 
-    [McpServerTool(Name = "fargo_items_update")]
-    [Description("Update an existing item's partitions. Only the supplied changes are applied. To move the item, use the move and remove-from-container tools.")]
-    public static async Task<string> UpdateItemAsync(
+    [McpServerTool(Name = "fargo_items_set_partitions")]
+    [Description("Change the partitions an item belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Requires the ChangeItemPartitions permission, which is separate from the permission to update.")]
+    public static async Task<string> SetItemPartitionsAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
-        [Description("The GUID of the item to update.")] Guid itemGuid,
-        [Description("The GUIDs of the partitions to add the item to.")] Guid[]? partitionsToAdd = null,
-        [Description("The GUIDs of the partitions to remove the item from.")] Guid[]? partitionsToRemove = null,
+        [Description("The GUID of the item.")] Guid itemGuid,
+        [Description("GUIDs of partitions to add.")] Guid[]? partitionsToAdd = null,
+        [Description("GUIDs of partitions to remove.")] Guid[]? partitionsToRemove = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var body = new ItemUpdateDto
+        var body = new PartitionMembershipsChangeDto
         {
-            PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList(),
-            PartitionsToRemove = partitionsToRemove?.Select(g => (Guid?)g).ToList()
+            PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
+            PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove)
         };
 
-        await client.V1.Items[itemGuid].PatchAsync(body, cancellationToken: cancellationToken);
+        await client.V1.Items[itemGuid].Partitions.PutAsync(body, cancellationToken: cancellationToken);
 
-        return $"Item '{itemGuid}' updated.";
+        return $"Item '{itemGuid}' partitions updated.";
     }
-
     [McpServerTool(Name = "fargo_items_move")]
     [Description("Place an item inside a container, recording a movement. Requires the MoveItem permission, which is separate from the permission to update. For event-tracked articles use the item event tools instead.")]
     public static async Task<string> MoveItemAsync(

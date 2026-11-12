@@ -23,6 +23,16 @@ public sealed record PartitionsChangeDto(
     IReadOnlyCollection<Guid>? PartitionAccessesToRemove = null
 );
 
+/// <summary>
+/// Request body of the dedicated partition endpoints of articles and items, which belong to partitions
+/// but have no partition access of their own. At least one partition must be given, and none may be in
+/// both lists.
+/// </summary>
+public sealed record PartitionMembershipsChangeDto(
+    IReadOnlyCollection<Guid>? PartitionsToAdd = null,
+    IReadOnlyCollection<Guid>? PartitionsToRemove = null
+);
+
 public sealed record ParentUserGroupDto(Guid ParentUserGroupGuid);
 
 public sealed record ParentPartitionDto(Guid ParentPartitionGuid);

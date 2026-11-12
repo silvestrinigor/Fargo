@@ -51,6 +51,8 @@ internal static class ActionTypes
     public const int ChangeUserGroupParent = 41;
     public const int ChangePartitionParent = 42;
     public const int RotateServiceAccountSecret = 43;
+    public const int ChangeArticlePartitions = 44;
+    public const int ChangeItemPartitions = 45;
 
     public static string Name(int code) => code switch
     {
@@ -97,6 +99,8 @@ internal static class ActionTypes
         ChangeUserGroupParent => "ChangeUserGroupParent",
         ChangePartitionParent => "ChangePartitionParent",
         RotateServiceAccountSecret => "RotateServiceAccountSecret",
+        ChangeArticlePartitions => "ChangeArticlePartitions",
+        ChangeItemPartitions => "ChangeItemPartitions",
         _ => $"Action({code})",
     };
 }

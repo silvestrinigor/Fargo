@@ -43,7 +43,7 @@
           "Articles"
         ],
         "summary": "Updates part of an existing article",
-        "description": "Updates only article fields included in the request body.",
+        "description": "Updates only article fields included in the request body. Use the partitions endpoint to change the partitions of the article.",
         "operationId": "PatchArticle",
         "consumes": [
           "application/json"
@@ -272,6 +272,44 @@
         }
       }
     },
+    "/v1/articles/{articleGuid}/partitions": {
+      "put": {
+        "tags": [
+          "Articles"
+        ],
+        "summary": "Changes the partitions of an article",
+        "description": "Adds and removes the partitions the an article belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Requires the ChangeArticlePartitions permission.",
+        "operationId": "SetArticlePartitions",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "articleGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartitionMembershipsChangeDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/v1/items/{itemGuid}": {
       "get": {
         "tags": [
@@ -301,39 +339,6 @@
           },
           "404": {
             "description": "Not Found"
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "Items"
-        ],
-        "summary": "Updates an existing item",
-        "description": "Updates mutable item state: partition memberships. Use the location endpoint to move the item.",
-        "operationId": "UpdateItem",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "itemGuid",
-            "required": true,
-            "type": "string",
-            "format": "uuid"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ItemUpdateDto"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -627,6 +632,44 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      }
+    },
+    "/v1/items/{itemGuid}/partitions": {
+      "put": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Changes the partitions of an item",
+        "description": "Adds and removes the partitions the an item belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Moving the item to another container is a separate operation. Requires the ChangeItemPartitions permission.",
+        "operationId": "SetItemPartitions",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "itemGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartitionMembershipsChangeDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -3192,22 +3235,6 @@
               "x-nullable": true
             }
           ]
-        },
-        "partitionsToAdd": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "partitionsToRemove": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
         }
       }
     },
@@ -3605,27 +3632,6 @@
         "parentItemContainerGuid": {
           "type": "string",
           "format": "uuid"
-        }
-      }
-    },
-    "ItemUpdateDto": {
-      "type": "object",
-      "properties": {
-        "partitionsToAdd": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "partitionsToRemove": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
         }
       }
     },
@@ -4103,6 +4109,28 @@
         },
         "isGlobalPartition": {
           "type": "boolean",
+          "x-nullable": true
+        }
+      }
+    },
+    "PartitionMembershipsChangeDto": {
+      "type": "object",
+      "description": "Request body of the dedicated partition endpoints of articles and items, which belong to partitions\r\nbut have no partition access of their own. At least one partition must be given, and none may be in\r\nboth lists.",
+      "properties": {
+        "partitionsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionsToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
           "x-nullable": true
         }
       }

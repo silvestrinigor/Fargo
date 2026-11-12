@@ -19,7 +19,6 @@ public class ArticleUpdateCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
-    private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -28,7 +27,6 @@ public class ArticleUpdateCommandHandlerTests
             ActorTestFactory.Resolver(userRepository),
             new ArticleService(articleRepository),
             articleRepository,
-            partitionRepository,
             currentActor);
 
     [Fact]

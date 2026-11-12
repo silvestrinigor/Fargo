@@ -31,8 +31,8 @@ Tools are grouped by resource and named `fargo_<resource>_<action>`:
 
 | Resource | Tools | Access |
 | --- | --- | --- |
-| Articles | `fargo_articles_list`, `fargo_articles_get`, `fargo_articles_get_by_barcode`, `fargo_articles_create`, `fargo_articles_update`, `fargo_articles_delete`, `fargo_articles_get_inventory` | Read/write |
-| Items | `fargo_items_list`, `fargo_items_get`, `fargo_items_create`, `fargo_items_update`, `fargo_items_move`, `fargo_items_remove_from_container`, `fargo_items_delete`, `fargo_items_get_location`, `fargo_items_list_moviments`, `fargo_items_get_inventory` | Read/write |
+| Articles | `fargo_articles_list`, `fargo_articles_get`, `fargo_articles_get_by_barcode`, `fargo_articles_create`, `fargo_articles_update`, `fargo_articles_set_partitions`, `fargo_articles_delete`, `fargo_articles_get_inventory` | Read/write |
+| Items | `fargo_items_list`, `fargo_items_get`, `fargo_items_create`, `fargo_items_set_partitions`, `fargo_items_move`, `fargo_items_remove_from_container`, `fargo_items_delete`, `fargo_items_get_location`, `fargo_items_list_moviments`, `fargo_items_get_inventory` | Read/write |
 | Item events | `fargo_item_events_list`, `fargo_item_events_create`, `fargo_item_events_delete`, `fargo_item_events_move` | Read/write |
 | Partitions | `fargo_partitions_list`, `fargo_partitions_get`, `fargo_partitions_create`, `fargo_partitions_update`, `fargo_partitions_set_parent`, `fargo_partitions_delete` | Read/write |
 | Users | `fargo_users_list`, `fargo_users_get`, `fargo_users_create`, `fargo_users_update`, `fargo_users_set_active`, `fargo_users_set_permissions`, `fargo_users_set_user_groups`, `fargo_users_set_partitions`, `fargo_users_reset_password`, `fargo_users_set_password_expiration`, `fargo_users_remove_password_expiration`, `fargo_users_delete` | Read/write |

@@ -98,7 +98,7 @@ fargo user list --username auditor --password '<password>'
 - Unsure about a command's options? Append `--help`:
 
   ```bash
-  fargo item update --help
+  fargo item set-partitions --help
   ```
 
 ## Next steps

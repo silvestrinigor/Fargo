@@ -14,6 +14,7 @@ public static class ArticleServiceCollectionExtensions
         public IServiceCollection AddFargoArticleApplication() => services
         .AddFargoCommandHandler<ArticleCreateCommand, Guid, ArticleCreateCommandHandler>()
         .AddFargoCommandHandler<ArticleUpdateCommand, ArticleUpdateCommandHandler>()
+        .AddFargoCommandHandler<ArticleSetPartitionsCommand, ArticleSetPartitionsCommandHandler>()
         .AddFargoCommandHandler<ArticleDeleteCommand, ArticleDeleteCommandHandler>()
         .AddFargoQueryHandler<ArticleByGuidQuery, ArticleDto?, ArticleQueryHandler>()
         .AddFargoQueryHandler<ArticleByBarcodeQuery, ArticleDto?, ArticleQueryHandler>()

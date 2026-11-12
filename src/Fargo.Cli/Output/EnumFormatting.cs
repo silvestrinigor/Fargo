@@ -108,6 +108,8 @@ public enum ActionType
     ChangeUserGroupParent = 41,
     ChangePartitionParent = 42,
     RotateServiceAccountSecret = 43,
+    ChangeArticlePartitions = 44,
+    ChangeItemPartitions = 45,
 }
 
 /// <summary>

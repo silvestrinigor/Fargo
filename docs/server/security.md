@@ -109,7 +109,10 @@ Activating and deactivating: `ActivateUser`, `ActivateUserGroup` and
 
 Moving an item: `MoveItem` gates `PUT /items/{guid}/location` (place the item in
 a container) and `DELETE /items/{guid}/location` (remove it from its container).
-`PATCH /items/{guid}` only changes partitions and requires `EditItem`.
+`ChangeItemPartitions` gates `PUT /items/{guid}/partitions` and
+`ChangeArticlePartitions` gates `PUT /articles/{guid}/partitions`. Those two
+need access to every partition they touch. An item has no other editable field,
+so there is no item update endpoint and `EditItem` no longer gates anything.
 
 Granting and revoking permissions: `ChangeUserPermissions`,
 `ChangeUserGroupPermissions` and `ChangeServiceAccountPermissions` gate

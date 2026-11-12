@@ -108,6 +108,16 @@ public sealed record PartitionsChangePlan(
         return new PartitionsChangePlan(membershipsToAdd, membershipsToRemove, accessesToAdd, accessesToRemove);
     }
 
+    /// <summary>
+    /// The plan for a target that only has partition membership, such as an article or an item.
+    /// </summary>
+    public static PartitionsChangePlan FromMemberships(PartitionMembershipsChangeDto change)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+
+        return From(new PartitionsChangeDto(change.PartitionsToAdd, change.PartitionsToRemove));
+    }
+
     /// <remarks>
     /// The actor needs access to every partition it touches, for removals as well as additions.
     /// Memberships are applied first, then accesses.
@@ -141,6 +151,17 @@ public sealed record PartitionsChangePlan(
             removeAccess((await ResolveAsync(actor, partitionRepository, guid, cancellationToken)).Guid);
         }
     }
+
+    /// <summary>
+    /// Applies only the membership part of a plan built with <see cref="FromMemberships"/>.
+    /// </summary>
+    public Task ApplyMembershipsAsync(
+        SecurityPrincipal actor,
+        IPartitionRepository partitionRepository,
+        Action<Partition> addMembership,
+        Action<Guid> removeMembership,
+        CancellationToken cancellationToken = default)
+        => ApplyAsync(actor, partitionRepository, addMembership, removeMembership, _ => { }, _ => { }, cancellationToken);
 
     private static async Task<Partition> ResolveAsync(
         SecurityPrincipal actor, IPartitionRepository partitionRepository, Guid partitionGuid, CancellationToken cancellationToken)

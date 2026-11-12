@@ -7,10 +7,11 @@ using System.IO;
 using System;
 namespace Fargo.ClientHttp.Models
 {
+    /// <summary>
+    /// Request body of the dedicated partition endpoints of articles and items, which belong to partitionsbut have no partition access of their own. At least one partition must be given, and none may be inboth lists.
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    #pragma warning disable CS1591
-    public partial class ItemUpdateDto : IAdditionalDataHolder, IParsable
-    #pragma warning restore CS1591
+    public partial class PartitionMembershipsChangeDto : IAdditionalDataHolder, IParsable
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
@@ -31,21 +32,21 @@ namespace Fargo.ClientHttp.Models
         public List<Guid?> PartitionsToRemove { get; set; }
 #endif
         /// <summary>
-        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.ItemUpdateDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.PartitionMembershipsChangeDto"/> and sets the default values.
         /// </summary>
-        public ItemUpdateDto()
+        public PartitionMembershipsChangeDto()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::Fargo.ClientHttp.Models.ItemUpdateDto"/></returns>
+        /// <returns>A <see cref="global::Fargo.ClientHttp.Models.PartitionMembershipsChangeDto"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::Fargo.ClientHttp.Models.ItemUpdateDto CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::Fargo.ClientHttp.Models.PartitionMembershipsChangeDto CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::Fargo.ClientHttp.Models.ItemUpdateDto();
+            return new global::Fargo.ClientHttp.Models.PartitionMembershipsChangeDto();
         }
         /// <summary>
         /// The deserialization information for the current model

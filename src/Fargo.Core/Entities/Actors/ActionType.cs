@@ -7,6 +7,11 @@ public enum ActionType
     EditArticle = 3,
     CreateItem = 4,
     DeleteItem = 5,
+
+    /// <summary>
+    /// No operation requires it any more: moving an item and changing its partitions have their own
+    /// permissions. The value stays because roles already store it.
+    /// </summary>
     EditItem = 6,
     CreateUser = 7,
     DeleteUser = 8,
@@ -106,5 +111,15 @@ public enum ActionType
     /// <summary>
     /// Replaces a service account's secret. Separate from <see cref="EditServiceAccount"/> so it can be granted on its own.
     /// </summary>
-    RotateServiceAccountSecret = 43
+    RotateServiceAccountSecret = 43,
+
+    /// <summary>
+    /// Changes the partitions an article belongs to, which decides who can see and use it.
+    /// </summary>
+    ChangeArticlePartitions = 44,
+
+    /// <summary>
+    /// Changes the partitions an item belongs to, which decides who can see and use it.
+    /// </summary>
+    ChangeItemPartitions = 45
 }
