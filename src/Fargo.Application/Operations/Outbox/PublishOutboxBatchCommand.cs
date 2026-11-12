@@ -6,15 +6,20 @@ using Microsoft.Extensions.Logging;
 
 namespace Fargo.Application.Operations.Outbox;
 
-public sealed record PublishOutboxBatchCommand(int BatchSize) : ICommand<OutboxBatchResultDto>, INonAuditedCommand;
+/// <remarks>
+/// Transactional: the claimed rows stay locked until the transactional decorator commits, so
+/// concurrent relays never publish the same row.
+/// </remarks>
+public sealed record PublishOutboxBatchCommand(int BatchSize)
+    : ICommand<OutboxBatchResultDto>, ITransactionalCommand, INonAuditedCommand;
 
 /// <remarks>
-/// The claimed batch runs in the single transaction owned by <see cref="IOutboxBatch"/>. Messages are
-/// published one at a time and stop at the first failure, which is recorded on the row; that row and
-/// the ones after it are retried by a later batch, so order is preserved.
+/// Messages are published one at a time and stop at the first failure, which is recorded on the row;
+/// that row and the ones after it are retried by a later batch, so order is preserved.
 ///
 /// Delivery is at-least-once: if the process stops after the broker accepted a message but before
-/// the commit, the message is published again.
+/// the commit, the message is published again. A cancellation only stops the publishing: what was
+/// already published is still committed.
 /// </remarks>
 public sealed class PublishOutboxBatchCommandHandler(
     IOutboxRepository repository,
@@ -29,9 +34,7 @@ public sealed class PublishOutboxBatchCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        await using var batch = await repository.ClaimBatchAsync(command.BatchSize, cancellationToken);
-
-        var messages = batch.Messages;
+        var messages = await repository.ClaimBatchAsync(command.BatchSize, cancellationToken);
 
         if (messages.Count == 0)
         {
@@ -49,7 +52,7 @@ public sealed class PublishOutboxBatchCommandHandler(
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                // Shutting down: keep what was already published.
+                // Shutting down: the transactional decorator still commits what was published.
                 break;
             }
             catch (Exception exception)
@@ -67,10 +70,6 @@ public sealed class PublishOutboxBatchCommandHandler(
 
             published++;
         }
-
-        // Commit even when shutting down: the broker already holds these
-        // messages, and not recording that would only publish them again.
-        await batch.CommitAsync(CancellationToken.None);
 
         if (published > 0)
         {

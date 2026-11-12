@@ -22,6 +22,12 @@ internal static class AuditCommandHandlerDecorator
         IAuditLogRepository auditLogRepository)
         where TCommand : ICommand
     {
+        // System commands (the outbox relay) are not actions of an actor.
+        if (command is INonAuditedCommand)
+        {
+            return;
+        }
+
         if (currentActor is null || !currentActor.IsAuthenticated)
         {
             return;

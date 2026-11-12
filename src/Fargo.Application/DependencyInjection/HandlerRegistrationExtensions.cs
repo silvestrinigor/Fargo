@@ -11,10 +11,9 @@ namespace Fargo.Application.DependencyInjection;
 
 /// <remarks>
 /// Commands resolve to <c>Logging(unit of work(Audit(handler)))</c>; queries resolve to the logging
-/// decorator only. A no-response command that implements <see cref="ITransactionalCommand"/> gets
-/// the transactional decorator (begin, handler, save, commit) instead of the commit-on-success one;
-/// the choice follows the command type, so it cannot be lost by calling the wrong helper. Commands
-/// with a response always get the commit-on-success decorator.
+/// decorator only. A command that implements <see cref="ITransactionalCommand"/> gets the
+/// transactional decorator (begin, handler, save, commit) instead of the commit-on-success one; the
+/// choice follows the command type, so it cannot be lost by calling the wrong helper.
 ///
 /// The current actor is null in actor-less hosts (the seed worker), where <see cref="ICurrentActor"/>
 /// is not registered.
@@ -47,7 +46,7 @@ public static class HandlerRegistrationExtensions
         services.TryAddScoped<THandler>();
         services.AddScoped<ICommandHandler<TCommand, TResponse>>(sp =>
             new LoggingCommandHandlerDecorator<TCommand, TResponse>(
-                new UnitOfWorkCommandHandlerDecorator<TCommand, TResponse>(
+                BuildUnitOfWorkDecorator<TCommand, TResponse>(
                     new AuditCommandHandlerDecorator<TCommand, TResponse>(
                         sp.GetRequiredService<THandler>(),
                         sp.GetService<ICurrentActor>(),
@@ -80,4 +79,11 @@ public static class HandlerRegistrationExtensions
         => typeof(ITransactionalCommand).IsAssignableFrom(typeof(TCommand))
             ? new TransactionalCommandHandlerDecorator<TCommand>(handler, unitOfWork)
             : new UnitOfWorkCommandHandlerDecorator<TCommand>(handler, unitOfWork);
+
+    private static ICommandHandler<TCommand, TResponse> BuildUnitOfWorkDecorator<TCommand, TResponse>(
+        ICommandHandler<TCommand, TResponse> handler, IUnitOfWork unitOfWork)
+        where TCommand : ICommand<TResponse>
+        => typeof(ITransactionalCommand).IsAssignableFrom(typeof(TCommand))
+            ? new TransactionalCommandHandlerDecorator<TCommand, TResponse>(handler, unitOfWork)
+            : new UnitOfWorkCommandHandlerDecorator<TCommand, TResponse>(handler, unitOfWork);
 }

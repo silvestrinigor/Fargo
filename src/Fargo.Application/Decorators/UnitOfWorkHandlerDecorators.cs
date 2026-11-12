@@ -54,3 +54,18 @@ public sealed class UnitOfWorkCommandHandlerDecorator<TCommand, TResponse>(
         return response;
     }
 }
+
+/// <summary>
+/// The transactional decorator for commands with a response; see
+/// <see cref="TransactionalCommandHandlerDecorator{TCommand}"/>.
+/// </summary>
+public sealed class TransactionalCommandHandlerDecorator<TCommand, TResponse>(
+    ICommandHandler<TCommand, TResponse> inner,
+    IUnitOfWork unitOfWork) : ICommandHandler<TCommand, TResponse>
+    where TCommand : ICommand<TResponse>
+{
+    public Task<TResponse> HandleAsync(TCommand command, CancellationToken cancellationToken = default)
+        => unitOfWork.ExecuteInTransactionAsync(
+            ct => inner.HandleAsync(command, ct),
+            cancellationToken);
+}

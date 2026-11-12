@@ -1,6 +1,9 @@
+using Fargo.Application.Abstractions;
+using Fargo.Application.Decorators;
 using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Operations.Outbox;
 using Fargo.Application.Operations.Outbox.Dtos;
+using Fargo.Application.Persistence;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
@@ -26,12 +29,18 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
 
     public Task DisposeAsync() => Task.CompletedTask;
 
-    private static PublishOutboxBatchCommandHandler CreatePublisher(FargoDbContext context, IEventPublisher publisher)
-        => new(
-            new OutboxRepository(context),
-            publisher,
-            TimeProvider.System,
-            NullLogger<PublishOutboxBatchCommandHandler>.Instance);
+    // As registered in the outbox host: the transactional decorator owns the transaction that holds
+    // the claim locks, and commits what the handler marked.
+    private static ICommandHandler<PublishOutboxBatchCommand, OutboxBatchResultDto> CreatePublisher(
+        FargoDbContext context,
+        IEventPublisher publisher)
+        => new TransactionalCommandHandlerDecorator<PublishOutboxBatchCommand, OutboxBatchResultDto>(
+            new PublishOutboxBatchCommandHandler(
+                new OutboxRepository(context),
+                publisher,
+                TimeProvider.System,
+                NullLogger<PublishOutboxBatchCommandHandler>.Instance),
+            new UnitOfWork(context, NullLogger<IUnitOfWork>.Instance));
 
     private static PurgeProcessedOutboxCommandHandler CreatePurger(FargoDbContext context)
         => new(
@@ -184,6 +193,30 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
     }
 
     [Fact]
+    public async Task PublishBatch_WhenCancelledMidBatch_ShouldStillCommitWhatWasPublished()
+    {
+        await AddMessagesAsync(3);
+
+        // Cancels the shutdown token during the second publish, as stopping the host would.
+        using var stopping = new CancellationTokenSource();
+        var publisher = new CancellingPublisher(stopping, cancelOnCall: 2);
+
+        await using (var context = postgres.CreateContext())
+        {
+            var result = await CreatePublisher(context, publisher)
+                .HandleAsync(new PublishOutboxBatchCommand(100), stopping.Token);
+
+            Assert.Equal(new OutboxBatchResultDto(3, 1, false), result);
+        }
+
+        // The broker accepted the first message, so it must be recorded as processed and not resent.
+        var messages = await ReadOutboxAsync();
+        Assert.NotNull(messages[0].ProcessedAt);
+        Assert.Null(messages[1].ProcessedAt);
+        Assert.Null(messages[2].ProcessedAt);
+    }
+
+    [Fact]
     public async Task Purge_ShouldDeleteOnlyProcessedMessagesBeforeTheCutoff()
     {
         await AddMessagesAsync(3);
@@ -221,6 +254,22 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
             }
 
             Published.Enqueue(outboundEvent);
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class CancellingPublisher(CancellationTokenSource stopping, int cancelOnCall) : IEventPublisher
+    {
+        private int calls;
+
+        public Task PublishAsync(OutboundEvent outboundEvent, CancellationToken cancellationToken = default)
+        {
+            if (Interlocked.Increment(ref calls) == cancelOnCall)
+            {
+                stopping.Cancel();
+                cancellationToken.ThrowIfCancellationRequested();
+            }
 
             return Task.CompletedTask;
         }

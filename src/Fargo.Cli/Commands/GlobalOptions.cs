@@ -11,7 +11,7 @@ namespace Fargo.Cli.Commands;
 /// and are attached only to the resource command groups, not to the identity group: its commands
 /// either take their own credential options (login, change-password) or operate on the stored
 /// session (logout), so the global credentials would be meaningless there.
-/// </summary>
+/// </remarks>
 public sealed class GlobalOptions
 {
     public GlobalOptions()

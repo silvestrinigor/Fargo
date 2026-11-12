@@ -2,31 +2,19 @@ using Fargo.Application.IntegrationEvents;
 
 namespace Fargo.Application.Persistence.Repositories;
 
-/// <summary>
-/// A batch of outbox messages claimed by one relay. The claim is held until the
-/// batch is committed or disposed.
-/// </summary>
-public interface IOutboxBatch : IAsyncDisposable
-{
-    /// <summary>
-    /// Tracked, oldest first: changes made through <see cref="OutboxMessage.MarkProcessed"/> and
-    /// <see cref="OutboxMessage.RecordFailure"/> are saved by <see cref="CommitAsync"/>.
-    /// </summary>
-    IReadOnlyList<OutboxMessage> Messages { get; }
-
-    /// <summary>
-    /// Saves the changes made to the claimed messages and releases the claim. Disposing the batch
-    /// without committing discards the changes.
-    /// </summary>
-    Task CommitAsync(CancellationToken cancellationToken = default);
-}
-
 public interface IOutboxRepository
 {
     /// <summary>
-    /// Claims the oldest unprocessed messages so that concurrent relays never claim the same message.
+    /// Claims the oldest unprocessed messages, oldest first and tracked, so that concurrent relays never
+    /// claim the same message.
     /// </summary>
-    Task<IOutboxBatch> ClaimBatchAsync(int batchSize, CancellationToken cancellationToken = default);
+    /// <remarks>
+    /// The claim is a row lock held until the surrounding transaction ends, so this must run inside one
+    /// (the publish command is an <c>ITransactionalCommand</c>); otherwise the lock is released at once.
+    /// Changes made through <see cref="OutboxMessage.MarkProcessed"/> and
+    /// <see cref="OutboxMessage.RecordFailure"/> are saved by that transaction.
+    /// </remarks>
+    Task<IReadOnlyList<OutboxMessage>> ClaimBatchAsync(int batchSize, CancellationToken cancellationToken = default);
 
     Task<int> PurgeProcessedAsync(DateTimeOffset cutoff, CancellationToken cancellationToken = default);
 }

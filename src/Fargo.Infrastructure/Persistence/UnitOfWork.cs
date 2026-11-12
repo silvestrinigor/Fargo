@@ -20,31 +20,48 @@ public sealed class UnitOfWork(FargoDbContext fargoContext, ILogger<IUnitOfWork>
         return changes;
     }
 
-    /// <summary>
-    /// Runs <paramref name="work"/> in a transaction and commits the pending changes, rolling back on failure.
-    /// </summary>
-    /// <remarks>
-    /// Wrapped in the context's execution strategy, so a transient failure retries the whole unit (the strategy
-    /// must own the transaction boundary when retries are enabled). A transaction-scoped database lock taken by
-    /// <paramref name="work"/> is held until the transaction ends.
-    /// </remarks>
-    public async Task ExecuteInTransactionAsync(
+    public Task ExecuteInTransactionAsync(
         Func<CancellationToken, Task> work,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(work);
+
+        return ExecuteInTransactionAsync<bool>(
+            async ct =>
+            {
+                await work(ct);
+
+                return true;
+            },
+            cancellationToken);
+    }
+
+    /// <remarks>
+    /// Wrapped in the context's execution strategy, so the strategy owns the transaction boundary. No
+    /// retrying strategy is configured today; if one is enabled, a transient failure re-runs the whole
+    /// <paramref name="work"/>, so it must be safe to repeat (the outbox relay would publish again).
+    /// </remarks>
+    public async Task<TResult> ExecuteInTransactionAsync<TResult>(
+        Func<CancellationToken, Task<TResult>> work,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(work);
 
         var strategy = fargoContext.Database.CreateExecutionStrategy();
 
-        await strategy.ExecuteAsync(async ct =>
+        return await strategy.ExecuteAsync(async ct =>
         {
             await using var transaction = await fargoContext.Database.BeginTransactionAsync(ct);
 
-            await work(ct);
+            var result = await work(ct);
 
-            await fargoContext.SaveChangesAsync(ct);
+            // The work is done: cancelling now would only throw it away (and, for the outbox, publish
+            // the same messages again), so the save and commit run to completion.
+            await fargoContext.SaveChangesAsync(CancellationToken.None);
 
-            await transaction.CommitAsync(ct);
+            await transaction.CommitAsync(CancellationToken.None);
+
+            return result;
         }, cancellationToken);
     }
 }

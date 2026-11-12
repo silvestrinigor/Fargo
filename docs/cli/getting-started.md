@@ -61,6 +61,19 @@ fargo audit list --limit 20
 fargo audit get 809434f3-c3b6-4f74-ad15-74e41d26468e
 ```
 
+## 5. Watch changes live
+
+Print changes as they happen, until Ctrl+C. The real-time service has its own
+URL; a fresh configuration defaults to `https://localhost:7571`:
+
+```bash
+fargo config set-realtime-server --url https://localhost:7571
+fargo realtime watch
+```
+
+See [Watching live changes](overview.md#watching-live-changes) for the output
+and options.
+
 ## Ad-hoc flows
 
 Override the server for a single command without changing your configuration:
