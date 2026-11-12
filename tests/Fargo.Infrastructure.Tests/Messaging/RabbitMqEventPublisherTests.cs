@@ -66,7 +66,8 @@ public sealed class RabbitMqEventPublisherTests : IAsyncLifetime
 
     private static OutboundEvent NewArticleEvent(string eventType)
     {
-        var message = new ArticleEventMessage(Guid.CreateVersion7(), eventType, DateTimeOffset.UtcNow, Guid.NewGuid());
+        var message = new ArticleEventMessage(
+            Guid.CreateVersion7(), eventType, DateTimeOffset.UtcNow, Guid.NewGuid(), [Guid.NewGuid()]);
 
         return new OutboundEvent(
             message.EventId,

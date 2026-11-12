@@ -50,4 +50,16 @@ _ = builder
 .WaitFor(rabbitmq)
 .WaitForCompletion(serviceMigrations);
 
+// Real-time push (SignalR). It does not wait for the broker: the hub serves
+// connections while the broker is down and its consumer retries until it is up.
+_ = builder
+.AddProject<Projects.Fargo_ServiceRealtime>("fargo-realtime")
+.WithHttpHealthCheck("/health")
+.WithEnvironment("ASPNETCORE_ENVIRONMENT", environmentName)
+.WithEnvironment("DOTNET_ENVIRONMENT", environmentName)
+.WithReference(databaseFargo)
+.WithReference(rabbitmq)
+.WithReference(serviceMigrations)
+.WaitForCompletion(serviceMigrations);
+
 builder.Build().Run();

@@ -7,6 +7,7 @@
     <Project Path="src/Fargo.ServiceHttp/Fargo.ServiceHttp.csproj" />
     <Project Path="src/Fargo.ServiceMigration/Fargo.ServiceMigration.csproj" />
     <Project Path="src/Fargo.ServiceOutbox/Fargo.ServiceOutbox.csproj" />
+    <Project Path="src/Fargo.ServiceRealtime/Fargo.ServiceRealtime.csproj" />
     <Project Path="src/Fargo.ServiceSeed/Fargo.ServiceSeed.csproj" />
     <Project Path="src/Fargo.Cli/Fargo.Cli.csproj" />
     <Project Path="src/Fargo.ClientHttp/Fargo.ClientHttp.csproj" />
@@ -14,7 +15,9 @@
     <Project Path="tests/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="tests/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />
     <Project Path="tests/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Fargo.Mcp.Tests/Fargo.Mcp.Tests.csproj" />
     <Project Path="tests/Fargo.ServiceOutbox.Tests/Fargo.ServiceOutbox.Tests.csproj" />
+    <Project Path="tests/Fargo.ServiceRealtime.Tests/Fargo.ServiceRealtime.Tests.csproj" />
     <Project Path="tests/Fargo.WorkflowTest/Fargo.WorkflowTest.csproj" />
     <Project Path="tests/Fargo.SimulationWorker/Fargo.SimulationWorker.csproj" />
 </Solution>

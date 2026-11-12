@@ -50,7 +50,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
             articleGuids.Add(articleGuid);
 
             context.OutboxMessages.Add(OutboxMessage.FromArticleEvent(new ArticleEventMessage(
-                Guid.CreateVersion7(), ArticleEventTypes.Edited, DateTimeOffset.UtcNow, articleGuid)));
+                Guid.CreateVersion7(), ArticleEventTypes.Edited, DateTimeOffset.UtcNow, articleGuid, [Guid.NewGuid()])));
 
             // One save per message so the sequence follows insertion order.
             await context.SaveChangesAsync();

@@ -1,7 +1,6 @@
 using Fargo.Application.Common.Actors;
 using Fargo.Core.Entities.Actors;
 using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
 
 namespace Fargo.Infrastructure.Security;
@@ -15,34 +14,7 @@ public sealed class CurrentUserActor(IHttpContextAccessor httpContextAccessor) :
     public bool IsAuthenticated
         => Principal?.Identity?.IsAuthenticated == true;
 
-    public Guid Guid
-    {
-        get
-        {
-            if (!IsAuthenticated)
-            {
-                return Guid.Empty;
-            }
+    public Guid Guid => Principal.GetFargoActorGuid();
 
-            var id =
-                Principal!.FindFirstValue(ClaimTypes.NameIdentifier) ??
-                Principal!.FindFirstValue(JwtRegisteredClaimNames.Sub);
-
-            var actorGuid = Guid.TryParse(id, out var guid) ? guid : Guid.Empty;
-
-            return actorGuid;
-        }
-    }
-
-    public ActorType ActorType
-    {
-        get
-        {
-            var actorTypeClaim = Principal?.FindFirstValue(FargoJwtClaims.ActorType);
-
-            return string.Equals(actorTypeClaim, FargoJwtClaims.ActorTypeService, StringComparison.Ordinal)
-                ? ActorType.Service
-                : ActorType.User;
-        }
-    }
+    public ActorType ActorType => Principal.GetFargoActorType();
 }

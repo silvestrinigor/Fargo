@@ -1,5 +1,6 @@
 using Fargo.Application.IntegrationEvents;
 using Fargo.Core.Barcodes;
+using Fargo.Core.Common;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
@@ -58,7 +59,7 @@ public class OutboxSaveChangesInterceptorTests
     }
 
     [Fact]
-    public async Task SaveChanges_WhenArticleAdded_ShouldStoreBodyWithOnlyTheArticleGuid()
+    public async Task SaveChanges_WhenArticleAdded_ShouldStoreBodyWithTheArticleGuidAndPartitions()
     {
         var article = await SaveNewArticleAsync();
 
@@ -66,12 +67,136 @@ public class OutboxSaveChangesInterceptorTests
         using var body = JsonDocument.Parse(message.Body);
 
         Assert.Equal(
-            ["eventId", "eventType", "occurredAt", "articleGuid"],
+            ["eventId", "eventType", "occurredAt", "articleGuid", "partitionGuids"],
             body.RootElement.EnumerateObject().Select(p => p.Name));
         Assert.Equal(message.EventId, body.RootElement.GetProperty("eventId").GetGuid());
         Assert.Equal(ArticleEventTypes.Created, body.RootElement.GetProperty("eventType").GetString());
         Assert.Equal(article.Guid, body.RootElement.GetProperty("articleGuid").GetGuid());
         Assert.Equal(ArticleEventMessage.SchemaVersion, message.SchemaVersion);
+    }
+
+    [Fact]
+    public async Task SaveChanges_WhenArticleAdded_ShouldReportItsGlobalPartition()
+    {
+        await SaveNewArticleAsync();
+
+        var message = Assert.Single(await ReadOutboxAsync());
+
+        Assert.Equal([FargoCoreWellKnowGuids.GlobalPartitionGuid], ReadPartitions(message));
+    }
+
+    [Fact]
+    public async Task SaveChanges_WhenEditedWithoutLoadingPartitions_ShouldReportTheStoredPartitions()
+    {
+        var article = await SaveNewArticleAsync();
+
+        await using (var context = CreateContext())
+        {
+            // Partitions are not included: they must come from the database.
+            var loaded = await context.Articles.SingleAsync(a => a.Guid == article.Guid);
+            loaded.Name = new Name("Renamed");
+            await context.SaveChangesAsync();
+        }
+
+        var edited = (await ReadOutboxAsync()).Last();
+
+        Assert.Equal(ArticleEventTypes.Edited, edited.EventType);
+        Assert.Equal([FargoCoreWellKnowGuids.GlobalPartitionGuid], ReadPartitions(edited));
+    }
+
+    [Fact]
+    public async Task SaveChanges_WhenPartitionAdded_ShouldReportTheOldAndNewPartitions()
+    {
+        var article = await SaveNewArticleAsync();
+        var branch = await SaveBranchPartitionAsync();
+
+        await using (var context = CreateContext())
+        {
+            var loaded = await context.Articles
+                .Include(a => a.Partitions)
+                .SingleAsync(a => a.Guid == article.Guid);
+            loaded.AddPartition(await context.Partitions.SingleAsync(p => p.Guid == branch.Guid));
+            await context.SaveChangesAsync();
+        }
+
+        var edited = (await ReadOutboxAsync()).Last();
+
+        Assert.Equal(
+            new[] { FargoCoreWellKnowGuids.GlobalPartitionGuid, branch.Guid }.Order(),
+            ReadPartitions(edited));
+    }
+
+    [Fact]
+    public async Task SaveChanges_WhenPartitionRemoved_ShouldStillReportTheRemovedPartition()
+    {
+        var article = await SaveNewArticleAsync();
+        var branch = await SaveBranchPartitionAsync();
+
+        await using (var context = CreateContext())
+        {
+            var loaded = await context.Articles
+                .Include(a => a.Partitions)
+                .SingleAsync(a => a.Guid == article.Guid);
+            loaded.AddPartition(await context.Partitions.SingleAsync(p => p.Guid == branch.Guid));
+            await context.SaveChangesAsync();
+        }
+
+        await using (var context = CreateContext())
+        {
+            var loaded = await context.Articles
+                .Include(a => a.Partitions)
+                .SingleAsync(a => a.Guid == article.Guid);
+            loaded.RemovePartition(branch.Guid);
+            await context.SaveChangesAsync();
+        }
+
+        var removal = (await ReadOutboxAsync()).Last();
+
+        // Actors that could see the article only through the branch lose access
+        // with this change, and must still be told about it.
+        Assert.Equal(ArticleEventTypes.Edited, removal.EventType);
+        Assert.Contains(branch.Guid, ReadPartitions(removal));
+    }
+
+    [Fact]
+    public async Task SaveChanges_WhenArticleDeleted_ShouldReportThePartitionsItHad()
+    {
+        var article = await SaveNewArticleAsync();
+
+        await using (var context = CreateContext())
+        {
+            var loaded = await context.Articles
+                .Include(a => a.Barcode)
+                .Include(a => a.Dimension)
+                .Include(a => a.Partitions)
+                .SingleAsync(a => a.Guid == article.Guid);
+            context.Articles.Remove(loaded);
+            await context.SaveChangesAsync();
+        }
+
+        var deleted = (await ReadOutboxAsync()).Last();
+
+        Assert.Equal(ArticleEventTypes.Deleted, deleted.EventType);
+        Assert.Equal([FargoCoreWellKnowGuids.GlobalPartitionGuid], ReadPartitions(deleted));
+    }
+
+    private async Task<Partition> SaveBranchPartitionAsync()
+    {
+        await using var context = CreateContext();
+
+        var global = Partition.CreateGlobalPartition(new Name("Global"));
+        var branch = Partition.CreatePartition(new Name("Branch"), global);
+        context.Partitions.AddRange(global, branch);
+        await context.SaveChangesAsync();
+
+        return branch;
+    }
+
+    private static List<Guid> ReadPartitions(OutboxMessage message)
+    {
+        using var body = JsonDocument.Parse(message.Body);
+
+        return [.. body.RootElement.GetProperty("partitionGuids").EnumerateArray().Select(p => p.GetGuid())];
     }
 
     [Fact]
