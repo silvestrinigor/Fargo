@@ -18,7 +18,8 @@ editing pages under `docs/`.
   there), `web-api/reference/fargo.swagger.json`
   (`scripts/generate-rest-api-docs.sh`), and `api/` (built from the XML docs).
 - **New page:** a lowercase-hyphenated file in its section folder, an entry in
-  the single `docs/toc.yml`, and a link from the section overview.
+  `docs/manual/toc.yml` (paths relative to it, like `../server/x.md`), and a
+  link from the section overview.
 - **Structure:** one `#` heading in Title Case matching `toc.yml`, an opening
   paragraph, then `##` sections in sentence case. Path pages end with
   `## Next steps`.

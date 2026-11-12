@@ -1,5 +1,5 @@
 using Fargo.Application.Common.Paging;
-using Fargo.Application.Operations.ServiceAccounts.Dtos;
+using Fargo.Application.Dtos.ServiceAccounts;
 
 namespace Fargo.Application.Persistence.Repositories;
 

@@ -42,8 +42,11 @@ and links there.
 
 1. Put it in the folder of its section, named in lowercase with hyphens, for
    example `server/realtime.md`.
-2. Add it to `docs/toc.yml`. That's the single table of contents for the whole
-   site, so a page that isn't listed there can't be found from the navigation.
+2. Add it to `docs/manual/toc.yml`, the sidebar for all the manual pages. Use
+   paths relative to that file (`../server/realtime.md`). A page that isn't
+   listed there can't be found from the navigation. The top bar
+   (`docs/toc.yml`) only separates the manual from the generated API
+   reference, so you don't edit it.
 3. Link to it from the section's overview page, and from the pages that cover
    neighboring topics.
 

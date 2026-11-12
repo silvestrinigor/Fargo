@@ -1,7 +1,7 @@
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Operations.ServiceAccounts;
-using Fargo.Application.Operations.ServiceAccounts.Dtos;
+using Fargo.Application.Commands.ServiceAccounts;
+using Fargo.Application.Dtos.ServiceAccounts;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;

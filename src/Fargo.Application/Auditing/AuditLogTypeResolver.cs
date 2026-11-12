@@ -1,12 +1,12 @@
-using Fargo.Application.Operations.Articles;
-using Fargo.Application.Operations.Identity;
-using Fargo.Application.Operations.Initialization;
-using Fargo.Application.Operations.Items;
-using Fargo.Application.Operations.Partitions;
-using Fargo.Application.Operations.ServiceAccounts;
-using Fargo.Application.Operations.SupplyOrders;
-using Fargo.Application.Operations.UserGroups;
-using Fargo.Application.Operations.Users;
+using Fargo.Application.Commands.Articles;
+using Fargo.Application.Commands.Identity;
+using Fargo.Application.Commands.Initialization;
+using Fargo.Application.Commands.Items;
+using Fargo.Application.Commands.Partitions;
+using Fargo.Application.Commands.ServiceAccounts;
+using Fargo.Application.Commands.SupplyOrders;
+using Fargo.Application.Commands.UserGroups;
+using Fargo.Application.Commands.Users;
 using Fargo.Core.Audits;
 
 namespace Fargo.Application.Auditing;

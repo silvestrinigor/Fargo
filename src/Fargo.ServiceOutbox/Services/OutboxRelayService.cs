@@ -1,6 +1,6 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Operations.Outbox;
-using Fargo.Application.Operations.Outbox.Dtos;
+using Fargo.Application.Commands.Outbox;
+using Fargo.Application.Dtos.Outbox;
 using Fargo.ServiceOutbox.Options;
 using Microsoft.Extensions.Options;
 

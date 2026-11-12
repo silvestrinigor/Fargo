@@ -1,7 +1,7 @@
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Operations.SupplyOrders;
-using Fargo.Application.Operations.SupplyOrders.Dtos;
+using Fargo.Application.Commands.SupplyOrders;
+using Fargo.Application.Dtos.SupplyOrders;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;

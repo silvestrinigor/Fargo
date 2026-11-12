@@ -1,7 +1,8 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.Common.Paging;
-using Fargo.Application.Operations.Partitions;
-using Fargo.Application.Operations.Partitions.Dtos;
+using Fargo.Application.Commands.Partitions;
+using Fargo.Application.Dtos.Partitions;
+using Fargo.Application.Queries.Partitions;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 

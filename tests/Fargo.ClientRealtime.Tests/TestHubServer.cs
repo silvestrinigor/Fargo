@@ -1,7 +1,6 @@
 using Fargo.ClientAuthentication;
 using Fargo.RealtimeContracts;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.TestHost;

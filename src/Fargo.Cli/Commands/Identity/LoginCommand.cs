@@ -1,7 +1,7 @@
 using Fargo.Cli.Authentication;
 using Fargo.Cli.Output;
-using Fargo.ClientHttp;
 using Fargo.ClientAuthentication;
+using Fargo.ClientHttp;
 using Fargo.ClientHttp.Models;
 using System.CommandLine;
 

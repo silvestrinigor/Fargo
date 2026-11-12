@@ -1,6 +1,5 @@
 using Fargo.Application.Common.Paging;
-using Fargo.Application.Operations.Users;
-using Fargo.Application.Operations.Users.Dtos;
+using Fargo.Application.Dtos.Users;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;

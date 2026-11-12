@@ -1,7 +1,7 @@
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Operations.Users;
-using Fargo.Application.Operations.Users.Dtos;
+using Fargo.Application.Commands.Users;
+using Fargo.Application.Dtos.Users;
 using Fargo.Application.Persistence;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Common;

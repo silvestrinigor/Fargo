@@ -1,10 +1,3 @@
-using Fargo.Application.Operations.Articles;
-using Fargo.Application.Operations.Audits;
-using Fargo.Application.Operations.Items;
-using Fargo.Application.Operations.Partitions;
-using Fargo.Application.Operations.SupplyOrders;
-using Fargo.Application.Operations.UserGroups;
-using Fargo.Application.Operations.Users;
 using Fargo.Application.Persistence;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Audits;

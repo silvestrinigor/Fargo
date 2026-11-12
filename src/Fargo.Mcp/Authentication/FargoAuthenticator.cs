@@ -1,6 +1,5 @@
-using Fargo.ClientHttp;
 using Fargo.ClientAuthentication;
-using Fargo.ClientHttp.ErrorHandling;
+using Fargo.ClientHttp;
 using Fargo.ClientHttp.Models;
 using Fargo.Mcp.Configuration;
 

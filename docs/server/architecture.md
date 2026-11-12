@@ -50,6 +50,17 @@ resource, for example `AddFargoArticleApplication`). HTTP endpoints stay thin:
 each endpoint resolves the relevant handler, builds the command or query from
 the request, and returns the result.
 
+The application layer is organized by kind first, then by resource, and each
+namespace mirrors its folder:
+
+| Folder | Namespace | Contains |
+| --- | --- | --- |
+| `Commands/<Resource>/` | `Fargo.Application.Commands.<Resource>` | Commands and their handlers. |
+| `Queries/<Resource>/` | `Fargo.Application.Queries.<Resource>` | Queries and their handlers. |
+| `Dtos/<Resource>/` | `Fargo.Application.Dtos.<Resource>` | Request and response DTOs, and their mappings. |
+| `Exceptions/<Resource>/` | `Fargo.Application.Exceptions.<Resource>` | Exceptions specific to one resource. |
+| `DependencyInjection/` | `Fargo.Application.DependencyInjection` | The handler registrations, one file per resource. |
+
 Every command handler is wrapped in decorators, from the outside in:
 
 1. **Logging**: logs the operation, its actor and its duration.
