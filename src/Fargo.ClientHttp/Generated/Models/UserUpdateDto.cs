@@ -14,14 +14,6 @@ namespace Fargo.ClientHttp.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The authentication property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto? Authentication { get; set; }
-#nullable restore
-#else
-        public global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto Authentication { get; set; }
-#endif
         /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -54,54 +46,6 @@ namespace Fargo.ClientHttp.Models
 #else
         public string Nameid { get; set; }
 #endif
-        /// <summary>The partitionAccessesToAdd property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionAccessesToAdd { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionAccessesToAdd { get; set; }
-#endif
-        /// <summary>The partitionAccessesToRemove property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionAccessesToRemove { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionAccessesToRemove { get; set; }
-#endif
-        /// <summary>The partitionsToAdd property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionsToAdd { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionsToAdd { get; set; }
-#endif
-        /// <summary>The partitionsToRemove property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionsToRemove { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionsToRemove { get; set; }
-#endif
-        /// <summary>The userGroupsToAdd property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? UserGroupsToAdd { get; set; }
-#nullable restore
-#else
-        public List<Guid?> UserGroupsToAdd { get; set; }
-#endif
-        /// <summary>The userGroupsToRemove property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? UserGroupsToRemove { get; set; }
-#nullable restore
-#else
-        public List<Guid?> UserGroupsToRemove { get; set; }
-#endif
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.UserUpdateDto"/> and sets the default values.
         /// </summary>
@@ -127,17 +71,10 @@ namespace Fargo.ClientHttp.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "authentication", n => { Authentication = n.GetObjectValue<global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto>(global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto.CreateFromDiscriminatorValue); } },
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "firstName", n => { FirstName = n.GetStringValue(); } },
                 { "lastName", n => { LastName = n.GetStringValue(); } },
                 { "nameid", n => { Nameid = n.GetStringValue(); } },
-                { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "partitionAccessesToRemove", n => { PartitionAccessesToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "partitionsToRemove", n => { PartitionsToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "userGroupsToAdd", n => { UserGroupsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "userGroupsToRemove", n => { UserGroupsToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
             };
         }
         /// <summary>
@@ -147,17 +84,10 @@ namespace Fargo.ClientHttp.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteObjectValue<global::Fargo.ClientHttp.Models.UserAuthenticationUpdateDto>("authentication", Authentication);
             writer.WriteStringValue("description", Description);
             writer.WriteStringValue("firstName", FirstName);
             writer.WriteStringValue("lastName", LastName);
             writer.WriteStringValue("nameid", Nameid);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToRemove", PartitionAccessesToRemove);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToRemove", PartitionsToRemove);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("userGroupsToAdd", UserGroupsToAdd);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("userGroupsToRemove", UserGroupsToRemove);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

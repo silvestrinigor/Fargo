@@ -7,12 +7,5 @@ public sealed record UserUpdateDto(
     Nameid? Nameid = null,
     FirstName? FirstName = null,
     LastName? LastName = null,
-    Description? Description = null,
-    UserAuthenticationUpdateDto? Authentication = null,
-    IReadOnlyCollection<Guid>? PartitionsToAdd = null,
-    IReadOnlyCollection<Guid>? PartitionsToRemove = null,
-    IReadOnlyCollection<Guid>? UserGroupsToAdd = null,
-    IReadOnlyCollection<Guid>? UserGroupsToRemove = null,
-    IReadOnlyCollection<Guid>? PartitionAccessesToAdd = null,
-    IReadOnlyCollection<Guid>? PartitionAccessesToRemove = null
+    Description? Description = null
 );

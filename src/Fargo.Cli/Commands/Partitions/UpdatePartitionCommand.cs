@@ -9,10 +9,13 @@ public sealed class UpdatePartitionCommand : Command
 {
     public UpdatePartitionCommand(FargoApiClient client)
         : base("update", """
-            Update an existing partition. Only the options you pass are changed.
+            Update the name or description of an existing partition. Only the options you pass are changed.
+
+            To move a partition under another parent, use 'set-parent'.
 
             Examples:
-              fargo partition update 00000000-0000-0000-0000-000000000002 --parent 00000000-0000-0000-0000-000000000001
+              fargo partition update 00000000-0000-0000-0000-000000000002 --name "Warehouse A"
+              fargo partition update 00000000-0000-0000-0000-000000000002 --description "Main warehouse"
             """)
     {
         var guidArgument = new Argument<Guid>("guid")
@@ -20,22 +23,28 @@ public sealed class UpdatePartitionCommand : Command
             Description = "The partition GUID."
         };
 
-        var parentOption = new Option<Guid?>("--parent")
+        var nameOption = new Option<string?>("--name")
         {
-            Description = "New parent partition GUID."
+            Description = "New name."
+        };
+
+        var descriptionOption = new Option<string?>("--description")
+        {
+            Description = "New description."
         };
 
         Add(guidArgument);
-        Add(parentOption);
+        Add(nameOption);
+        Add(descriptionOption);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
-            var parent = parseResult.GetValue(parentOption);
 
             var dto = new PartitionUpdateDto
             {
-                ParentPartitionGuid = parent
+                Name = parseResult.GetValue(nameOption),
+                Description = parseResult.GetValue(descriptionOption)
             };
 
             await client.V1.Partitions[guid].PatchAsync(dto, cancellationToken: cancellationToken);

@@ -76,5 +76,35 @@ public enum ActionType
     /// <summary>
     /// Grants and revokes the permissions of a service account.
     /// </summary>
-    ChangeServiceAccountPermissions = 37
+    ChangeServiceAccountPermissions = 37,
+
+    /// <summary>
+    /// Changes the partitions a user belongs to and the partitions it can access.
+    /// </summary>
+    ChangeUserPartitions = 38,
+
+    /// <summary>
+    /// Changes the partitions a user group belongs to and the partitions it can access.
+    /// </summary>
+    ChangeUserGroupPartitions = 39,
+
+    /// <summary>
+    /// Changes the partitions a service account belongs to and the partitions it can access.
+    /// </summary>
+    ChangeServiceAccountPartitions = 40,
+
+    /// <summary>
+    /// Sets or clears the parent of a user group, which passes the parent's permissions down to the group's members.
+    /// </summary>
+    ChangeUserGroupParent = 41,
+
+    /// <summary>
+    /// Moves a partition under another parent, which changes who can access it.
+    /// </summary>
+    ChangePartitionParent = 42,
+
+    /// <summary>
+    /// Replaces a service account's secret. Separate from <see cref="EditServiceAccount"/> so it can be granted on its own.
+    /// </summary>
+    RotateServiceAccountSecret = 43
 }

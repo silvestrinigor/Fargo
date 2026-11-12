@@ -30,42 +30,6 @@ namespace Fargo.ClientHttp.Models
 #else
         public string Nameid { get; set; }
 #endif
-        /// <summary>The parentUserGroup property</summary>
-        public Guid? ParentUserGroup { get; set; }
-        /// <summary>The partitionAccessesToAdd property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionAccessesToAdd { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionAccessesToAdd { get; set; }
-#endif
-        /// <summary>The partitionAccessesToRemove property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionAccessesToRemove { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionAccessesToRemove { get; set; }
-#endif
-        /// <summary>The partitionsToAdd property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionsToAdd { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionsToAdd { get; set; }
-#endif
-        /// <summary>The partitionsToRemove property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionsToRemove { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionsToRemove { get; set; }
-#endif
-        /// <summary>The removeParentUserGroup property</summary>
-        public bool? RemoveParentUserGroup { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.UserGroupUpdateDto"/> and sets the default values.
         /// </summary>
@@ -93,12 +57,6 @@ namespace Fargo.ClientHttp.Models
             {
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "nameid", n => { Nameid = n.GetStringValue(); } },
-                { "parentUserGroup", n => { ParentUserGroup = n.GetGuidValue(); } },
-                { "partitionAccessesToAdd", n => { PartitionAccessesToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "partitionAccessesToRemove", n => { PartitionAccessesToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "partitionsToRemove", n => { PartitionsToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "removeParentUserGroup", n => { RemoveParentUserGroup = n.GetBoolValue(); } },
             };
         }
         /// <summary>
@@ -110,12 +68,6 @@ namespace Fargo.ClientHttp.Models
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("description", Description);
             writer.WriteStringValue("nameid", Nameid);
-            writer.WriteGuidValue("parentUserGroup", ParentUserGroup);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToAdd", PartitionAccessesToAdd);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionAccessesToRemove", PartitionAccessesToRemove);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToRemove", PartitionsToRemove);
-            writer.WriteBoolValue("removeParentUserGroup", RemoveParentUserGroup);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

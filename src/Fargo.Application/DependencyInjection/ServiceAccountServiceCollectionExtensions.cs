@@ -16,6 +16,7 @@ public static class ServiceAccountServiceCollectionExtensions
         .AddFargoCommandHandler<ServiceAccountUpdateCommand, ServiceAccountUpdateCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountSetActiveCommand, ServiceAccountSetActiveCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountSetPermissionsCommand, ServiceAccountSetPermissionsCommandHandler>()
+        .AddFargoCommandHandler<ServiceAccountSetPartitionsCommand, ServiceAccountSetPartitionsCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountRotateSecretCommand, ServiceAccountCreatedDto, ServiceAccountRotateSecretCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountDeleteCommand, ServiceAccountDeleteCommandHandler>()
         .AddFargoQueryHandler<ServiceAccountSingleQuery, ServiceAccountDto?, ServiceAccountSingleQueryHandler>()

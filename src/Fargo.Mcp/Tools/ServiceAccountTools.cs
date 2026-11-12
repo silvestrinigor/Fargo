@@ -66,8 +66,8 @@ public static class ServiceAccountTools
         [Description("Optional human-readable description.")] string? description = null,
         [Description("Whether the account is active. Defaults to true.")] bool isActive = true,
         [Description("Permissions to grant; requires the ChangeServiceAccountPermissions permission. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
-        [Description("GUIDs of the partitions the account belongs to (its membership / scope).")] Guid[]? partitionsToAdd = null,
-        [Description("GUIDs of the partitions the account is granted access to.")] Guid[]? partitionAccessesToAdd = null,
+        [Description("GUIDs of the partitions the account belongs to (its membership / scope). Requires the ChangeServiceAccountPartitions permission.")] Guid[]? partitionsToAdd = null,
+        [Description("GUIDs of the partitions the account is granted access to. Requires the ChangeServiceAccountPartitions permission.")] Guid[]? partitionAccessesToAdd = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -89,34 +89,51 @@ public static class ServiceAccountTools
     }
 
     [McpServerTool(Name = "fargo_serviceaccounts_update")]
-    [Description("Update an existing service account. Only the supplied fields are changed; omitted fields are left as-is. Partition membership and partition access are managed independently.")]
+    [Description("Update the description of an existing service account. Activation, permissions and partitions have their own tools.")]
     public static async Task<string> UpdateServiceAccountAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
         [Description("The GUID of the service account to update.")] Guid serviceAccountGuid,
         [Description("The new description.")] string? description = null,
-        [Description("GUIDs of partitions to add to the account's membership.")] Guid[]? partitionsToAdd = null,
-        [Description("GUIDs of partitions to remove from the account's membership.")] Guid[]? partitionsToRemove = null,
-        [Description("GUIDs of partitions to grant the account access to.")] Guid[]? partitionAccessesToAdd = null,
-        [Description("GUIDs of partitions to revoke the account's access from.")] Guid[]? partitionAccessesToRemove = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
         var body = new ServiceAccountUpdateDto
         {
-            Description = description,
-            PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
-            PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove),
-            PartitionAccessesToAdd = ToolInput.ToGuidList(partitionAccessesToAdd),
-            PartitionAccessesToRemove = ToolInput.ToGuidList(partitionAccessesToRemove)
+            Description = description
         };
 
         await client.V1.ServiceAccounts[serviceAccountGuid].PutAsync(body, cancellationToken: cancellationToken);
 
         return $"Service account '{serviceAccountGuid}' updated.";
     }
+    [McpServerTool(Name = "fargo_serviceaccounts_set_partitions")]
+    [Description("Change the partitions of a service account in one request: the partitions it belongs to (membership) and the partitions it can access. At least one list is required and no partition may be in both the add and remove list of the same kind. The caller needs access to every partition it touches. Requires the ChangeServiceAccountPartitions permission, which is separate from the permission to update.")]
+    public static async Task<string> SetServiceAccountPartitionsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the a service account.")] Guid serviceAccountGuid,
+        [Description("GUIDs of partitions to add to the membership.")] Guid[]? partitionsToAdd = null,
+        [Description("GUIDs of partitions to remove from the membership.")] Guid[]? partitionsToRemove = null,
+        [Description("GUIDs of partitions to grant access to.")] Guid[]? partitionAccessesToAdd = null,
+        [Description("GUIDs of partitions to revoke access from.")] Guid[]? partitionAccessesToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
+        var body = new PartitionsChangeDto
+        {
+            PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
+            PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove),
+            PartitionAccessesToAdd = ToolInput.ToGuidList(partitionAccessesToAdd),
+            PartitionAccessesToRemove = ToolInput.ToGuidList(partitionAccessesToRemove)
+        };
+
+        await client.V1.ServiceAccounts[serviceAccountGuid].Partitions.PutAsync(body, cancellationToken: cancellationToken);
+
+        return $"Service account '{serviceAccountGuid}' partitions updated.";
+    }
     [McpServerTool(Name = "fargo_serviceaccounts_set_permissions")]
     [Description("Grant and revoke permissions of a service account in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. The caller cannot change its own permissions. Requires the ChangeServiceAccountPermissions permission, which is separate from the permission to update.")]
     public static async Task<string> SetServiceAccountPermissionsAsync(
@@ -159,7 +176,7 @@ public static class ServiceAccountTools
     }
 
     [McpServerTool(Name = "fargo_serviceaccounts_rotate_secret")]
-    [Description("Rotate a service account's secret. The old secret stops working immediately. The new secret is returned EXACTLY ONCE in this result and cannot be retrieved later, so hand it to the user to store securely.")]
+    [Description("Rotate a service account's secret. The old secret stops working immediately. The new secret is returned EXACTLY ONCE in this result and cannot be retrieved later, so hand it to the user to store securely. Requires the RotateServiceAccountSecret permission, which is separate from the permission to update.")]
     public static async Task<ServiceAccountCreatedSummary> RotateServiceAccountSecretAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,

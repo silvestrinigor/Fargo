@@ -102,6 +102,12 @@ public enum ActionType
     ChangeUserPermissions = 35,
     ChangeUserGroupPermissions = 36,
     ChangeServiceAccountPermissions = 37,
+    ChangeUserPartitions = 38,
+    ChangeUserGroupPartitions = 39,
+    ChangeServiceAccountPartitions = 40,
+    ChangeUserGroupParent = 41,
+    ChangePartitionParent = 42,
+    RotateServiceAccountSecret = 43,
 }
 
 /// <summary>

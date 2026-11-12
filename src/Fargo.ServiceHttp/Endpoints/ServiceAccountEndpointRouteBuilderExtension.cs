@@ -27,6 +27,8 @@ public static class ServiceAccountEndpointRouteBuilderExtension
         group.MapSetServiceAccountActive();
 
         group.MapSetServiceAccountPermissions();
+
+        group.MapSetServiceAccountPartitions();
         group.MapRotateServiceAccountSecret();
         group.MapDeleteServiceAccount();
     }
@@ -105,7 +107,7 @@ public static class ServiceAccountEndpointRouteBuilderExtension
         builder.MapPost("/", Create)
             .WithName("CreateServiceAccount")
             .WithSummary("Creates a new service account")
-            .WithDescription("Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated). Granting permissions requires the ChangeServiceAccountPermissions permission.")
+            .WithDescription("Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated). Granting permissions requires ChangeServiceAccountPermissions, and adding partitions or partition access requires ChangeServiceAccountPartitions.")
             .Produces<ServiceAccountCreatedDto>(StatusCodes.Status200OK);
 
         return builder;
@@ -130,7 +132,7 @@ public static class ServiceAccountEndpointRouteBuilderExtension
         builder.MapPut("/{serviceAccountGuid:guid}", Update)
             .WithName("UpdateServiceAccount")
             .WithSummary("Updates a service account")
-            .WithDescription("Updates mutable service-account state: description and partition accesses. Use the is-active endpoint to activate or deactivate.")
+            .WithDescription("Updates the description of a service account. Use the is-active, permissions and partitions endpoints for the rest.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -201,6 +203,32 @@ public static class ServiceAccountEndpointRouteBuilderExtension
     }
 
     #endregion Set permissions
+    #region Set partitions
+
+    private static IEndpointRouteBuilder MapSetServiceAccountPartitions(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{serviceAccountGuid:guid}/partitions", SetPartitions)
+            .WithName("SetServiceAccountPartitions")
+            .WithSummary("Changes the partitions of a service account")
+            .WithDescription("Adds and removes the partitions the account belongs to (membership) and the partitions it can access in one request. At least one is required. The caller needs access to every partition it touches. Requires the ChangeServiceAccountPartitions permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetPartitions(
+        Guid serviceAccountGuid,
+        PartitionsChangeDto request,
+        ICommandHandler<ServiceAccountSetPartitionsCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new ServiceAccountSetPartitionsCommand(serviceAccountGuid, request), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+    #endregion Set partitions
+
     #region Rotate secret
 
     private static IEndpointRouteBuilder MapRotateServiceAccountSecret(this IEndpointRouteBuilder builder)
@@ -208,7 +236,7 @@ public static class ServiceAccountEndpointRouteBuilderExtension
         builder.MapPost("/{serviceAccountGuid:guid}/rotate-secret", RotateSecret)
             .WithName("RotateServiceAccountSecret")
             .WithSummary("Rotates a service account's secret")
-            .WithDescription("Generates a new client secret (returned EXACTLY ONCE) and invalidates all tokens previously issued to the account.")
+            .WithDescription("Generates a new client secret (returned EXACTLY ONCE) and invalidates all tokens previously issued to the account. Requires the RotateServiceAccountSecret permission, which is separate from the edit permission.")
             .Produces<ServiceAccountCreatedDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 

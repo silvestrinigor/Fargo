@@ -2,6 +2,8 @@
 #pragma warning disable CS0618
 using Fargo.ClientHttp.Models;
 using Fargo.ClientHttp.V1.UserGroups.Item.IsActive;
+using Fargo.ClientHttp.V1.UserGroups.Item.Parent;
+using Fargo.ClientHttp.V1.UserGroups.Item.Partitions;
 using Fargo.ClientHttp.V1.UserGroups.Item.Permissions;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions.Serialization;
@@ -23,6 +25,16 @@ namespace Fargo.ClientHttp.V1.UserGroups.Item
         public global::Fargo.ClientHttp.V1.UserGroups.Item.IsActive.IsActiveRequestBuilder IsActive
         {
             get => new global::Fargo.ClientHttp.V1.UserGroups.Item.IsActive.IsActiveRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The parent property</summary>
+        public global::Fargo.ClientHttp.V1.UserGroups.Item.Parent.ParentRequestBuilder Parent
+        {
+            get => new global::Fargo.ClientHttp.V1.UserGroups.Item.Parent.ParentRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The partitions property</summary>
+        public global::Fargo.ClientHttp.V1.UserGroups.Item.Partitions.PartitionsRequestBuilder Partitions
+        {
+            get => new global::Fargo.ClientHttp.V1.UserGroups.Item.Partitions.PartitionsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The permissions property</summary>
         public global::Fargo.ClientHttp.V1.UserGroups.Item.Permissions.PermissionsRequestBuilder Permissions
@@ -81,7 +93,7 @@ namespace Fargo.ClientHttp.V1.UserGroups.Item
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.UserGroupDto>(requestInfo, global::Fargo.ClientHttp.Models.UserGroupDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Updates user group state: name, description, parent group and partitions. Use the is-active and permissions endpoints to change those.
+        /// Updates the name and description of a user group. Use the is-active, permissions, partitions and parent endpoints for the rest.
         /// </summary>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -137,7 +149,7 @@ namespace Fargo.ClientHttp.V1.UserGroups.Item
             return requestInfo;
         }
         /// <summary>
-        /// Updates user group state: name, description, parent group and partitions. Use the is-active and permissions endpoints to change those.
+        /// Updates the name and description of a user group. Use the is-active, permissions, partitions and parent endpoints for the rest.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

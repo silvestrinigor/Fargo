@@ -15,6 +15,9 @@ public sealed class UserGroupsCommand : Command
         Add(new UpdateUserGroupCommand(client));
         Add(new SetUserGroupActiveCommand(client));
         Add(new SetUserGroupPermissionsCommand(client));
+        Add(new SetUserGroupPartitionsCommand(client));
+        Add(new SetUserGroupParentCommand(client));
+        Add(new RemoveUserGroupParentCommand(client));
         Add(new DeleteUserGroupCommand(client));
     }
 }

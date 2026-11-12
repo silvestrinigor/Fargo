@@ -39,13 +39,7 @@ Non-interactive callers (integrations, scheduled jobs, other services) authentic
 
 A service exchanges its credentials for a short-lived access token at `POST /identity/service-token` (the client-credentials flow). Unlike user login, no refresh token is issued - a service simply requests a new token when the current one nears expiry. The issued token carries an actor-type claim marking it as a service, so it resolves to a service principal.
 
-Service accounts are managed under `/service-accounts` (create, read, update, rotate secret, delete), each operation gated by a dedicated permission (`CreateServiceAccount`, `ReadServiceAccount`, `EditServiceAccount`, `DeleteServiceAccount`).
-
-Activating and deactivating are separate from editing. `ActivateUser`, `ActivateUserGroup` and `ActivateServiceAccount` gate `PUT /users/{guid}/is-active`, `PUT /user-groups/{guid}/is-active` and `PUT /service-accounts/{guid}/is-active`. The update endpoints no longer accept an active flag, so holding `EditUser`, `EditUserGroup` or `EditServiceAccount` is not enough to activate or deactivate.
-
-Moving an item is separate from editing it. `MoveItem` gates `PUT /items/{guid}/location` (place the item in a container) and `DELETE /items/{guid}/location` (remove it from its container); `PATCH /items/{guid}` now only changes partitions and requires `EditItem`.
-
-Granting and revoking permissions is separate from editing too. `ChangeUserPermissions`, `ChangeUserGroupPermissions` and `ChangeServiceAccountPermissions` gate `PUT /users/{guid}/permissions`, `PUT /user-groups/{guid}/permissions` and `PUT /service-accounts/{guid}/permissions`. A request lists the permissions to add and to remove; it must name at least one and none in both lists. The caller must hold every permission it grants or revokes, and it cannot change its own permissions (as a user or a service account). Creating a user, user group or service account with permissions requires the same `Change*Permissions` permission. The update endpoints no longer accept permissions, and each change is recorded with the `PermissionsChanged` audit log type. Deactivating an account, or rotating its secret, invalidates all tokens previously issued to it.
+Service accounts are managed under `/service-accounts` (create, read, update, rotate secret, delete), each operation gated by a dedicated permission (`CreateServiceAccount`, `ReadServiceAccount`, `EditServiceAccount`, `DeleteServiceAccount`, and `RotateServiceAccountSecret` for rotating the secret). Deactivating an account, or rotating its secret, invalidates all tokens previously issued to it.
 
 Like a user, a service account is a **partitioned** entity: it carries both a **partition membership** (the partitions it belongs to, which define its scope and drive partition-filtered listings and audit-log partition association) and **partition access** (the partitions it is allowed to reach, expanded down the partition hierarchy). When creating or updating an account, the granting actor must itself have access to every partition it assigns as membership or access. Unlike a user, a service account has no mandatory global-partition membership — it is a scoped machine identity whose memberships are assigned explicitly.
 
@@ -104,11 +98,54 @@ create / delete / edit permission per resource plus a few specific actions such
 as `ChangeAnotherUserPassword`, `ChangeUserGroupMembers`, `ReadAuditLogs`,
 `ReadItemEvents`, and the service-account actions (`CreateServiceAccount`, `ReadServiceAccount`, `EditServiceAccount`, `DeleteServiceAccount`).
 
-Activating and deactivating are separate from editing. `ActivateUser`, `ActivateUserGroup` and `ActivateServiceAccount` gate `PUT /users/{guid}/is-active`, `PUT /user-groups/{guid}/is-active` and `PUT /service-accounts/{guid}/is-active`. The update endpoints no longer accept an active flag, so holding `EditUser`, `EditUserGroup` or `EditServiceAccount` is not enough to activate or deactivate.
+Some operations are separate from editing, each with its own permission, so a
+role can edit profiles without managing privileges. Holding an `Edit*`
+permission is not enough for any of them.
 
-Moving an item is separate from editing it. `MoveItem` gates `PUT /items/{guid}/location` (place the item in a container) and `DELETE /items/{guid}/location` (remove it from its container); `PATCH /items/{guid}` now only changes partitions and requires `EditItem`.
+Activating and deactivating: `ActivateUser`, `ActivateUserGroup` and
+`ActivateServiceAccount` gate `PUT /users/{guid}/is-active`,
+`PUT /user-groups/{guid}/is-active` and
+`PUT /service-accounts/{guid}/is-active`.
 
-Granting and revoking permissions is separate from editing too. `ChangeUserPermissions`, `ChangeUserGroupPermissions` and `ChangeServiceAccountPermissions` gate `PUT /users/{guid}/permissions`, `PUT /user-groups/{guid}/permissions` and `PUT /service-accounts/{guid}/permissions`. A request lists the permissions to add and to remove; it must name at least one and none in both lists. The caller must hold every permission it grants or revokes, and it cannot change its own permissions (as a user or a service account). Creating a user, user group or service account with permissions requires the same `Change*Permissions` permission. The update endpoints no longer accept permissions, and each change is recorded with the `PermissionsChanged` audit log type.
+Moving an item: `MoveItem` gates `PUT /items/{guid}/location` (place the item in
+a container) and `DELETE /items/{guid}/location` (remove it from its container).
+`PATCH /items/{guid}` only changes partitions and requires `EditItem`.
+
+Granting and revoking permissions: `ChangeUserPermissions`,
+`ChangeUserGroupPermissions` and `ChangeServiceAccountPermissions` gate
+`PUT /users/{guid}/permissions`, `PUT /user-groups/{guid}/permissions` and
+`PUT /service-accounts/{guid}/permissions`. A request lists the permissions to
+add and to remove; it must name at least one, and none in both lists. The caller
+must hold every permission it grants or revokes, and it cannot change its own
+permissions (as a user or a service account). Creating a user, user group or
+service account with permissions requires the same permission. Each change is
+recorded with the `PermissionsChanged` audit log type.
+
+Group membership, partitions and parents: `ChangeUserGroupMembers` gates
+`PUT /users/{guid}/user-groups`. `ChangeUserPartitions`,
+`ChangeUserGroupPartitions` and `ChangeServiceAccountPartitions` gate
+`PUT /users/{guid}/partitions`, `PUT /user-groups/{guid}/partitions` and
+`PUT /service-accounts/{guid}/partitions`, which change partition membership and
+partition access together. `ChangeUserGroupParent` gates
+`PUT /user-groups/{guid}/parent` and `DELETE /user-groups/{guid}/parent`, and
+`ChangePartitionParent` gates `PUT /partitions/{guid}/parent`. A partition
+always has a parent, so it can be moved but not detached.
+
+A user inherits the permissions of its groups and of their ancestors. Adding a
+user to a group, or placing a group under a parent, therefore requires the
+caller to hold every permission the group and its ancestors carry. Creating a
+user with groups, or a user group with a parent, applies the same check.
+Creating a user, user group or service account with partitions requires the
+matching `Change*Partitions` permission.
+
+Passwords: `PUT /users/{guid}/password` resets a password and makes the user
+choose a new one at the next sign-in. `PUT /users/{guid}/password-expiration`
+and `DELETE /users/{guid}/password-expiration` set and clear the default
+expiration period. All three require `ChangeAnotherUserPassword`, and a caller
+cannot reset its own password this way. A reset is recorded with the
+`PasswordChanged` audit log type.
+
+Rotating a service account secret requires `RotateServiceAccountSecret`.
 
 Permissions can be granted directly to a user or to a user group; a user's
 effective permissions are the union of both (including permissions inherited

@@ -14,6 +14,11 @@ public sealed class UsersCommand : Command
         Add(new UpdateUserCommand(client));
         Add(new SetUserActiveCommand(client));
         Add(new SetUserPermissionsCommand(client));
+        Add(new SetUserGroupsCommand(client));
+        Add(new SetUserPartitionsCommand(client));
+        Add(new ResetUserPasswordCommand(client));
+        Add(new SetUserPasswordExpirationCommand(client));
+        Add(new RemoveUserPasswordExpirationCommand(client));
         Add(new DeleteUserCommand(client));
     }
 }

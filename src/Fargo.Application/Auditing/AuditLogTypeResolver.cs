@@ -35,6 +35,7 @@ public static class AuditLogTypeResolver
         // Partitions
         [typeof(PartitionCreateCommand)] = AuditLogType.EntityCreated,
         [typeof(PartitionUpdateCommand)] = AuditLogType.EntityUpdated,
+        [typeof(PartitionSetParentCommand)] = AuditLogType.EntityUpdated,
         [typeof(PartitionDeleteCommand)] = AuditLogType.EntityDeleted,
 
         // Users
@@ -42,6 +43,11 @@ public static class AuditLogTypeResolver
         [typeof(UserUpdateCommand)] = AuditLogType.EntityUpdated,
         [typeof(UserSetActiveCommand)] = AuditLogType.EntityUpdated,
         [typeof(UserSetPermissionsCommand)] = AuditLogType.PermissionsChanged,
+        [typeof(UserSetUserGroupsCommand)] = AuditLogType.EntityUpdated,
+        [typeof(UserSetPartitionsCommand)] = AuditLogType.EntityUpdated,
+        [typeof(UserResetPasswordCommand)] = AuditLogType.PasswordChanged,
+        [typeof(UserSetPasswordExpirationCommand)] = AuditLogType.EntityUpdated,
+        [typeof(UserRemovePasswordExpirationCommand)] = AuditLogType.EntityUpdated,
         [typeof(UserDeleteCommand)] = AuditLogType.EntityDeleted,
 
         // User groups
@@ -49,6 +55,9 @@ public static class AuditLogTypeResolver
         [typeof(UserGroupUpdateCommand)] = AuditLogType.EntityUpdated,
         [typeof(UserGroupSetActiveCommand)] = AuditLogType.EntityUpdated,
         [typeof(UserGroupSetPermissionsCommand)] = AuditLogType.PermissionsChanged,
+        [typeof(UserGroupSetPartitionsCommand)] = AuditLogType.EntityUpdated,
+        [typeof(UserGroupSetParentCommand)] = AuditLogType.EntityUpdated,
+        [typeof(UserGroupRemoveParentCommand)] = AuditLogType.EntityUpdated,
         [typeof(UserGroupDeleteCommand)] = AuditLogType.EntityDeleted,
 
         // Service accounts
@@ -56,6 +65,7 @@ public static class AuditLogTypeResolver
         [typeof(ServiceAccountUpdateCommand)] = AuditLogType.EntityUpdated,
         [typeof(ServiceAccountSetActiveCommand)] = AuditLogType.EntityUpdated,
         [typeof(ServiceAccountSetPermissionsCommand)] = AuditLogType.PermissionsChanged,
+        [typeof(ServiceAccountSetPartitionsCommand)] = AuditLogType.EntityUpdated,
         [typeof(ServiceAccountDeleteCommand)] = AuditLogType.EntityDeleted,
         [typeof(ServiceAccountRotateSecretCommand)] = AuditLogType.ServiceAccountSecretRotated,
 

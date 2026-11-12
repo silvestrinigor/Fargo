@@ -112,3 +112,17 @@ public sealed class TestCurrentActor : ICurrentActor
 
     public bool IsAuthenticated { get; init; } = true;
 }
+
+public static class UserGroupRepositoryStubs
+{
+    /// <summary>
+    /// Makes the repository report these permissions as the ones <paramref name="userGroup"/> passes to
+    /// its members (its own and its ancestors'), as the single recursive query does.
+    /// </summary>
+    public static void StubInheritedPermissions(
+        this Fargo.Core.Entities.UserGroups.IUserGroupRepository repository,
+        Fargo.Core.Entities.UserGroups.UserGroup userGroup,
+        params ActionType[] permissions)
+        => repository.GetInheritedPermissionsAsync(userGroup.Guid, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IReadOnlyCollection<ActionType>>(permissions));
+}

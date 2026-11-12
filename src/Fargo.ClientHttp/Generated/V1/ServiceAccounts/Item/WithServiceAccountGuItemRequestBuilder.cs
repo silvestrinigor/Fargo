@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using Fargo.ClientHttp.Models;
 using Fargo.ClientHttp.V1.ServiceAccounts.Item.IsActive;
+using Fargo.ClientHttp.V1.ServiceAccounts.Item.Partitions;
 using Fargo.ClientHttp.V1.ServiceAccounts.Item.Permissions;
 using Fargo.ClientHttp.V1.ServiceAccounts.Item.RotateSecret;
 using Microsoft.Kiota.Abstractions.Extensions;
@@ -24,6 +25,11 @@ namespace Fargo.ClientHttp.V1.ServiceAccounts.Item
         public global::Fargo.ClientHttp.V1.ServiceAccounts.Item.IsActive.IsActiveRequestBuilder IsActive
         {
             get => new global::Fargo.ClientHttp.V1.ServiceAccounts.Item.IsActive.IsActiveRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The partitions property</summary>
+        public global::Fargo.ClientHttp.V1.ServiceAccounts.Item.Partitions.PartitionsRequestBuilder Partitions
+        {
+            get => new global::Fargo.ClientHttp.V1.ServiceAccounts.Item.Partitions.PartitionsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The permissions property</summary>
         public global::Fargo.ClientHttp.V1.ServiceAccounts.Item.Permissions.PermissionsRequestBuilder Permissions
@@ -87,7 +93,7 @@ namespace Fargo.ClientHttp.V1.ServiceAccounts.Item
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.ServiceAccountDto>(requestInfo, global::Fargo.ClientHttp.Models.ServiceAccountDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Updates mutable service-account state: description and partition accesses. Use the is-active endpoint to activate or deactivate.
+        /// Updates the description of a service account. Use the is-active, permissions and partitions endpoints for the rest.
         /// </summary>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -143,7 +149,7 @@ namespace Fargo.ClientHttp.V1.ServiceAccounts.Item
             return requestInfo;
         }
         /// <summary>
-        /// Updates mutable service-account state: description and partition accesses. Use the is-active endpoint to activate or deactivate.
+        /// Updates the description of a service account. Use the is-active, permissions and partitions endpoints for the rest.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

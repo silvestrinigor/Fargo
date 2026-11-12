@@ -1,6 +1,7 @@
 using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.UserGroups;
 using Fargo.Application.Persistence.Repositories;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Informations;
 using Microsoft.EntityFrameworkCore;
@@ -120,6 +121,34 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             partitionGuids,
             userGroup => userGroup.Partitions,
             partition => partition.PartitionGuid);
+
+    public async Task<IReadOnlyCollection<ActionType>> GetInheritedPermissionsAsync(
+        Guid userGroupGuid, CancellationToken cancellationToken = default)
+    {
+        // UNION (not UNION ALL) drops repeated rows, so the walk ends even if the data ever held a cycle.
+        FormattableString query = $"""
+        WITH RECURSIVE user_group_chain AS
+        (
+            SELECT guid, permissions, parent_user_group_guid
+            FROM user_groups
+            WHERE guid = {userGroupGuid}
+
+            UNION
+
+            SELECT parent.guid, parent.permissions, parent.parent_user_group_guid
+            FROM user_groups AS parent
+            INNER JOIN user_group_chain AS child
+                ON child.parent_user_group_guid = parent.guid
+        )
+        SELECT DISTINCT jsonb_array_elements_text(permissions)::integer AS permission
+        FROM user_group_chain
+        ORDER BY permission;
+        """;
+
+        return await context.Database
+            .SqlQuery<ActionType>(query)
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantUserGroupGuidsAsync(Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default)
     {

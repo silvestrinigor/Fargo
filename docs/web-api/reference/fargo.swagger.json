@@ -308,8 +308,8 @@
         "tags": [
           "Items"
         ],
-        "summary": "Replaces an existing item",
-        "description": "Replaces mutable item state including partitions and parent container.",
+        "summary": "Updates an existing item",
+        "description": "Updates mutable item state: partition memberships. Use the location endpoint to move the item.",
         "operationId": "UpdateItem",
         "consumes": [
           "application/json"
@@ -395,6 +395,67 @@
                 "$ref": "#/definitions/ItemDto"
               }
             }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Places an item inside a container",
+        "description": "Sets the parent container of the item, recording a movement. Placing an item in the container it is already in does nothing. Requires the MoveItem permission, which is separate from the edit permission.",
+        "operationId": "SetItemLocation",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "itemGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ItemSetLocationDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Removes an item from its container",
+        "description": "Clears the parent container of the item, recording a movement with no destination. An item that is not in a container is left as it is. Requires the MoveItem permission.",
+        "operationId": "RemoveItemFromContainer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "itemGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
           },
           "404": {
             "description": "Not Found"
@@ -701,7 +762,7 @@
           "Users"
         ],
         "summary": "Replaces an existing user",
-        "description": "Replaces all user state including partitions, user groups, and permissions.",
+        "description": "Updates the username, names and description of a user. Use the is-active, permissions, user-groups, partitions, password and password-expiration endpoints for the rest.",
         "operationId": "UpdateUser",
         "consumes": [
           "application/json"
@@ -813,7 +874,7 @@
           "Users"
         ],
         "summary": "Creates a new user",
-        "description": "Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier.",
+        "description": "Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier. Granting permissions requires ChangeUserPermissions, adding partitions or partition access requires ChangeUserPartitions, and adding user groups requires ChangeUserGroupMembers.",
         "operationId": "CreateUser",
         "consumes": [
           "application/json"
@@ -838,6 +899,259 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/is-active": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Activates or deactivates a user",
+        "description": "Sets whether the user is active. Requires the ActivateUser permission, which is separate from the edit permission.",
+        "operationId": "SetUserActive",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ActiveStateDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/permissions": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Grants and revokes permissions of a user",
+        "description": "Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. A caller cannot change its own permissions. Requires the ChangeUserPermissions permission, which is separate from the edit permission.",
+        "operationId": "SetUserPermissions",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PermissionsChangeDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/user-groups": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Adds and removes the groups of a user",
+        "description": "Adds the user to and removes it from user groups in one request. At least one group is required and none may be in both lists. Joining a group hands the user the permissions of that group and of its ancestors, so the caller must hold all of them. Requires the ChangeUserGroupMembers permission, which is separate from the edit permission.",
+        "operationId": "SetUserUserGroups",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserGroupsChangeDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/partitions": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Changes the partitions of a user",
+        "description": "Adds and removes the partitions the user belongs to (membership) and the partitions it can access in one request. At least one is required. The caller needs access to every partition it touches. Requires the ChangeUserPartitions permission, which is separate from the edit permission.",
+        "operationId": "SetUserPartitions",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartitionsChangeDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/password": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Resets the password of a user",
+        "description": "Sets a new password and requires the user to change it at the next sign-in. A caller cannot reset its own password here; use the identity password change instead. Requires the ChangeAnotherUserPassword permission.",
+        "operationId": "ResetUserPassword",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PasswordResetDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/password-expiration": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Sets how long the passwords of a user last",
+        "description": "Sets the default period after which the password of the user expires. It applies the next time the password is changed; zero means it must be changed immediately. Requires the ChangeAnotherUserPassword permission.",
+        "operationId": "SetUserPasswordExpiration",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PasswordExpirationDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Removes the password expiration of a user",
+        "description": "Clears the default password expiration period, so the passwords of the user no longer expire by default. Requires the ChangeAnotherUserPassword permission.",
+        "operationId": "RemoveUserPasswordExpiration",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -879,7 +1193,7 @@
           "UserGroups"
         ],
         "summary": "Replaces an existing user group",
-        "description": "Replaces all user group state including partitions and permissions.",
+        "description": "Updates the name and description of a user group. Use the is-active, permissions, partitions and parent endpoints for the rest.",
         "operationId": "UpdateUserGroup",
         "consumes": [
           "application/json"
@@ -991,7 +1305,7 @@
           "UserGroups"
         ],
         "summary": "Creates a new user group",
-        "description": "Creates a new user group with optional partitions and permissions. Returns the generated identifier.",
+        "description": "Creates a new user group with optional partitions and permissions. Returns the generated identifier. Granting permissions requires ChangeUserGroupPermissions, adding partitions or partition access requires ChangeUserGroupPartitions, and setting a parent requires ChangeUserGroupParent.",
         "operationId": "CreateUserGroup",
         "consumes": [
           "application/json"
@@ -1016,6 +1330,183 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/is-active": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Activates or deactivates a user group",
+        "description": "Sets whether the user group is active. Requires the ActivateUserGroup permission, which is separate from the edit permission.",
+        "operationId": "SetUserGroupActive",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGroupGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ActiveStateDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/permissions": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Grants and revokes permissions of a user group",
+        "description": "Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. Requires the ChangeUserGroupPermissions permission, which is separate from the edit permission.",
+        "operationId": "SetUserGroupPermissions",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGroupGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PermissionsChangeDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/partitions": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Changes the partitions of a user group",
+        "description": "Adds and removes the partitions the group belongs to (membership) and the partitions it can access in one request. At least one is required. The caller needs access to every partition it touches. Requires the ChangeUserGroupPartitions permission, which is separate from the edit permission.",
+        "operationId": "SetUserGroupPartitions",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGroupGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartitionsChangeDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/parent": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Places a user group under a parent",
+        "description": "Sets the parent of the group. Members of the group inherit the permissions of the parent and of its ancestors, so the caller must hold all of them. Rejects an assignment that would create a cycle. Setting the parent the group already has does nothing. Requires the ChangeUserGroupParent permission.",
+        "operationId": "SetUserGroupParent",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGroupGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ParentUserGroupDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Removes the parent of a user group",
+        "description": "Detaches the group from its parent, so its members stop inheriting the permissions of the parent. A group without a parent is left as it is. Requires the ChangeUserGroupParent permission.",
+        "operationId": "RemoveUserGroupParent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userGroupGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1057,7 +1548,7 @@
           "Partitions"
         ],
         "summary": "Updates an existing partition",
-        "description": "Updates partition properties.",
+        "description": "Updates the name and description of a partition. Use the parent endpoint to move it.",
         "operationId": "UpdatePartition",
         "consumes": [
           "application/json"
@@ -1195,6 +1686,44 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        }
+      }
+    },
+    "/v1/partitions/{partitionGuid}/parent": {
+      "put": {
+        "tags": [
+          "Partitions"
+        ],
+        "summary": "Moves a partition under another parent",
+        "description": "Sets the parent of the partition, which changes who can access it. Rejects a move that would create a cycle. A partition always has a parent, so there is no way to clear it. Setting the parent the partition already has does nothing. Requires the ChangePartitionParent permission, which is separate from the edit permission.",
+        "operationId": "SetPartitionParent",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "partitionGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ParentPartitionDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1451,17 +1980,6 @@
           },
           {
             "in": "query",
-            "name": "entityGuid",
-            "type": "string",
-            "format": "uuid"
-          },
-          {
-            "in": "query",
-            "name": "entityType",
-            "type": "integer"
-          },
-          {
-            "in": "query",
             "name": "periodStart",
             "type": "string",
             "format": "date-time"
@@ -1520,7 +2038,7 @@
           "ServiceAccounts"
         ],
         "summary": "Updates a service account",
-        "description": "Updates mutable service-account state: description, active flag, permissions and partition accesses.",
+        "description": "Updates the description of a service account. Use the is-active, permissions and partitions endpoints for the rest.",
         "operationId": "UpdateServiceAccount",
         "consumes": [
           "application/json"
@@ -1612,7 +2130,7 @@
           "ServiceAccounts"
         ],
         "summary": "Creates a new service account",
-        "description": "Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated).",
+        "description": "Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated). Granting permissions requires ChangeServiceAccountPermissions, and adding partitions or partition access requires ChangeServiceAccountPartitions.",
         "operationId": "CreateServiceAccount",
         "consumes": [
           "application/json"
@@ -1640,13 +2158,127 @@
         }
       }
     },
+    "/v1/service-accounts/{serviceAccountGuid}/is-active": {
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Activates or deactivates a service account",
+        "description": "Sets whether the service account is active. Requires the ActivateServiceAccount permission, which is separate from the edit permission.",
+        "operationId": "SetServiceAccountActive",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ActiveStateDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}/permissions": {
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Grants and revokes permissions of a service account",
+        "description": "Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. A caller cannot change its own permissions. Requires the ChangeServiceAccountPermissions permission, which is separate from the edit permission.",
+        "operationId": "SetServiceAccountPermissions",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PermissionsChangeDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}/partitions": {
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Changes the partitions of a service account",
+        "description": "Adds and removes the partitions the account belongs to (membership) and the partitions it can access in one request. At least one is required. The caller needs access to every partition it touches. Requires the ChangeServiceAccountPartitions permission, which is separate from the edit permission.",
+        "operationId": "SetServiceAccountPartitions",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serviceAccountGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PartitionsChangeDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/v1/service-accounts/{serviceAccountGuid}/rotate-secret": {
       "post": {
         "tags": [
           "ServiceAccounts"
         ],
         "summary": "Rotates a service account's secret",
-        "description": "Generates a new client secret (returned EXACTLY ONCE) and invalidates all tokens previously issued to the account.",
+        "description": "Generates a new client secret (returned EXACTLY ONCE) and invalidates all tokens previously issued to the account. Requires the RotateServiceAccountSecret permission, which is separate from the edit permission.",
         "operationId": "RotateServiceAccountSecret",
         "produces": [
           "application/json"
@@ -1672,24 +2304,399 @@
           }
         }
       }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}": {
+      "get": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Gets a single supply order",
+        "description": "Retrieves a single supply order, including its lines and receiving container, by its unique identifier.",
+        "operationId": "GetSupplyOrder",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "supplyOrderGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SupplyOrderDto"
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders": {
+      "get": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Gets multiple supply orders",
+        "description": "Retrieves a paginated list of supply orders, optionally filtered by status and a case-insensitive search over the reference and description.",
+        "operationId": "GetSupplyOrders",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "default": 1000,
+            "maximum": 1000,
+            "minimum": 1
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PagedResultOfSupplyOrderDto"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Creates a supply order",
+        "description": "Creates a new draft supply order with optional lines, receiving container, and partitions. Returns the generated identifier.",
+        "operationId": "CreateSupplyOrder",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SupplyOrderCreateDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/lines/{articleGuid}": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Adds a line to a draft supply order",
+        "description": "Adds a line for the given article and ordered quantity. Only valid while the order is a draft.",
+        "operationId": "AddSupplyOrderLine",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "supplyOrderGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "path",
+            "name": "articleGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SupplyOrderLineQuantityRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Changes a draft supply order line quantity",
+        "description": "Changes the ordered quantity of a line. Only valid while the order is a draft.",
+        "operationId": "ChangeSupplyOrderLineQuantity",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "supplyOrderGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "path",
+            "name": "articleGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SupplyOrderLineQuantityRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Removes a line from a draft supply order",
+        "description": "Removes the line for the given article. Only valid while the order is a draft.",
+        "operationId": "RemoveSupplyOrderLine",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "supplyOrderGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "path",
+            "name": "articleGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/receiving-container": {
+      "put": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Sets the receiving container of a draft supply order",
+        "description": "Sets or clears the container into which goods are received. A null container receives goods at the root. Only valid while the order is a draft.",
+        "operationId": "SetSupplyOrderReceivingContainer",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "supplyOrderGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SupplyOrderReceivingContainerRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/place": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Places a supply order",
+        "description": "Commits a draft supply order, freezing its lines. Requires at least one line.",
+        "operationId": "PlaceSupplyOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "supplyOrderGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/receive": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Receives goods against a supply order",
+        "description": "Receives the given quantities, effecting the stock change into the order's receiving container (or at the root when it has none) and advancing the order's received quantities and status. Over-receipt is permitted.",
+        "operationId": "ReceiveSupplyOrder",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "supplyOrderGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SupplyOrderReceiveDto"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/cancel": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Cancels a supply order",
+        "description": "Cancels the supply order. Not allowed once the order is received, closed, or already cancelled.",
+        "operationId": "CancelSupplyOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "supplyOrderGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/supply-orders/{supplyOrderGuid}/close": {
+      "post": {
+        "tags": [
+          "SupplyOrders"
+        ],
+        "summary": "Closes a supply order",
+        "description": "Finalizes the supply order. Allowed once at least some goods have been received.",
+        "operationId": "CloseSupplyOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "supplyOrderGuid",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
     }
   },
   "definitions": {
     "ActionType": {
-      "type": "integer",
-      "description": "Represents the set of actions in the system."
+      "type": "integer"
+    },
+    "ActiveStateDto": {
+      "type": "object",
+      "description": "Request body of the dedicated activate/deactivate endpoints.",
+      "required": [
+        "isActive"
+      ],
+      "properties": {
+        "isActive": {
+          "type": "boolean"
+        }
+      }
     },
     "ActorType": {
-      "type": "integer",
-      "description": "Represents the type of actor responsible for performing an action\r\nwithin the system."
+      "type": "integer"
     },
     "ArticleBarcodeDto": {
       "type": "object",
-      "description": "Represents the barcode information associated with an article.",
       "properties": {
         "ean13": {
           "type": "string",
-          "description": "The optional EAN-13 barcode of the article.",
           "maxLength": 13,
           "minLength": 13,
           "pattern": "^\\d{13}$"
@@ -1698,29 +2705,46 @@
     },
     "ArticleBarcodeUpdateDto": {
       "type": "object",
-      "description": "Represents the barcode changes to apply to an article.",
       "properties": {
         "ean13": {
           "type": "string",
-          "description": "The new EAN-13 barcode to assign to the article. A `null` value\r\nleaves the existing EAN-13 barcode unchanged.",
+          "description": "New barcode; `null` leaves it unchanged.",
           "maxLength": 13,
           "minLength": 13,
           "pattern": "^\\d{13}$"
         },
         "removeEan13": {
           "type": "boolean",
-          "description": "Indicates whether the existing EAN-13 barcode should be removed by setting its\r\nvalue to `null`.",
+          "description": "Clears the barcode instead of changing it.",
           "default": false
+        }
+      }
+    },
+    "ArticleContainerAllowedArticleDto": {
+      "type": "object",
+      "required": [
+        "articleGuid"
+      ],
+      "properties": {
+        "articleGuid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "maxQuantity": {
+          "description": "`null` means no cap. Only allowed for an entity-tracked allowed article.",
+          "allOf": [
+            {
+              "type": "number"
+            }
+          ]
         }
       }
     },
     "ArticleContainerDto": {
       "type": "object",
-      "description": "Represents the container information associated with an article.",
       "properties": {
         "maxMass": {
           "type": "object",
-          "description": "The optional maximum mass that the container can hold.",
           "required": [
             "value",
             "unit"
@@ -1734,12 +2758,19 @@
               "example": "g"
             }
           }
+        },
+        "allowedArticles": {
+          "type": "array",
+          "description": "Empty or `null` means the container has no allow-list constraint.",
+          "items": {
+            "$ref": "#/definitions/ArticleContainerAllowedArticleDto"
+          },
+          "x-nullable": true
         }
       }
     },
     "ArticleCreateDto": {
       "type": "object",
-      "description": "Represents the data required to create an article.",
       "required": [
         "name"
       ],
@@ -1749,7 +2780,6 @@
         },
         "description": {
           "type": "string",
-          "description": "The optional description of the article.",
           "maxLength": 500
         },
         "articleType": {
@@ -1771,7 +2801,7 @@
         },
         "kitComponents": {
           "type": "array",
-          "description": "The optional components of the article. Required when ArticleType\r\nis ArticleType.Kit.",
+          "description": "Required when ArticleType is ArticleType.Kit.",
           "items": {
             "$ref": "#/definitions/ArticleKitComponentDto"
           },
@@ -1786,19 +2816,16 @@
         },
         "shelfLife": {
           "type": "string",
-          "description": "The optional shelf life of the article.",
           "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
           "x-nullable": true
         },
         "color": {
           "type": "string",
-          "description": "The optional color of the article.",
           "pattern": "^#[0-9a-fA-F]{6}$",
           "example": "#FFFFFF"
         },
         "mass": {
           "type": "object",
-          "description": "The optional mass of the article.",
           "required": [
             "value",
             "unit"
@@ -1832,7 +2859,6 @@
         },
         "partitionsToAdd": {
           "type": "array",
-          "description": "The optional identifiers of partitions to associate with the article.",
           "items": {
             "type": "string",
             "format": "uuid"
@@ -1843,11 +2869,9 @@
     },
     "ArticleDimensionDto": {
       "type": "object",
-      "description": "Represents the physical dimensions of an article.",
       "properties": {
         "lengthX": {
           "type": "object",
-          "description": "The optional length along the X axis.",
           "required": [
             "value",
             "unit"
@@ -1864,7 +2888,6 @@
         },
         "lengthY": {
           "type": "object",
-          "description": "The optional length along the Y axis.",
           "required": [
             "value",
             "unit"
@@ -1881,7 +2904,6 @@
         },
         "lengthZ": {
           "type": "object",
-          "description": "The optional length along the Z axis.",
           "required": [
             "value",
             "unit"
@@ -1900,11 +2922,10 @@
     },
     "ArticleDimensionUpdateDto": {
       "type": "object",
-      "description": "Represents the dimensional changes to apply to an article.",
+      "description": "For each axis, `null` leaves the length unchanged and the matching\r\n`Remove*` flag clears it. The flag takes precedence over the new length.",
       "properties": {
         "lengthX": {
           "type": "object",
-          "description": "The new length along the X axis. A `null` value leaves the\r\nexisting value unchanged.",
           "required": [
             "value",
             "unit"
@@ -1921,12 +2942,10 @@
         },
         "removeLengthX": {
           "type": "boolean",
-          "description": "Indicates whether the existing X-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthX.",
           "default": false
         },
         "lengthY": {
           "type": "object",
-          "description": "The new length along the Y axis. A `null` value leaves the\r\nexisting value unchanged.",
           "required": [
             "value",
             "unit"
@@ -1943,12 +2962,10 @@
         },
         "removeLengthY": {
           "type": "boolean",
-          "description": "Indicates whether the existing Y-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthY.",
           "default": false
         },
         "lengthZ": {
           "type": "object",
-          "description": "The new length along the Z axis. A `null` value leaves the\r\nexisting value unchanged.",
           "required": [
             "value",
             "unit"
@@ -1965,14 +2982,12 @@
         },
         "removeLengthZ": {
           "type": "boolean",
-          "description": "Indicates whether the existing Z-axis length should be removed by setting it\r\nto `null`. When `true`, this takes precedence\r\nover LengthZ.",
           "default": false
         }
       }
     },
     "ArticleDto": {
       "type": "object",
-      "description": "Represents the application-layer data transfer object for an article.",
       "required": [
         "guid",
         "name",
@@ -1993,7 +3008,6 @@
       "properties": {
         "guid": {
           "type": "string",
-          "description": "The unique identifier of the article.",
           "format": "uuid"
         },
         "name": {
@@ -2010,7 +3024,6 @@
         },
         "shelfLife": {
           "type": "string",
-          "description": "The optional shelf life of the article.",
           "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
           "x-nullable": true
         },
@@ -2047,7 +3060,7 @@
         },
         "kitComponents": {
           "type": "array",
-          "description": "The components that compose the article when it is a kit; otherwise, `null`.",
+          "description": "`null` unless the article is a kit.",
           "items": {
             "$ref": "#/definitions/ArticleKitComponentDto"
           },
@@ -2065,7 +3078,6 @@
         },
         "partitions": {
           "type": "array",
-          "description": "The identifiers of the partitions associated with the article.",
           "items": {
             "type": "string",
             "format": "uuid"
@@ -2075,13 +3087,12 @@
     },
     "ArticleInventoryDto": {
       "type": "object",
-      "description": "Represents a summary of inventory information for a specific article.",
       "required": [
         "totalCount"
       ],
       "properties": {
         "totalCount": {
-          "description": "The total quantity available in inventory for this article.\r\nFor entity-tracked articles this is a whole number of items; for\r\nevent-tracked articles it is the net quantity derived from movement events\r\n(received minus dispatched) and may be fractional.",
+          "description": "Whole number for entity-tracked articles; for event-tracked articles the net of movement\r\nevents (received minus dispatched), which may be fractional.",
           "format": "double",
           "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"
         }
@@ -2089,7 +3100,6 @@
     },
     "ArticleKitComponentDto": {
       "type": "object",
-      "description": "Represents a component of a kit article.",
       "required": [
         "articleGuid",
         "quantity"
@@ -2097,7 +3107,6 @@
       "properties": {
         "articleGuid": {
           "type": "string",
-          "description": "The unique identifier of the article used as a component.",
           "format": "uuid"
         },
         "quantity": {
@@ -2107,7 +3116,6 @@
     },
     "ArticlePackDto": {
       "type": "object",
-      "description": "Represents the packaging information for an article pack.",
       "required": [
         "fromArticleGuid",
         "quantity"
@@ -2115,7 +3123,6 @@
       "properties": {
         "fromArticleGuid": {
           "type": "string",
-          "description": "The unique identifier of the article from which the pack is composed.",
           "format": "uuid"
         },
         "quantity": {
@@ -2125,41 +3132,35 @@
     },
     "ArticleTrackingMode": {
       "type": "integer",
-      "description": "Determines how the stock of an Article is tracked."
+      "description": "How the stock of an Article is tracked; chosen per article and fixed for its\r\nlifetime."
     },
     "ArticleType": {
-      "type": "integer",
-      "description": "Represents the classification of an article within the inventory system."
+      "type": "integer"
     },
     "ArticleUpdateDto": {
       "type": "object",
-      "description": "Represents the changes to apply to an existing article.",
+      "description": "`null` leaves a value unchanged. The `Remove*` flags clear the value and take\r\n        precedence over the matching new value.",
       "properties": {
         "name": {
           "type": "string",
-          "description": "The new name of the article. A `null` value leaves the existing name unchanged.",
           "maxLength": 100,
           "minLength": 1
         },
         "description": {
           "type": "string",
-          "description": "The new description of the article. A `null` value leaves the existing description unchanged.",
           "maxLength": 500
         },
         "shelfLife": {
           "type": "string",
-          "description": "The new shelf life of the article. A `null` value leaves the existing value unchanged.",
           "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
           "x-nullable": true
         },
         "removeShelfLife": {
           "type": "boolean",
-          "description": "Indicates whether the existing shelf life should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over ShelfLife.",
           "default": false
         },
         "mass": {
           "type": "object",
-          "description": "The new mass of the article. A `null` value leaves the existing value unchanged.",
           "required": [
             "value",
             "unit"
@@ -2176,7 +3177,6 @@
         },
         "removeMass": {
           "type": "boolean",
-          "description": "Indicates whether the existing mass should be removed by setting it to `null`.\r\nWhen `true`, this takes precedence over Mass.",
           "default": false
         },
         "dimension": {
@@ -2195,7 +3195,6 @@
         },
         "partitionsToAdd": {
           "type": "array",
-          "description": "The identifiers of partitions to associate with the article.",
           "items": {
             "type": "string",
             "format": "uuid"
@@ -2204,7 +3203,6 @@
         },
         "partitionsToRemove": {
           "type": "array",
-          "description": "The identifiers of partitions to disassociate from the article.",
           "items": {
             "type": "string",
             "format": "uuid"
@@ -2215,41 +3213,34 @@
     },
     "ArticleVariationDto": {
       "type": "object",
-      "description": "Represents the variation information of an article.",
       "required": [
         "fromArticleGuid"
       ],
       "properties": {
         "fromArticleGuid": {
           "type": "string",
-          "description": "The unique identifier of the article from which the variation was created.",
           "format": "uuid"
         }
       }
     },
     "AuditLogDto": {
       "type": "object",
-      "description": "Represents a data transfer object for audit log information.\r\nThis DTO contains all the essential details about an audit event, including\r\nthe actor who performed the action, the entity affected, the type of action,\r\nwhen it occurred, and any additional metadata.",
       "required": [
         "guid",
         "actorGuid",
         "actorType",
         "auditLogType",
-        "entityGuid",
-        "entityType",
+        "commandName",
         "occurredAt",
-        "metadata",
-        "partitions"
+        "metadata"
       ],
       "properties": {
         "guid": {
           "type": "string",
-          "description": "The unique identifier of the audit log entry",
           "format": "uuid"
         },
         "actorGuid": {
           "type": "string",
-          "description": "The unique identifier of the actor who performed the action",
           "format": "uuid"
         },
         "actorType": {
@@ -2258,36 +3249,21 @@
         "auditLogType": {
           "$ref": "#/definitions/AuditLogType"
         },
-        "entityGuid": {
-          "type": "string",
-          "description": "The unique identifier of the entity that was affected by the action",
-          "format": "uuid"
-        },
-        "entityType": {
-          "$ref": "#/definitions/EntityType"
+        "commandName": {
+          "type": "string"
         },
         "occurredAt": {
           "type": "string",
-          "description": "The date and time when the audit event occurred",
           "format": "date-time"
         },
         "metadata": {
-          "type": "object",
-          "description": "A dictionary containing additional metadata about the audit event"
-        },
-        "partitions": {
-          "type": "array",
-          "description": "The collection of partition GUIDs that this audit log entry belongs to",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          }
+          "type": "object"
         }
       }
     },
     "AuditLogType": {
       "type": "integer",
-      "description": "Represents the kind of change an audit log records."
+      "description": "Coarse family of a command; the exact command is in string AuditLog.CommandName."
     },
     "Color": {
       "type": "string",
@@ -2296,12 +3272,8 @@
     },
     "Description": {
       "type": "string",
-      "description": "Represents a validated textual description.",
+      "description": "A free text of at most int Description.MaxLength characters; unlike Name, it may be empty.",
       "maxLength": 500
-    },
-    "EntityType": {
-      "type": "integer",
-      "description": "Represents a entity type."
     },
     "FirstName": {
       "type": "string",
@@ -2310,7 +3282,6 @@
     },
     "IdentityAuthResultDto": {
       "type": "object",
-      "description": "Represents the result of a successful authentication.",
       "required": [
         "accessToken",
         "refreshToken",
@@ -2318,16 +3289,13 @@
       ],
       "properties": {
         "accessToken": {
-          "type": "string",
-          "description": "The generated access token used to authenticate API requests."
+          "type": "string"
         },
         "refreshToken": {
-          "type": "string",
-          "description": "The refresh token used to obtain a new access token when the current one expires."
+          "type": "string"
         },
         "expiresAt": {
           "type": "string",
-          "description": "The date and time when the access token expires.",
           "format": "date-time"
         }
       }
@@ -2349,7 +3317,6 @@
     },
     "IdentityLogOutDto": {
       "type": "object",
-      "description": "Represents the data transfer object for logging out by providing a refresh token.\r\nThis DTO is used as input when performing a logout operation to revoke the refresh token.",
       "required": [
         "refreshToken"
       ],
@@ -2361,7 +3328,6 @@
     },
     "IdentityPasswordUpdateDto": {
       "type": "object",
-      "description": "Represents the data transfer object for updating a user's password.\r\nThe NewPassword field uses the Password structure to enforce security validation rules\r\nincluding minimum character requirements, special character constraints, and other password policies.",
       "required": [
         "nameid",
         "newPassword",
@@ -2369,21 +3335,18 @@
       ],
       "properties": {
         "nameid": {
-          "type": "string",
-          "description": "The unique identifier of the user whose password is being changed"
+          "type": "string"
         },
         "newPassword": {
           "$ref": "#/definitions/Password"
         },
         "currentPassword": {
-          "type": "string",
-          "description": "The user's current password for verification purposes"
+          "type": "string"
         }
       }
     },
     "IdentityRefreshDto": {
       "type": "object",
-      "description": "Represents the data transfer object for refreshing authentication tokens.\r\nThis DTO is used as input when requesting a new access token using a refresh token.",
       "required": [
         "refreshToken"
       ],
@@ -2395,7 +3358,6 @@
     },
     "ItemContainerInventoryDto": {
       "type": "object",
-      "description": "Represents the inventory of a single article contained in a container.",
       "required": [
         "articleGuid",
         "totalCount"
@@ -2403,11 +3365,10 @@
       "properties": {
         "articleGuid": {
           "type": "string",
-          "description": "The article the quantity belongs to.",
           "format": "uuid"
         },
         "totalCount": {
-          "description": "The total quantity of the article in the container. For entity-tracked\r\narticles this is a whole number of items; for event-tracked articles it is\r\nthe net quantity derived from movement events (received minus dispatched) and\r\nmay be fractional.",
+          "description": "Whole number for entity-tracked articles; for event-tracked articles the net of movement\r\nevents (received minus dispatched), which may be fractional.",
           "format": "double",
           "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"
         }
@@ -2475,7 +3436,6 @@
     },
     "ItemEventCreateDto": {
       "type": "object",
-      "description": "Describes a new item event to record against an event-tracked article.",
       "required": [
         "eventType",
         "articleGuid",
@@ -2487,7 +3447,6 @@
         },
         "articleGuid": {
           "type": "string",
-          "description": "The unique identifier of the event-tracked article the event concerns.",
           "format": "uuid"
         },
         "quantity": {
@@ -2495,25 +3454,25 @@
         },
         "fromItemContainerGuid": {
           "type": "string",
-          "description": "For a movement, the origin container, or `null` for a receipt\r\nfrom outside any container.",
+          "description": "`null` for a receipt from outside any container.",
           "format": "uuid",
           "x-nullable": true
         },
         "toItemContainerGuid": {
           "type": "string",
-          "description": "For a movement, the destination container, or `null` for a\r\ndispatch to outside any container.",
+          "description": "`null` for a dispatch to outside any container.",
           "format": "uuid",
           "x-nullable": true
         },
         "itemContainerGuid": {
           "type": "string",
-          "description": "For a creation or deletion, the container the quantity was created in or\r\ndeleted from, or `null` when outside any container.",
+          "description": "`null` when outside any container.",
           "format": "uuid",
           "x-nullable": true
         },
         "occuredAt": {
           "type": "string",
-          "description": "The instant, in UTC, at which the event occurred. When\r\n`null`, the server records the current instant.",
+          "description": "UTC. `null` makes the server record the current instant.",
           "format": "date-time",
           "x-nullable": true
         }
@@ -2521,7 +3480,6 @@
     },
     "ItemEventDto": {
       "type": "object",
-      "description": "Represents a data transfer object for an item event recorded against an\r\nevent-tracked article.",
       "required": [
         "guid",
         "articleGuid",
@@ -2533,12 +3491,10 @@
       "properties": {
         "guid": {
           "type": "string",
-          "description": "The unique identifier of the item event.",
           "format": "uuid"
         },
         "articleGuid": {
           "type": "string",
-          "description": "The unique identifier of the event-tracked article the event concerns.",
           "format": "uuid"
         },
         "eventType": {
@@ -2546,7 +3502,6 @@
         },
         "occuredAt": {
           "type": "string",
-          "description": "The instant, in UTC, at which the event occurred.",
           "format": "date-time"
         },
         "moviment": {
@@ -2566,12 +3521,10 @@
       }
     },
     "ItemEventType": {
-      "type": "integer",
-      "description": "Identifies the kind of event recorded against an event-tracked article."
+      "type": "integer"
     },
     "ItemLifecycleEventDto": {
       "type": "object",
-      "description": "Represents the creation/deletion payload of an item event.",
       "required": [
         "quantity",
         "itemContainerGuid",
@@ -2583,13 +3536,12 @@
         },
         "itemContainerGuid": {
           "type": "string",
-          "description": "The container the quantity was created in or deleted from, or\r\n`null` when outside any container, or when the container has\r\nsince been deleted.",
+          "description": "`null` when there was no container or it has since been deleted; see\r\n        NoContainer.",
           "format": "uuid",
           "x-nullable": true
         },
         "noContainer": {
-          "type": "boolean",
-          "description": "Whether the event originally had no container."
+          "type": "boolean"
         }
       }
     },
@@ -2613,7 +3565,6 @@
     },
     "ItemMovimentEventDto": {
       "type": "object",
-      "description": "Represents the movement payload of an item event.",
       "required": [
         "quantity",
         "fromItemContainerGuid",
@@ -2627,38 +3578,39 @@
         },
         "fromItemContainerGuid": {
           "type": "string",
-          "description": "The origin container, or `null` when the movement originated\r\noutside any container, or when the origin container has since been deleted.",
+          "description": "`null` when there was no origin container or it has since been deleted; see\r\n        FromNoContainer.",
           "format": "uuid",
           "x-nullable": true
         },
         "fromNoContainer": {
-          "type": "boolean",
-          "description": "Whether the movement originally had no origin container."
+          "type": "boolean"
         },
         "toItemContainerGuid": {
           "type": "string",
-          "description": "The destination container, or `null` when the movement left\r\nthe quantity outside any container, or when the destination container has\r\nsince been deleted.",
+          "description": "`null` when there was no destination container or it has since been deleted; see\r\n        ToNoContainer.",
           "format": "uuid",
           "x-nullable": true
         },
         "toNoContainer": {
-          "type": "boolean",
-          "description": "Whether the movement originally had no destination container."
+          "type": "boolean"
+        }
+      }
+    },
+    "ItemSetLocationDto": {
+      "type": "object",
+      "required": [
+        "parentItemContainerGuid"
+      ],
+      "properties": {
+        "parentItemContainerGuid": {
+          "type": "string",
+          "format": "uuid"
         }
       }
     },
     "ItemUpdateDto": {
       "type": "object",
       "properties": {
-        "parentItemContainerGuid": {
-          "type": "string",
-          "format": "uuid",
-          "x-nullable": true
-        },
-        "removeFromParentItemContainer": {
-          "type": "boolean",
-          "default": false
-        },
         "partitionsToAdd": {
           "type": "array",
           "items": {
@@ -2700,20 +3652,19 @@
     },
     "Name": {
       "type": "string",
-      "description": "Represents a validated name.",
+      "description": "A name that is not blank and has between int Name.MinLength and int Name.MaxLength characters.",
       "maxLength": 100,
       "minLength": 1
     },
     "Nameid": {
       "type": "string",
-      "description": "Represents a nameid.",
+      "description": "A case-insensitive identifier of 3 to 100 characters, stored in lower case. It may contain only\r\nletters, digits, '.', '_' and '-', must start and end with a letter or digit, and cannot\r\ncontain consecutive special characters.",
       "maxLength": 100,
       "minLength": 3,
       "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$"
     },
     "PagedResultOfArticleDto": {
       "type": "object",
-      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
       "required": [
         "items",
         "totalCount",
@@ -2723,44 +3674,38 @@
       "properties": {
         "items": {
           "type": "array",
-          "description": "The items on the current page.",
           "items": {
             "$ref": "#/definitions/ArticleDto"
           }
         },
         "totalCount": {
-          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "description": "Matches across all pages, ignoring pagination.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "page": {
-          "description": "The 1-based index of the current page.",
+          "description": "1-based.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "limit": {
-          "description": "The maximum number of items per page.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "totalPages": {
-          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "hasNextPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page after the current one exists."
+          "type": "boolean"
         },
         "hasPreviousPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page before the current one exists."
+          "type": "boolean"
         }
       }
     },
     "PagedResultOfAuditLogDto": {
       "type": "object",
-      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
       "required": [
         "items",
         "totalCount",
@@ -2770,44 +3715,38 @@
       "properties": {
         "items": {
           "type": "array",
-          "description": "The items on the current page.",
           "items": {
             "$ref": "#/definitions/AuditLogDto"
           }
         },
         "totalCount": {
-          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "description": "Matches across all pages, ignoring pagination.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "page": {
-          "description": "The 1-based index of the current page.",
+          "description": "1-based.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "limit": {
-          "description": "The maximum number of items per page.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "totalPages": {
-          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "hasNextPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page after the current one exists."
+          "type": "boolean"
         },
         "hasPreviousPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page before the current one exists."
+          "type": "boolean"
         }
       }
     },
     "PagedResultOfItemDto": {
       "type": "object",
-      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
       "required": [
         "items",
         "totalCount",
@@ -2817,44 +3756,38 @@
       "properties": {
         "items": {
           "type": "array",
-          "description": "The items on the current page.",
           "items": {
             "$ref": "#/definitions/ItemDto"
           }
         },
         "totalCount": {
-          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "description": "Matches across all pages, ignoring pagination.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "page": {
-          "description": "The 1-based index of the current page.",
+          "description": "1-based.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "limit": {
-          "description": "The maximum number of items per page.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "totalPages": {
-          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "hasNextPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page after the current one exists."
+          "type": "boolean"
         },
         "hasPreviousPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page before the current one exists."
+          "type": "boolean"
         }
       }
     },
     "PagedResultOfItemEventDto": {
       "type": "object",
-      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
       "required": [
         "items",
         "totalCount",
@@ -2864,44 +3797,38 @@
       "properties": {
         "items": {
           "type": "array",
-          "description": "The items on the current page.",
           "items": {
             "$ref": "#/definitions/ItemEventDto"
           }
         },
         "totalCount": {
-          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "description": "Matches across all pages, ignoring pagination.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "page": {
-          "description": "The 1-based index of the current page.",
+          "description": "1-based.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "limit": {
-          "description": "The maximum number of items per page.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "totalPages": {
-          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "hasNextPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page after the current one exists."
+          "type": "boolean"
         },
         "hasPreviousPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page before the current one exists."
+          "type": "boolean"
         }
       }
     },
     "PagedResultOfPartitionDto": {
       "type": "object",
-      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
       "required": [
         "items",
         "totalCount",
@@ -2911,44 +3838,38 @@
       "properties": {
         "items": {
           "type": "array",
-          "description": "The items on the current page.",
           "items": {
             "$ref": "#/definitions/PartitionDto"
           }
         },
         "totalCount": {
-          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "description": "Matches across all pages, ignoring pagination.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "page": {
-          "description": "The 1-based index of the current page.",
+          "description": "1-based.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "limit": {
-          "description": "The maximum number of items per page.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "totalPages": {
-          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "hasNextPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page after the current one exists."
+          "type": "boolean"
         },
         "hasPreviousPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page before the current one exists."
+          "type": "boolean"
         }
       }
     },
     "PagedResultOfServiceAccountDto": {
       "type": "object",
-      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
       "required": [
         "items",
         "totalCount",
@@ -2958,44 +3879,79 @@
       "properties": {
         "items": {
           "type": "array",
-          "description": "The items on the current page.",
           "items": {
             "$ref": "#/definitions/ServiceAccountDto"
           }
         },
         "totalCount": {
-          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "description": "Matches across all pages, ignoring pagination.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "page": {
-          "description": "The 1-based index of the current page.",
+          "description": "1-based.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "limit": {
-          "description": "The maximum number of items per page.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "totalPages": {
-          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "hasNextPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page after the current one exists."
+          "type": "boolean"
         },
         "hasPreviousPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page before the current one exists."
+          "type": "boolean"
+        }
+      }
+    },
+    "PagedResultOfSupplyOrderDto": {
+      "type": "object",
+      "required": [
+        "items",
+        "totalCount",
+        "page",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SupplyOrderDto"
+          }
+        },
+        "totalCount": {
+          "description": "Matches across all pages, ignoring pagination.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "page": {
+          "description": "1-based.",
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "limit": {
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "totalPages": {
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "hasNextPage": {
+          "type": "boolean"
+        },
+        "hasPreviousPage": {
+          "type": "boolean"
         }
       }
     },
     "PagedResultOfUserDto": {
       "type": "object",
-      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
       "required": [
         "items",
         "totalCount",
@@ -3005,44 +3961,38 @@
       "properties": {
         "items": {
           "type": "array",
-          "description": "The items on the current page.",
           "items": {
             "$ref": "#/definitions/UserDto"
           }
         },
         "totalCount": {
-          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "description": "Matches across all pages, ignoring pagination.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "page": {
-          "description": "The 1-based index of the current page.",
+          "description": "1-based.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "limit": {
-          "description": "The maximum number of items per page.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "totalPages": {
-          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "hasNextPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page after the current one exists."
+          "type": "boolean"
         },
         "hasPreviousPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page before the current one exists."
+          "type": "boolean"
         }
       }
     },
     "PagedResultOfUserGroupDto": {
       "type": "object",
-      "description": "A page of query results together with the paging metadata needed by clients\r\nto drive pagination (for example, to know whether more pages exist).",
       "required": [
         "items",
         "totalCount",
@@ -3052,38 +4002,57 @@
       "properties": {
         "items": {
           "type": "array",
-          "description": "The items on the current page.",
           "items": {
             "$ref": "#/definitions/UserGroupDto"
           }
         },
         "totalCount": {
-          "description": "The total number of items across all pages that match the query, ignoring\r\npagination.",
+          "description": "Matches across all pages, ignoring pagination.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "page": {
-          "description": "The 1-based index of the current page.",
+          "description": "1-based.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "limit": {
-          "description": "The maximum number of items per page.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "totalPages": {
-          "description": "Gets the total number of pages for the current int PagedResult&lt;T&gt;.Limit.\r\nA query that matches no items has zero pages.",
           "format": "int32",
           "pattern": "^-?(?:0|[1-9]\\d*)$"
         },
         "hasNextPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page after the current one exists."
+          "type": "boolean"
         },
         "hasPreviousPage": {
-          "type": "boolean",
-          "description": "Gets a value indicating whether a page before the current one exists."
+          "type": "boolean"
+        }
+      }
+    },
+    "ParentPartitionDto": {
+      "type": "object",
+      "required": [
+        "parentPartitionGuid"
+      ],
+      "properties": {
+        "parentPartitionGuid": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "ParentUserGroupDto": {
+      "type": "object",
+      "required": [
+        "parentUserGroupGuid"
+      ],
+      "properties": {
+        "parentUserGroupGuid": {
+          "type": "string",
+          "format": "uuid"
         }
       }
     },
@@ -3138,6 +4107,44 @@
         }
       }
     },
+    "PartitionsChangeDto": {
+      "type": "object",
+      "description": "Request body of the dedicated partition endpoints. Membership is the partitions the target\r\nbelongs to; access is the partitions it may reach. At least one list must be given, and no\r\npartition may be in both the add and the remove list of the same kind.",
+      "properties": {
+        "partitionsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionsToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "partitionAccessesToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
     "PartitionUpdateDto": {
       "type": "object",
       "properties": {
@@ -3149,20 +4156,59 @@
         "description": {
           "type": "string",
           "maxLength": 500
-        },
-        "parentPartitionGuid": {
-          "type": "string",
-          "format": "uuid",
-          "x-nullable": true
         }
       }
     },
     "Password": {
       "type": "string",
-      "description": "Represents a validated plaintext password.",
+      "description": "A plaintext password: 9 to 512 characters, no spaces, with at least one letter, one digit and\r\none special (non-letter, non-digit) character.",
       "format": "password",
       "maxLength": 512,
       "minLength": 9
+    },
+    "PasswordExpirationDto": {
+      "type": "object",
+      "description": "How long a user's password stays valid by default. The period is not named after the password so\r\nthe audit log does not redact it.",
+      "required": [
+        "expirationPeriod"
+      ],
+      "properties": {
+        "expirationPeriod": {
+          "type": "string",
+          "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$"
+        }
+      }
+    },
+    "PasswordResetDto": {
+      "type": "object",
+      "required": [
+        "password"
+      ],
+      "properties": {
+        "password": {
+          "$ref": "#/definitions/Password"
+        }
+      }
+    },
+    "PermissionsChangeDto": {
+      "type": "object",
+      "description": "Request body of the dedicated permission endpoints: the permissions to grant and to revoke in\r\none request. At least one must be given, and no permission may appear in both.",
+      "properties": {
+        "permissionsToAdd": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        },
+        "permissionsToRemove": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionType"
+          },
+          "x-nullable": true
+        }
+      }
     },
     "Scalar": {
       "allOf": [
@@ -3173,7 +4219,7 @@
     },
     "ServiceAccountCreatedDto": {
       "type": "object",
-      "description": "Result of creating (or rotating the secret of) a service account. The\r\nplaintext string ServiceAccountCreatedDto.ClientSecret is returned exactly once and is never\r\nretrievable again.",
+      "description": "Result of creating a service account or rotating its secret. The plaintext\r\nstring ServiceAccountCreatedDto.ClientSecret is returned exactly once and cannot be retrieved again.",
       "required": [
         "guid",
         "clientId",
@@ -3194,36 +4240,40 @@
     },
     "ServiceAccountCreateDto": {
       "type": "object",
-      "description": "Data required to create a service account.",
       "required": [
         "clientId"
       ],
       "properties": {
         "clientId": {
-          "type": "string",
-          "description": "The unique client identifier."
+          "type": "string"
         },
         "description": {
           "type": "string",
-          "description": "An optional human-readable description.",
           "x-nullable": true
         },
         "isActive": {
           "type": "boolean",
-          "description": "Whether the account is active on creation. Defaults to true.",
+          "description": "Defaults to true.",
           "default": true
         },
         "permissionsToAdd": {
           "type": "array",
-          "description": "Permissions to grant on creation.",
           "items": {
             "$ref": "#/definitions/ActionType"
           },
           "x-nullable": true
         },
+        "partitionsToAdd": {
+          "type": "array",
+          "description": "Partitions the account belongs to. Distinct from PartitionAccessesToAdd.",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
         "partitionAccessesToAdd": {
           "type": "array",
-          "description": "Partition accesses to grant on creation.",
           "items": {
             "type": "string",
             "format": "uuid"
@@ -3234,13 +4284,14 @@
     },
     "ServiceAccountDto": {
       "type": "object",
-      "description": "Read model for a service account. Never exposes the secret.",
+      "description": "Never exposes the secret.",
       "required": [
         "guid",
         "clientId",
         "description",
         "isActive",
         "permissions",
+        "partitionGuids",
         "partitionAccessGuids"
       ],
       "properties": {
@@ -3263,6 +4314,13 @@
             "$ref": "#/definitions/ActionType"
           }
         },
+        "partitionGuids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
         "partitionAccessGuids": {
           "type": "array",
           "items": {
@@ -3274,51 +4332,15 @@
     },
     "ServiceAccountUpdateDto": {
       "type": "object",
-      "description": "Mutable service-account state to apply in an update.",
       "properties": {
         "description": {
           "type": "string",
-          "x-nullable": true
-        },
-        "isActive": {
-          "type": "boolean",
-          "x-nullable": true
-        },
-        "permissionsToAdd": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ActionType"
-          },
-          "x-nullable": true
-        },
-        "permissionsToRemove": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ActionType"
-          },
-          "x-nullable": true
-        },
-        "partitionAccessesToAdd": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "partitionAccessesToRemove": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
           "x-nullable": true
         }
       }
     },
     "ServiceTokenRequestDto": {
       "type": "object",
-      "description": "Request body for the service-account client-credentials token endpoint.",
       "required": [
         "clientId",
         "clientSecret"
@@ -3334,43 +4356,243 @@
     },
     "ServiceTokenResultDto": {
       "type": "object",
-      "description": "Result of a successful service-account (client-credentials) authentication.",
+      "description": "Unlike a user login, no refresh token is returned: the service re-exchanges its client\r\ncredentials when the access token nears expiry.",
       "required": [
         "accessToken",
         "expiresAt"
       ],
       "properties": {
         "accessToken": {
-          "type": "string",
-          "description": "The generated access token used to authenticate API requests."
+          "type": "string"
         },
         "expiresAt": {
           "type": "string",
-          "description": "The date and time when the access token expires.",
           "format": "date-time"
         }
       }
     },
+    "SupplyOrderCreateDto": {
+      "type": "object",
+      "required": [
+        "reference"
+      ],
+      "properties": {
+        "reference": {
+          "$ref": "#/definitions/Name"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "receivingContainerGuid": {
+          "type": "string",
+          "description": "`null` receives goods at the root. Otherwise it must be a container accessible to\r\n        the caller.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SupplyOrderLineCreateDto"
+          },
+          "x-nullable": true
+        },
+        "partitionsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "SupplyOrderDto": {
+      "type": "object",
+      "required": [
+        "guid",
+        "reference",
+        "description",
+        "status",
+        "createdAt",
+        "placedAt",
+        "receivingContainerGuid",
+        "partitions",
+        "lines"
+      ],
+      "properties": {
+        "guid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "reference": {
+          "$ref": "#/definitions/Name"
+        },
+        "description": {
+          "$ref": "#/definitions/Description"
+        },
+        "status": {
+          "$ref": "#/definitions/SupplyOrderStatus"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "UTC.",
+          "format": "date-time"
+        },
+        "placedAt": {
+          "type": "string",
+          "description": "UTC, or `null` while a draft.",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "receivingContainerGuid": {
+          "type": "string",
+          "description": "`null` receives goods at the root.",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "partitions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SupplyOrderLineDto"
+          }
+        }
+      }
+    },
+    "SupplyOrderLineCreateDto": {
+      "type": "object",
+      "required": [
+        "articleGuid",
+        "orderedQuantity"
+      ],
+      "properties": {
+        "articleGuid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "orderedQuantity": {
+          "$ref": "#/definitions/Scalar"
+        }
+      }
+    },
+    "SupplyOrderLineDto": {
+      "type": "object",
+      "required": [
+        "articleGuid",
+        "orderedQuantity",
+        "receivedQuantity",
+        "outstandingQuantity",
+        "isFullyReceived",
+        "isOverReceived"
+      ],
+      "properties": {
+        "articleGuid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "orderedQuantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "receivedQuantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "outstandingQuantity": {
+          "$ref": "#/definitions/Scalar"
+        },
+        "isFullyReceived": {
+          "type": "boolean",
+          "description": "Also true when more than the ordered quantity was received."
+        },
+        "isOverReceived": {
+          "type": "boolean",
+          "description": "More than the ordered quantity was received."
+        }
+      }
+    },
+    "SupplyOrderLineQuantityRequest": {
+      "type": "object",
+      "required": [
+        "orderedQuantity"
+      ],
+      "properties": {
+        "orderedQuantity": {
+          "$ref": "#/definitions/Scalar"
+        }
+      }
+    },
+    "SupplyOrderReceiveDto": {
+      "type": "object",
+      "description": "Goods are placed into the order's receiving container, or at the root when it has none.",
+      "required": [
+        "lines"
+      ],
+      "properties": {
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SupplyOrderReceiveLineDto"
+          }
+        }
+      }
+    },
+    "SupplyOrderReceiveLineDto": {
+      "type": "object",
+      "required": [
+        "articleGuid",
+        "quantity"
+      ],
+      "properties": {
+        "articleGuid": {
+          "type": "string",
+          "description": "Must be a line on the order.",
+          "format": "uuid"
+        },
+        "quantity": {
+          "$ref": "#/definitions/Scalar"
+        }
+      }
+    },
+    "SupplyOrderReceivingContainerRequest": {
+      "type": "object",
+      "required": [
+        "receivingContainerGuid"
+      ],
+      "properties": {
+        "receivingContainerGuid": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        }
+      }
+    },
+    "SupplyOrderStatus": {
+      "type": "integer",
+      "description": "Lifecycle of a SupplyOrder: Draft, then Placed, then PartiallyReceived or Received,\r\nthen Closed. An order can be Cancelled until it is received or closed."
+    },
     "Token": {
       "type": "string",
-      "description": "Represents a security token used by the system.",
+      "description": "An opaque security token (such as an access or refresh token): 50 to 4096 characters with no\r\nwhitespace. The domain does not interpret its value.",
       "maxLength": 4096,
       "minLength": 50
     },
     "UserAuthenticationCreateDto": {
       "type": "object",
-      "description": "Represents the data required to create authentication information for a user.",
       "properties": {
         "password": {
           "type": "string",
-          "description": "The initial password for the user's authentication credentials.",
           "format": "password",
           "maxLength": 512,
           "minLength": 9
         },
         "defaultPasswordExpirationPeriod": {
           "type": "string",
-          "description": "The period after which the user's password expires.",
           "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
           "x-nullable": true
         }
@@ -3378,38 +4600,15 @@
     },
     "UserAuthenticationDto": {
       "type": "object",
-      "description": "Represents user authentication information.",
       "properties": {
         "defaultPasswordExpirationPeriod": {
           "type": "string",
-          "description": "The default period after which the user's password expires.",
           "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
           "x-nullable": true
         },
         "requirePasswordChangeAt": {
           "type": "string",
-          "description": "The date and time at which the user is required to change their password.",
           "format": "date-time",
-          "x-nullable": true
-        }
-      }
-    },
-    "UserAuthenticationUpdateDto": {
-      "type": "object",
-      "properties": {
-        "password": {
-          "type": "string",
-          "format": "password",
-          "maxLength": 512,
-          "minLength": 9
-        },
-        "defaultPasswordExpirationPeriod": {
-          "type": "string",
-          "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-          "x-nullable": true
-        },
-        "removeDefaultPasswordExpirationPeriod": {
-          "type": "boolean",
           "x-nullable": true
         }
       }
@@ -3664,94 +4863,40 @@
         }
       }
     },
+    "UserGroupsChangeDto": {
+      "type": "object",
+      "description": "Request body of the dedicated user-group membership endpoint. At least one group must be given,\r\nand none may be in both lists.",
+      "properties": {
+        "userGroupsToAdd": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        },
+        "userGroupsToRemove": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "x-nullable": true
+        }
+      }
+    },
     "UserGroupUpdateDto": {
       "type": "object",
-      "required": [
-        "nameid",
-        "description",
-        "isActive",
-        "parentUserGroup",
-        "removeParentUserGroup",
-        "permissionsToAdd",
-        "permissionsToRemove",
-        "partitionsToAdd",
-        "partitionsToRemove",
-        "partitionAccessesToAdd",
-        "partitionAccessesToRemove"
-      ],
       "properties": {
         "nameid": {
-          "allOf": [
-            {
-              "x-nullable": true
-            }
-          ]
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 3,
+          "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$"
         },
         "description": {
-          "allOf": [
-            {
-              "x-nullable": true
-            }
-          ]
-        },
-        "isActive": {
-          "type": "boolean",
-          "x-nullable": true
-        },
-        "parentUserGroup": {
           "type": "string",
-          "format": "uuid",
-          "x-nullable": true
-        },
-        "removeParentUserGroup": {
-          "type": "boolean",
-          "x-nullable": true
-        },
-        "permissionsToAdd": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ActionType"
-          },
-          "x-nullable": true
-        },
-        "permissionsToRemove": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ActionType"
-          },
-          "x-nullable": true
-        },
-        "partitionsToAdd": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "partitionsToRemove": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "partitionAccessesToAdd": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "partitionAccessesToRemove": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
+          "maxLength": 500
         }
       }
     },
@@ -3777,79 +4922,6 @@
         "description": {
           "type": "string",
           "maxLength": 500
-        },
-        "isActive": {
-          "type": "boolean",
-          "x-nullable": true
-        },
-        "authentication": {
-          "allOf": [
-            {
-              "x-nullable": true
-            }
-          ]
-        },
-        "permissionsToAdd": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ActionType"
-          },
-          "x-nullable": true
-        },
-        "permissionsToRemove": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ActionType"
-          },
-          "x-nullable": true
-        },
-        "partitionsToAdd": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "partitionsToRemove": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "userGroupsToAdd": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "userGroupsToRemove": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "partitionAccessesToAdd": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
-        },
-        "partitionAccessesToRemove": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "x-nullable": true
         }
       }
     }
@@ -3881,6 +4953,9 @@
     },
     {
       "name": "ServiceAccounts"
+    },
+    {
+      "name": "SupplyOrders"
     }
   ]
 }

@@ -1,3 +1,4 @@
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Informations;
 
 namespace Fargo.Core.Entities.UserGroups;
@@ -17,6 +18,13 @@ public interface IUserGroupRepository
     /// <paramref name="includeRoot"/> is set.
     /// </summary>
     Task<IReadOnlyCollection<Guid>> GetDescendantUserGroupGuidsAsync(Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Every permission the group passes to its members: its own and those of all its ancestors, in
+    /// one query. Inactive groups are included, because an inactive group can be activated later and
+    /// would then pass its permissions on. Empty when the group does not exist.
+    /// </summary>
+    Task<IReadOnlyCollection<ActionType>> GetInheritedPermissionsAsync(Guid userGroupGuid, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Acquires a single global advisory lock that serializes user-group re-parenting across the

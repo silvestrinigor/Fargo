@@ -14,6 +14,7 @@ public static class PartitionServiceCollectionExtensions
         public IServiceCollection AddFargoPartitionApplication() => services
         .AddFargoCommandHandler<PartitionCreateCommand, Guid, PartitionCreateCommandHandler>()
         .AddFargoCommandHandler<PartitionUpdateCommand, PartitionUpdateCommandHandler>()
+        .AddFargoCommandHandler<PartitionSetParentCommand, PartitionSetParentCommandHandler>()
         .AddFargoCommandHandler<PartitionDeleteCommand, PartitionDeleteCommandHandler>()
         .AddFargoQueryHandler<PartitionSingleQuery, PartitionDto?, PartitionSingleQueryHandler>()
         .AddFargoQueryHandler<PartitionsQuery, PagedResult<PartitionDto>, PartitionsQueryHandler>();

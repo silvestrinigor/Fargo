@@ -2,7 +2,11 @@
 #pragma warning disable CS0618
 using Fargo.ClientHttp.Models;
 using Fargo.ClientHttp.V1.Users.Item.IsActive;
+using Fargo.ClientHttp.V1.Users.Item.Partitions;
+using Fargo.ClientHttp.V1.Users.Item.Password;
+using Fargo.ClientHttp.V1.Users.Item.PasswordExpiration;
 using Fargo.ClientHttp.V1.Users.Item.Permissions;
+using Fargo.ClientHttp.V1.Users.Item.UserGroups;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions.Serialization;
 using Microsoft.Kiota.Abstractions;
@@ -24,10 +28,30 @@ namespace Fargo.ClientHttp.V1.Users.Item
         {
             get => new global::Fargo.ClientHttp.V1.Users.Item.IsActive.IsActiveRequestBuilder(PathParameters, RequestAdapter);
         }
+        /// <summary>The partitions property</summary>
+        public global::Fargo.ClientHttp.V1.Users.Item.Partitions.PartitionsRequestBuilder Partitions
+        {
+            get => new global::Fargo.ClientHttp.V1.Users.Item.Partitions.PartitionsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The password property</summary>
+        public global::Fargo.ClientHttp.V1.Users.Item.Password.PasswordRequestBuilder Password
+        {
+            get => new global::Fargo.ClientHttp.V1.Users.Item.Password.PasswordRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The passwordExpiration property</summary>
+        public global::Fargo.ClientHttp.V1.Users.Item.PasswordExpiration.PasswordExpirationRequestBuilder PasswordExpiration
+        {
+            get => new global::Fargo.ClientHttp.V1.Users.Item.PasswordExpiration.PasswordExpirationRequestBuilder(PathParameters, RequestAdapter);
+        }
         /// <summary>The permissions property</summary>
         public global::Fargo.ClientHttp.V1.Users.Item.Permissions.PermissionsRequestBuilder Permissions
         {
             get => new global::Fargo.ClientHttp.V1.Users.Item.Permissions.PermissionsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The userGroups property</summary>
+        public global::Fargo.ClientHttp.V1.Users.Item.UserGroups.UserGroupsRequestBuilder UserGroups
+        {
+            get => new global::Fargo.ClientHttp.V1.Users.Item.UserGroups.UserGroupsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.V1.Users.Item.WithUserGuItemRequestBuilder"/> and sets the default values.
@@ -81,7 +105,7 @@ namespace Fargo.ClientHttp.V1.Users.Item
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.UserDto>(requestInfo, global::Fargo.ClientHttp.Models.UserDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Updates user state: names, description, authentication, partitions and user groups. Use the is-active and permissions endpoints to change those.
+        /// Updates the username, names and description of a user. Use the is-active, permissions, user-groups, partitions, password and password-expiration endpoints for the rest.
         /// </summary>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -137,7 +161,7 @@ namespace Fargo.ClientHttp.V1.Users.Item
             return requestInfo;
         }
         /// <summary>
-        /// Updates user state: names, description, authentication, partitions and user groups. Use the is-active and permissions endpoints to change those.
+        /// Updates the username, names and description of a user. Use the is-active, permissions, user-groups, partitions, password and password-expiration endpoints for the rest.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

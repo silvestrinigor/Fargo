@@ -30,8 +30,6 @@ namespace Fargo.ClientHttp.Models
 #else
         public string Name { get; set; }
 #endif
-        /// <summary>The parentPartitionGuid property</summary>
-        public Guid? ParentPartitionGuid { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.ClientHttp.Models.PartitionUpdateDto"/> and sets the default values.
         /// </summary>
@@ -59,7 +57,6 @@ namespace Fargo.ClientHttp.Models
             {
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "name", n => { Name = n.GetStringValue(); } },
-                { "parentPartitionGuid", n => { ParentPartitionGuid = n.GetGuidValue(); } },
             };
         }
         /// <summary>
@@ -71,7 +68,6 @@ namespace Fargo.ClientHttp.Models
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("description", Description);
             writer.WriteStringValue("name", Name);
-            writer.WriteGuidValue("parentPartitionGuid", ParentPartitionGuid);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

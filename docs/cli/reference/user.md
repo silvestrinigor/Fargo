@@ -19,52 +19,92 @@ Options:
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  list                        List users as a table.
+  list                                     List users as a table.
   
-                              By default the list is paged interactively: a page of users is shown
-                              and you can press 'n' for the next page, 'p' for the previous page, or
-                              'q' to quit (press Enter after the key). Passing --page or --limit
-                              switches to a single, non-interactive fetch of exactly that page.
+                                           By default the list is paged interactively: a page of users is shown
+                                           and you can press 'n' for the next page, 'p' for the previous page, or
+                                           'q' to quit (press Enter after the key). Passing --page or --limit
+                                           switches to a single, non-interactive fetch of exactly that page.
   
-                              Examples:
-                                fargo user list
-                                fargo user list --page 2
-                                fargo user list --page 1 --limit 50
-                                fargo user list --partitions 00000000-0000-0000-0000-000000000001
-  get <guid>                  Show the full details of a single user.
+                                           Examples:
+                                             fargo user list
+                                             fargo user list --page 2
+                                             fargo user list --page 1 --limit 50
+                                             fargo user list --partitions 00000000-0000-0000-0000-000000000001
+  get <guid>                               Show the full details of a single user.
   
-                              Examples:
-                                fargo user get 00000000-0000-0000-0000-000000000004
-  create                      Create a new user account.
+                                           Examples:
+                                             fargo user get 00000000-0000-0000-0000-000000000004
+  create                                   Create a new user account.
   
-                              Examples:
-                                fargo user create --username jdoe --password 'S3cr3t!'
-                                fargo user create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
-  update <guid>               Update an existing user. Only the options you pass are changed.
+                                           Examples:
+                                             fargo user create --username jdoe --password 'S3cr3t!'
+                                             fargo user create --username jdoe --password 'S3cr3t!' --first-name John --last-name Doe
+  update <guid>                            Update an existing user. Only the options you pass are changed.
   
-                              Examples:
-                                fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
-  set-active <guid> <active>  Activate or deactivate a user.
+                                           Examples:
+                                             fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
+  set-active <guid> <active>               Activate or deactivate a user.
   
-                              This is a separate operation from update and requires its own permission.
+                                           This is a separate operation from update and requires its own permission.
   
-                              Examples:
-                                fargo user set-active 00000000-0000-0000-0000-000000000004 true
-                                fargo user set-active 00000000-0000-0000-0000-000000000004 false
-  set-permissions <guid>      Grant and revoke permissions of a user.
+                                           Examples:
+                                             fargo user set-active 00000000-0000-0000-0000-000000000004 true
+                                             fargo user set-active 00000000-0000-0000-0000-000000000004 false
+  set-permissions <guid>                   Grant and revoke permissions of a user.
   
-                              Permissions are numeric ActionType codes (space-separated). This is a
-                              separate operation from update and requires the ChangeUserPermissions
-                              permission. You must hold every permission you grant or revoke.
-                              You cannot change your own permissions.
+                                           Permissions are numeric ActionType codes (space-separated). This is a
+                                           separate operation from update and requires the ChangeUserPermissions
+                                           permission. You must hold every permission you grant or revoke.
+                                           You cannot change your own permissions.
   
-                              Examples:
-                                fargo user set-permissions 00000000-0000-0000-0000-000000000004 --add 4 6
-                                fargo user set-permissions 00000000-0000-0000-0000-000000000004 --add 4 --remove 2
-  delete <guid>               Delete a user by GUID.
+                                           Examples:
+                                             fargo user set-permissions 00000000-0000-0000-0000-000000000004 --add 4 6
+                                             fargo user set-permissions 00000000-0000-0000-0000-000000000004 --add 4 --remove 2
+  set-groups <guid>                        Add a user to, and remove it from, user groups.
   
-                              Examples:
-                                fargo user delete 00000000-0000-0000-0000-000000000004
+                                           Joining a group hands the user the permissions of that group and of its
+                                           ancestors, so you must hold all of them. This is a separate operation
+                                           from update and requires the ChangeUserGroupMembers permission.
+  
+                                           Examples:
+                                             fargo user set-groups 00000000-0000-0000-0000-000000000004 --add 00000000-0000-0000-0000-000000000003
+                                             fargo user set-groups 00000000-0000-0000-0000-000000000004 --remove 00000000-0000-0000-0000-000000000003
+  set-partitions <guid>                    Change the partitions of a user.
+  
+                                           Membership is the partitions it belongs to; access is the partitions it
+                                           may reach. This is a separate operation from update and requires the
+                                           ChangeUserPartitions permission. You need access to every partition you touch.
+  
+                                           Examples:
+                                             fargo user set-partitions 00000000-0000-0000-0000-000000000004 --add-accesses 00000000-0000-0000-0000-000000000002
+                                             fargo user set-partitions 00000000-0000-0000-0000-000000000004 --add-memberships 00000000-0000-0000-0000-000000000002 --remove-accesses 00000000-0000-0000-0000-000000000005
+  reset-password <guid>                    Reset the password of a user.
+  
+                                           The user must choose a new password at the next sign-in. You cannot reset
+                                           your own password this way; use 'identity change-password' instead.
+                                           Requires the ChangeAnotherUserPassword permission.
+  
+                                           Examples:
+                                             fargo user reset-password 00000000-0000-0000-0000-000000000004 --password 'Temp-S3cr3t!'
+  set-password-expiration <guid> <period>  Set how long the passwords of a user last by default.
+  
+                                           The period is an ISO-8601 duration. It applies the next time the password is
+                                           changed; PT0S means it must be changed immediately. Requires the
+                                           ChangeAnotherUserPassword permission.
+  
+                                           Examples:
+                                             fargo user set-password-expiration 00000000-0000-0000-0000-000000000004 P90D
+  remove-password-expiration <guid>        Stop the passwords of a user from expiring by default.
+  
+                                           Requires the ChangeAnotherUserPassword permission.
+  
+                                           Examples:
+                                             fargo user remove-password-expiration 00000000-0000-0000-0000-000000000004
+  delete <guid>                            Delete a user by GUID.
+  
+                                           Examples:
+                                             fargo user delete 00000000-0000-0000-0000-000000000004
 
 ```
 
@@ -232,6 +272,154 @@ Arguments:
 Options:
   --add <add>            ActionType permission codes to grant (space-separated).
   --remove <remove>      ActionType permission codes to revoke (space-separated).
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user set-groups`
+
+```text
+Description:
+  Add a user to, and remove it from, user groups.
+  
+  Joining a group hands the user the permissions of that group and of its
+  ancestors, so you must hold all of them. This is a separate operation
+  from update and requires the ChangeUserGroupMembers permission.
+  
+  Examples:
+    fargo user set-groups 00000000-0000-0000-0000-000000000004 --add 00000000-0000-0000-0000-000000000003
+    fargo user set-groups 00000000-0000-0000-0000-000000000004 --remove 00000000-0000-0000-0000-000000000003
+
+Usage:
+  fargo user set-groups <guid> [options]
+
+Arguments:
+  <guid>  The user GUID.
+
+Options:
+  --add <add>            User group GUIDs to add the user to (space-separated).
+  --remove <remove>      User group GUIDs to remove the user from (space-separated).
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user set-partitions`
+
+```text
+Description:
+  Change the partitions of a user.
+  
+  Membership is the partitions it belongs to; access is the partitions it
+  may reach. This is a separate operation from update and requires the
+  ChangeUserPartitions permission. You need access to every partition you touch.
+  
+  Examples:
+    fargo user set-partitions 00000000-0000-0000-0000-000000000004 --add-accesses 00000000-0000-0000-0000-000000000002
+    fargo user set-partitions 00000000-0000-0000-0000-000000000004 --add-memberships 00000000-0000-0000-0000-000000000002 --remove-accesses 00000000-0000-0000-0000-000000000005
+
+Usage:
+  fargo user set-partitions <guid> [options]
+
+Arguments:
+  <guid>  The a user GUID.
+
+Options:
+  --add-memberships <add-memberships>        Partition GUIDs to add to the membership (space-separated).
+  --remove-memberships <remove-memberships>  Partition GUIDs to remove from the membership (space-separated).
+  --add-accesses <add-accesses>              Partition GUIDs to grant access to (space-separated).
+  --remove-accesses <remove-accesses>        Partition GUIDs to revoke access from (space-separated).
+  --username <username>                      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>                      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                             Show help and usage information
+  --server <server>                          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user reset-password`
+
+```text
+Description:
+  Reset the password of a user.
+  
+  The user must choose a new password at the next sign-in. You cannot reset
+  your own password this way; use 'identity change-password' instead.
+  Requires the ChangeAnotherUserPassword permission.
+  
+  Examples:
+    fargo user reset-password 00000000-0000-0000-0000-000000000004 --password 'Temp-S3cr3t!'
+
+Usage:
+  fargo user reset-password <guid> [options]
+
+Arguments:
+  <guid>  The user GUID.
+
+Options:
+  --password <password> (REQUIRED)  The new temporary password.
+  --username <username>             Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>             Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                    Show help and usage information
+  --server <server>                 The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                     Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user set-password-expiration`
+
+```text
+Description:
+  Set how long the passwords of a user last by default.
+  
+  The period is an ISO-8601 duration. It applies the next time the password is
+  changed; PT0S means it must be changed immediately. Requires the
+  ChangeAnotherUserPassword permission.
+  
+  Examples:
+    fargo user set-password-expiration 00000000-0000-0000-0000-000000000004 P90D
+
+Usage:
+  fargo user set-password-expiration <guid> <period> [options]
+
+Arguments:
+  <guid>    The user GUID.
+  <period>  The expiration period as an ISO-8601 duration, e.g. P90D.
+
+Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user remove-password-expiration`
+
+```text
+Description:
+  Stop the passwords of a user from expiring by default.
+  
+  Requires the ChangeAnotherUserPassword permission.
+  
+  Examples:
+    fargo user remove-password-expiration 00000000-0000-0000-0000-000000000004
+
+Usage:
+  fargo user remove-password-expiration <guid> [options]
+
+Arguments:
+  <guid>  The user GUID.
+
+Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information

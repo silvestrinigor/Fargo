@@ -742,9 +742,9 @@ internal sealed class LargeTreeScenario(
             try
             {
                 var dto = (i % 2 == 0)
-                    ? new UserUpdateDto { UserGroupsToAdd = [g.Guid] }
-                    : new UserUpdateDto { UserGroupsToRemove = [g.Guid] };
-                await _admin.V1.Users[churnUser.Guid].PutAsync(dto, cancellationToken: cancellationToken);
+                    ? new UserGroupsChangeDto { UserGroupsToAdd = [g.Guid] }
+                    : new UserGroupsChangeDto { UserGroupsToRemove = [g.Guid] };
+                await _admin.V1.Users[churnUser.Guid].UserGroups.PutAsync(dto, cancellationToken: cancellationToken);
             }
             catch (FargoApiException)
             {

@@ -9,10 +9,14 @@ public sealed class UpdateUserGroupCommand : Command
 {
     public UpdateUserGroupCommand(FargoApiClient client)
         : base("update", """
-            Update an existing user group. Only the options you pass are changed.
+            Update the name or description of an existing user group. Only the options you pass are changed.
+
+            Activation, permissions, partitions and the parent group have their own
+            commands: set-active, set-permissions, set-partitions, set-parent and remove-parent.
 
             Examples:
-              fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
+              fargo user-group update 00000000-0000-0000-0000-000000000003 --name editors
+              fargo user-group update 00000000-0000-0000-0000-000000000003 --description "Content editors"
             """)
     {
         var guidArgument = new Argument<Guid>("guid")
@@ -20,30 +24,28 @@ public sealed class UpdateUserGroupCommand : Command
             Description = "The user group GUID."
         };
 
-        var parentOption = new Option<Guid?>("--parent")
+        var nameOption = new Option<string?>("--name")
         {
-            Description = "New parent user group GUID."
+            Description = "New name identifier (nameid) for the user group."
         };
 
-        var removeParentOption = new Option<bool>("--remove-parent")
+        var descriptionOption = new Option<string?>("--description")
         {
-            Description = "Remove the parent user group association."
+            Description = "New description."
         };
 
         Add(guidArgument);
-        Add(parentOption);
-        Add(removeParentOption);
+        Add(nameOption);
+        Add(descriptionOption);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
             var guid = parseResult.GetValue(guidArgument);
-            var parent = parseResult.GetValue(parentOption);
-            var removeParent = parseResult.GetValue(removeParentOption);
 
             var dto = new UserGroupUpdateDto
             {
-                ParentUserGroup = parent,
-                RemoveParentUserGroup = removeParent ? true : null
+                Nameid = parseResult.GetValue(nameOption),
+                Description = parseResult.GetValue(descriptionOption)
             };
 
             await client.V1.UserGroups[guid].PutAsync(dto, cancellationToken: cancellationToken);

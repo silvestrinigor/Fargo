@@ -86,9 +86,9 @@ public static class UserTools
         [Description("Description of the user.")] string? description = null,
         [Description("Whether the user is active. Defaults to the server default (active).")] bool? isActive = null,
         [Description("Permissions to grant the user directly; requires the ChangeUserPermissions permission. " + ToolInput.PermissionCodes)] int[]? permissionsToAdd = null,
-        [Description("GUIDs of the partitions the user belongs to (its membership).")] Guid[]? partitionsToAdd = null,
-        [Description("GUIDs of the user groups to add the user to.")] Guid[]? userGroupsToAdd = null,
-        [Description("GUIDs of the partitions the user is granted access to.")] Guid[]? partitionAccessesToAdd = null,
+        [Description("GUIDs of the partitions the user belongs to (its membership). Requires the ChangeUserPartitions permission.")] Guid[]? partitionsToAdd = null,
+        [Description("GUIDs of the user groups to add the user to. Requires the ChangeUserGroupMembers permission, and the caller must hold the permissions of those groups and their ancestors.")] Guid[]? userGroupsToAdd = null,
+        [Description("GUIDs of the partitions the user is granted access to. Requires the ChangeUserPartitions permission.")] Guid[]? partitionAccessesToAdd = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -121,7 +121,7 @@ public static class UserTools
     }
 
     [McpServerTool(Name = "fargo_users_update")]
-    [Description("Update an existing user. Only the supplied fields are changed; omitted fields are left as-is. Supplying a password resets it (requires the permission to change another user's password).")]
+    [Description("Update the username, names or description of an existing user. Only the supplied fields are changed; omitted fields are left as-is. Activation, permissions, user groups, partitions and passwords have their own tools.")]
     public static async Task<string> UpdateUserAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
@@ -130,15 +130,6 @@ public static class UserTools
         [Description("The new first name.")] string? firstName = null,
         [Description("The new last name.")] string? lastName = null,
         [Description("The new description.")] string? description = null,
-        [Description("A new password to set for the user.")] string? password = null,
-        [Description("The new default password validity as an ISO-8601 duration, e.g. 'P90D'.")] string? defaultPasswordExpirationPeriod = null,
-        [Description("Set true to clear the default password expiration period.")] bool? removeDefaultPasswordExpirationPeriod = null,
-        [Description("GUIDs of partitions to add to the user's membership.")] Guid[]? partitionsToAdd = null,
-        [Description("GUIDs of partitions to remove from the user's membership.")] Guid[]? partitionsToRemove = null,
-        [Description("GUIDs of user groups to add the user to.")] Guid[]? userGroupsToAdd = null,
-        [Description("GUIDs of user groups to remove the user from.")] Guid[]? userGroupsToRemove = null,
-        [Description("GUIDs of partitions to grant the user access to.")] Guid[]? partitionAccessesToAdd = null,
-        [Description("GUIDs of partitions to revoke the user's access from.")] Guid[]? partitionAccessesToRemove = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -148,34 +139,112 @@ public static class UserTools
             Nameid = nameid,
             FirstName = firstName,
             LastName = lastName,
-            Description = description,
-            PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
-            PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove),
-            UserGroupsToAdd = ToolInput.ToGuidList(userGroupsToAdd),
-            UserGroupsToRemove = ToolInput.ToGuidList(userGroupsToRemove),
-            PartitionAccessesToAdd = ToolInput.ToGuidList(partitionAccessesToAdd),
-            PartitionAccessesToRemove = ToolInput.ToGuidList(partitionAccessesToRemove)
+            Description = description
         };
-
-        if (!string.IsNullOrEmpty(password)
-            || !string.IsNullOrWhiteSpace(defaultPasswordExpirationPeriod)
-            || removeDefaultPasswordExpirationPeriod is not null)
-        {
-            body.Authentication = new UserAuthenticationUpdateDto
-            {
-                Password = string.IsNullOrEmpty(password) ? null : password,
-                DefaultPasswordExpirationPeriod = string.IsNullOrWhiteSpace(defaultPasswordExpirationPeriod)
-                    ? null
-                    : defaultPasswordExpirationPeriod,
-                RemoveDefaultPasswordExpirationPeriod = removeDefaultPasswordExpirationPeriod
-            };
-        }
 
         await client.V1.Users[userGuid].PutAsync(body, cancellationToken: cancellationToken);
 
         return $"User '{userGuid}' updated.";
     }
 
+    [McpServerTool(Name = "fargo_users_set_user_groups")]
+    [Description("Add a user to, and remove it from, user groups in one request. At least one group is required and none may be in both lists. Joining a group hands the user the permissions of that group and of its ancestors, so the caller must hold all of them. Requires the ChangeUserGroupMembers permission, which is separate from the permission to update.")]
+    public static async Task<string> SetUserUserGroupsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the user.")] Guid userGuid,
+        [Description("GUIDs of user groups to add the user to.")] Guid[]? userGroupsToAdd = null,
+        [Description("GUIDs of user groups to remove the user from.")] Guid[]? userGroupsToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new UserGroupsChangeDto
+        {
+            UserGroupsToAdd = ToolInput.ToGuidList(userGroupsToAdd),
+            UserGroupsToRemove = ToolInput.ToGuidList(userGroupsToRemove)
+        };
+
+        await client.V1.Users[userGuid].UserGroups.PutAsync(body, cancellationToken: cancellationToken);
+
+        return $"User '{userGuid}' user groups updated.";
+    }
+    [McpServerTool(Name = "fargo_users_set_partitions")]
+    [Description("Change the partitions of a user in one request: the partitions it belongs to (membership) and the partitions it can access. At least one list is required and no partition may be in both the add and remove list of the same kind. The caller needs access to every partition it touches. Requires the ChangeUserPartitions permission, which is separate from the permission to update.")]
+    public static async Task<string> SetUserPartitionsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the a user.")] Guid userGuid,
+        [Description("GUIDs of partitions to add to the membership.")] Guid[]? partitionsToAdd = null,
+        [Description("GUIDs of partitions to remove from the membership.")] Guid[]? partitionsToRemove = null,
+        [Description("GUIDs of partitions to grant access to.")] Guid[]? partitionAccessesToAdd = null,
+        [Description("GUIDs of partitions to revoke access from.")] Guid[]? partitionAccessesToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new PartitionsChangeDto
+        {
+            PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
+            PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove),
+            PartitionAccessesToAdd = ToolInput.ToGuidList(partitionAccessesToAdd),
+            PartitionAccessesToRemove = ToolInput.ToGuidList(partitionAccessesToRemove)
+        };
+
+        await client.V1.Users[userGuid].Partitions.PutAsync(body, cancellationToken: cancellationToken);
+
+        return $"User '{userGuid}' partitions updated.";
+    }
+    [McpServerTool(Name = "fargo_users_reset_password")]
+    [Description("Reset a user's password. The user must choose a new password at the next sign-in. A caller cannot reset its own password this way. Requires the ChangeAnotherUserPassword permission.")]
+    public static async Task<string> ResetUserPasswordAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the user.")] Guid userGuid,
+        [Description("The new temporary password.")] string password,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Users[userGuid].Password.PutAsync(
+            new PasswordResetDto { Password = password },
+            cancellationToken: cancellationToken);
+
+        return $"User '{userGuid}' password reset.";
+    }
+
+    [McpServerTool(Name = "fargo_users_set_password_expiration")]
+    [Description("Set how long a user's passwords last by default, as an ISO-8601 duration such as 'P90D'. It applies the next time the password is changed; 'PT0S' means it must be changed immediately. Requires the ChangeAnotherUserPassword permission.")]
+    public static async Task<string> SetUserPasswordExpirationAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the user.")] Guid userGuid,
+        [Description("The expiration period as an ISO-8601 duration, e.g. 'P90D'.")] string expirationPeriod,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Users[userGuid].PasswordExpiration.PutAsync(
+            new PasswordExpirationDto { ExpirationPeriod = expirationPeriod },
+            cancellationToken: cancellationToken);
+
+        return $"User '{userGuid}' password expiration set to {expirationPeriod}.";
+    }
+
+    [McpServerTool(Name = "fargo_users_remove_password_expiration")]
+    [Description("Stop a user's passwords from expiring by default. Requires the ChangeAnotherUserPassword permission.")]
+    public static async Task<string> RemoveUserPasswordExpirationAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the user.")] Guid userGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Users[userGuid].PasswordExpiration.DeleteAsync(cancellationToken: cancellationToken);
+
+        return $"User '{userGuid}' password expiration removed.";
+    }
     [McpServerTool(Name = "fargo_users_set_permissions")]
     [Description("Grant and revoke permissions of a user in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. The caller cannot change its own permissions. Requires the ChangeUserPermissions permission, which is separate from the permission to update.")]
     public static async Task<string> SetUserPermissionsAsync(

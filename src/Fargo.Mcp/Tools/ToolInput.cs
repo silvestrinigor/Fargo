@@ -13,7 +13,7 @@ internal static class ToolInput
         + "7 CreateUser, 8 DeleteUser, 9 EditUser, 10 ChangeAnotherUserPassword, 11 CreateUserGroup, 12 DeleteUserGroup, 13 EditUserGroup, "
         + "14 ChangeUserGroupMembers, 15 CreatePartition, 16 DeletePartition, 17 EditPartition, 18 ReadAuditLogs, 19 ReadItemEvents, "
         + "20 CreateServiceAccount, 21 DeleteServiceAccount, 22 EditServiceAccount, 23 ReadServiceAccount, 24 CreateSupplyOrder, "
-        + "25 EditSupplyOrder, 26 PlaceSupplyOrder, 27 ReceiveSupplyOrder, 28 CancelSupplyOrder, 29 CloseSupplyOrder, 30 ReadSupplyOrders, 31 ActivateUser, 32 ActivateUserGroup, 33 ActivateServiceAccount, 34 MoveItem, 35 ChangeUserPermissions, 36 ChangeUserGroupPermissions, 37 ChangeServiceAccountPermissions.";
+        + "25 EditSupplyOrder, 26 PlaceSupplyOrder, 27 ReceiveSupplyOrder, 28 CancelSupplyOrder, 29 CloseSupplyOrder, 30 ReadSupplyOrders, 31 ActivateUser, 32 ActivateUserGroup, 33 ActivateServiceAccount, 34 MoveItem, 35 ChangeUserPermissions, 36 ChangeUserGroupPermissions, 37 ChangeServiceAccountPermissions, 38 ChangeUserPartitions, 39 ChangeUserGroupPartitions, 40 ChangeServiceAccountPartitions, 41 ChangeUserGroupParent, 42 ChangePartitionParent, 43 RotateServiceAccountSecret.";
 
     /// <summary>
     /// Splits a measure token such as <c>25kg</c> or <c>10 cm</c> into its numeric

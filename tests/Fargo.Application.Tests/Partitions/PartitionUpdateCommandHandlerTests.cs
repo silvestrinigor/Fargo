@@ -2,7 +2,6 @@ using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
 using Fargo.Application.Commands.Partitions;
 using Fargo.Application.Dtos.Partitions;
-using Fargo.Application.Persistence;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;
@@ -17,13 +16,11 @@ public class PartitionUpdateCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
-    private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly TestCurrentActor currentActor = new();
 
     private PartitionUpdateCommandHandler CreateHandler()
         => new(
             ActorTestFactory.Resolver(userRepository),
-            new PartitionService(partitionRepository),
             partitionRepository,
             currentActor);
 
@@ -99,32 +96,5 @@ public class PartitionUpdateCommandHandlerTests
         await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
             () => CreateHandler().HandleAsync(
                 new PartitionUpdateCommand(partition.Guid, new PartitionUpdateDto(new Name("X")))));
-    }
-
-    [Fact]
-    public async Task HandleAsync_WhenParentAssignmentCreatesCircularHierarchy_ShouldThrow()
-    {
-        var partition = ChildPartition();
-        var newParent = ChildPartition("NewParent");
-        ActorTestFactory.ConfigureUserActor(
-            userRepository, currentActor.Guid, [ActionType.EditPartition],
-            partitionAccesses:
-            [
-                FargoCoreWellKnowGuids.GlobalPartitionGuid, partition.Guid, newParent.Guid
-            ]);
-        partitionRepository.GetByGuidAsync(partition.Guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Partition?>(partition));
-        partitionRepository.GetByGuidAsync(newParent.Guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Partition?>(newParent));
-        // The new parent is a descendant of the partition being edited -> circular.
-        partitionRepository.GetDescendantGuidsAsync(partition.Guid, false, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<IReadOnlyCollection<Guid>>([newParent.Guid]));
-
-        await Assert.ThrowsAsync<FargoCoreException>(
-            () => CreateHandler().HandleAsync(
-                new PartitionUpdateCommand(
-                    partition.Guid, new PartitionUpdateDto(ParentPartitionGuid: newParent.Guid))));
-
-        await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

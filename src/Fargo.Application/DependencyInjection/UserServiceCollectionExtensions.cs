@@ -16,6 +16,11 @@ public static class UserServiceCollectionExtensions
         .AddFargoCommandHandler<UserUpdateCommand, UserUpdateCommandHandler>()
         .AddFargoCommandHandler<UserSetActiveCommand, UserSetActiveCommandHandler>()
         .AddFargoCommandHandler<UserSetPermissionsCommand, UserSetPermissionsCommandHandler>()
+        .AddFargoCommandHandler<UserSetUserGroupsCommand, UserSetUserGroupsCommandHandler>()
+        .AddFargoCommandHandler<UserSetPartitionsCommand, UserSetPartitionsCommandHandler>()
+        .AddFargoCommandHandler<UserResetPasswordCommand, UserResetPasswordCommandHandler>()
+        .AddFargoCommandHandler<UserSetPasswordExpirationCommand, UserSetPasswordExpirationCommandHandler>()
+        .AddFargoCommandHandler<UserRemovePasswordExpirationCommand, UserRemovePasswordExpirationCommandHandler>()
         .AddFargoCommandHandler<UserDeleteCommand, UserDeleteCommandHandler>()
         .AddFargoQueryHandler<UserSingleQuery, UserDto?, UserSingleQueryHandler>()
         .AddFargoQueryHandler<UsersQuery, PagedResult<UserDto>, UsersQueryHandler>();

@@ -13,6 +13,7 @@ public sealed class PartitionsCommand : Command
         Add(new GetPartitionCommand(client));
         Add(new CreatePartitionCommand(client));
         Add(new UpdatePartitionCommand(client));
+        Add(new SetPartitionParentCommand(client));
         Add(new DeletePartitionCommand(client));
     }
 }

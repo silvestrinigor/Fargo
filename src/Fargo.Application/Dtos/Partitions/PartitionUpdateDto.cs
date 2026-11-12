@@ -4,6 +4,5 @@ namespace Fargo.Application.Dtos.Partitions;
 
 public sealed record PartitionUpdateDto(
     Name? Name = null,
-    Description? Description = null,
-    Guid? ParentPartitionGuid = null
+    Description? Description = null
 );
