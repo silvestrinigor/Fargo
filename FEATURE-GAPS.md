@@ -54,35 +54,9 @@ UnitsNet carries a unit but values are stored as-given; no conversion between pu
 
 ## Platform / non-functional
 
-### [x] GAP-11 - Optimistic concurrency control (Tier 1)
-No row-version / `xmin` tokens on any aggregate; risk of silent lost updates under concurrent edits (the
-simulation concurrency test confirmed "last writer wins"). (Quick win - see below.)
-
 ### [ ] GAP-12 - Soft delete / retention / archival (Tier 2)
 Deleting an aggregate physically removes the row (history survives only via temporal tables + audit
 logs). No undo / compliance archival.
-
-### [ ] GAP-13 - Enterprise auth (Tier 3, partially resolved / scoped)
-Status after review (2026-10):
-
-- **Account lockout - DONE (was a false positive).** `AuthenticationAttempt` is not just tracked; the
-  login handler calls `IAuthenticationAttemptService.IsAllowedAsync` BEFORE verifying credentials and
-  enforces three thresholds (>=5 fails per IP+identifier / 5 min; >=20 per IP / 1 min; >=5 per identifier
-  / 15 min), returns the longest `RetryAfter`, records every failure, and surfaces 429 with `retryAfter`.
-  Success resets the count. No work needed.
-- **OAuth/OIDC/SSO - OPTIONAL.** Only worth it if operators should log in with a corporate directory
-  (AD / Entra / LDAP) for centralized account lifecycle. Skip while Fargo's own user store is the
-  intended home for accounts. (Open question: does the org have a central directory?)
-- **Service-to-service auth - REAL, build when the first machine caller appears.** Design captured in
-  the appendix below (native `ServiceAccount` + `ActorType.Service` + client-credentials token endpoint).
-  Not yet built because no confirmed unattended machine caller exists today.
-- **JWT signing-key hardening - REAL, low priority.** Today a single shared symmetric secret
-  (`JwtOptions.Key`, HMAC-SHA256) both signs and verifies, so anyone who can read it can forge an admin
-  token, and there is no rotation (changing the key logs everyone out). Fix tiers: (a) treat the secret
-  as a real secret - out of source/logs, long/random, injected via a secrets manager; (b) add rotation
-  support - multiple keys + `kid` header + an accept-set so keys can change with zero forced logouts;
-  (c) optionally switch to asymmetric (RSA/ECDSA) signing so verifiers only ever get the public key -
-  worth it once more than one service must validate Fargo tokens.
 
 ### [ ] GAP-14 - Outbound integration / eventing (Tier 3)
 No webhooks, message bus, or working outbox/inbox (the `ComInbox` type is orphaned, not mapped to the
@@ -91,10 +65,6 @@ DB). Nothing can notify an ERP/carrier when stock changes.
 ### [ ] GAP-15 - Bulk/batch endpoints + idempotency keys (Tier 2)
 One HTTP call per item (throttled by the 100/min per-user rate limit); a retried "receive" can
 double-count. No idempotency keys.
-
-### [ ] GAP-16 - Query capability: sorting + search (Tier 2/3)
-Pagination exists and filtering is endpoint-specific, but there is NO sorting anywhere and no general
-search. No real-time (SignalR) for live dashboards.
 
 ### [ ] GAP-17 - Caching, background jobs/scheduler, async long-running ops (Tier 3)
 No reorder-check job, no report generation, no 202-Accepted + poll pattern. DB `EnableRetryOnFailure` is
