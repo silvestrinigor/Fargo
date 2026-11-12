@@ -8,7 +8,6 @@ using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Informations;
 
-
 namespace Fargo.Application.Operations.ServiceAccounts;
 
 /// <summary>Command to create a service account. Returns its id and one-time secret.</summary>

@@ -5,7 +5,6 @@ using Fargo.Core.Common;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
-
 namespace Fargo.Application.Logging;
 
 /// <summary>

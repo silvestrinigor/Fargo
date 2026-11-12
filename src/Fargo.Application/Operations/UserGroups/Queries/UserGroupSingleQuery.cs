@@ -4,7 +4,6 @@ using Fargo.Application.Operations.UserGroups.Dtos;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 
-
 namespace Fargo.Application.Operations.UserGroups;
 
 public sealed record UserGroupSingleQuery(

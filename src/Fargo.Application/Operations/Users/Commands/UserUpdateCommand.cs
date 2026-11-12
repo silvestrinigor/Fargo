@@ -9,7 +9,6 @@ using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Identity.Credentials;
 
-
 namespace Fargo.Application.Operations.Users;
 
 /// <summary>

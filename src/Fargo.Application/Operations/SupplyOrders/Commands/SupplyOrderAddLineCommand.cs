@@ -6,7 +6,6 @@ using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.SupplyOrders;
 using UnitsNet;
 
-
 namespace Fargo.Application.Operations.SupplyOrders;
 
 /// <summary>

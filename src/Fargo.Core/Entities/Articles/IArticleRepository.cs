@@ -86,7 +86,6 @@ public interface IArticleRepository
     /// </remarks>
     void Add(Article article);
 
-
     /// <summary>
     /// Removes an article from the persistence context.
     /// </summary>

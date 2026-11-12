@@ -12,7 +12,6 @@ using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Informations;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.UserGroups;
 
 public class UserGroupCreateCommandHandlerTests

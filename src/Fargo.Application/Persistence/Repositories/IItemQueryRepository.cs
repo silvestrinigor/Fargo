@@ -1,7 +1,6 @@
 using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Items.Dtos;
 
-
 namespace Fargo.Application.Persistence.Repositories;
 
 public interface IItemQueryRepository

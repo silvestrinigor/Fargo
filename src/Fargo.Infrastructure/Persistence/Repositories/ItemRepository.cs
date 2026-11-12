@@ -7,7 +7,6 @@ using Fargo.Core.Entities.Items;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-
 namespace Fargo.Infrastructure.Persistence.Repositories;
 
 public sealed class ItemRepository(FargoDbContext context) : IItemRepository, IItemQueryRepository

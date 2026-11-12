@@ -7,7 +7,6 @@ using Fargo.Core.Informations;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 
-
 namespace Fargo.Infrastructure.Tests.Repositories;
 
 public class ServiceAccountRepositoryTests

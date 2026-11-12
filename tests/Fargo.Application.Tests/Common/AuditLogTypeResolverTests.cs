@@ -3,7 +3,6 @@ using Fargo.Application.Auditing;
 using Fargo.Application.Operations.Articles;
 using Fargo.Core.Audits;
 
-
 namespace Fargo.Application.Tests.Common;
 
 public class AuditLogTypeResolverTests

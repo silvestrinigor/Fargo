@@ -7,7 +7,6 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Identity.Tokens;
 
-
 namespace Fargo.Application.Operations.Identity;
 
 /// <summary>

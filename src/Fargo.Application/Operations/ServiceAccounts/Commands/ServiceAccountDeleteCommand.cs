@@ -5,7 +5,6 @@ using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 
-
 namespace Fargo.Application.Operations.ServiceAccounts;
 
 /// <summary>Command to delete a service account.</summary>

@@ -10,7 +10,6 @@ using Fargo.Core.Entities.Articles;
 using Fargo.Core.Informations;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.Articles;
 
 public class ArticleDeleteCommandHandlerTests

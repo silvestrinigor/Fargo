@@ -7,7 +7,6 @@ using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 using UnitsNet;
 
-
 namespace Fargo.Infrastructure.Tests.Repositories;
 
 public class ItemEventRepositoryTests

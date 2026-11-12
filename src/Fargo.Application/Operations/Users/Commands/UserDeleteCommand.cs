@@ -5,7 +5,6 @@ using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 
-
 namespace Fargo.Application.Operations.Users;
 
 /// <summary>

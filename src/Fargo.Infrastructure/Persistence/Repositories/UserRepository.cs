@@ -8,7 +8,6 @@ using Fargo.Core.Informations;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-
 namespace Fargo.Infrastructure.Persistence.Repositories;
 
 public sealed class UserRepository(FargoDbContext context) : IUserRepository, IUserQueryRepository

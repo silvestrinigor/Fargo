@@ -8,7 +8,6 @@ using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Events;
 
-
 namespace Fargo.Application.Operations.Items;
 
 /// <summary>

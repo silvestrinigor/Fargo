@@ -6,7 +6,6 @@ using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Fargo.Infrastructure.Tests.Repositories;
 
 public class PartitionRepositoryTests

@@ -7,7 +7,6 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 
-
 namespace Fargo.Application.Operations.Partitions;
 
 /// <summary>

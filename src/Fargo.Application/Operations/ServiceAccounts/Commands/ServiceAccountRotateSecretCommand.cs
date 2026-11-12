@@ -7,7 +7,6 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Identity.Credentials;
 
-
 namespace Fargo.Application.Operations.ServiceAccounts;
 
 /// <summary>Command to rotate a service account's secret. Returns the new one-time secret.</summary>

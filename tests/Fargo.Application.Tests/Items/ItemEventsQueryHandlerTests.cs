@@ -9,7 +9,6 @@ using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Events;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.Items;
 
 public class ItemEventsQueryHandlerTests

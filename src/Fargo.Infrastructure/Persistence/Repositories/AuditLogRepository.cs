@@ -6,7 +6,6 @@ using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Fargo.Infrastructure.Persistence.Repositories;
 
 public sealed class AuditLogRepository(FargoDbContext context) : IAuditLogRepository, IAuditLogQueryRepository

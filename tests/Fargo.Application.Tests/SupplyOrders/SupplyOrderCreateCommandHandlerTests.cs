@@ -14,7 +14,6 @@ using NSubstitute;
 using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
-
 namespace Fargo.Application.Tests.SupplyOrders;
 
 public class SupplyOrderCreateCommandHandlerTests

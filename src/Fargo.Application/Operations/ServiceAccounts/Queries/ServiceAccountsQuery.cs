@@ -6,7 +6,6 @@ using Fargo.Application.Operations.ServiceAccounts.Dtos;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 
-
 namespace Fargo.Application.Operations.ServiceAccounts;
 
 /// <summary>Query for a page of service accounts.</summary>

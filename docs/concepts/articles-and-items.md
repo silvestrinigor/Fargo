@@ -92,7 +92,6 @@ item is unrelated and still goes through `POST /items` / `DELETE /items/{guid}`.
 > Entity-tracked and event-tracked articles coexist in the same catalog and the
 > same containers. A container's inventory lists both kinds side by side.
 
-
 ## Containers and location
 
 An item whose article is of type **Container** can hold other items. Because a
@@ -144,7 +143,6 @@ be evaluated as of a past instant by considering only the events that occurred
 at or before it — exactly like the point-in-time view of entity-tracked stock.
 Event-derived quantities may be fractional (for bulk goods), whereas
 entity-tracked counts are always whole numbers of items.
-
 
 ## Partitions apply here too
 

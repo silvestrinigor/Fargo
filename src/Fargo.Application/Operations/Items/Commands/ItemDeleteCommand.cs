@@ -4,7 +4,6 @@ using Fargo.Application.Common.Exceptions;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Items;
 
-
 namespace Fargo.Application.Operations.Items;
 
 /// <summary>

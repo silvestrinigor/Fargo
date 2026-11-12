@@ -5,7 +5,6 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Entities.SupplyOrders;
 
-
 namespace Fargo.Application.Operations.SupplyOrders;
 
 /// <summary>

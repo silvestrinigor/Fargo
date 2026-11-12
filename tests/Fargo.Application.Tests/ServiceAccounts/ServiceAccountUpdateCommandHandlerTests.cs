@@ -11,7 +11,6 @@ using Fargo.Core.Identity.Credentials;
 using Fargo.Core.Informations;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.ServiceAccounts;
 
 public class ServiceAccountUpdateCommandHandlerTests

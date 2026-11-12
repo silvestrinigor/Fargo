@@ -7,7 +7,6 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Informations;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.Common;
 
 public class AuditCommandHandlerDecoratorTests

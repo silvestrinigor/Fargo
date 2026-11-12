@@ -9,7 +9,6 @@ using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Informations;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.Users;
 
 public class UserDeleteCommandHandlerTests

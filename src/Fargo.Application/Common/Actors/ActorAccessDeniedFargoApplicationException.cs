@@ -2,7 +2,6 @@ using Fargo.Application.Common.Exceptions;
 using Fargo.Core.Entities;
 using Fargo.Core.Entities.Actors;
 
-
 namespace Fargo.Application.Common.Actors;
 
 /// <summary>

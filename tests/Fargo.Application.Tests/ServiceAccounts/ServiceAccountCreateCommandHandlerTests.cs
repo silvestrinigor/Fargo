@@ -10,7 +10,6 @@ using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Identity.Credentials;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.ServiceAccounts;
 
 public class ServiceAccountCreateCommandHandlerTests

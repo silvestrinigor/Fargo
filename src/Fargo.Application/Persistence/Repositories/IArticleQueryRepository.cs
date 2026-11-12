@@ -2,7 +2,6 @@ using Fargo.Application.Common.Paging;
 using Fargo.Application.Operations.Articles.Dtos;
 using Fargo.Core.Barcodes;
 
-
 namespace Fargo.Application.Persistence.Repositories;
 
 /// <summary>

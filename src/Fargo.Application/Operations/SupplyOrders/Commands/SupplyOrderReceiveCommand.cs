@@ -10,7 +10,6 @@ using Fargo.Core.Entities.SupplyOrders;
 using Fargo.Core.Events;
 using UnitsNet;
 
-
 namespace Fargo.Application.Operations.SupplyOrders;
 
 /// <summary>

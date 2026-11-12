@@ -5,7 +5,6 @@ using Fargo.Application.Operations.UserGroups.Dtos;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-
 namespace Fargo.ServiceHttp.Endpoints;
 
 public static class UserGroupEndpointRouteBuilderExtension

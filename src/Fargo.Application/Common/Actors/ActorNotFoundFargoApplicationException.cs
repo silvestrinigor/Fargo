@@ -3,7 +3,6 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;
 using System.Diagnostics.CodeAnalysis;
 
-
 namespace Fargo.Application.Common.Actors;
 
 /// <summary>

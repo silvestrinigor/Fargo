@@ -3,7 +3,6 @@ using Fargo.Application.Auditing;
 using Fargo.Application.Common.Actors;
 using Fargo.Core.Audits;
 
-
 namespace Fargo.Application.Decorators;
 
 /// <summary>

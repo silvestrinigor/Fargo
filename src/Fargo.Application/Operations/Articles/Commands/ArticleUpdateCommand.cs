@@ -6,7 +6,6 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Partitions;
 
-
 namespace Fargo.Application.Operations.Articles;
 
 /// <summary>

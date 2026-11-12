@@ -8,7 +8,6 @@ using System.Drawing;
 using System.Text.Json.Nodes;
 using UnitsNet;
 
-
 namespace Fargo.ServiceHttp.OpenApi;
 
 /// <summary>

@@ -6,7 +6,6 @@ using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Informations;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.Common;
 
 /// <summary>

@@ -7,7 +7,6 @@ using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Entities.Partitions;
 
-
 namespace Fargo.Application.Operations.Items;
 
 /// <summary>

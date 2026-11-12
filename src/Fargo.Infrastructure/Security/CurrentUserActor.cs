@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
 
-
 namespace Fargo.Infrastructure.Security;
 
 public sealed class CurrentUserActor(IHttpContextAccessor httpContextAccessor) : ICurrentActor

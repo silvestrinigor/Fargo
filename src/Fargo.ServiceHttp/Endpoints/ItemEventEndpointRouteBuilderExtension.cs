@@ -6,7 +6,6 @@ using Fargo.Core.Events;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-
 namespace Fargo.ServiceHttp.Endpoints;
 
 public static class ItemEventEndpointRouteBuilderExtension

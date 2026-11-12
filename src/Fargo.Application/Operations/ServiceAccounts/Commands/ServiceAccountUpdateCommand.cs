@@ -8,7 +8,6 @@ using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 
-
 namespace Fargo.Application.Operations.ServiceAccounts;
 
 /// <summary>Command to update a service account's mutable state.</summary>

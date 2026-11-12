@@ -7,7 +7,6 @@ using Fargo.Core.Informations;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-
 namespace Fargo.Infrastructure.Persistence.Repositories;
 
 public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepository, IUserGroupQueryRepository

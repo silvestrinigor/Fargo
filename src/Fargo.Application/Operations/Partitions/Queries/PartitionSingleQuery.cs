@@ -4,7 +4,6 @@ using Fargo.Application.Operations.Partitions.Dtos;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 
-
 namespace Fargo.Application.Operations.Partitions;
 
 public sealed record PartitionSingleQuery(

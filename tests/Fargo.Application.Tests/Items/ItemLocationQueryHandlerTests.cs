@@ -6,7 +6,6 @@ using Fargo.Application.Tests.Common;
 using Fargo.Core.Entities.Actors.Users;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.Items;
 
 public class ItemLocationQueryHandlerTests

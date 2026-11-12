@@ -2,7 +2,6 @@ using Fargo.Application.Common.Exceptions;
 using Fargo.Application.Common.Paging;
 using System.Linq.Expressions;
 
-
 namespace Fargo.Infrastructure.Persistence;
 
 /// <summary>

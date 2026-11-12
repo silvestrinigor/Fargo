@@ -6,7 +6,6 @@ using Fargo.Core.Entities.SupplyOrders;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-
 namespace Fargo.Infrastructure.Persistence.Repositories;
 
 public sealed class SupplyOrderRepository(FargoDbContext context)

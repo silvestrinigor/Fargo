@@ -5,7 +5,6 @@ using Fargo.Application.Operations.Partitions.Dtos;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Partitions;
 
-
 namespace Fargo.Application.Operations.Partitions;
 
 /// <summary>

@@ -5,7 +5,6 @@ using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
 
-
 namespace Fargo.Application.Operations.Articles;
 
 /// <summary>

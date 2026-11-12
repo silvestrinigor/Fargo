@@ -5,7 +5,6 @@ using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Events;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Fargo.Infrastructure.Persistence.Repositories;
 
 public sealed class ItemEventRepository(FargoDbContext context) : IItemEventRepository, IItemEventQueryRepository

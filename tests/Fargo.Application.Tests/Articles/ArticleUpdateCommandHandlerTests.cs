@@ -13,7 +13,6 @@ using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 using NSubstitute;
 
-
 namespace Fargo.Application.Tests.Articles;
 
 public class ArticleUpdateCommandHandlerTests

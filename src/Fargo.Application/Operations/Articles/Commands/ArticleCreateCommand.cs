@@ -9,7 +9,6 @@ using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 using UnitsNet;
 
-
 namespace Fargo.Application.Operations.Articles;
 
 /// <summary>

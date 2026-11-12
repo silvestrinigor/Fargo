@@ -6,7 +6,6 @@ using Fargo.Application.Operations.Users.Dtos;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 
-
 namespace Fargo.Application.Operations.Users;
 
 public sealed record UsersQuery(

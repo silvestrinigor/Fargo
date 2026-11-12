@@ -7,7 +7,6 @@ using Fargo.Core.Entities.Actors.ServiceAccounts;
 using Fargo.Core.Informations;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Fargo.Infrastructure.Persistence.Repositories;
 
 public sealed class ServiceAccountRepository(FargoDbContext context)

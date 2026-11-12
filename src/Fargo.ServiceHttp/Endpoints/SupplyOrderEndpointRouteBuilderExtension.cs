@@ -7,7 +7,6 @@ using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UnitsNet;
 
-
 namespace Fargo.ServiceHttp.Endpoints;
 
 public static class SupplyOrderEndpointRouteBuilderExtension

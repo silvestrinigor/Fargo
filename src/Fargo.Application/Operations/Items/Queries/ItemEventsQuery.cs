@@ -6,7 +6,6 @@ using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Events;
 
-
 namespace Fargo.Application.Operations.Items;
 
 /// <summary>

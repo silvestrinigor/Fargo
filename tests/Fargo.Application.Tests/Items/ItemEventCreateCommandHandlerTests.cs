@@ -14,7 +14,6 @@ using Fargo.Core.Informations;
 using NSubstitute;
 using UnitsNet;
 
-
 namespace Fargo.Application.Tests.Items;
 
 public class ItemEventCreateCommandHandlerTests

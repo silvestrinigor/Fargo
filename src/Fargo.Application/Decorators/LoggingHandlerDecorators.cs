@@ -3,7 +3,6 @@ using Fargo.Application.Common.Actors;
 using Fargo.Application.Logging;
 using Microsoft.Extensions.Logging;
 
-
 namespace Fargo.Application.Decorators;
 
 /// <summary>

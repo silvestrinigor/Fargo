@@ -3,7 +3,6 @@ using Fargo.Application.Operations.Audits;
 using Fargo.Application.Operations.Audits.Dtos;
 using Fargo.Core.Entities.Actors;
 
-
 namespace Fargo.Application.Persistence.Repositories;
 
 /// <summary>

@@ -6,7 +6,6 @@ using Fargo.Core.Entities.Partitions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-
 namespace Fargo.Infrastructure.Persistence.Repositories;
 
 public sealed class PartitionRepository(FargoDbContext context) : IPartitionRepository, IPartitionQueryRepository
