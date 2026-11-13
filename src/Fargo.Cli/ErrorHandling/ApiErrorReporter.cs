@@ -91,7 +91,7 @@ public static class ApiErrorReporter
             {
                 case HttpRequestException:
                 case SocketException:
-                case System.IO.IOException:
+                case IOException:
                 // A request timeout surfaces as a cancellation that was not
                 // requested by the user.
                 case TaskCanceledException:

@@ -52,7 +52,7 @@ public class IdempotencyPipelineTests
         services.AddSingleton<TimeProvider>(timeProvider);
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(options));
         services.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
-        services.AddScoped<ICurrentActor>(_ => currentActor);
+        services.AddScoped(_ => currentActor);
         services.AddSingleton(itemCreateHandler);
         services.AddSingleton(receiveHandler);
         services.AddFargoIdempotencyApplication();
@@ -176,13 +176,13 @@ public class IdempotencyPipelineTests
     [Fact]
     public async Task TheSameKeyFromAnotherActor_ShouldBeIndependent()
     {
-        var first = await SendCreateAsync(CreateItem(Key1));
+        var (Result, Replayed) = await SendCreateAsync(CreateItem(Key1));
 
         currentActor = new TestCurrentActor { IsAuthenticated = true };
         var second = await SendCreateAsync(CreateItem(Key1));
 
         Assert.False(second.Replayed);
-        Assert.NotEqual(first.Result, second.Result);
+        Assert.NotEqual(Result, second.Result);
         Assert.Equal(2, itemCreateHandler.Calls);
         Assert.Equal(2, records.All.Count);
     }

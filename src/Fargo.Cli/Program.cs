@@ -191,7 +191,7 @@ catch (Exception ex) when (ApiErrorReporter.CanReport(ex))
 
 // Returns true when the invoked command belongs to the "identity" group, whose
 // commands handle authentication themselves and must not be auto-refreshed.
-static bool IsIdentityCommand(System.CommandLine.ParseResult result)
+static bool IsIdentityCommand(ParseResult result)
 {
     var command = result.CommandResult.Command;
 
@@ -202,8 +202,8 @@ static bool IsIdentityCommand(System.CommandLine.ParseResult result)
             return true;
         }
 
-        command = (command as System.CommandLine.Command)?.Parents
-            .OfType<System.CommandLine.Command>()
+        command = (command as Command)?.Parents
+            .OfType<Command>()
             .FirstOrDefault();
     }
 

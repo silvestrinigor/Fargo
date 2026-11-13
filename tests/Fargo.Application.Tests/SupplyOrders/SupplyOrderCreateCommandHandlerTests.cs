@@ -68,7 +68,7 @@ public class SupplyOrderCreateCommandHandlerTests
             new Name("PO-1"),
             Lines: [new SupplyOrderLineCreateDto(article.Guid, Qty(10))]));
 
-        await Assert.ThrowsAsync<Fargo.Core.Common.FargoCoreException>(
+        await Assert.ThrowsAsync<Core.Common.FargoCoreException>(
             () => CreateHandler().HandleAsync(command));
 
         supplyOrderRepository.DidNotReceive().Add(Arg.Any<SupplyOrder>());
@@ -104,7 +104,7 @@ public class SupplyOrderCreateCommandHandlerTests
             new Name("PO-1"),
             ReceivingContainerGuid: notAContainer.Guid));
 
-        await Assert.ThrowsAsync<Fargo.Core.Common.FargoCoreException>(
+        await Assert.ThrowsAsync<Core.Common.FargoCoreException>(
             () => CreateHandler().HandleAsync(command));
     }
 

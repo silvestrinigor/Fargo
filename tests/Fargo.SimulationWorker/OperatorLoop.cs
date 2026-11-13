@@ -46,7 +46,7 @@ internal sealed class OperatorLoop(
         {
             try
             {
-                var action = await rateLimit.ExecuteAsync<string>(
+                var action = await rateLimit.ExecuteAsync(
                     async () => await _router.RunNextAsync(ctx, cancellationToken), cancellationToken);
 
                 if (action is not null)

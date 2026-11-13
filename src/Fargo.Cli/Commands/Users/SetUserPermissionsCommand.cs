@@ -61,5 +61,5 @@ public sealed class SetUserPermissionsCommand : Command
     }
 
     private static List<int?>? ToIntList(int[]? values)
-        => values is { Length: > 0 } ? values.Select(v => (int?)v).ToList() : null;
+        => values is { Length: > 0 } ? [.. values.Select(v => (int?)v)] : null;
 }

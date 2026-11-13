@@ -43,7 +43,7 @@ public static class ArticleTools
             if (partitions is { Length: > 0 })
             {
                 request.QueryParameters.ChildOfAnyOfThesePartitions =
-                    partitions.Select(g => (Guid?)g).ToArray();
+                    [.. partitions.Select(g => (Guid?)g)];
             }
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -178,7 +178,7 @@ public static class ArticleTools
 
         if (kitComponents is { Length: > 0 })
         {
-            body.KitComponents = kitComponents
+            body.KitComponents = [.. kitComponents
                 .Select(token =>
                 {
                     var (articleGuid, quantity) = ToolInput.ParseKitComponent(token);
@@ -187,8 +187,7 @@ public static class ArticleTools
                         ArticleGuid = articleGuid,
                         Quantity = quantity is { } q ? new Scalar { Double = q } : null
                     };
-                })
-                .ToList();
+                })];
         }
 
         var container = BuildContainer(containerMaxMass, allowedArticles);
@@ -315,7 +314,7 @@ public static class ArticleTools
             if (insideItemContainerGuids is { Length: > 0 })
             {
                 request.QueryParameters.InsideItemContainerGuids =
-                    insideItemContainerGuids.Select(g => (Guid?)g).ToArray();
+                    [.. insideItemContainerGuids.Select(g => (Guid?)g)];
             }
 
             if (includeDescendents.HasValue)
@@ -450,7 +449,7 @@ public static class ArticleTools
 
         if (hasAllowed)
         {
-            container.AllowedArticles = allowedArticles!
+            container.AllowedArticles = [.. allowedArticles!
                 .Select(token =>
                 {
                     var (articleGuid, maxQuantity) = ToolInput.ParseAllowedArticle(token);
@@ -461,8 +460,7 @@ public static class ArticleTools
                             ? new ArticleContainerAllowedArticleDto.ArticleContainerAllowedArticleDto_maxQuantity { Double = q }
                             : null
                     };
-                })
-                .ToList();
+                })];
         }
 
         return container;

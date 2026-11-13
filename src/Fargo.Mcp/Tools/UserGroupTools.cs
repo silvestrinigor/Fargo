@@ -42,7 +42,7 @@ public static class UserGroupTools
             if (partitions is { Length: > 0 })
             {
                 request.QueryParameters.ChildOfAnyOfThesePartitions =
-                    partitions.Select(g => (Guid?)g).ToArray();
+                    [.. partitions.Select(g => (Guid?)g)];
             }
 
             if (!string.IsNullOrWhiteSpace(search))

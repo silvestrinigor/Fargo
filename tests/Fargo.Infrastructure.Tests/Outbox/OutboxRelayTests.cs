@@ -1,4 +1,3 @@
-using Fargo.Application.Abstractions;
 using Fargo.Application.Commands.Outbox;
 using Fargo.Application.Decorators;
 using Fargo.Application.Dtos.Outbox;
@@ -34,7 +33,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
     private static TransactionalCommandHandlerDecorator<PublishOutboxBatchCommand, OutboxBatchResultDto> CreatePublisher(
         FargoDbContext context,
         IEventPublisher publisher)
-        => new TransactionalCommandHandlerDecorator<PublishOutboxBatchCommand, OutboxBatchResultDto>(
+        => new(
             new PublishOutboxBatchCommandHandler(
                 new OutboxRepository(context),
                 publisher,

@@ -50,7 +50,7 @@ internal static class AuditMetadataJson
             AuditValue.String x => JsonValue.Create(x.Value),
             AuditValue.Number x => JsonValue.Create(x.Value),
             AuditValue.Boolean x => JsonValue.Create(x.Value),
-            AuditValue.Null x => null,
+            AuditValue.Null => null,
             AuditValue.Object x => ToJsonObject(x),
             AuditValue.Array x => ToJsonArray(x),
             _ => throw new JsonException($"Unsupported audit value type: {value.GetType().Name}")

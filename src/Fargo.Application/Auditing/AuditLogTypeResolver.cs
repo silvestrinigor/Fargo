@@ -17,7 +17,7 @@ namespace Fargo.Application.Auditing;
 /// </remarks>
 public static class AuditLogTypeResolver
 {
-    private static readonly Dictionary<Type, AuditLogType> map = new Dictionary<Type, AuditLogType>
+    private static readonly Dictionary<Type, AuditLogType> map = new()
     {
         // Articles
         [typeof(ArticleCreateCommand)] = AuditLogType.EntityCreated,

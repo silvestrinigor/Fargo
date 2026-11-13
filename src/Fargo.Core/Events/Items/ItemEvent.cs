@@ -24,13 +24,13 @@ public class ItemEvent : Event
 
     /// <summary>
     /// The movement payload; <see langword="null"/> unless the type is
-    /// <see cref="Events.ItemEventType.Moviment"/>.
+    /// <see cref="ItemEventType.Moviment"/>.
     /// </summary>
     public ItemMovimentEvent? Moviment { get; private set; }
 
     /// <summary>
     /// The creation/deletion payload; <see langword="null"/> unless the type is
-    /// <see cref="Events.ItemEventType.Creation"/> or <see cref="Events.ItemEventType.Deletion"/>.
+    /// <see cref="ItemEventType.Creation"/> or <see cref="ItemEventType.Deletion"/>.
     /// </summary>
     public ItemLifecycleEvent? Lifecycle { get; private set; }
 

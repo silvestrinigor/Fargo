@@ -64,7 +64,7 @@ public sealed class ListPartitionsCommand : Command
             var search = parseResult.GetValue(searchOption);
             var partitions = parseResult.GetValue(parentOption);
 
-            await PagedListView.RunAsync<PartitionDto>(
+            await PagedListView.RunAsync(
                 page,
                 limit,
                 fetch: async (p, l) =>
@@ -87,7 +87,7 @@ public sealed class ListPartitionsCommand : Command
                         if (partitions is { Length: > 0 })
                         {
                             request.QueryParameters.ChildOfAnyOfThesePartitions =
-                                partitions.Select(g => (Guid?)g).ToArray();
+                                [.. partitions.Select(g => (Guid?)g)];
                         }
                     }, cancellationToken);
 

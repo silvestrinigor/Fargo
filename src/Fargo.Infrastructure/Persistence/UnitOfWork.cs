@@ -26,7 +26,7 @@ public sealed class UnitOfWork(FargoDbContext fargoContext, ILogger<IUnitOfWork>
     {
         ArgumentNullException.ThrowIfNull(work);
 
-        return ExecuteInTransactionAsync<bool>(
+        return ExecuteInTransactionAsync(
             async ct =>
             {
                 await work(ct);

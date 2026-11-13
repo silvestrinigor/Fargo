@@ -40,7 +40,7 @@ public class AuditCommandHandlerDecoratorTests
         var currentActor = new TestCurrentActor { IsAuthenticated = true };
         var inner = Substitute.For<ICommandHandler<ArticleCreateCommand>>();
         inner.HandleAsync(Arg.Any<ArticleCreateCommand>(), Arg.Any<CancellationToken>())
-            .Returns<Task>(_ => throw new InvalidOperationException("boom"));
+            .Returns(_ => throw new InvalidOperationException("boom"));
 
         var decorator = new AuditCommandHandlerDecorator<ArticleCreateCommand>(
             inner, currentActor, auditLogRepository);

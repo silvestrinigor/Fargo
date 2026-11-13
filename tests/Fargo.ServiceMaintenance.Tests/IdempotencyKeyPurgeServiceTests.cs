@@ -78,7 +78,7 @@ public class IdempotencyKeyPurgeServiceTests
 
         handler
             .HandleAsync(Arg.Any<PurgeExpiredIdempotencyKeysCommand>(), Arg.Any<CancellationToken>())
-            .Returns<Task<int>>(call =>
+            .Returns(call =>
             {
                 call.Arg<CancellationToken>().ThrowIfCancellationRequested();
                 return Task.FromResult(0);

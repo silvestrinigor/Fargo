@@ -6,7 +6,7 @@ namespace Fargo.Cli.Output;
 /// </summary>
 public sealed class TableWriter<T>
 {
-    private readonly List<(string Header, Func<T, string?> Selector)> _columns = new();
+    private readonly List<(string Header, Func<T, string?> Selector)> _columns = [];
 
     private string _emptyMessage = "No results.";
 
@@ -27,7 +27,7 @@ public sealed class TableWriter<T>
 
     public void Write(IEnumerable<T>? rows)
     {
-        var materialized = rows?.ToList() ?? new List<T>();
+        var materialized = rows?.ToList() ?? [];
 
         if (materialized.Count == 0)
         {

@@ -29,8 +29,8 @@ public static class HandlerRegistrationExtensions
         services.TryAddScoped<THandler>();
         services.AddScoped<ICommandHandler<TCommand>>(sp =>
             new LoggingCommandHandlerDecorator<TCommand>(
-                BuildUnitOfWorkDecorator<TCommand>(
-                    BuildIdempotencyDecorator<TCommand>(
+                BuildUnitOfWorkDecorator(
+                    BuildIdempotencyDecorator(
                         new AuditCommandHandlerDecorator<TCommand>(
                             sp.GetRequiredService<THandler>(),
                             sp.GetService<ICurrentActor>(),
@@ -50,8 +50,8 @@ public static class HandlerRegistrationExtensions
         services.TryAddScoped<THandler>();
         services.AddScoped<ICommandHandler<TCommand, TResponse>>(sp =>
             new LoggingCommandHandlerDecorator<TCommand, TResponse>(
-                BuildUnitOfWorkDecorator<TCommand, TResponse>(
-                    BuildIdempotencyDecorator<TCommand, TResponse>(
+                BuildUnitOfWorkDecorator(
+                    BuildIdempotencyDecorator(
                         new AuditCommandHandlerDecorator<TCommand, TResponse>(
                             sp.GetRequiredService<THandler>(),
                             sp.GetService<ICurrentActor>(),

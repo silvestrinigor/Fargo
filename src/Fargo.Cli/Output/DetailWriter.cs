@@ -5,7 +5,7 @@ namespace Fargo.Cli.Output;
 /// </summary>
 public sealed class DetailWriter
 {
-    private readonly List<(string Label, string? Value)> _fields = new();
+    private readonly List<(string Label, string? Value)> _fields = [];
 
     private string? _title;
 

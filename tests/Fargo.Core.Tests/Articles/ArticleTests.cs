@@ -236,6 +236,6 @@ public class ArticleTests
     {
         var article = Article.NewArticle(Aname);
 
-        Assert.Equal(Fargo.Core.Entities.EntityType.Article, article.EntityType);
+        Assert.Equal(Entities.EntityType.Article, article.EntityType);
     }
 }

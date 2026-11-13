@@ -73,13 +73,13 @@ internal static class ToolInput
     /// Returns <see langword="null"/> when empty, as the generated client expects nullable lists.
     /// </summary>
     public static List<Guid?>? ToGuidList(Guid[]? values) =>
-        values is { Length: > 0 } ? values.Select(v => (Guid?)v).ToList() : null;
+        values is { Length: > 0 } ? [.. values.Select(v => (Guid?)v)] : null;
 
     /// <summary>
     /// Returns <see langword="null"/> when empty, as the generated client expects nullable lists.
     /// </summary>
     public static List<int?>? ToIntList(int[]? values) =>
-        values is { Length: > 0 } ? values.Select(v => (int?)v).ToList() : null;
+        values is { Length: > 0 } ? [.. values.Select(v => (int?)v)] : null;
 
     private static (Guid Guid, double? Number) SplitGuidAndNumber(string token, string what, string numberName)
     {

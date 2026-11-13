@@ -48,7 +48,7 @@ public class EnumLookupTests(PostgresFixture postgres) : IClassFixture<PostgresF
             .ToListAsync();
 #pragma warning restore EF1002
 
-        Assert.Equal(expected, actual.Order(StringComparer.Ordinal).ToList());
+        Assert.Equal(expected, [.. actual.Order(StringComparer.Ordinal)]);
     }
 
     [Fact]

@@ -60,7 +60,7 @@ public sealed class ArticleInventoryCommand : Command
                 if (containers is { Length: > 0 })
                 {
                     request.QueryParameters.InsideItemContainerGuids =
-                        containers.Select(g => (Guid?)g).ToArray();
+                        [.. containers.Select(g => (Guid?)g)];
                 }
 
                 if (at.HasValue)

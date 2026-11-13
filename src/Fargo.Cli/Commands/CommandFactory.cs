@@ -1,9 +1,9 @@
 using Fargo.Cli.Commands.Articles;
 using Fargo.Cli.Commands.Audits;
-using Fargo.Cli.Commands.Metadata;
 using Fargo.Cli.Commands.Config;
 using Fargo.Cli.Commands.Identity;
 using Fargo.Cli.Commands.Items;
+using Fargo.Cli.Commands.Metadata;
 using Fargo.Cli.Commands.Partitions;
 using Fargo.Cli.Commands.Realtime;
 using Fargo.Cli.Commands.ServiceAccounts;

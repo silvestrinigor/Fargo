@@ -32,46 +32,39 @@ public sealed class ProblemDetailsHandler : DelegatingHandler
         var problem = await TryReadProblemDetailsAsync(response, cancellationToken)
             .ConfigureAwait(false);
 
-        switch (response.StatusCode)
+        throw response.StatusCode switch
         {
-            case HttpStatusCode.BadRequest:
-                throw new BadRequestApiException(
-                    problem,
-                    BuildMessage(
-                        problem,
-                        defaultMessage:
-                        "Bad request (400): the server rejected the request. "
-                        + "Check the command arguments and try again."));
-
-            case HttpStatusCode.Unauthorized:
-                throw new UnauthorizedApiException(
-                    problem,
-                    BuildMessage(
-                        problem,
-                        defaultMessage:
-                        "Unauthorized (401): authentication is required or your "
-                        + "session has expired. Run 'fargo identity login' or "
-                        + "provide --username and --password."));
-
-            case HttpStatusCode.Forbidden:
-                throw new ForbiddenApiException(
-                    problem,
-                    BuildMessage(
-                        problem,
-                        defaultMessage:
-                        "Forbidden (403): you do not have permission to perform "
-                        + "this action."));
-
-            default:
-                throw new FargoApiException(
-                    status,
-                    problem,
-                    BuildMessage(
-                        problem,
-                        defaultMessage:
-                        $"The server returned an error ({status} "
-                        + $"{response.ReasonPhrase})."));
-        }
+            HttpStatusCode.BadRequest => new BadRequestApiException(
+                                problem,
+                                BuildMessage(
+                                    problem,
+                                    defaultMessage:
+                                    "Bad request (400): the server rejected the request. "
+                                    + "Check the command arguments and try again.")),
+            HttpStatusCode.Unauthorized => new UnauthorizedApiException(
+                                problem,
+                                BuildMessage(
+                                    problem,
+                                    defaultMessage:
+                                    "Unauthorized (401): authentication is required or your "
+                                    + "session has expired. Run 'fargo identity login' or "
+                                    + "provide --username and --password.")),
+            HttpStatusCode.Forbidden => new ForbiddenApiException(
+                                problem,
+                                BuildMessage(
+                                    problem,
+                                    defaultMessage:
+                                    "Forbidden (403): you do not have permission to perform "
+                                    + "this action.")),
+            _ => new FargoApiException(
+                                status,
+                                problem,
+                                BuildMessage(
+                                    problem,
+                                    defaultMessage:
+                                    $"The server returned an error ({status} "
+                                    + $"{response.ReasonPhrase}).")),
+        };
     }
 
     private static async Task<FargoProblemDetails?> TryReadProblemDetailsAsync(

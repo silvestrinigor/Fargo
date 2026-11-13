@@ -4,7 +4,7 @@ public sealed class TreeNode(string label)
 {
     public string Label { get; } = label;
 
-    public List<TreeNode> Children { get; } = new();
+    public List<TreeNode> Children { get; } = [];
 
     public TreeNode Add(TreeNode child)
     {
