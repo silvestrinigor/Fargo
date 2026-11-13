@@ -18,7 +18,7 @@
     Removes the installed binary and the PATH entry instead of installing.
 
 .EXAMPLE
-    irm https://github.com/silvestrinigor/Fargo/releases/latest/download/install.ps1 | iex
+    irm https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.ps1 | iex
 
 .EXAMPLE
     .\install.ps1 -Version 0.1.0-alpha.1
@@ -48,31 +48,63 @@ $Repo       = 'silvestrinigor/Fargo'
 $Rid        = 'win-x64'
 $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\fargo'
 
+# The user PATH lives in HKCU\Environment as a REG_EXPAND_SZ value that often
+# contains unexpanded entries such as %USERPROFILE%\bin. [Environment]::
+# SetEnvironmentVariable would expand them and store a plain REG_SZ, silently
+# rewriting the user's other PATH entries. Read the raw value and write it back
+# with its expandable type instead.
+function Get-RawUserPath {
+    $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment')
+    try {
+        if ($null -eq $key) { return '' }
+        $value = $key.GetValue('Path', '', [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
+        if ($null -eq $value) { return '' }
+        return [string]$value
+    } finally {
+        if ($key) { $key.Dispose() }
+    }
+}
+
+function Set-RawUserPath([string]$value) {
+    $key = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Environment')
+    try {
+        $key.SetValue('Path', $value, [Microsoft.Win32.RegistryValueKind]::ExpandString)
+    } finally {
+        $key.Dispose()
+    }
+    # Tell running programs (Explorer, new terminals) the environment changed.
+    # Setting and clearing a throwaway variable broadcasts WM_SETTINGCHANGE.
+    $name = "FARGO_PATH_REFRESH_$PID"
+    [Environment]::SetEnvironmentVariable($name, '1', 'User')
+    [Environment]::SetEnvironmentVariable($name, $null, 'User')
+}
+
+function Test-SamePath([string]$a, [string]$b) {
+    $a = [Environment]::ExpandEnvironmentVariables($a).TrimEnd('\')
+    $b = [Environment]::ExpandEnvironmentVariables($b).TrimEnd('\')
+    return $a -ieq $b
+}
+
 function Remove-FromUserPath([string]$dir) {
-    $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
+    $userPath = Get-RawUserPath
     if ([string]::IsNullOrEmpty($userPath)) { return }
 
-    $entries = $userPath -split ';' | Where-Object {
-        $_ -and ($_.TrimEnd('\') -ine $dir.TrimEnd('\'))
-    }
-    [Environment]::SetEnvironmentVariable('PATH', ($entries -join ';'), 'User')
+    $entries = @($userPath -split ';' | Where-Object { $_ -and -not (Test-SamePath $_ $dir) })
+    Set-RawUserPath ($entries -join ';')
 }
 
 function Add-ToUserPath([string]$dir) {
-    $userPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
-    $present  = ($userPath -split ';') | Where-Object {
-        $_.TrimEnd('\') -ieq $dir.TrimEnd('\')
-    }
-    if (-not $present) {
-        $newPath = if ([string]::IsNullOrEmpty($userPath)) { $dir } else { "$userPath;$dir" }
-        [Environment]::SetEnvironmentVariable('PATH', $newPath, 'User')
+    $userPath = Get-RawUserPath
+    $present  = @($userPath -split ';' | Where-Object { $_ -and (Test-SamePath $_ $dir) })
+    if ($present.Count -eq 0) {
+        $newPath = if ([string]::IsNullOrEmpty($userPath)) { $dir } else { "$($userPath.TrimEnd(';'));$dir" }
+        Set-RawUserPath $newPath
     }
     # Make it usable in the current session too.
-    if (($env:PATH -split ';' | Where-Object { $_.TrimEnd('\') -ieq $dir.TrimEnd('\') }).Count -eq 0) {
+    if (@($env:PATH -split ';' | Where-Object { $_ -and (Test-SamePath $_ $dir) }).Count -eq 0) {
         $env:PATH = "$env:PATH;$dir"
     }
 }
-
 if ($Uninstall) {
     Write-Host "Uninstalling Fargo CLI..."
     if (Test-Path $InstallDir) {
@@ -111,20 +143,24 @@ try {
     $zipPath = Join-Path $tmp $asset
     Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
 
-    # Verify the checksum when the .sha256 asset is available.
+    # Verify the checksum when the .sha256 asset is available. A missing asset
+    # only skips verification; a mismatch always aborts the install.
+    $shaPath = "$zipPath.sha256"
+    $haveSha = $true
     try {
-        $shaPath = "$zipPath.sha256"
         Invoke-WebRequest -Uri $sha256Url -OutFile $shaPath -UseBasicParsing
+    } catch {
+        $haveSha = $false
+        Write-Warning "No checksum file found; skipping verification."
+    }
+    if ($haveSha) {
         $expected = (Get-Content $shaPath -Raw).Trim().Split(' ')[0]
         $actual   = (Get-FileHash $zipPath -Algorithm SHA256).Hash
         if ($actual -ine $expected) {
             throw "Checksum verification failed for $asset (expected $expected, got $actual)."
         }
         Write-Host "Checksum verified."
-    } catch [System.Net.WebException] {
-        Write-Warning "No checksum file found; skipping verification."
     }
-
     Write-Host "Installing to $InstallDir..."
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
     Expand-Archive -Path $zipPath -DestinationPath $tmp -Force

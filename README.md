@@ -29,7 +29,7 @@ user `PATH` — no admin rights required:
 
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-irm https://github.com/silvestrinigor/Fargo/releases/latest/download/install.ps1 | iex
+irm https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.ps1 | iex
 ```
 
 > The first line enables TLS 1.2, which Windows PowerShell 5.1 does not use by
@@ -45,7 +45,7 @@ with arguments:
 ```powershell
 # Install a specific version
 $s = "$env:TEMP\fargo-install.ps1"
-irm https://github.com/silvestrinigor/Fargo/releases/latest/download/install.ps1 -OutFile $s
+irm https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.ps1 -OutFile $s
 & $s -Version 0.1.0-alpha.1
 
 # Uninstall (removes the binary and the PATH entry)
@@ -58,7 +58,7 @@ Install (or upgrade) the latest release for the current user. This downloads the
 `fargo` binary, verifies its checksum, and installs it to `~/.local/bin`:
 
 ```bash
-curl -fsSL https://github.com/silvestrinigor/Fargo/releases/latest/download/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.sh | sh
 ```
 
 Make sure `~/.local/bin` is on your `PATH` (the script warns you if it is not),
@@ -68,13 +68,13 @@ Install a specific version, pick a different install directory, or uninstall:
 
 ```bash
 # Install a specific version
-curl -fsSL https://github.com/silvestrinigor/Fargo/releases/latest/download/install.sh | sh -s -- --version 0.1.0-alpha.1
+curl -fsSL https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.sh | sh -s -- --version 0.1.0-alpha.1
 
 # Install system-wide (needs sudo)
-curl -fsSL https://github.com/silvestrinigor/Fargo/releases/latest/download/install.sh | sudo sh -s -- --prefix /usr/local/bin
+curl -fsSL https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.sh | sudo sh -s -- --prefix /usr/local/bin
 
 # Uninstall
-curl -fsSL https://github.com/silvestrinigor/Fargo/releases/latest/download/install.sh | sh -s -- --uninstall
+curl -fsSL https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.sh | sh -s -- --uninstall
 ```
 
 ### Manual install

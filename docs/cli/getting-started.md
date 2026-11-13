@@ -1,10 +1,44 @@
 # CLI Getting Started
 
-This guide takes you from a fresh checkout to running commands against a Fargo
-server. Examples refer to the client as `fargo`; you can also run it with
-`dotnet run --project src/Fargo.Cli -- <command>`.
+This guide takes you from installing the CLI to running commands against a
+Fargo server. Examples refer to the client as `fargo`.
 
-## 1. Point the CLI at a server
+## 1. Install the CLI
+
+The CLI ships as a self-contained executable for Windows (x64) and Linux (x64),
+so no .NET runtime is needed. The installer puts `fargo` on your `PATH`.
+
+On Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.ps1 | iex
+```
+
+On Linux:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.sh | sh
+```
+
+Open a new terminal, then check the install:
+
+```bash
+fargo --version
+```
+
+For specific versions, uninstalling, and manual installs, see
+[Installing the CLI](https://github.com/silvestrinigor/Fargo#installing-the-cli)
+in the repository README.
+
+If you work from a checkout instead, run the project from the repo root. This
+does not put `fargo` on your `PATH`, so replace `fargo` in the examples with
+the `dotnet run` form:
+
+```bash
+dotnet run --project src/Fargo.Cli -- <command>
+```
+
+## 2. Point the CLI at a server
 
 Set and persist the server the CLI connects to by default:
 
@@ -13,7 +47,7 @@ fargo config set-server --url https://localhost:7563
 fargo config show
 ```
 
-## 2. Log in
+## 3. Log in
 
 Authenticate. Omit `--password` to be prompted securely (the input is not
 echoed):
@@ -25,7 +59,7 @@ fargo identity login --username admin
 The session token is stored in your OS credential store and reused by later
 commands. It is bound to the server you logged in against.
 
-## 3. Work with resources
+## 4. Work with resources
 
 List resources as a table:
 
@@ -51,7 +85,7 @@ fargo user set-active 00000000-0000-0000-0000-000000000004 false
 fargo item delete 22222222-2222-2222-2222-222222222222
 ```
 
-## 4. Inspect the audit trail
+## 5. Inspect the audit trail
 
 Every create, update, and delete is recorded. List recent entries, then fetch
 one with its metadata:
@@ -61,7 +95,7 @@ fargo audit list --limit 20
 fargo audit get 809434f3-c3b6-4f74-ad15-74e41d26468e
 ```
 
-## 5. Watch changes live
+## 6. Watch changes live
 
 Print changes as they happen, until Ctrl+C. The real-time service has its own
 URL; a fresh configuration defaults to `https://localhost:7571`:
