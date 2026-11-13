@@ -1,7 +1,7 @@
 using Fargo.Cli.Commands.Config;
 using Fargo.Cli.Configurations;
 using Fargo.Cli.ErrorHandling;
-using Fargo.ClientAuthentication;
+using Fargo.ClientHttp.Authentication;
 using Fargo.ClientRealtime;
 using System.CommandLine;
 using System.Net;
@@ -95,7 +95,7 @@ public sealed class WatchRealtimeCommand : Command
 
             await using var client = new FargoRealtimeClient(
                 new FargoRealtimeClientOptions { RealtimeBaseAddress = realtimeServer },
-                tokenSource);
+                new DelegateRealtimeAccessTokenProvider(tokenSource.GetAccessTokenAsync));
 
             var output = new Lock();
 

@@ -1,4 +1,4 @@
-namespace Fargo.ClientAuthentication;
+namespace Fargo.ClientHttp.Authentication;
 
 /// <summary>
 /// Holds the current <see cref="AuthTokens"/> of a client session.

@@ -1,4 +1,3 @@
-using Fargo.ClientAuthentication;
 using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace Fargo.ClientHttp.Authentication;

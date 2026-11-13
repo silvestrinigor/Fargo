@@ -1,4 +1,4 @@
-using Fargo.ClientAuthentication;
+using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.Extensions;
 using Fargo.Mcp.Authentication;
 using Fargo.Mcp.Configuration;

@@ -37,9 +37,8 @@ Everything lives under `src/`, with tests under `tests/`.
 
 | Project | Role |
 | --- | --- |
-| `Fargo.ClientHttp` | The HTTP client, generated with Kiota from the OpenAPI document. |
-| `Fargo.ClientRealtime` | The client for the real-time hub. |
-| `Fargo.ClientAuthentication` | Token storage and refresh, shared by both clients. |
+| `Fargo.ClientHttp` | The HTTP client, generated with Kiota from the OpenAPI document, with token storage and refresh. |
+| `Fargo.ClientRealtime` | The client for the real-time hub; it makes no API requests. |
 | `Fargo.RealtimeContracts` | The wire contract of the real-time hub, shared by the server and the client. |
 | `Fargo.Cli` | The `fargo` command-line client. |
 | `Fargo.Mcp` | The Model Context Protocol server for AI agents. |

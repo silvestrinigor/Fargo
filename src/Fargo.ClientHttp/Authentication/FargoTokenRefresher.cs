@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Fargo.ClientAuthentication;
+namespace Fargo.ClientHttp.Authentication;
 
 /// <summary>
 /// Exchanges the stored refresh token for new tokens through the Fargo API

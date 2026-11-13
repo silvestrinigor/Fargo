@@ -11,14 +11,13 @@
     <Project Path="src/Fargo.ServiceRealtime/Fargo.ServiceRealtime.csproj" />
     <Project Path="src/Fargo.ServiceInitializer/Fargo.ServiceInitializer.csproj" />
     <Project Path="src/Fargo.Cli/Fargo.Cli.csproj" />
-    <Project Path="src/Fargo.ClientAuthentication/Fargo.ClientAuthentication.csproj" />
     <Project Path="src/Fargo.ClientHttp/Fargo.ClientHttp.csproj" />
     <Project Path="src/Fargo.ClientRealtime/Fargo.ClientRealtime.csproj" />
     <Project Path="src/Fargo.Mcp/Fargo.Mcp.csproj" />
     <Project Path="src/Fargo.RealtimeContracts/Fargo.RealtimeContracts.csproj" />
     <Project Path="tests/Fargo.Application.Tests/Fargo.Application.Tests.csproj" />
     <Project Path="tests/Fargo.Cli.Tests/Fargo.Cli.Tests.csproj" />
-    <Project Path="tests/Fargo.ClientAuthentication.Tests/Fargo.ClientAuthentication.Tests.csproj" />
+    <Project Path="tests/Fargo.ClientHttp.Tests/Fargo.ClientHttp.Tests.csproj" />
     <Project Path="tests/Fargo.ClientRealtime.Tests/Fargo.ClientRealtime.Tests.csproj" />
     <Project Path="tests/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />
     <Project Path="tests/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />

@@ -7,9 +7,9 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 
     <!--
-      Client for the Fargo real-time hub. Depends on the shared token handling
-      (Fargo.ClientAuthentication) and the hub contract (Fargo.RealtimeContracts),
-      not on the Kiota HTTP client.
+      Client for the Fargo real-time hub. Depends only on SignalR and the hub
+      contract (Fargo.RealtimeContracts): it makes no API requests, and the
+      application supplies the access token (IFargoRealtimeAccessTokenProvider).
     -->
     <Version>0.1.0-alpha.1</Version>
   </PropertyGroup>
@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.ClientAuthentication\Fargo.ClientAuthentication.csproj" />
     <ProjectReference Include="..\Fargo.RealtimeContracts\Fargo.RealtimeContracts.csproj" />
   </ItemGroup>
 

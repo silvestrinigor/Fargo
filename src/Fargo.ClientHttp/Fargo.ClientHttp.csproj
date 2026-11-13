@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.ClientAuthentication\Fargo.ClientAuthentication.csproj" />
+    <InternalsVisibleTo Include="Fargo.ClientHttp.Tests" />
   </ItemGroup>
 
 </Project>

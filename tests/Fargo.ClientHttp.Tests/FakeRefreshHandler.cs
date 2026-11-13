@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
 
-namespace Fargo.ClientAuthentication.Tests;
+namespace Fargo.ClientHttp.Tests;
 
 internal sealed class FakeRefreshHandler : HttpMessageHandler
 {

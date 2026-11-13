@@ -1,5 +1,5 @@
 using Fargo.Cli.Configurations;
-using Fargo.ClientAuthentication;
+using Fargo.ClientHttp.Authentication;
 using ktsu.CredentialCache;
 using System.Text.Json;
 

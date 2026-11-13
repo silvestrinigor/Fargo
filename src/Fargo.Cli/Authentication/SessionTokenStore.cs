@@ -1,4 +1,4 @@
-using Fargo.ClientAuthentication;
+using Fargo.ClientHttp.Authentication;
 
 namespace Fargo.Cli.Authentication;
 

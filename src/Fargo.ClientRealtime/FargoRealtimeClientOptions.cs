@@ -31,7 +31,7 @@ public sealed class FargoRealtimeClientOptions
     /// Gets or sets an optional hook to adjust the SignalR connection, for
     /// example the transports, extra headers, or a test message handler.
     /// The access token is always supplied by the
-    /// <see cref="ClientAuthentication.IFargoAccessTokenSource"/>.
+    /// <see cref="IFargoRealtimeAccessTokenProvider"/>.
     /// </summary>
     public Action<HttpConnectionOptions>? ConfigureHttpConnection { get; set; }
 }

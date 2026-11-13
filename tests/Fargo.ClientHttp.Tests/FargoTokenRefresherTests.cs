@@ -1,8 +1,9 @@
+using Fargo.ClientHttp.Authentication;
 using Microsoft.Extensions.Time.Testing;
 using System.Net;
 using System.Text.Json;
 
-namespace Fargo.ClientAuthentication.Tests;
+namespace Fargo.ClientHttp.Tests;
 
 public class FargoTokenRefresherTests
 {

@@ -1,4 +1,3 @@
-using Fargo.ClientAuthentication;
 using Fargo.ClientHttp.Authentication;
 using Fargo.Mcp.Authentication;
 using Fargo.Mcp.Configuration;
@@ -24,7 +23,7 @@ internal static class ScopedAuthenticationExtensions
         // Everything that reads the token store must be scoped with it, or a
         // singleton would capture one caller's store.
         services.Replace(ServiceDescriptor.Scoped(sp => new FargoTokenRefresher(
-            () => sp.GetRequiredService<IHttpClientFactory>().CreateClient(ClientAuthenticationServiceCollectionExtensions.HttpClientName),
+            () => sp.GetRequiredService<IHttpClientFactory>().CreateClient(FargoAuthenticationServiceCollectionExtensions.HttpClientName),
             sp.GetRequiredService<ITokenStore>())));
         services.Replace(ServiceDescriptor.Scoped<IFargoAccessTokenSource, StoredAccessTokenSource>());
         services.Replace(ServiceDescriptor.Scoped<IAccessTokenProvider, FargoAccessTokenProvider>());

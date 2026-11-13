@@ -1,4 +1,3 @@
-using Fargo.ClientAuthentication;
 using Fargo.RealtimeContracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Connections;
@@ -42,7 +41,7 @@ internal sealed class TestHubServer : IAsyncDisposable
         return new TestHubServer(app);
     }
 
-    public FargoRealtimeClient CreateClient(IFargoAccessTokenSource tokenSource, int duplicateWindow = 1000)
+    public FargoRealtimeClient CreateClient(IFargoRealtimeAccessTokenProvider tokenProvider, int duplicateWindow = 1000)
     {
         var server = app.GetTestServer();
 
@@ -58,7 +57,7 @@ internal sealed class TestHubServer : IAsyncDisposable
                     options.Transports = HttpTransportType.LongPolling;
                 },
             },
-            tokenSource);
+            tokenProvider);
     }
 
     public async ValueTask DisposeAsync()
@@ -99,7 +98,7 @@ internal sealed class TestHubServer : IAsyncDisposable
 /// <summary>
 /// Returns numbered tokens and counts how often it was asked.
 /// </summary>
-internal sealed class CountingTokenSource : IFargoAccessTokenSource
+internal sealed class CountingTokenSource : IFargoRealtimeAccessTokenProvider
 {
     private int calls;
 

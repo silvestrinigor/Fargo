@@ -1,8 +1,7 @@
-namespace Fargo.ClientAuthentication;
+namespace Fargo.ClientHttp.Authentication;
 
 /// <summary>
-/// Provides the access token a Fargo client sends with a request or a
-/// real-time connection.
+/// Provides the access token the Fargo HTTP client sends with each request.
 /// </summary>
 /// <remarks>
 /// The default, <see cref="StoredAccessTokenSource"/>, returns the stored token

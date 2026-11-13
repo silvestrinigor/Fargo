@@ -19,7 +19,7 @@ something wrong?* If not, leave the comment out.
 | What `null`, an empty result or a unit means, when it is not obvious | "`null` while the message is still waiting to be published." |
 | Why something is done, in `<remarks>` | "Disposing a broken channel can throw; there is nothing to recover." |
 | Domain exceptions a caller is expected to catch | `<exception cref="FargoCoreException">` on a domain method that guards an invariant. |
-| Short summaries on the public client libraries | `Fargo.ClientHttp`, `Fargo.ClientAuthentication`, `Fargo.ClientRealtime`, `Fargo.RealtimeContracts` are used by other developers, who see the summaries in IntelliSense. |
+| Short summaries on the public client libraries | `Fargo.ClientHttp`, `Fargo.ClientRealtime`, `Fargo.RealtimeContracts` are used by other developers, who see the summaries in IntelliSense. |
 
 Inline `//` comments follow the same rule: keep the ones that explain why, a
 workaround or a non-obvious decision.
