@@ -32,22 +32,27 @@ add their rows in the same transaction as the change:
 Changes made outside the change tracker (raw SQL, `ExecuteUpdate`,
 `ExecuteDelete`) bypass both.
 
-### Event-tracking tables
+### Item events
 
-Event-tracked articles record their stock as movement events rather than
-individual item rows (see [Articles and Items](../concepts/articles-and-items.md)):
+Stock changes are stored in one table, **`item_events`** (joined to the `events`
+base table that holds `occured_at`). Each row is a movement of a `quantity` (a
+`Scalar` persisted as `double precision`) from an origin container to a
+destination container (`from_item_container_guid` / `to_item_container_guid`),
+each with a `*_no_container` flag that preserves whether the event originally had
+no container on that side, since the FK is set to `NULL` if the container is
+deleted. The event type says what a missing side means: a creation has no origin,
+a deletion has no destination. Indexed by `article_guid`, `item_guid`, `occured_at`,
+and by article and time together to support point-in-time inventory.
 
-- **`item_events`** — one row per event, with the article it concerns, the event
-  type, and an `occured_at` timestamp. Indexed by `article_guid`, by `occured_at`,
-  and by both together to support point-in-time inventory.
-- **`item_moviment_events`** — the movement payload, keyed one-to-one by the
-  event GUID. It stores the moved `quantity` (a `Scalar` persisted as
-  `double precision`) and the optional origin/destination container references
-  (`from_item_container_guid` / `to_item_container_guid`, each with a
-  `*_no_container` flag preserving whether the movement originally had no
-  container on that side, since the FK is set to `NULL` if the container is
-  deleted).
-
+- Event-tracked articles have no per-unit item, so clients record their stock
+  through the API and `item_guid` is `NULL`.
+- Entity-tracked articles get a row, written by the application in the same
+  transaction, when an item is created, moved or deleted. `item_guid` holds the
+  item's GUID and the quantity is 1. It is deliberately not a foreign key, so the
+  events outlive the item. Deleting a container deletes the items inside it with
+  a cascading foreign key, so the delete command first records a deletion for each
+  contained item. Those events keep no reference to the deleted container, only
+  the `from_no_container = false` flag.
 ### Reference tables
 
 Every enum stored in a column has a **reference table** with `id` and `name`,
@@ -94,7 +99,7 @@ Read queries apply the actor's partition access as a filter and project directly
 to DTOs, so reads never over-fetch or leak entities the actor cannot see.
 
 Inventory for event-tracked articles is computed with raw recursive SQL
-(`item_moviment_events` joined to `item_events`) as the **net of signed
+(movement rows of `item_events`, for event-tracked articles) as the **net of signed
 quantities** — quantity moved into a container minus quantity moved out —
 optionally bounded by an `occured_at <= at` instant and expanded over the live
 container subtree. The article and container inventory query handlers branch on

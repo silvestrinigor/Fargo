@@ -4,6 +4,7 @@ using Fargo.Application.Dtos.Items;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
+using Fargo.Core.Events;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -92,6 +93,33 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
         FormattableString query = $"SELECT pg_advisory_xact_lock({ContainmentLockKey})";
 
         await context.Database.ExecuteSqlInterpolatedAsync(query, cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<ContainedItem>> GetContainedItemsAsync(
+        Guid itemContainerGuid,
+        CancellationToken cancellationToken = default)
+    {
+        FormattableString query = $"""
+        WITH RECURSIVE item_tree AS
+        (
+            SELECT child.guid AS item_guid, child.article_guid
+            FROM items AS child
+            WHERE child.parent_item_container_guid = {itemContainerGuid}
+
+            UNION ALL
+
+            SELECT child.guid AS item_guid, child.article_guid
+            FROM items AS child
+            INNER JOIN item_tree AS parent
+                ON child.parent_item_container_guid = parent.item_guid
+        )
+        SELECT item_guid, article_guid
+        FROM item_tree;
+        """;
+
+        return await context.Database
+            .SqlQuery<ContainedItem>(query)
+            .ToListAsync(cancellationToken);
     }
 
     public void Add(Item item) => context.Items.Add(item);
@@ -285,19 +313,24 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
 
     public async Task<IReadOnlyCollection<ItemMovimentDto>?> GetItemMovimentsInfoByGuidOrderedByOccurredAtAsync(Guid itemGuid, IReadOnlyCollection<Guid>? childOfAnyOfThesePartitions = null, CancellationToken cancellationToken = default)
     {
-        var itemMoviments = await context.Items
-        .AsNoTracking()
-        .Include(i => i.Moviments)
-        .Where(i => i.Guid == itemGuid)
-        .Select(i => i.Moviments)
-        .FirstOrDefaultAsync(cancellationToken);
+        var exists = await ApplyPartitionFilter(context.Items.AsNoTracking(), childOfAnyOfThesePartitions)
+        .AnyAsync(i => i.Guid == itemGuid, cancellationToken);
 
-        if (itemMoviments is null)
+        if (!exists)
         {
             return null;
         }
 
-        return [.. itemMoviments.OrderBy(m => m.OccurredAt).Select(a => a.ToDto())];
+        // The creation of an item inside a container counts as its first movement.
+        var itemEvents = await context.ItemEvents
+        .AsNoTracking()
+        .Where(e => e.ItemGuid == itemGuid
+            && (e.ItemEventType == ItemEventType.Moviment
+                || (e.ItemEventType == ItemEventType.Creation && !e.ToNoContainer)))
+        .OrderBy(e => e.OccuredAt)
+        .ToListAsync(cancellationToken);
+
+        return [.. itemEvents.Select(e => e.ToMovimentDto())];
     }
 
     public async Task<IReadOnlyCollection<ItemContainerInventoryDto>> GetInventoryInfoByGuidAsync(
@@ -454,10 +487,12 @@ public sealed class ItemRepository(FargoDbContext context) : IItemRepository, II
                     ELSE 0
                 END
             ), 0) AS total_count
-        FROM item_moviment_events AS moviment
-        INNER JOIN item_events AS event
-            ON event.guid = moviment.item_event_guid
-        WHERE event.occured_at <= {upperBound}
+        FROM item_events AS moviment
+        INNER JOIN events AS event
+            ON event.guid = moviment.guid
+        WHERE moviment.item_guid IS NULL
+          AND moviment.item_event_type = {(short)ItemEventType.Moviment}
+          AND event.occured_at <= {upperBound}
           AND (
                 moviment.to_item_container_guid IN (SELECT guid FROM container_set)
              OR moviment.from_item_container_guid IN (SELECT guid FROM container_set)

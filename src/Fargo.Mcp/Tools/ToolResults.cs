@@ -106,11 +106,10 @@ public static class ToolResults
         dto.ArticleGuid,
         dto.EventType,
         dto.OccuredAt,
-        dto.Moviment?.Quantity?.Double,
-        dto.Moviment?.FromItemContainerGuid,
-        dto.Moviment?.ToItemContainerGuid,
-        dto.Lifecycle?.Quantity?.Double,
-        dto.Lifecycle?.ItemContainerGuid);
+        dto.ItemGuid,
+        dto.Quantity?.Double,
+        dto.FromItemContainerGuid,
+        dto.ToItemContainerGuid);
 }
 
 public sealed record ArticleSummary(
@@ -191,8 +190,7 @@ public sealed record ItemEventSummary(
     Guid? ArticleGuid,
     int? EventType,
     DateTimeOffset? OccuredAt,
-    double? MovimentQuantity,
+    Guid? ItemGuid,
+    double? Quantity,
     Guid? FromItemContainerGuid,
-    Guid? ToItemContainerGuid,
-    double? LifecycleQuantity,
-    Guid? ItemContainerGuid);
+    Guid? ToItemContainerGuid);
