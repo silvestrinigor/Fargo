@@ -14,7 +14,7 @@ public class ItemEventRepositoryTests
     private static Scalar Qty(double amount) => Scalar.FromAmount(amount);
 
     private static (ArticleRepository, ItemRepository, ItemEventRepository) Repos(
-        Fargo.Infrastructure.Persistence.FargoDbContext ctx)
+        Infrastructure.Persistence.FargoDbContext ctx)
         => (new ArticleRepository(ctx), new ItemRepository(ctx), new ItemEventRepository(ctx));
 
     [Fact]

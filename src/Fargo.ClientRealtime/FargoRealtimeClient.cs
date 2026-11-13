@@ -1,4 +1,3 @@
-using Fargo.ClientAuthentication;
 using Fargo.RealtimeContracts;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
@@ -16,9 +15,9 @@ namespace Fargo.ClientRealtime;
 /// <see cref="EntityChanged"/> by reading the entity again through the API.
 /// </para>
 /// <para>
-/// <b>Tokens.</b> Every connect and reconnect asks the <see cref="IFargoAccessTokenSource"/> for a
-/// token, and the service closes a connection when its token expires. Nothing refreshes tokens
-/// unless the application opts in, for example with <see cref="RefreshingAccessTokenSource"/>.
+/// <b>Tokens.</b> Every connect and reconnect asks the <see cref="IFargoRealtimeAccessTokenProvider"/>
+/// for a token, and the service closes a connection when its token expires. The client never
+/// refreshes tokens itself: a provider that must outlive a token should refresh it.
 /// </para>
 /// <para>
 /// <b>Connection loss.</b> After <see cref="StartAsync"/> succeeds, the client keeps reconnecting
@@ -50,11 +49,11 @@ public sealed class FargoRealtimeClient : IAsyncDisposable
 
     public FargoRealtimeClient(
         FargoRealtimeClientOptions options,
-        IFargoAccessTokenSource tokenSource,
+        IFargoRealtimeAccessTokenProvider tokenProvider,
         ILogger<FargoRealtimeClient>? logger = null)
     {
         ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(tokenSource);
+        ArgumentNullException.ThrowIfNull(tokenProvider);
 
         if (options.RealtimeBaseAddress is null)
         {
@@ -75,8 +74,8 @@ public sealed class FargoRealtimeClient : IAsyncDisposable
             {
                 options.ConfigureHttpConnection?.Invoke(httpOptions);
 
-                // Set last so the configured source always supplies the token.
-                httpOptions.AccessTokenProvider = () => tokenSource.GetAccessTokenAsync();
+                // Set last so the configured provider always supplies the token.
+                httpOptions.AccessTokenProvider = () => tokenProvider.GetAccessTokenAsync();
             })
             .WithAutomaticReconnect(reconnectPolicy)
             .Build();

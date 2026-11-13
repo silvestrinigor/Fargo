@@ -33,13 +33,7 @@ public sealed class IdentityPasswordChangeCommandHandler(
             throw new InvalidCredentialsFargoApplicationException($"Nameid '{command.Passwords.Nameid}' has an invalid format.");
         }
 
-        var user = await userRepository.GetByNameidAsync(nameid, cancellationToken);
-
-        if (user is null)
-        {
-            throw new InvalidCredentialsFargoApplicationException($"User '{nameid}' was not found.");
-        }
-
+        var user = await userRepository.GetByNameidAsync(nameid, cancellationToken) ?? throw new InvalidCredentialsFargoApplicationException($"User '{nameid}' was not found.");
         if (!user.Actor.IsActive)
         {
             throw new InvalidCredentialsFargoApplicationException($"User '{user.ActorGuid}' is not active.");

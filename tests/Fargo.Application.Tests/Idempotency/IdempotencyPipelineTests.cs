@@ -43,7 +43,7 @@ public class IdempotencyPipelineTests
     {
         unitOfWork
             .ExecuteInTransactionAsync(Arg.Any<Func<CancellationToken, Task>>(), Arg.Any<CancellationToken>())
-            .Returns(call => call.Arg<Func<CancellationToken, Task>>()(CancellationToken.None));
+            .Returns(call => call.Arg<Func<CancellationToken, Task>>()!(CancellationToken.None));
 
         var services = new ServiceCollection();
         services.AddSingleton(unitOfWork);
@@ -52,7 +52,7 @@ public class IdempotencyPipelineTests
         services.AddSingleton<TimeProvider>(timeProvider);
         services.AddSingleton(Microsoft.Extensions.Options.Options.Create(options));
         services.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
-        services.AddScoped<ICurrentActor>(_ => currentActor);
+        services.AddScoped(_ => currentActor);
         services.AddSingleton(itemCreateHandler);
         services.AddSingleton(receiveHandler);
         services.AddFargoIdempotencyApplication();
@@ -176,13 +176,13 @@ public class IdempotencyPipelineTests
     [Fact]
     public async Task TheSameKeyFromAnotherActor_ShouldBeIndependent()
     {
-        var first = await SendCreateAsync(CreateItem(Key1));
+        var (firstResult, _) = await SendCreateAsync(CreateItem(Key1));
 
         currentActor = new TestCurrentActor { IsAuthenticated = true };
-        var second = await SendCreateAsync(CreateItem(Key1));
+        var (secondResult, secondReplayed) = await SendCreateAsync(CreateItem(Key1));
 
-        Assert.False(second.Replayed);
-        Assert.NotEqual(first.Result, second.Result);
+        Assert.False(secondReplayed);
+        Assert.NotEqual(firstResult, secondResult);
         Assert.Equal(2, itemCreateHandler.Calls);
         Assert.Equal(2, records.All.Count);
     }
@@ -342,7 +342,7 @@ public class IdempotencyPipelineTests
     {
         private readonly Dictionary<(Guid, Guid), IdempotencyRecord> store = [];
 
-        public IReadOnlyCollection<IdempotencyRecord> All => store.Values;
+        public Dictionary<(Guid, Guid), IdempotencyRecord>.ValueCollection All => store.Values;
 
         public Task<IdempotencyRecord?> FindAsync(Guid actorGuid, Guid key, CancellationToken cancellationToken = default)
             => Task.FromResult(store.GetValueOrDefault((actorGuid, key)));

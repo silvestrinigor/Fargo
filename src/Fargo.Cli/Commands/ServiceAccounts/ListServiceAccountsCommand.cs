@@ -39,7 +39,7 @@ public sealed class ListServiceAccountsCommand : Command
             var page = parseResult.GetValue(pageOption);
             var limit = parseResult.GetValue(limitOption);
 
-            await PagedListView.RunAsync<ServiceAccountDto>(
+            await PagedListView.RunAsync(
                 page,
                 limit,
                 fetch: async (p, l) =>

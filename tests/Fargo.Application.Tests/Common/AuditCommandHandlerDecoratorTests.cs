@@ -28,7 +28,7 @@ public class AuditCommandHandlerDecoratorTests
         await decorator.HandleAsync(Command());
 
         auditLogRepository.Received(1).Add(Arg.Is<AuditLog>(a =>
-            a.ActorGuid == actorGuid
+            a!.ActorGuid == actorGuid
             && a.ActorType == ActorType.User
             && a.AuditLogType == AuditLogType.EntityCreated
             && a.CommandName == nameof(ArticleCreateCommand)));
@@ -40,7 +40,7 @@ public class AuditCommandHandlerDecoratorTests
         var currentActor = new TestCurrentActor { IsAuthenticated = true };
         var inner = Substitute.For<ICommandHandler<ArticleCreateCommand>>();
         inner.HandleAsync(Arg.Any<ArticleCreateCommand>(), Arg.Any<CancellationToken>())
-            .Returns<Task>(_ => throw new InvalidOperationException("boom"));
+            .Returns(_ => throw new InvalidOperationException("boom"));
 
         var decorator = new AuditCommandHandlerDecorator<ArticleCreateCommand>(
             inner, currentActor, auditLogRepository);

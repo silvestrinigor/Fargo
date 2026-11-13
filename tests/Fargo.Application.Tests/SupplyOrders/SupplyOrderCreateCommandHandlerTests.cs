@@ -51,7 +51,7 @@ public class SupplyOrderCreateCommandHandlerTests
         var result = await CreateHandler().HandleAsync(command);
 
         supplyOrderRepository.Received(1).Add(Arg.Is<SupplyOrder>(o =>
-            o.Guid == result
+            o!.Guid == result
             && o.Lines.Count == 1
             && o.Lines.Single().ArticleGuid == article.Guid));
     }
@@ -68,7 +68,7 @@ public class SupplyOrderCreateCommandHandlerTests
             new Name("PO-1"),
             Lines: [new SupplyOrderLineCreateDto(article.Guid, Qty(10))]));
 
-        await Assert.ThrowsAsync<Fargo.Core.Common.FargoCoreException>(
+        await Assert.ThrowsAsync<Core.Common.FargoCoreException>(
             () => CreateHandler().HandleAsync(command));
 
         supplyOrderRepository.DidNotReceive().Add(Arg.Any<SupplyOrder>());
@@ -89,7 +89,7 @@ public class SupplyOrderCreateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         supplyOrderRepository.Received(1).Add(Arg.Is<SupplyOrder>(o =>
-            o.ReceivingContainerGuid == container.Guid));
+            o!.ReceivingContainerGuid == container.Guid));
     }
 
     [Fact]
@@ -104,7 +104,7 @@ public class SupplyOrderCreateCommandHandlerTests
             new Name("PO-1"),
             ReceivingContainerGuid: notAContainer.Guid));
 
-        await Assert.ThrowsAsync<Fargo.Core.Common.FargoCoreException>(
+        await Assert.ThrowsAsync<Core.Common.FargoCoreException>(
             () => CreateHandler().HandleAsync(command));
     }
 

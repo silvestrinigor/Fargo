@@ -181,7 +181,7 @@ public class IdempotencyPipelineIntegrationTests(PostgresFixture postgres) : ICl
         await Task.WhenAny(requests);
         await Task.WhenAll(requests.Select(r => r.ContinueWith(_ => { })));
 
-        var winner = requests.Single(r => r.IsCompletedSuccessfully).Result;
+        var winner = await requests.Single(r => r.IsCompletedSuccessfully);
 
         var retried = await SendAsync(provider, Key1);
 

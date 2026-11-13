@@ -37,7 +37,7 @@ public class OutboxPurgeServiceTests
         await CreateService().PurgeOnceAsync(settings, CancellationToken.None);
 
         await handler.Received(1).HandleAsync(
-            Arg.Is<PurgeProcessedOutboxCommand>(c => c.Cutoff == timeProvider.GetUtcNow() - TimeSpan.FromDays(3)),
+            Arg.Is<PurgeProcessedOutboxCommand>(c => c!.Cutoff == timeProvider.GetUtcNow() - TimeSpan.FromDays(3)),
             Arg.Any<CancellationToken>());
     }
 

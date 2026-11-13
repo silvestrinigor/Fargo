@@ -132,6 +132,6 @@ public class ServiceAccountTests
     {
         var actor = NewAccountActor();
 
-        Assert.Equal(Fargo.Core.Entities.EntityType.Actor, actor.EntityType);
+        Assert.Equal(Entities.EntityType.Actor, actor.EntityType);
     }
 }

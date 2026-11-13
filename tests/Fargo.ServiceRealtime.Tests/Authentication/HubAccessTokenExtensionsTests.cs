@@ -28,10 +28,11 @@ public class HubAccessTokenExtensionsTests
 
         var scheme = new AuthenticationScheme(
             JwtBearerDefaults.AuthenticationScheme, null, typeof(JwtBearerHandler));
-        var context = new MessageReceivedContext(httpContext, scheme, options);
-
-        // A token already read from the Authorization header is kept as is.
-        context.Token = authorizationHeader;
+        var context = new MessageReceivedContext(httpContext, scheme, options)
+        {
+            // A token already read from the Authorization header is kept as is.
+            Token = authorizationHeader
+        };
 
         await options.Events.OnMessageReceived(context);
 

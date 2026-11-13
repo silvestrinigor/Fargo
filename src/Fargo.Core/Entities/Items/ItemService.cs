@@ -70,15 +70,9 @@ public sealed class ItemService(IItemRepository itemRepository)
             return;
         }
 
-        var allowed = allowedArticles.FirstOrDefault(a => a.AllowedArticleGuid == memberItem.ArticleGuid);
-
-        if (allowed is null)
-        {
-            throw new FargoCoreException(
+        var allowed = allowedArticles.FirstOrDefault(a => a.AllowedArticleGuid == memberItem.ArticleGuid) ?? throw new FargoCoreException(
                 $"Item '{memberItem.Guid}' cannot be placed inside container '{parentContainerItem.Guid}' because its article '{memberItem.ArticleGuid}' is not in the container's allowed articles.",
                 FargoErrorType.InvalidOperation);
-        }
-
         if (allowed.MaxQuantity is not { } maxQuantity)
         {
             return;

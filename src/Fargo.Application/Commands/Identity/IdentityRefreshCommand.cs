@@ -39,13 +39,7 @@ public sealed class IdentityRefreshCommandHandler(
             throw new InvalidCredentialsFargoApplicationException("The refresh token was missing or not usable.");
         }
 
-        var user = await userRepository.GetByGuidAsync(storedOldRefreshToken.UserGuid, cancellationToken);
-
-        if (user is null)
-        {
-            throw new InvalidCredentialsFargoApplicationException($"User '{storedOldRefreshToken.UserGuid}' from the refresh token was not found.");
-        }
-
+        var user = await userRepository.GetByGuidAsync(storedOldRefreshToken.UserGuid, cancellationToken) ?? throw new InvalidCredentialsFargoApplicationException($"User '{storedOldRefreshToken.UserGuid}' from the refresh token was not found.");
         if (!user.Actor.IsActive)
         {
             storedOldRefreshToken.Revoke(now);

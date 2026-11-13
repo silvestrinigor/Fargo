@@ -1,5 +1,5 @@
-using Fargo.ClientAuthentication;
 using Fargo.ClientHttp;
+using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.Extensions;
 using Fargo.ClientHttp.Models;
 using Microsoft.Extensions.DependencyInjection;

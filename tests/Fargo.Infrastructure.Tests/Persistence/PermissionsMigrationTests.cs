@@ -31,7 +31,9 @@ public sealed class PermissionsMigrationTests : IAsyncLifetime
 
         await migrator.MigrateAsync(BeforeMigration);
 
-        await context.Database.ExecuteSqlAsync(
+        // The interpolated values are this test's own GUID constants.
+#pragma warning disable EF1002
+        await context.Database.ExecuteSqlRawAsync(
             $"""
             INSERT INTO entities (guid, entity_type) VALUES ('{ActorGuid}', 2), ('{UserGroupGuid}', 3);
 
@@ -41,6 +43,7 @@ public sealed class PermissionsMigrationTests : IAsyncLifetime
             INSERT INTO user_groups (guid, is_active, nameid, description, permissions)
             VALUES ('{UserGroupGuid}', true, 'migration-group', '', '[2, 3]');
             """);
+#pragma warning restore EF1002
 
         await migrator.MigrateAsync();
 

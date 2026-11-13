@@ -2229,6 +2229,256 @@
         }
       }
     },
+    "/v1/metadata/entity-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the entity types",
+        "description": "Gets the entity types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetEntityTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/audit-log-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the audit log types",
+        "description": "Gets the audit log types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetAuditLogTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/action-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the action (permission) types",
+        "description": "Gets the action (permission) types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetActionTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/actor-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the actor types",
+        "description": "Gets the actor types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetActorTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/article-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the article types",
+        "description": "Gets the article types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetArticleTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/article-tracking-modes": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the article tracking modes",
+        "description": "Gets the article tracking modes as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetArticleTrackingModes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/barcode-formats": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the barcode formats",
+        "description": "Gets the barcode formats as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetBarcodeFormats",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/item-event-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the item event types",
+        "description": "Gets the item event types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetItemEventTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/supply-order-statuses": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the supply order statuses",
+        "description": "Gets the supply order statuses as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetSupplyOrderStatuses",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/error-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the error types",
+        "description": "Gets the error types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetErrorTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/service-accounts/{serviceAccountGuid}": {
       "get": {
         "tags": [
@@ -3606,6 +3856,26 @@
       "AuditLogType": {
         "type": "integer",
         "description": "Coarse family of a command; the exact command is in string AuditLog.CommandName."
+      },
+      "CatalogEntryDto": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
       },
       "Color": {
         "pattern": "^#[0-9a-fA-F]{6}$",
@@ -5561,6 +5831,9 @@
     },
     {
       "name": "AuditLogs"
+    },
+    {
+      "name": "Metadata"
     },
     {
       "name": "ServiceAccounts"

@@ -1,17 +1,17 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Fargo.ClientAuthentication;
+namespace Fargo.ClientHttp.Authentication;
 
 /// <summary>
-/// Registers the shared Fargo client authentication services.
+/// Registers the token storage and refresh used by the Fargo HTTP client.
 /// </summary>
-public static class ClientAuthenticationServiceCollectionExtensions
+public static class FargoAuthenticationServiceCollectionExtensions
 {
     /// <summary>
     /// The name of the <see cref="HttpClient"/> used to refresh tokens.
     /// </summary>
-    public const string HttpClientName = "Fargo.ClientAuthentication";
+    public const string HttpClientName = "Fargo.ClientHttp.TokenRefresh";
 
     extension(IServiceCollection services)
     {
@@ -21,8 +21,7 @@ public static class ClientAuthenticationServiceCollectionExtensions
         /// (<see cref="StoredAccessTokenSource"/>, which never refreshes).
         /// </summary>
         /// <remarks>
-        /// Existing registrations of these services are kept, so several client libraries can call this
-        /// and an application can register its own store.
+        /// Existing registrations of these services are kept, so an application can register its own store.
         /// </remarks>
         public IServiceCollection AddFargoClientAuthentication(Uri apiBaseAddress)
         {
@@ -32,7 +31,7 @@ public static class ClientAuthenticationServiceCollectionExtensions
         }
 
         /// <summary>
-        /// Registers the shared client authentication services, reading the API
+        /// Registers the client authentication services, reading the API
         /// base address when the refresh client is created, so it can follow a
         /// runtime override (for example a <c>--server</c> option).
         /// </summary>

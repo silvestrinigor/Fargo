@@ -16,7 +16,7 @@ public static class AuditLogTools
         [Description("Page number to retrieve, starting at 1.")] int? page = null,
         [Description("Maximum number of audit log entries to return per page.")] int? limit = null,
         [Description("Only return entries for the actor with this GUID.")] Guid? actorGuid = null,
-        [Description("Only return entries for this numeric actor type.")] int? actorType = null,
+        [Description("Only return entries for this actor type id (see fargo_metadata_get, catalog 'actor-types').")] int? actorType = null,
         [Description("Only return entries that occurred at or after this UTC timestamp (ISO 8601).")] DateTimeOffset? periodStart = null,
         [Description("Only return entries that occurred at or before this UTC timestamp (ISO 8601).")] DateTimeOffset? periodEnd = null,
         CancellationToken cancellationToken = default)

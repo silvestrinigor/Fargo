@@ -9,14 +9,20 @@ For the full, generated list of commands and options, see the
 
 ## Running the CLI
 
-The CLI is the `Fargo.Cli` project:
+Install the `fargo` executable with the installer described in
+[Getting Started](getting-started.md#1-install-the-cli), then run:
+
+```bash
+fargo <command> [options]
+```
+
+From a checkout, you can run the `Fargo.Cli` project instead:
 
 ```bash
 dotnet run --project src/Fargo.Cli -- <command> [options]
 ```
 
-In the examples throughout these docs the client is referred to as `fargo`
-(the compiled executable name).
+The examples throughout these docs use `fargo`.
 
 Run any command with `--help` to see its description, options, and examples:
 

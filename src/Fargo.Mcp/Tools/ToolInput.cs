@@ -9,11 +9,7 @@ namespace Fargo.Mcp.Tools;
 internal static class ToolInput
 {
     public const string PermissionCodes =
-        "Numeric permission (ActionType) codes: 1 CreateArticle, 2 DeleteArticle, 3 EditArticle, 4 CreateItem, 5 DeleteItem, 6 EditItem, "
-        + "7 CreateUser, 8 DeleteUser, 9 EditUser, 10 ChangeAnotherUserPassword, 11 CreateUserGroup, 12 DeleteUserGroup, 13 EditUserGroup, "
-        + "14 ChangeUserGroupMembers, 15 CreatePartition, 16 DeletePartition, 17 EditPartition, 18 ReadAuditLogs, 19 ReadItemEvents, "
-        + "20 CreateServiceAccount, 21 DeleteServiceAccount, 22 EditServiceAccount, 23 ReadServiceAccount, 24 CreateSupplyOrder, "
-        + "25 EditSupplyOrder, 26 PlaceSupplyOrder, 27 ReceiveSupplyOrder, 28 CancelSupplyOrder, 29 CloseSupplyOrder, 30 ReadSupplyOrders, 31 ActivateUser, 32 ActivateUserGroup, 33 ActivateServiceAccount, 34 MoveItem, 35 ChangeUserPermissions, 36 ChangeUserGroupPermissions, 37 ChangeServiceAccountPermissions, 38 ChangeUserPartitions, 39 ChangeUserGroupPartitions, 40 ChangeServiceAccountPartitions, 41 ChangeUserGroupParent, 42 ChangePartitionParent, 43 RotateServiceAccountSecret, 44 ChangeArticlePartitions, 45 ChangeItemPartitions.";
+        "Permission (ActionType) ids; list them with fargo_metadata_get using catalog 'action-types'.";
 
     /// <summary>
     /// Splits a measure token such as <c>25kg</c> or <c>10 cm</c> into its numeric
@@ -77,13 +73,13 @@ internal static class ToolInput
     /// Returns <see langword="null"/> when empty, as the generated client expects nullable lists.
     /// </summary>
     public static List<Guid?>? ToGuidList(Guid[]? values) =>
-        values is { Length: > 0 } ? values.Select(v => (Guid?)v).ToList() : null;
+        values is { Length: > 0 } ? [.. values.Select(v => (Guid?)v)] : null;
 
     /// <summary>
     /// Returns <see langword="null"/> when empty, as the generated client expects nullable lists.
     /// </summary>
     public static List<int?>? ToIntList(int[]? values) =>
-        values is { Length: > 0 } ? values.Select(v => (int?)v).ToList() : null;
+        values is { Length: > 0 } ? [.. values.Select(v => (int?)v)] : null;
 
     private static (Guid Guid, double? Number) SplitGuidAndNumber(string token, string what, string numberName)
     {

@@ -64,7 +64,7 @@ public sealed class ListArticlesCommand : Command
             var sort = parseResult.GetValue(sortOption);
             var search = parseResult.GetValue(searchOption);
 
-            await PagedListView.RunAsync<ArticleDto>(
+            await PagedListView.RunAsync(
                 page,
                 limit,
                 fetch: async (p, l) =>
@@ -77,7 +77,7 @@ public sealed class ListArticlesCommand : Command
                         if (partitions is { Length: > 0 })
                         {
                             request.QueryParameters.ChildOfAnyOfThesePartitions =
-                                partitions.Select(g => (Guid?)g).ToArray();
+                                [.. partitions.Select(g => (Guid?)g)];
                         }
 
                         if (!string.IsNullOrWhiteSpace(sort))

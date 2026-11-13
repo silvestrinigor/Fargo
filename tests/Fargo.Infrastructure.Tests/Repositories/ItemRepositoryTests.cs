@@ -9,7 +9,7 @@ namespace Fargo.Infrastructure.Tests.Repositories;
 
 public class ItemRepositoryTests
 {
-    private static (ArticleRepository, ItemRepository) Repos(Fargo.Infrastructure.Persistence.FargoDbContext ctx)
+    private static (ArticleRepository, ItemRepository) Repos(Infrastructure.Persistence.FargoDbContext ctx)
         => (new ArticleRepository(ctx), new ItemRepository(ctx));
 
     [Fact]

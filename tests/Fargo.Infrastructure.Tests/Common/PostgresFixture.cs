@@ -12,8 +12,7 @@ namespace Fargo.Infrastructure.Tests.Common;
 /// </summary>
 public sealed class PostgresFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer container = new PostgreSqlBuilder()
-        .WithImage("postgres:17")
+    private readonly PostgreSqlContainer container = new PostgreSqlBuilder("postgres:17")
         .Build();
 
     public string ConnectionString => container.GetConnectionString();

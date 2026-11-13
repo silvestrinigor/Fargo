@@ -303,7 +303,7 @@ public sealed class ArticleCreateCommand : Command
 
                     if (allowedArticles is { Length: > 0 })
                     {
-                        container.AllowedArticles = allowedArticles
+                        container.AllowedArticles = [.. allowedArticles
                             .Select(token =>
                             {
                                 var (articleGuid, maxQuantity) = MeasureParser.ParseAllowedArticle(token);
@@ -314,8 +314,7 @@ public sealed class ArticleCreateCommand : Command
                                         ? new ArticleContainerAllowedArticleDto.ArticleContainerAllowedArticleDto_maxQuantity { Double = q }
                                         : null
                                 };
-                            })
-                            .ToList();
+                            })];
                     }
 
                     dto.Container = container;
@@ -328,7 +327,7 @@ public sealed class ArticleCreateCommand : Command
 
                 if (kitComponents is { Length: > 0 })
                 {
-                    dto.KitComponents = kitComponents
+                    dto.KitComponents = [.. kitComponents
                         .Select(token =>
                         {
                             var (articleGuid, quantity) = MeasureParser.ParseKitComponent(token);
@@ -337,8 +336,7 @@ public sealed class ArticleCreateCommand : Command
                                 ArticleGuid = articleGuid,
                                 Quantity = quantity is { } q ? new Scalar { Double = q } : null
                             };
-                        })
-                        .ToList();
+                        })];
                 }
             }
             catch (FormatException ex)

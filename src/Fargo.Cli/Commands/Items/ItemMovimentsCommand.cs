@@ -27,7 +27,7 @@ public sealed class ItemMovimentsCommand : Command
 
             var result = await client.V1.Items[guid].Moviments.GetAsync(cancellationToken: cancellationToken);
 
-            new TableWriter<Fargo.ClientHttp.Models.ItemMovimentDto>()
+            new TableWriter<ClientHttp.Models.ItemMovimentDto>()
                 .Column("OCCURRED AT", m => m.OccurredAt?.ToString("u"))
                 .Column("MOVED TO CONTAINER", m => m.MovedToItemContainerGuid?.ToString())
                 .EmptyMessage("No movement history found.")

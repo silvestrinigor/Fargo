@@ -38,8 +38,7 @@ public class RabbitMqEventPublisherPropertiesTests
 /// </summary>
 public sealed class RabbitMqEventPublisherTests : IAsyncLifetime
 {
-    private readonly RabbitMqContainer container = new RabbitMqBuilder()
-        .WithImage("rabbitmq:4-management")
+    private readonly RabbitMqContainer container = new RabbitMqBuilder("rabbitmq:4-management")
         .Build();
 
     private IConnection connection = null!;

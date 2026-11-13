@@ -80,13 +80,13 @@ public sealed class CreateServiceAccountCommand : Command
                 Description = description,
                 IsActive = isActive,
                 PermissionsToAdd = permissions is { Length: > 0 }
-                    ? permissions.Select(p => (int?)p).ToList()
+                    ? [.. permissions.Select(p => (int?)p)]
                     : null,
                 PartitionsToAdd = partitionMemberships is { Length: > 0 }
-                    ? partitionMemberships.Select(g => (Guid?)g).ToList()
+                    ? [.. partitionMemberships.Select(g => (Guid?)g)]
                     : null,
                 PartitionAccessesToAdd = partitionAccesses is { Length: > 0 }
-                    ? partitionAccesses.Select(g => (Guid?)g).ToList()
+                    ? [.. partitionAccesses.Select(g => (Guid?)g)]
                     : null
             };
 

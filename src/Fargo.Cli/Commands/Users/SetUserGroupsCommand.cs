@@ -60,5 +60,5 @@ public sealed class SetUserGroupsCommand : Command
     }
 
     private static List<Guid?>? ToGuidList(Guid[]? values)
-        => values is { Length: > 0 } ? values.Select(v => (Guid?)v).ToList() : null;
+        => values is { Length: > 0 } ? [.. values.Select(v => (Guid?)v)] : null;
 }

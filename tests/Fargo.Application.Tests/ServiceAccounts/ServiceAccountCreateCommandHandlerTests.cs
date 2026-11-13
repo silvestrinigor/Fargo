@@ -62,8 +62,8 @@ public class ServiceAccountCreateCommandHandlerTests
     [Fact]
     public async Task HandleAsync_WhenPartitionMembershipRequested_ShouldAssignMembership()
     {
-        var global = Partition.CreateGlobalPartition(new Fargo.Core.Informations.Name("global"));
-        var partition = Partition.CreatePartition(new Fargo.Core.Informations.Name("branch"), global);
+        var global = Partition.CreateGlobalPartition(new Core.Informations.Name("global"));
+        var partition = Partition.CreatePartition(new Core.Informations.Name("branch"), global);
 
         // Actor has CreateServiceAccount and access to the requested partition.
         ActorTestFactory.ConfigureUserActor(
@@ -108,8 +108,8 @@ public class ServiceAccountCreateCommandHandlerTests
         // membership partition is a restricted one it cannot reach.
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateServiceAccount, ActionType.ChangeServiceAccountPartitions]);
 
-        var global = Partition.CreateGlobalPartition(new Fargo.Core.Informations.Name("global"));
-        var restricted = Partition.CreatePartition(new Fargo.Core.Informations.Name("restricted"), global);
+        var global = Partition.CreateGlobalPartition(new Core.Informations.Name("global"));
+        var restricted = Partition.CreatePartition(new Core.Informations.Name("restricted"), global);
         partitionRepository.GetByGuidAsync(restricted.Guid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<Partition?>(restricted));
 
@@ -148,7 +148,7 @@ public class ServiceAccountCreateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         serviceAccountRepository.Received(1).Add(
-            Arg.Is<ServiceAccount>(a => a.Actor.Permissions.Contains(ActionType.CreateItem)));
+            Arg.Is<ServiceAccount>(a => a!.Actor.Permissions.Contains(ActionType.CreateItem)));
     }
 
     [Fact]

@@ -42,7 +42,7 @@ public class ArticleCreateCommandHandlerTests
 
         var result = await CreateHandler().HandleAsync(DefaultCommand());
 
-        articleRepository.Received(1).Add(Arg.Is<Article>(a => a.Guid == result));
+        articleRepository.Received(1).Add(Arg.Is<Article>(a => a!.Guid == result));
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class ArticleCreateCommandHandlerTests
         await CreateHandler().HandleAsync(DefaultCommand());
 
         articleRepository.Received(1).Add(
-            Arg.Is<Article>(a => a.TrackingMode == ArticleTrackingMode.Entity));
+            Arg.Is<Article>(a => a!.TrackingMode == ArticleTrackingMode.Entity));
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class ArticleCreateCommandHandlerTests
 
         articleRepository.Received(1).Add(
             Arg.Is<Article>(a =>
-                a.TrackingMode == ArticleTrackingMode.Event &&
+                a!.TrackingMode == ArticleTrackingMode.Event &&
                 a.ArticleType == ArticleType.Default));
     }
 
@@ -160,7 +160,7 @@ public class ArticleCreateCommandHandlerTests
 
         articleRepository.Received(1).Add(
             Arg.Is<Article>(a =>
-                a.ArticleType == ArticleType.Container &&
+                a!.ArticleType == ArticleType.Container &&
                 a.Container!.AllowedArticles.Count == 1 &&
                 a.Container.AllowedArticles.Single().AllowedArticleGuid == allowed.Guid &&
                 a.Container.AllowedArticles.Single().MaxQuantity!.Value.Value == 10));

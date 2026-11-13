@@ -37,11 +37,11 @@ public static class ActorTestFactory
 
         userRepository
             .GetAllActivePermissionsFromUserAsync(guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<IReadOnlyCollection<ActionType>>(permissions ?? []));
+            .Returns(Task.FromResult(permissions ?? []));
 
         userRepository
             .GetAllActivePartitionAccessGuidsFromUserAsync(guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<IReadOnlyCollection<Guid>>(
+            .Returns(Task.FromResult(
                 partitionAccesses ?? [FargoCoreWellKnowGuids.GlobalPartitionGuid]));
 
         return guid;
@@ -120,8 +120,8 @@ public static class UserGroupRepositoryStubs
     /// its members (its own and its ancestors'), as the single recursive query does.
     /// </summary>
     public static void StubInheritedPermissions(
-        this Fargo.Core.Entities.UserGroups.IUserGroupRepository repository,
-        Fargo.Core.Entities.UserGroups.UserGroup userGroup,
+        this Core.Entities.UserGroups.IUserGroupRepository repository,
+        Core.Entities.UserGroups.UserGroup userGroup,
         params ActionType[] permissions)
         => repository.GetInheritedPermissionsAsync(userGroup.Guid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<ActionType>>(permissions));

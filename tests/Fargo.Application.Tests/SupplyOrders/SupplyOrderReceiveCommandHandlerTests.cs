@@ -61,7 +61,7 @@ public class SupplyOrderReceiveCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(e =>
-            e.ArticleGuid == article.Guid && e.ItemEventType == ItemEventType.Creation));
+            e!.ArticleGuid == article.Guid && e.ItemEventType == ItemEventType.Creation));
         itemRepository.DidNotReceive().Add(Arg.Any<Item>());
     }
 

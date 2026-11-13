@@ -38,7 +38,7 @@ public static class ItemTools
             if (partitions is { Length: > 0 })
             {
                 request.QueryParameters.ChildOfAnyOfThesePartitions =
-                    partitions.Select(g => (Guid?)g).ToArray();
+                    [.. partitions.Select(g => (Guid?)g)];
             }
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -216,7 +216,7 @@ public static class ItemTools
 
         var body = new ItemEventCreateDto
         {
-            EventType = ItemEventTypes.Moviment,
+            EventType = await MetadataIds.ResolveAsync(client.V1.Metadata.ItemEventTypes.GetAsync, "Moviment", cancellationToken),
             ArticleGuid = articleGuid,
             Quantity = new Scalar { Double = quantity },
             FromItemContainerGuid = fromItemContainerGuid,
@@ -245,7 +245,7 @@ public static class ItemTools
 
         var body = new ItemEventCreateDto
         {
-            EventType = ItemEventTypes.Creation,
+            EventType = await MetadataIds.ResolveAsync(client.V1.Metadata.ItemEventTypes.GetAsync, "Creation", cancellationToken),
             ArticleGuid = articleGuid,
             Quantity = new Scalar { Double = quantity },
             ItemContainerGuid = itemContainerGuid,
@@ -273,7 +273,7 @@ public static class ItemTools
 
         var body = new ItemEventCreateDto
         {
-            EventType = ItemEventTypes.Deletion,
+            EventType = await MetadataIds.ResolveAsync(client.V1.Metadata.ItemEventTypes.GetAsync, "Deletion", cancellationToken),
             ArticleGuid = articleGuid,
             Quantity = new Scalar { Double = quantity },
             ItemContainerGuid = itemContainerGuid,
@@ -291,7 +291,7 @@ public static class ItemTools
         FargoApiClient client,
         FargoAuthenticator authenticator,
         [Description("Only return events for this event-tracked article GUID.")] Guid? articleGuid = null,
-        [Description("Only return events of this type. 1 = moviment, 2 = creation, 3 = deletion.")] int? eventType = null,
+        [Description("Only return events of this type id (see fargo_metadata_get, catalog 'item-event-types').")] int? eventType = null,
         [Description("Only return events that occurred at or after this instant (ISO 8601 UTC).")] DateTimeOffset? periodStart = null,
         [Description("Only return events that occurred at or before this instant (ISO 8601 UTC).")] DateTimeOffset? periodEnd = null,
         [Description("Page number to retrieve, starting at 1.")] int? page = null,

@@ -1,4 +1,4 @@
-using Fargo.ClientAuthentication;
+using Fargo.ClientHttp.Authentication;
 
 namespace Fargo.Cli.Authentication;
 
@@ -9,7 +9,7 @@ namespace Fargo.Cli.Authentication;
 /// </summary>
 public sealed class SessionTokenStore : ITokenStore
 {
-    private readonly ITokenStore _persistentStore;
+    private readonly FargoCliTokenStore _persistentStore;
 
     private AuthTokens? _sessionOverride;
 

@@ -87,19 +87,25 @@ Access is kept current in three ways:
 
 ### .NET client (`Fargo.ClientRealtime`)
 
-`Fargo.ClientRealtime` wraps the SignalR connection. It depends on
-`Fargo.ClientAuthentication` (token storage and refresh) and
-`Fargo.RealtimeContracts` (the payload above, shared with the server), but not
-on the Kiota HTTP client.
+`Fargo.ClientRealtime` wraps the SignalR connection. It depends only on SignalR
+and `Fargo.RealtimeContracts` (the payload above, shared with the server). It
+makes no API requests: the application supplies the access token through an
+`IFargoRealtimeAccessTokenProvider`.
 
 ```csharp
-services.AddFargoRealtimeClient(
-    apiBaseAddress: new Uri("https://api.example"),
-    realtimeBaseAddress: new Uri("https://realtime.example"));
+// The HTTP client owns the token store and refresh.
+services.AddFargoHttpClient(new Uri("https://api.example"));
 
 // Optional: refresh the stored token shortly before it expires. Without this,
 // the stored token is sent as is and refreshing is up to you.
 services.UseFargoRefreshingAccessTokens();
+
+// Hand the HTTP client's token source to the real-time client.
+services.AddSingleton<IFargoRealtimeAccessTokenProvider>(sp =>
+    new DelegateRealtimeAccessTokenProvider(
+        sp.GetRequiredService<IFargoAccessTokenSource>().GetAccessTokenAsync));
+
+services.AddFargoRealtimeClient(new Uri("https://realtime.example"));
 
 var realtime = provider.GetRequiredService<FargoRealtimeClient>();
 
@@ -120,7 +126,7 @@ What the client does for you:
 
 | Concern | Behaviour |
 |---|---|
-| Tokens | Every connect and reconnect asks the registered `IFargoAccessTokenSource` for a token. |
+| Tokens | Every connect and reconnect asks the registered `IFargoRealtimeAccessTokenProvider` for a token. |
 | Connection loss | After a successful `StartAsync`, it reconnects without limit (0 s, then 1, 2, 4… up to `MaxReconnectDelay`), also when the server closes the connection, until `StopAsync`. |
 | Missed events | Raises `Resynchronized` after every reconnect. |
 | Duplicates | Drops an `eventId` seen in the last `DuplicateWindow` (default 1000) events. |
@@ -131,23 +137,25 @@ whether to retry.
 
 #### Tokens are your decision
 
-Nothing refreshes tokens automatically, neither the HTTP client nor the
-real-time client:
+The real-time client never refreshes tokens. The server closes a connection
+when its token expires, so a provider used for a long-lived connection must
+return a fresh one. With `Fargo.ClientHttp`, the token source decides:
 
-- **Default (`StoredAccessTokenSource`).** Sends the stored token as is. The
-  server closes the connection when that token expires, so refresh it yourself
-  (`FargoTokenRefresher.EnsureValidAsync`) before it does.
+- **Default (`StoredAccessTokenSource`).** Sends the stored token as is, so
+  refresh it yourself (`FargoTokenRefresher.EnsureValidAsync`) before it
+  expires.
 - **`UseFargoRefreshingAccessTokens()`.** Refreshes shortly before expiry
-  whenever a token is needed. This applies to the HTTP client too, because both
-  share the same source.
-- **Your own `IFargoAccessTokenSource`.** For example, a service account that
-  obtains tokens with client credentials, or a fixed token.
+  whenever a token is needed, for the HTTP requests and, through the adapter
+  above, for the real-time connection.
+- **Your own `IFargoAccessTokenSource` or `IFargoRealtimeAccessTokenProvider`.**
+  For example, a service account that obtains tokens with client credentials,
+  or a fixed token.
 
 The API revokes a refresh token when it is used, so two refreshes with the same
 token would log the session out. `FargoTokenRefresher` lets only one refresh run
-at a time per token store, and a caller that waited reuses the result. Share one
-token store, and its refresher, between the HTTP and real-time clients of a
-session (dependency injection does this).
+at a time per token store, and a caller that waited reuses the result. Use one
+token source, and its refresher, for the HTTP and real-time clients of a
+session, as in the example above.
 
 Browser clients use the JavaScript SignalR client directly, with the same hub
 path, method name and payload.
@@ -200,7 +208,7 @@ connection strings.
 | Hub, routing, access refresh | `Fargo.ServiceRealtime` (`Hubs/`, `Notifications/`, `Connections/`, `Services/`) |
 | Hub wire contract | `Fargo.RealtimeContracts` |
 | .NET client | `Fargo.ClientRealtime` |
-| Token store, refresh, token sources | `Fargo.ClientAuthentication` |
+| Token store, refresh, token sources | `Fargo.ClientHttp` (`Fargo.ClientHttp.Authentication`) |
 | End-to-end check | `tests/Fargo.WorkflowTest/RealtimeScenario.cs` (needs the full stack and `Workflow:RealtimeServer`) |
 
 ## Not done yet

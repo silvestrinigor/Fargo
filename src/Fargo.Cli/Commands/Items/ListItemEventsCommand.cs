@@ -75,7 +75,7 @@ public sealed class ListItemEventsCommand : Command
             var page = parseResult.GetValue(pageOption);
             var limit = parseResult.GetValue(limitOption);
 
-            await PagedListView.RunAsync<ItemEventDto>(
+            await PagedListView.RunAsync(
                 page,
                 limit,
                 fetch: async (p, l) =>

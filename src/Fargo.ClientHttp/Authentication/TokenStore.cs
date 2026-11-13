@@ -1,4 +1,4 @@
-namespace Fargo.ClientAuthentication;
+namespace Fargo.ClientHttp.Authentication;
 
 /// <summary>
 /// An in-memory <see cref="ITokenStore"/>; the tokens live as long as the

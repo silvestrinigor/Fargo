@@ -1,5 +1,5 @@
 using Fargo.Cli.Configurations;
-using Fargo.ClientAuthentication;
+using Fargo.ClientHttp.Authentication;
 using ktsu.CredentialCache;
 using System.Text.Json;
 
@@ -69,7 +69,7 @@ public class FargoCliTokenStore : ITokenStore
             return Task.FromResult<AuthTokens?>(null);
         }
 
-        return Task.FromResult<AuthTokens?>(stored.Tokens);
+        return Task.FromResult(stored.Tokens);
     }
 
     public Task SetAsync(AuthTokens tokens, CancellationToken cancellationToken = default)

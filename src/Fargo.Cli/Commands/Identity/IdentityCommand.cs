@@ -1,5 +1,5 @@
-using Fargo.ClientAuthentication;
 using Fargo.ClientHttp;
+using Fargo.ClientHttp.Authentication;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Identity;

@@ -43,7 +43,7 @@ internal sealed class Names(string runTag)
 
     public string Display(string prefix) => $"{prefix}-{_runTag}-{Next():x}";
 
-    public string FirstName(int index) => FirstNames[Math.Abs(index) % FirstNames.Length];
+    public static string FirstName(int index) => FirstNames[Math.Abs(index) % FirstNames.Length];
 
     public string Ean13()
     {

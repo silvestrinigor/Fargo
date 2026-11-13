@@ -1,4 +1,4 @@
-namespace Fargo.ClientAuthentication;
+namespace Fargo.ClientHttp.Authentication;
 
 /// <summary>
 /// The tokens issued by the Fargo API at login or refresh.

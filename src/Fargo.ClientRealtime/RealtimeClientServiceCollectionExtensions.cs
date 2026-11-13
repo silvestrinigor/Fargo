@@ -1,4 +1,3 @@
-using Fargo.ClientAuthentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -13,32 +12,25 @@ public static class RealtimeClientServiceCollectionExtensions
     extension(IServiceCollection services)
     {
         /// <summary>
-        /// Registers a singleton <see cref="FargoRealtimeClient"/> and the shared
-        /// client authentication services for the API at
-        /// <paramref name="apiBaseAddress"/>.
+        /// Registers a singleton <see cref="FargoRealtimeClient"/> for the hub at
+        /// <paramref name="realtimeBaseAddress"/>.
         /// </summary>
         /// <remarks>
-        /// The client uses the registered <see cref="IFargoAccessTokenSource"/>,
-        /// which by default returns the stored token without refreshing it. Call
-        /// <c>UseFargoRefreshingAccessTokens()</c> to refresh before expiry, or
-        /// register your own source.
+        /// The client takes its tokens from the registered <see cref="IFargoRealtimeAccessTokenProvider"/>,
+        /// which the application must register.
         /// </remarks>
         public IServiceCollection AddFargoRealtimeClient(
-            Uri apiBaseAddress,
             Uri realtimeBaseAddress,
             Action<FargoRealtimeClientOptions>? configure = null)
         {
-            ArgumentNullException.ThrowIfNull(apiBaseAddress);
             ArgumentNullException.ThrowIfNull(realtimeBaseAddress);
-
-            services.AddFargoClientAuthentication(apiBaseAddress);
 
             var options = new FargoRealtimeClientOptions { RealtimeBaseAddress = realtimeBaseAddress };
             configure?.Invoke(options);
 
             services.TryAddSingleton(sp => new FargoRealtimeClient(
                 options,
-                sp.GetRequiredService<IFargoAccessTokenSource>(),
+                sp.GetRequiredService<IFargoRealtimeAccessTokenProvider>(),
                 sp.GetService<ILogger<FargoRealtimeClient>>()));
 
             return services;

@@ -1,4 +1,3 @@
-using Fargo.ClientAuthentication;
 using Fargo.RealtimeContracts;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -134,29 +133,37 @@ public sealed class FargoRealtimeClientTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AddFargoRealtimeClient_ShouldResolveAClientUsingTheStoredTokenByDefault()
+    public async Task AddFargoRealtimeClient_ShouldUseTheRegisteredAccessTokenProvider()
     {
+        var tokens = new CountingTokenSource();
         var services = new ServiceCollection();
-        services.AddFargoRealtimeClient(new Uri("http://api.test"), new Uri("http://realtime.test"));
+        services.AddSingleton<IFargoRealtimeAccessTokenProvider>(tokens);
+        services.AddFargoRealtimeClient(new Uri("http://realtime.test"));
 
         // The client is IAsyncDisposable only, like SignalR's HubConnection.
         await using var provider = services.BuildServiceProvider();
 
         var client = provider.GetRequiredService<FargoRealtimeClient>();
         Assert.Equal(new Uri("http://realtime.test/hubs/fargo"), client.HubUri);
-        Assert.IsType<StoredAccessTokenSource>(provider.GetRequiredService<IFargoAccessTokenSource>());
     }
 
     [Fact]
-    public void UseFargoRefreshingAccessTokens_ShouldBeAnExplicitOptIn()
+    public async Task AddFargoRealtimeClient_WithoutAnAccessTokenProvider_ShouldFailToResolve()
     {
         var services = new ServiceCollection();
-        services.AddFargoRealtimeClient(new Uri("http://api.test"), new Uri("http://realtime.test"));
-        services.UseFargoRefreshingAccessTokens();
+        services.AddFargoRealtimeClient(new Uri("http://realtime.test"));
 
-        using var provider = services.BuildServiceProvider();
+        await using var provider = services.BuildServiceProvider();
 
-        Assert.IsType<RefreshingAccessTokenSource>(provider.GetRequiredService<IFargoAccessTokenSource>());
+        Assert.Throws<InvalidOperationException>(() => provider.GetRequiredService<FargoRealtimeClient>());
+    }
+
+    [Fact]
+    public async Task DelegateRealtimeAccessTokenProvider_ShouldReturnTheDelegatesToken()
+    {
+        var provider = new DelegateRealtimeAccessTokenProvider(_ => Task.FromResult<string?>("token"));
+
+        Assert.Equal("token", await provider.GetAccessTokenAsync());
     }
 }
 

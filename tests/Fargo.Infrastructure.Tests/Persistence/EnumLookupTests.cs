@@ -41,11 +41,14 @@ public class EnumLookupTests(PostgresFixture postgres) : IClassFixture<PostgresF
 
         await using var context = postgres.CreateContext();
 
+        // The table name comes from the fixed Lookups map, never from input, and identifiers cannot be bound as parameters.
+#pragma warning disable EF1002
         var actual = await context.Database
-            .SqlQuery<string>($"SELECT id::text || ':' || name AS \"Value\" FROM {table}")
+            .SqlQueryRaw<string>($"SELECT id::text || ':' || name AS \"Value\" FROM {table}")
             .ToListAsync();
+#pragma warning restore EF1002
 
-        Assert.Equal(expected, actual.Order(StringComparer.Ordinal).ToList());
+        Assert.Equal(expected, [.. actual.Order(StringComparer.Ordinal)]);
     }
 
     [Fact]

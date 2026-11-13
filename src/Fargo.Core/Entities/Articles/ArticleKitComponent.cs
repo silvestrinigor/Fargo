@@ -47,7 +47,7 @@ public sealed class ArticleKitComponent
         Quantity = quantity;
     }
 
-    private void ValidateQuantity(Scalar quantity)
+    private static void ValidateQuantity(Scalar quantity)
     {
         if (quantity <= 0.Amount())
         {

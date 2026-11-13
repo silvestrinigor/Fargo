@@ -150,7 +150,7 @@ public class UserGroupCreateCommandHandlerTests
 
         await CreateHandler().HandleAsync(command);
 
-        userGroupRepository.Received(1).Add(Arg.Is<UserGroup>(g => g.Permissions.Contains(ActionType.CreateItem)));
+        userGroupRepository.Received(1).Add(Arg.Is<UserGroup>(g => g!.Permissions.Contains(ActionType.CreateItem)));
     }
 
     [Fact]
@@ -207,7 +207,7 @@ public class UserGroupCreateCommandHandlerTests
         await CreateHandler().HandleAsync(new UserGroupCreateCommand(
             new UserGroupCreateDto(new Nameid("editors"), ParentUserGroup: parent.Guid)));
 
-        userGroupRepository.Received(1).Add(Arg.Is<UserGroup>(g => g.ParentUserGroupGuid == parent.Guid));
+        userGroupRepository.Received(1).Add(Arg.Is<UserGroup>(g => g!.ParentUserGroupGuid == parent.Guid));
     }
 
     [Fact]

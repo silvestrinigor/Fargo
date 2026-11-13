@@ -11,7 +11,7 @@
 #   install.sh --uninstall [--prefix <dir>]
 #
 # One-line install (latest release, including pre-releases):
-#   curl -fsSL https://github.com/silvestrinigor/Fargo/releases/latest/download/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/silvestrinigor/Fargo/master/scripts/install.sh | sh
 #
 # Install a specific version:
 #   curl -fsSL .../install.sh | sh -s -- --version 0.1.0-alpha.1

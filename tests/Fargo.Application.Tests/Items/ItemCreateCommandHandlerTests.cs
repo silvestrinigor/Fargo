@@ -45,7 +45,7 @@ public class ItemCreateCommandHandlerTests
         var result = await CreateHandler().HandleAsync(
             new ItemCreateCommand(new ItemCreateDto(article.Guid)));
 
-        itemRepository.Received(1).Add(Arg.Is<Item>(i => i.Guid == result && i.ArticleGuid == article.Guid));
+        itemRepository.Received(1).Add(Arg.Is<Item>(i => i!.Guid == result && i.ArticleGuid == article.Guid));
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class ItemCreateCommandHandlerTests
         await CreateHandler().HandleAsync(
             new ItemCreateCommand(new ItemCreateDto(article.Guid, ParentItemContainerGuid: parentContainer.Guid)));
 
-        itemRepository.Received(1).Add(Arg.Is<Item>(i => i.ParentItemContainerGuid == parentContainer.Guid));
+        itemRepository.Received(1).Add(Arg.Is<Item>(i => i!.ParentItemContainerGuid == parentContainer.Guid));
     }
 
     [Fact]
@@ -226,6 +226,6 @@ public class ItemCreateCommandHandlerTests
         await CreateHandler().HandleAsync(
             new ItemCreateCommand(new ItemCreateDto(article.Guid, ParentItemContainerGuid: parentContainer.Guid)));
 
-        itemRepository.Received(1).Add(Arg.Is<Item>(i => i.ParentItemContainerGuid == parentContainer.Guid));
+        itemRepository.Received(1).Add(Arg.Is<Item>(i => i!.ParentItemContainerGuid == parentContainer.Guid));
     }
 }

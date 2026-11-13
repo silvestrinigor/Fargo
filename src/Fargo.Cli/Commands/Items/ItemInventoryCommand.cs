@@ -52,7 +52,7 @@ public sealed class ItemInventoryCommand : Command
                 Console.WriteLine();
             }
 
-            new TableWriter<Fargo.ClientHttp.Models.ItemContainerInventoryDto>()
+            new TableWriter<ClientHttp.Models.ItemContainerInventoryDto>()
                 .Column("ARTICLE GUID", e => e.ArticleGuid?.ToString())
                 .Column("COUNT", e => e.TotalCount?.ToString())
                 .EmptyMessage(at.HasValue

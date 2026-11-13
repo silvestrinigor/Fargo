@@ -1,5 +1,5 @@
-using Fargo.ClientAuthentication;
 using Fargo.ClientHttp;
+using Fargo.ClientHttp.Authentication;
 using Fargo.ClientHttp.Models;
 using Fargo.ClientRealtime;
 using Fargo.RealtimeContracts;
@@ -113,7 +113,8 @@ internal sealed class RealtimeScenario(
 
     private static FargoRealtimeClient Connect(Uri realtimeServer, IFargoAccessTokenSource tokens, Inbox inbox)
     {
-        var client = new FargoRealtimeClient(new FargoRealtimeClientOptions { RealtimeBaseAddress = realtimeServer }, tokens);
+        var client = new FargoRealtimeClient(new FargoRealtimeClientOptions { RealtimeBaseAddress = realtimeServer },
+            new DelegateRealtimeAccessTokenProvider(tokens.GetAccessTokenAsync));
 
         client.EntityChanged += notification =>
         {

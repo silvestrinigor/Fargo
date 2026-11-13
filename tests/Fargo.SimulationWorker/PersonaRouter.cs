@@ -63,7 +63,7 @@ internal sealed class PersonaRouter(OperatorActions actions)
         ],
         OperatorRole.Auditor =>
         [
-            new(1, _actions.AuditAsync),
+            new(1, OperatorActions.AuditAsync),
         ],
         _ =>
         [

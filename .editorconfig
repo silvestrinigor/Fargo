@@ -261,3 +261,7 @@ dotnet_diagnostic.CS1573.severity = silent
 # Fargo.Application: namespaces must mirror folders (enforced in the IDE / dotnet format).
 [src/Fargo.Application/**.cs]
 dotnet_diagnostic.IDE0130.severity = warning
+
+# EF Core migrations are generated and must not be edited, so analyzers treat them as generated code.
+[src/Fargo.Infrastructure/Migrations/*.cs]
+generated_code = true

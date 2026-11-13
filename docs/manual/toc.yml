@@ -70,6 +70,8 @@
           href: ../cli/reference/service-account.md
         - name: Audit
           href: ../cli/reference/audit.md
+        - name: Metadata
+          href: ../cli/reference/metadata.md
         - name: Realtime
           href: ../cli/reference/realtime.md
 - name: Web API
@@ -97,3 +99,5 @@
       href: ../contributing/code-documentation.md
     - name: Writing Documentation
       href: ../contributing/writing-documentation.md
+    - name: Commit Messages
+      href: ../contributing/commit-messages.md

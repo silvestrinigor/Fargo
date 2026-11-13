@@ -3,14 +3,15 @@ using Fargo.Cli.Commands.Audits;
 using Fargo.Cli.Commands.Config;
 using Fargo.Cli.Commands.Identity;
 using Fargo.Cli.Commands.Items;
+using Fargo.Cli.Commands.Metadata;
 using Fargo.Cli.Commands.Partitions;
 using Fargo.Cli.Commands.Realtime;
 using Fargo.Cli.Commands.ServiceAccounts;
 using Fargo.Cli.Commands.UserGroups;
 using Fargo.Cli.Commands.Users;
 using Fargo.Cli.Configurations;
-using Fargo.ClientAuthentication;
 using Fargo.ClientHttp;
+using Fargo.ClientHttp.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using System.CommandLine;
 
@@ -70,6 +71,7 @@ public static class CommandFactory
             new UsersCommand(client),
             new ServiceAccountsCommand(client),
             new AuditLogsCommand(client),
+            new MetadataCommand(client),
             new RealtimeCommand(configurationStore, tokenRefresher, tokenStore),
         };
 

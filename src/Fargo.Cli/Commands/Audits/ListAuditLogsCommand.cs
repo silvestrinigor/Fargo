@@ -42,7 +42,7 @@ public sealed class ListAuditLogsCommand : Command
             var page = parseResult.GetValue(pageOption);
             var limit = parseResult.GetValue(limitOption);
 
-            await PagedListView.RunAsync<AuditLogDto>(
+            await PagedListView.RunAsync(
                 page,
                 limit,
                 fetch: async (p, l) =>
