@@ -27,6 +27,7 @@ CLI_GROUPS=(
     "user|User|list get create update set-active set-permissions set-groups set-partitions reset-password set-password-expiration remove-password-expiration delete"
     "service-account|Service Account|list get create update set-active set-permissions set-partitions rotate-secret delete"
     "audit|Audit|list get"
+    "metadata|Metadata|entity-types audit-log-types action-types actor-types article-types article-tracking-modes barcode-formats item-event-types supply-order-statuses error-types"
     "realtime|Realtime|watch"
 )
 

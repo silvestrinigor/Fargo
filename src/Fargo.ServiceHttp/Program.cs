@@ -91,6 +91,8 @@ app.MapFargoIdentity();
 
 app.MapFargoAuditLog();
 
+app.MapFargoMetadata();
+
 app.MapFargoServiceAccount();
 
 app.MapFargoSupplyOrder();

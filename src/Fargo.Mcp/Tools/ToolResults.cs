@@ -196,29 +196,3 @@ public sealed record ItemEventSummary(
     Guid? ToItemContainerGuid,
     double? LifecycleQuantity,
     Guid? ItemContainerGuid);
-
-/// <summary>
-/// Numeric values of the server's <c>ItemEventType</c> enum, which the API
-/// serializes as integers.
-/// </summary>
-public static class ItemEventTypes
-{
-    public const int Moviment = 1;
-
-    public const int Creation = 2;
-
-    public const int Deletion = 3;
-}
-
-/// <summary>
-/// Numeric values of the server's <c>ArticleTrackingMode</c> enum, which the API
-/// serializes as integers.
-/// </summary>
-public static class ArticleTrackingModes
-{
-    /// <summary>Each physical unit is tracked individually as its own item.</summary>
-    public const int Entity = 1;
-
-    /// <summary>Stock is tracked as aggregate quantities via movement events.</summary>
-    public const int Event = 2;
-}

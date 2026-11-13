@@ -13,12 +13,6 @@ namespace Fargo.Mcp.Tools;
 [McpServerToolType]
 public static class ArticleTools
 {
-    // Mirrors the server's ArticleType enum numeric values.
-    private const int ArticleTypeDefault = 1;
-    private const int ArticleTypeVariation = 2;
-    private const int ArticleTypePack = 3;
-    private const int ArticleTypeKit = 4;
-    private const int ArticleTypeContainer = 5;
 
     [McpServerTool(Name = "fargo_articles_list")]
     [Description("List articles, optionally paginated, searched, sorted and filtered to those under specific partitions.")]
@@ -103,7 +97,7 @@ public static class ArticleTools
         FargoAuthenticator authenticator,
         [Description("The name of the article.")] string name,
         [Description("An optional description of the article.")] string? description = null,
-        [Description("How stock is tracked: 1 = Entity (each unit is an individual item; the default), 2 = Event (aggregate quantities recorded as movement events). Container articles are always entity-tracked.")] int? trackingMode = null,
+        [Description("Id of the tracking mode (see fargo_metadata_get, catalog 'article-tracking-modes'). Defaults to Entity, where each unit is an individual item; Event records aggregate quantities as movement events. Container articles are always entity-tracked.")] int? trackingMode = null,
         [Description("Optional shelf life as an ISO-8601 duration, e.g. 'P30D'.")] string? shelfLife = null,
         [Description("Optional color, e.g. a hex code like '#FF0000'.")] string? color = null,
         [Description("Optional mass as value+unit, e.g. '2.5kg'. Units: mg, g, kg, oz, lb.")] string? mass = null,
@@ -123,18 +117,21 @@ public static class ArticleTools
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var articleType = InferArticleType(
+        var articleTypeName = InferArticleType(
             variationPresent: variationFromArticleGuid is not null,
             packPresent: packFromArticleGuid is not null || packQuantity is not null,
             kitPresent: kitComponents is { Length: > 0 },
             containerPresent: isContainer || !string.IsNullOrWhiteSpace(containerMaxMass) || allowedArticles is { Length: > 0 });
 
-        var resolvedTrackingMode = trackingMode ?? ArticleTrackingModes.Entity;
+        var articleType = await MetadataIds.ResolveAsync(client.V1.Metadata.ArticleTypes.GetAsync, articleTypeName, cancellationToken);
 
-        if (resolvedTrackingMode == ArticleTrackingModes.Event && articleType == ArticleTypeContainer)
+        var resolvedTrackingMode = trackingMode
+            ?? await MetadataIds.ResolveAsync(client.V1.Metadata.ArticleTrackingModes.GetAsync, "Entity", cancellationToken);
+
+        if (articleTypeName == "Container"
+            && resolvedTrackingMode == await MetadataIds.ResolveAsync(client.V1.Metadata.ArticleTrackingModes.GetAsync, "Event", cancellationToken))
         {
-            throw new ArgumentException(
-                "Container articles are always entity-tracked; trackingMode 2 (Event) cannot be combined with a container.");
+            throw new ArgumentException("Container articles are always entity-tracked; the Event tracking mode cannot be combined with a container.");
         }
 
         var body = new ArticleCreateDto
@@ -335,14 +332,14 @@ public static class ArticleTools
         return inventory?.ToSummary();
     }
 
-    private static int InferArticleType(bool variationPresent, bool packPresent, bool kitPresent, bool containerPresent)
+    private static string InferArticleType(bool variationPresent, bool packPresent, bool kitPresent, bool containerPresent)
     {
-        var signals = new (bool Present, int Type, string Hint)[]
+        var signals = new (bool Present, string Type, string Hint)[]
         {
-            (variationPresent, ArticleTypeVariation, "variationFromArticleGuid"),
-            (packPresent, ArticleTypePack, "packFromArticleGuid / packQuantity"),
-            (kitPresent, ArticleTypeKit, "kitComponents"),
-            (containerPresent, ArticleTypeContainer, "isContainer / containerMaxMass / allowedArticles"),
+            (variationPresent, "Variation", "variationFromArticleGuid"),
+            (packPresent, "Pack", "packFromArticleGuid / packQuantity"),
+            (kitPresent, "Kit", "kitComponents"),
+            (containerPresent, "Container", "isContainer / containerMaxMass / allowedArticles"),
         };
 
         var present = signals.Where(s => s.Present).ToList();
@@ -354,7 +351,7 @@ public static class ArticleTools
                 + "An article can only be one of variation, pack, kit, or container. Supply the options for a single type.");
         }
 
-        return present.Count == 1 ? present[0].Type : ArticleTypeDefault;
+        return present.Count == 1 ? present[0].Type : "Default";
     }
 
     private static ArticleDimensionDto? BuildDimension(string? lengthX, string? lengthY, string? lengthZ)

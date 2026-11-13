@@ -39,6 +39,7 @@ The API is organized around these resource groups (shown at the current `v1`):
 | Users | `/v1/users` | User accounts. |
 | User groups | `/v1/user-groups` | Collections of users that share permissions. |
 | Audit logs | `/v1/audit-logs` | Immutable record of changes. |
+| Metadata | `/v1/metadata/{catalog}` | Read-only lists of the numeric codes (id and name) of entity types, audit log types, action types and other enumerations. |
 
 ## Authentication
 

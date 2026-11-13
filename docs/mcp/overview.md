@@ -39,6 +39,7 @@ Tools are grouped by resource and named `fargo_<resource>_<action>`:
 | User groups | `fargo_usergroups_list`, `fargo_usergroups_get`, `fargo_usergroups_create`, `fargo_usergroups_update`, `fargo_usergroups_set_active`, `fargo_usergroups_set_permissions`, `fargo_usergroups_set_partitions`, `fargo_usergroups_set_parent`, `fargo_usergroups_remove_parent`, `fargo_usergroups_delete` | Read/write |
 | Service accounts | `fargo_serviceaccounts_list`, `fargo_serviceaccounts_get`, `fargo_serviceaccounts_create`, `fargo_serviceaccounts_update`, `fargo_serviceaccounts_set_active`, `fargo_serviceaccounts_set_permissions`, `fargo_serviceaccounts_set_partitions`, `fargo_serviceaccounts_rotate_secret`, `fargo_serviceaccounts_delete` | Read/write |
 | Audit logs | `fargo_auditlogs_list`, `fargo_auditlogs_get` | Read-only |
+| Metadata | `fargo_metadata_get` | Read-only |
 
 The list tools for articles, items, partitions, users and user groups accept
 `search` and `sort` in addition to paging. Article update, delete and inventory

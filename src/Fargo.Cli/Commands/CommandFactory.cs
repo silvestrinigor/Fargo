@@ -1,5 +1,6 @@
 using Fargo.Cli.Commands.Articles;
 using Fargo.Cli.Commands.Audits;
+using Fargo.Cli.Commands.Metadata;
 using Fargo.Cli.Commands.Config;
 using Fargo.Cli.Commands.Identity;
 using Fargo.Cli.Commands.Items;
@@ -70,6 +71,7 @@ public static class CommandFactory
             new UsersCommand(client),
             new ServiceAccountsCommand(client),
             new AuditLogsCommand(client),
+            new MetadataCommand(client),
             new RealtimeCommand(configurationStore, tokenRefresher, tokenStore),
         };
 

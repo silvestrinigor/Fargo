@@ -29,6 +29,7 @@ public static class ApplicationServiceCollectionExtensions
         .AddFargoServiceAccountApplication()
         .AddFargoInitializationApplication()
         .AddFargoAuditLogApplication()
+        .AddFargoMetadataApplication()
         .AddFargoSupplyOrderApplication()
         .AddFargoOutboxApplication()
         .AddFargoIdempotencyApplication();

@@ -5,6 +5,7 @@ using Fargo.ClientHttp.V1.AuditLogs;
 using Fargo.ClientHttp.V1.Identity;
 using Fargo.ClientHttp.V1.Item_Escaped;
 using Fargo.ClientHttp.V1.Items;
+using Fargo.ClientHttp.V1.Metadata;
 using Fargo.ClientHttp.V1.Partitions;
 using Fargo.ClientHttp.V1.ServiceAccounts;
 using Fargo.ClientHttp.V1.SupplyOrders;
@@ -48,6 +49,11 @@ namespace Fargo.ClientHttp.V1
         public global::Fargo.ClientHttp.V1.Items.ItemsRequestBuilder Items
         {
             get => new global::Fargo.ClientHttp.V1.Items.ItemsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The metadata property</summary>
+        public global::Fargo.ClientHttp.V1.Metadata.MetadataRequestBuilder Metadata
+        {
+            get => new global::Fargo.ClientHttp.V1.Metadata.MetadataRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The partitions property</summary>
         public global::Fargo.ClientHttp.V1.Partitions.PartitionsRequestBuilder Partitions
