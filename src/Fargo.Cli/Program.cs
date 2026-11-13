@@ -139,11 +139,12 @@ if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password)
             authResult.RefreshToken,
             authResult.ExpiresAt.Value));
 }
-else if (!skipAuthentication && !IsIdentityCommand(parseResult))
+else if (!skipAuthentication && !CommandGroups.IsIn(parseResult, "identity", "config"))
 {
-    // For any non-identity command, refresh the stored token up front if it has
-    // expired, so the request carries a valid access token. The identity
-    // commands manage authentication themselves and are skipped.
+    // For any command that calls the API, refresh the stored token up front if
+    // it has expired, so the request carries a valid access token. The identity
+    // commands manage authentication themselves, and the config commands never
+    // call the API, so neither touches the credential store here.
     var refresher = serviceProvider.GetRequiredService<FargoTokenRefresher>();
 
     try
@@ -189,23 +190,3 @@ catch (Exception ex) when (ApiErrorReporter.CanReport(ex))
     return ApiErrorReporter.Report(ex);
 }
 
-// Returns true when the invoked command belongs to the "identity" group, whose
-// commands handle authentication themselves and must not be auto-refreshed.
-static bool IsIdentityCommand(ParseResult result)
-{
-    var command = result.CommandResult.Command;
-
-    while (command is not null)
-    {
-        if (string.Equals(command.Name, "identity", StringComparison.Ordinal))
-        {
-            return true;
-        }
-
-        command = (command as Command)?.Parents
-            .OfType<Command>()
-            .FirstOrDefault();
-    }
-
-    return false;
-}

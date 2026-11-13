@@ -57,7 +57,9 @@ fargo identity login --username admin
 ```
 
 The session token is stored in your OS credential store and reused by later
-commands. It is bound to the server you logged in against.
+commands. It is bound to the server you logged in against. On Linux this needs
+the Secret Service (see
+[Authentication and sessions](overview.md#authentication-and-sessions)).
 
 ## 4. Work with resources
 

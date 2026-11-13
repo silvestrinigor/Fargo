@@ -61,7 +61,13 @@ changing your stored session. They are intentionally unavailable on the
 ## Authentication and sessions
 
 - Authenticate once with `fargo identity login`; the access and refresh tokens
-  are stored in your operating system's credential store.
+  are stored in your operating system's credential store: the Windows
+  Credential Manager, the macOS keychain, or the Secret Service on Linux.
+- **On Linux, the Secret Service needs `libsecret` and a keyring daemon.**
+  Without them, commands that need a session stop with a message saying so;
+  `fargo config` commands still work. On Debian or Ubuntu, install them with
+  `sudo apt install libsecret-1-0 gnome-keyring`. On a headless machine,
+  pass `--username` and `--password` to sign in for a single command instead.
 - **Tokens are bound to the server they were issued for.** A token obtained
   against one server is never sent to another, so switching `--server` or the
   configured server will not reuse the wrong token.

@@ -10,13 +10,15 @@ namespace Fargo.Cli.Authentication;
 /// A token obtained against one server is never returned for another, so logging in with
 /// <c>--server A</c> and then running against the configured server B does not reuse A's token.
 /// </summary>
+/// <remarks>
+/// A credential store that cannot be used (for example, no <c>libsecret</c> on Linux) surfaces as a
+/// <see cref="CredentialStoreUnavailableException"/> instead of the backend's native exception.
+/// </remarks>
 public class FargoCliTokenStore : ITokenStore
 {
     private readonly PersonaGUID personaGuid;
 
     private readonly ActiveServerContext activeServer;
-
-    private readonly CredentialCache credentials = CredentialCache.Instance;
 
     public FargoCliTokenStore(
         IFargoCliConfigurationStore configurationStore,
@@ -38,14 +40,17 @@ public class FargoCliTokenStore : ITokenStore
 
     public Task ClearAsync(CancellationToken cancellationToken = default)
     {
-        credentials.Remove(personaGuid);
+        UseCredentialStore(() => CredentialCache.Instance.Remove(personaGuid));
 
         return Task.CompletedTask;
     }
 
     public Task<AuthTokens?> GetAsync(CancellationToken cancellationToken = default)
     {
-        if (!credentials.TryGet(personaGuid, out Credential? credential))
+        var credential = UseCredentialStore(() =>
+            CredentialCache.Instance.TryGet(personaGuid, out Credential? found) ? found : null);
+
+        if (credential is null)
         {
             return Task.FromResult<AuthTokens?>(null);
         }
@@ -82,13 +87,37 @@ public class FargoCliTokenStore : ITokenStore
 
         var json = JsonSerializer.Serialize(payload);
 
-        credentials.AddOrReplace(personaGuid, new CredentialWithToken
+        UseCredentialStore(() => CredentialCache.Instance.AddOrReplace(personaGuid, new CredentialWithToken
         {
             Token = CredentialToken.Create(json)
-        });
+        }));
 
         return Task.CompletedTask;
     }
+
+    /// <remarks>
+    /// The native backends fail in many ways (a missing library throws <see cref="DllNotFoundException"/>
+    /// wrapped in a <see cref="TypeInitializationException"/>, a missing D-Bus session throws other
+    /// exceptions), so every failure except cancellation is treated as an unavailable store.
+    /// </remarks>
+    internal static T UseCredentialStore<T>(Func<T> action)
+    {
+        try
+        {
+            return action();
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            throw new CredentialStoreUnavailableException(exception);
+        }
+    }
+
+    private static void UseCredentialStore(Action action)
+        => UseCredentialStore(() =>
+        {
+            action();
+            return true;
+        });
 
     private static StoredToken? TryDeserialize(string json)
     {

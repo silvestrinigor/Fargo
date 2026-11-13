@@ -1,11 +1,12 @@
+using Fargo.Cli.Authentication;
 using Fargo.Client.ErrorHandling;
 using System.Net.Sockets;
 
 namespace Fargo.Cli.ErrorHandling;
 
 /// <summary>
-/// Renders Fargo API errors and connectivity failures as concise console messages and maps them to
-/// exit codes, so every command reports failures the same way.
+/// Renders Fargo API errors, connectivity failures and an unavailable credential store as concise
+/// console messages and maps them to exit codes, so every command reports failures the same way.
 /// </summary>
 public static class ApiErrorReporter
 {
@@ -44,6 +45,11 @@ public static class ApiErrorReporter
                 WriteVerboseDetails(api);
                 return 1;
 
+            case CredentialStoreUnavailableException credentialStore:
+                Console.Error.WriteLine(credentialStore.Message);
+                WriteVerboseDetails(credentialStore);
+                return 1;
+
             default:
                 if (IsConnectivityError(exception))
                 {
@@ -62,7 +68,7 @@ public static class ApiErrorReporter
     /// in an exception filter.
     /// </summary>
     public static bool CanReport(Exception exception) =>
-        exception is FargoApiException || IsConnectivityError(exception);
+        exception is FargoApiException or CredentialStoreUnavailableException || IsConnectivityError(exception);
 
     /// <summary>
     /// Calls <see cref="Report"/> when <see cref="CanReport"/> accepts the exception; otherwise returns
