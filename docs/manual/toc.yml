@@ -99,3 +99,5 @@
       href: ../contributing/code-documentation.md
     - name: Writing Documentation
       href: ../contributing/writing-documentation.md
+    - name: Commit Messages
+      href: ../contributing/commit-messages.md
