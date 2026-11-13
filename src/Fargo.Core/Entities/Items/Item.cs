@@ -39,14 +39,6 @@ public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
 
     private readonly List<ItemPartition> partitions = [];
 
-    /// <summary>
-    /// A movement is recorded whenever the parent container changes; removing the item from a
-    /// container records a movement with no destination.
-    /// </summary>
-    public IReadOnlyCollection<ItemMoviment> Moviments => moviments;
-
-    private readonly List<ItemMoviment> moviments = [];
-
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     // Required by EF Core.
     private Item()
@@ -116,8 +108,6 @@ public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
         ParentItemContainer = parentItemContainer;
 
         ParentItemContainerGuid = parentItemContainer.Guid;
-
-        moviments.Add(new ItemMoviment(Guid, parentItemContainer.Guid, DateTimeOffset.UtcNow));
     }
 
     /// <summary>
@@ -138,8 +128,6 @@ public class Item : Entity, IPartitionedGuidsReadOnly, IConcurrencyVersioned
         ParentItemContainer = null;
 
         ParentItemContainerGuid = null;
-
-        moviments.Add(new ItemMoviment(Guid, null, DateTimeOffset.UtcNow));
     }
 
     /// <remarks>

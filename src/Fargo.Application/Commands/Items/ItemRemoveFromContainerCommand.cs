@@ -3,6 +3,7 @@ using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Items;
+using Fargo.Core.Events;
 
 namespace Fargo.Application.Commands.Items;
 
@@ -14,6 +15,7 @@ public sealed record ItemRemoveFromContainerCommand(Guid ItemGuid) : ICommand;
 public sealed class ItemRemoveFromContainerCommandHandler(
     ActorResolver actorService,
     IItemRepository itemRepository,
+    IItemEventRepository itemEventRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ItemRemoveFromContainerCommand>
 {
@@ -34,6 +36,10 @@ public sealed class ItemRemoveFromContainerCommandHandler(
             return;
         }
 
+        var previousParentGuid = item.ParentItemContainerGuid;
+
         item.RemoveFromContainers();
+
+        itemEventRepository.Add(ItemEvent.NewItemMovedEvent(item, previousParentGuid));
     }
 }

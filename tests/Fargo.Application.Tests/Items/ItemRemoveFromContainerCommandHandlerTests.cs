@@ -6,6 +6,7 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
+using Fargo.Core.Events;
 using Fargo.Core.Informations;
 using NSubstitute;
 
@@ -15,12 +16,14 @@ public class ItemRemoveFromContainerCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IItemRepository itemRepository = Substitute.For<IItemRepository>();
+    private readonly IItemEventRepository itemEventRepository = Substitute.For<IItemEventRepository>();
     private readonly TestCurrentActor currentActor = new();
 
     private ItemRemoveFromContainerCommandHandler CreateHandler()
         => new(
             ActorTestFactory.Resolver(userRepository),
             itemRepository,
+            itemEventRepository,
             currentActor);
 
     private static Item NewItem()
@@ -31,18 +34,22 @@ public class ItemRemoveFromContainerCommandHandlerTests
             .Returns(Task.FromResult<Item?>(item));
 
     [Fact]
-    public async Task HandleAsync_WhenInContainer_ShouldClearParentAndRecordMoviment()
+    public async Task HandleAsync_WhenInContainer_ShouldClearParent()
     {
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.MoveItem]);
         var item = NewItem();
         Existing(item);
-        item.PlaceInsideContainer(Item.CreateItem(Article.NewArticleContainer(new Name("Box"))));
-        var movimentsBefore = item.Moviments.Count;
+        var box = Item.CreateItem(Article.NewArticleContainer(new Name("Box")));
+        item.PlaceInsideContainer(box);
 
         await CreateHandler().HandleAsync(new ItemRemoveFromContainerCommand(item.Guid));
 
         Assert.Null(item.ParentItemContainerGuid);
-        Assert.Equal(movimentsBefore + 1, item.Moviments.Count);
+        itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
+            e => e!.ItemGuid == item.Guid
+                 && e.ItemEventType == ItemEventType.Moviment
+                 && e.FromItemContainerGuid == box.Guid
+                 && e.ToNoContainer));
     }
 
     [Fact]
@@ -54,7 +61,8 @@ public class ItemRemoveFromContainerCommandHandlerTests
 
         await CreateHandler().HandleAsync(new ItemRemoveFromContainerCommand(item.Guid));
 
-        Assert.Empty(item.Moviments);
+        Assert.Null(item.ParentItemContainerGuid);
+        itemEventRepository.DidNotReceive().Add(Arg.Any<ItemEvent>());
     }
 
     [Fact]

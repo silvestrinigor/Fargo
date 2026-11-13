@@ -7,6 +7,7 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
+using Fargo.Core.Events;
 using Fargo.Core.Informations;
 using NSubstitute;
 
@@ -16,6 +17,7 @@ public class ItemSetLocationCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IItemRepository itemRepository = Substitute.For<IItemRepository>();
+    private readonly IItemEventRepository itemEventRepository = Substitute.For<IItemEventRepository>();
     private readonly TestCurrentActor currentActor = new();
 
     private ItemSetLocationCommandHandler CreateHandler()
@@ -23,6 +25,7 @@ public class ItemSetLocationCommandHandlerTests
             new ItemService(itemRepository),
             ActorTestFactory.Resolver(userRepository),
             itemRepository,
+            itemEventRepository,
             currentActor);
 
     private static Item NewItem()
@@ -36,7 +39,7 @@ public class ItemSetLocationCommandHandlerTests
             .Returns(Task.FromResult<Item?>(item));
 
     [Fact]
-    public async Task HandleAsync_WhenValid_ShouldPlaceItemInContainerAndRecordMoviment()
+    public async Task HandleAsync_WhenValid_ShouldPlaceItemInContainer()
     {
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.MoveItem]);
         var item = NewItem();
@@ -49,7 +52,11 @@ public class ItemSetLocationCommandHandlerTests
         await CreateHandler().HandleAsync(new ItemSetLocationCommand(item.Guid, parentContainer.Guid));
 
         Assert.Equal(parentContainer.Guid, item.ParentItemContainerGuid);
-        Assert.Single(item.Moviments);
+        itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
+            e => e!.ItemGuid == item.Guid
+                 && e.ItemEventType == ItemEventType.Moviment
+                 && e.FromNoContainer
+                 && e.ToItemContainerGuid == parentContainer.Guid));
     }
 
     [Fact]
@@ -61,11 +68,11 @@ public class ItemSetLocationCommandHandlerTests
         var parentContainer = NewContainer("Box");
         Existing(parentContainer);
         item.PlaceInsideContainer(parentContainer);
-        var movimentsBefore = item.Moviments.Count;
 
         await CreateHandler().HandleAsync(new ItemSetLocationCommand(item.Guid, parentContainer.Guid));
 
-        Assert.Equal(movimentsBefore, item.Moviments.Count);
+        Assert.Equal(parentContainer.Guid, item.ParentItemContainerGuid);
+        itemEventRepository.DidNotReceive().Add(Arg.Any<ItemEvent>());
         await itemRepository.DidNotReceive().AcquireContainmentLockAsync(Arg.Any<CancellationToken>());
     }
 

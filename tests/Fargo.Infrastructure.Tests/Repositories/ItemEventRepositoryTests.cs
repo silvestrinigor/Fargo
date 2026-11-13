@@ -47,7 +47,7 @@ public class ItemEventRepositoryTests
         Assert.True(page.Items.First().OccuredAt <= page.Items.Last().OccuredAt);
         Assert.All(page.Items, e => Assert.Equal(article.Guid, e.ArticleGuid));
         Assert.All(page.Items, e => Assert.Equal(ItemEventType.Moviment, e.EventType));
-        Assert.All(page.Items, e => Assert.NotNull(e.Moviment));
+        Assert.All(page.Items, e => Assert.Null(e.ItemGuid));
     }
 
     [Fact]
@@ -74,6 +74,6 @@ public class ItemEventRepositoryTests
             periodStart: DateTimeOffset.UtcNow.AddDays(-2));
 
         Assert.Equal(1, page.TotalCount);
-        Assert.Equal(5, page.Items.Single().Moviment!.Quantity.Amount);
+        Assert.Equal(5, page.Items.Single().Quantity.Amount);
     }
 }

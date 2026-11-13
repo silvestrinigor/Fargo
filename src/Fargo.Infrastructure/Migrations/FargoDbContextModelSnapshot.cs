@@ -526,33 +526,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.UseTptMappingStrategy();
                 });
 
-            modelBuilder.Entity("Fargo.Core.Entities.Items.ItemMoviment", b =>
-                {
-                    b.Property<Guid>("ItemGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("item_guid");
-
-                    b.Property<DateTimeOffset>("OccurredAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("occurred_at");
-
-                    b.Property<Guid?>("MovedToContainerGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("moved_to_container_guid");
-
-                    b.Property<bool>("RemovedFromContainers")
-                        .HasColumnType("boolean")
-                        .HasColumnName("removed_from_containers");
-
-                    b.HasKey("ItemGuid", "OccurredAt")
-                        .HasName("pk_item_moviments");
-
-                    b.HasIndex("MovedToContainerGuid")
-                        .HasDatabaseName("ix_item_moviments_moved_to_container_guid");
-
-                    b.ToTable("item_moviments", (string)null);
-                });
-
             modelBuilder.Entity("Fargo.Core.Entities.Items.ItemPartition", b =>
                 {
                     b.Property<Guid>("ItemGuid")
@@ -701,71 +674,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.ToTable("events", (string)null);
 
                     b.UseTptMappingStrategy();
-                });
-
-            modelBuilder.Entity("Fargo.Core.Events.ItemLifecycleEvent", b =>
-                {
-                    b.Property<Guid>("ItemEventGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("item_event_guid");
-
-                    b.Property<Guid?>("ItemContainerGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("item_container_guid");
-
-                    b.Property<bool>("NoContainer")
-                        .HasColumnType("boolean")
-                        .HasColumnName("no_container");
-
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double precision")
-                        .HasColumnName("quantity");
-
-                    b.HasKey("ItemEventGuid")
-                        .HasName("pk_item_lifecycle_events");
-
-                    b.HasIndex("ItemContainerGuid")
-                        .HasDatabaseName("ix_item_lifecycle_events_item_container_guid");
-
-                    b.ToTable("item_lifecycle_events", (string)null);
-                });
-
-            modelBuilder.Entity("Fargo.Core.Events.ItemMovimentEvent", b =>
-                {
-                    b.Property<Guid>("ItemEventGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("item_event_guid");
-
-                    b.Property<Guid?>("FromItemContainerGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("from_item_container_guid");
-
-                    b.Property<bool>("FromNoContainer")
-                        .HasColumnType("boolean")
-                        .HasColumnName("from_no_container");
-
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double precision")
-                        .HasColumnName("quantity");
-
-                    b.Property<Guid?>("ToItemContainerGuid")
-                        .HasColumnType("uuid")
-                        .HasColumnName("to_item_container_guid");
-
-                    b.Property<bool>("ToNoContainer")
-                        .HasColumnType("boolean")
-                        .HasColumnName("to_no_container");
-
-                    b.HasKey("ItemEventGuid")
-                        .HasName("pk_item_moviment_events");
-
-                    b.HasIndex("FromItemContainerGuid")
-                        .HasDatabaseName("ix_item_moviment_events_from_item_container_guid");
-
-                    b.HasIndex("ToItemContainerGuid")
-                        .HasDatabaseName("ix_item_moviment_events_to_item_container_guid");
-
-                    b.ToTable("item_moviment_events", (string)null);
                 });
 
             modelBuilder.Entity("Fargo.Core.Identity.Authentication.AuthenticationAttempt", b =>
@@ -1797,15 +1705,48 @@ namespace Fargo.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("article_guid");
 
+                    b.Property<Guid?>("FromItemContainerGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_item_container_guid");
+
+                    b.Property<bool>("FromNoContainer")
+                        .HasColumnType("boolean")
+                        .HasColumnName("from_no_container");
+
                     b.Property<short>("ItemEventType")
                         .HasColumnType("smallint")
                         .HasColumnName("item_event_type");
 
+                    b.Property<Guid?>("ItemGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_guid");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid?>("ToItemContainerGuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("to_item_container_guid");
+
+                    b.Property<bool>("ToNoContainer")
+                        .HasColumnType("boolean")
+                        .HasColumnName("to_no_container");
+
                     b.HasIndex("ArticleGuid")
                         .HasDatabaseName("ix_item_events_article_guid");
 
+                    b.HasIndex("FromItemContainerGuid")
+                        .HasDatabaseName("ix_item_events_from_item_container_guid");
+
                     b.HasIndex("ItemEventType")
                         .HasDatabaseName("ix_item_events_item_event_type");
+
+                    b.HasIndex("ItemGuid")
+                        .HasDatabaseName("ix_item_events_item_guid");
+
+                    b.HasIndex("ToItemContainerGuid")
+                        .HasDatabaseName("ix_item_events_to_item_container_guid");
 
                     b.ToTable("item_events", (string)null);
                 });
@@ -2113,22 +2054,6 @@ namespace Fargo.Infrastructure.Migrations
                         .HasConstraintName("fk_entities_entity_types_entity_type");
                 });
 
-            modelBuilder.Entity("Fargo.Core.Entities.Items.ItemMoviment", b =>
-                {
-                    b.HasOne("Fargo.Core.Entities.Items.Item", null)
-                        .WithMany("Moviments")
-                        .HasForeignKey("ItemGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_moviments_items_item_guid");
-
-                    b.HasOne("Fargo.Core.Entities.Items.Item", null)
-                        .WithMany()
-                        .HasForeignKey("MovedToContainerGuid")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_item_moviments_items_moved_to_container_guid");
-                });
-
             modelBuilder.Entity("Fargo.Core.Entities.Items.ItemPartition", b =>
                 {
                     b.HasOne("Fargo.Core.Entities.Items.Item", "Item")
@@ -2261,50 +2186,6 @@ namespace Fargo.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_events_event_types_event_type");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Events.ItemLifecycleEvent", b =>
-                {
-                    b.HasOne("Fargo.Core.Entities.Items.Item", "ItemContainer")
-                        .WithMany()
-                        .HasForeignKey("ItemContainerGuid")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_item_lifecycle_events_items_item_container_guid");
-
-                    b.HasOne("Fargo.Core.Events.ItemEvent", null)
-                        .WithOne("Lifecycle")
-                        .HasForeignKey("Fargo.Core.Events.ItemLifecycleEvent", "ItemEventGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_lifecycle_events_item_events_item_event_guid");
-
-                    b.Navigation("ItemContainer");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Events.ItemMovimentEvent", b =>
-                {
-                    b.HasOne("Fargo.Core.Entities.Items.Item", "FromItemContainer")
-                        .WithMany()
-                        .HasForeignKey("FromItemContainerGuid")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_item_moviment_events_items_from_item_container_guid");
-
-                    b.HasOne("Fargo.Core.Events.ItemEvent", null)
-                        .WithOne("Moviment")
-                        .HasForeignKey("Fargo.Core.Events.ItemMovimentEvent", "ItemEventGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_item_moviment_events_item_events_item_event_guid");
-
-                    b.HasOne("Fargo.Core.Entities.Items.Item", "ToItemContainer")
-                        .WithMany()
-                        .HasForeignKey("ToItemContainerGuid")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_item_moviment_events_items_to_item_container_guid");
-
-                    b.Navigation("FromItemContainer");
-
-                    b.Navigation("ToItemContainer");
                 });
 
             modelBuilder.Entity("Fargo.Core.Identity.Tokens.RefreshToken", b =>
@@ -2475,6 +2356,12 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_item_events_articles_article_guid");
 
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "FromItemContainer")
+                        .WithMany()
+                        .HasForeignKey("FromItemContainerGuid")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_item_events_items_from_item_container_guid");
+
                     b.HasOne("Fargo.Core.Events.Event", null)
                         .WithOne()
                         .HasForeignKey("Fargo.Core.Events.ItemEvent", "Guid")
@@ -2489,7 +2376,17 @@ namespace Fargo.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_item_events_item_event_types_item_event_type");
 
+                    b.HasOne("Fargo.Core.Entities.Items.Item", "ToItemContainer")
+                        .WithMany()
+                        .HasForeignKey("ToItemContainerGuid")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_item_events_items_to_item_container_guid");
+
                     b.Navigation("Article");
+
+                    b.Navigation("FromItemContainer");
+
+                    b.Navigation("ToItemContainer");
                 });
 
             modelBuilder.Entity("Fargo.Core.Entities.Actors.Users.User", b =>
@@ -2539,8 +2436,6 @@ namespace Fargo.Infrastructure.Migrations
 
             modelBuilder.Entity("Fargo.Core.Entities.Items.Item", b =>
                 {
-                    b.Navigation("Moviments");
-
                     b.Navigation("Partitions");
                 });
 
@@ -2558,13 +2453,6 @@ namespace Fargo.Infrastructure.Migrations
                     b.Navigation("Partitions");
 
                     b.Navigation("PermissionGrants");
-                });
-
-            modelBuilder.Entity("Fargo.Core.Events.ItemEvent", b =>
-                {
-                    b.Navigation("Lifecycle");
-
-                    b.Navigation("Moviment");
                 });
 #pragma warning restore 612, 618
         }

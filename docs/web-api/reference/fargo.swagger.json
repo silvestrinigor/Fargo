@@ -2074,6 +2074,246 @@
         }
       }
     },
+    "/v1/metadata/entity-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the entity types",
+        "description": "Gets the entity types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetEntityTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/audit-log-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the audit log types",
+        "description": "Gets the audit log types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetAuditLogTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/action-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the action (permission) types",
+        "description": "Gets the action (permission) types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetActionTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/actor-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the actor types",
+        "description": "Gets the actor types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetActorTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/article-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the article types",
+        "description": "Gets the article types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetArticleTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/article-tracking-modes": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the article tracking modes",
+        "description": "Gets the article tracking modes as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetArticleTrackingModes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/barcode-formats": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the barcode formats",
+        "description": "Gets the barcode formats as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetBarcodeFormats",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/item-event-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the item event types",
+        "description": "Gets the item event types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetItemEventTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/supply-order-statuses": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the supply order statuses",
+        "description": "Gets the supply order statuses as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetSupplyOrderStatuses",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metadata/error-types": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Gets the error types",
+        "description": "Gets the error types as id and name pairs. The id is the numeric code the API accepts and returns; the values are fixed by the application and are not read from the database.",
+        "operationId": "GetErrorTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CatalogEntryDto"
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/service-accounts/{serviceAccountGuid}": {
       "get": {
         "tags": [
@@ -3337,6 +3577,22 @@
       "type": "integer",
       "description": "Coarse family of a command; the exact command is in string AuditLog.CommandName."
     },
+    "CatalogEntryDto": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "format": "int32",
+          "pattern": "^-?(?:0|[1-9]\\d*)$"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
     "Color": {
       "type": "string",
       "pattern": "^#[0-9a-fA-F]{6}$",
@@ -3557,8 +3813,12 @@
         "articleGuid",
         "eventType",
         "occuredAt",
-        "moviment",
-        "lifecycle"
+        "itemGuid",
+        "quantity",
+        "fromItemContainerGuid",
+        "fromNoContainer",
+        "toItemContainerGuid",
+        "toNoContainer"
       ],
       "properties": {
         "guid": {
@@ -3576,75 +3836,12 @@
           "type": "string",
           "format": "date-time"
         },
-        "moviment": {
-          "allOf": [
-            {
-              "x-nullable": true
-            }
-          ]
-        },
-        "lifecycle": {
-          "allOf": [
-            {
-              "x-nullable": true
-            }
-          ]
-        }
-      }
-    },
-    "ItemEventType": {
-      "type": "integer"
-    },
-    "ItemLifecycleEventDto": {
-      "type": "object",
-      "required": [
-        "quantity",
-        "itemContainerGuid",
-        "noContainer"
-      ],
-      "properties": {
-        "quantity": {
-          "$ref": "#/definitions/Scalar"
-        },
-        "itemContainerGuid": {
+        "itemGuid": {
           "type": "string",
-          "description": "`null` when there was no container or it has since been deleted; see\r\n        NoContainer.",
+          "description": "`null` for an event-tracked article. For an item, it stays after the item is deleted.",
           "format": "uuid",
           "x-nullable": true
         },
-        "noContainer": {
-          "type": "boolean"
-        }
-      }
-    },
-    "ItemMovimentDto": {
-      "type": "object",
-      "required": [
-        "movedToItemContainerGuid",
-        "occurredAt"
-      ],
-      "properties": {
-        "movedToItemContainerGuid": {
-          "type": "string",
-          "format": "uuid",
-          "x-nullable": true
-        },
-        "occurredAt": {
-          "type": "string",
-          "format": "date-time"
-        }
-      }
-    },
-    "ItemMovimentEventDto": {
-      "type": "object",
-      "required": [
-        "quantity",
-        "fromItemContainerGuid",
-        "fromNoContainer",
-        "toItemContainerGuid",
-        "toNoContainer"
-      ],
-      "properties": {
         "quantity": {
           "$ref": "#/definitions/Scalar"
         },
@@ -3665,6 +3862,27 @@
         },
         "toNoContainer": {
           "type": "boolean"
+        }
+      }
+    },
+    "ItemEventType": {
+      "type": "integer"
+    },
+    "ItemMovimentDto": {
+      "type": "object",
+      "required": [
+        "movedToItemContainerGuid",
+        "occurredAt"
+      ],
+      "properties": {
+        "movedToItemContainerGuid": {
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -5023,6 +5241,9 @@
     },
     {
       "name": "AuditLogs"
+    },
+    {
+      "name": "Metadata"
     },
     {
       "name": "ServiceAccounts"

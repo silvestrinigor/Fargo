@@ -3,6 +3,7 @@ using Fargo.Application.Dtos.Articles;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Barcodes;
 using Fargo.Core.Entities.Articles;
+using Fargo.Core.Events;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -382,10 +383,12 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
                 -
                 CASE WHEN moviment.from_item_container_guid IS NOT NULL THEN moviment.quantity ELSE 0 END
             ), 0) AS value
-            FROM item_moviment_events AS moviment
-            INNER JOIN item_events AS event
-                ON event.guid = moviment.item_event_guid
-            WHERE event.article_guid = {articleGuid}
+            FROM item_events AS moviment
+            INNER JOIN events AS event
+                ON event.guid = moviment.guid
+            WHERE moviment.article_guid = {articleGuid}
+              AND moviment.item_guid IS NULL
+              AND moviment.item_event_type = {(short)ItemEventType.Moviment}
               AND event.occured_at <= {upperBound}
             """;
 
@@ -427,10 +430,12 @@ public sealed class ArticleRepository(FargoDbContext context) : IArticleReposito
                 ELSE 0
             END
         ), 0) AS value
-        FROM item_moviment_events AS moviment
-        INNER JOIN item_events AS event
-            ON event.guid = moviment.item_event_guid
-        WHERE event.article_guid = {articleGuid}
+        FROM item_events AS moviment
+        INNER JOIN events AS event
+            ON event.guid = moviment.guid
+        WHERE moviment.article_guid = {articleGuid}
+          AND moviment.item_guid IS NULL
+          AND moviment.item_event_type = {(short)ItemEventType.Moviment}
           AND event.occured_at <= {upperBound}
         """;
 
