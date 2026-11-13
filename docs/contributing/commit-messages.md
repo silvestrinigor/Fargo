@@ -117,5 +117,8 @@ Fixed stuff.
 
 ## Merges
 
-Work happens on branches from `develop`. Merge commits that Git generates
+Branches, pull requests and merge methods are covered in
+[branches and pull requests](branches-and-pull-requests.md). A pull request
+title follows the rules on this page, because it becomes the commit message
+when the pull request is squashed. Merge commits that Git generates
 (`Merge branch 'develop' of ...`) are fine and need no convention.
