@@ -1,8 +1,8 @@
-using Fargo.ClientHttp;
-using Fargo.ClientHttp.Authentication;
-using Fargo.ClientHttp.Models;
-using Fargo.ClientRealtime;
-using Fargo.RealtimeContracts;
+using Fargo.Client;
+using Fargo.Client.Authentication;
+using Fargo.Client.Models;
+using Fargo.Client.Realtime;
+using Fargo.Realtime.Contracts;
 using System.Collections.Concurrent;
 
 namespace Fargo.WorkflowTest;

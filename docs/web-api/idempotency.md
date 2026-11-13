@@ -77,7 +77,7 @@ fargo item event create --article <article-guid> --quantity 10 --container <cont
 
 The MCP tools that create items and item events take an optional
 `idempotencyKey` and generate one when it is omitted. In code, the
-`Fargo.ClientHttp` library offers `IdempotencyKeys.Header(key)`, which you pass
+`Fargo.Client` library offers `IdempotencyKeys.Header(key)`, which you pass
 as the request configuration of the generated client.
 
 ## Next steps

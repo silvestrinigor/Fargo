@@ -1,5 +1,5 @@
 using Fargo.Cli.Output;
-using Fargo.ClientHttp;
+using Fargo.Client;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Items;
@@ -52,7 +52,7 @@ public sealed class ItemInventoryCommand : Command
                 Console.WriteLine();
             }
 
-            new TableWriter<ClientHttp.Models.ItemContainerInventoryDto>()
+            new TableWriter<Client.Models.ItemContainerInventoryDto>()
                 .Column("ARTICLE GUID", e => e.ArticleGuid?.ToString())
                 .Column("COUNT", e => e.TotalCount?.ToString())
                 .EmptyMessage(at.HasValue

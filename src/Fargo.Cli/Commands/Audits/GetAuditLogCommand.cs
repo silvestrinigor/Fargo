@@ -1,6 +1,6 @@
 using Fargo.Cli.Output;
-using Fargo.ClientHttp;
-using Fargo.ClientHttp.Models;
+using Fargo.Client;
+using Fargo.Client.Models;
 using Microsoft.Kiota.Abstractions.Serialization;
 using System.CommandLine;
 using System.Globalization;

@@ -1,4 +1,4 @@
-using Fargo.ClientHttp;
+using Fargo.Client;
 using Microsoft.Kiota.Abstractions;
 using System.CommandLine;
 

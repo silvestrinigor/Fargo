@@ -1,5 +1,5 @@
 using Fargo.Cli.Output;
-using Fargo.ClientHttp;
+using Fargo.Client;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Articles;
@@ -35,7 +35,7 @@ public sealed class UpdateArticleCommand : Command
         {
             var guid = parseResult.GetValue(guidArgument);
 
-            ClientHttp.Models.ArticleUpdateDto dto;
+            Client.Models.ArticleUpdateDto dto;
             try
             {
                 dto = options.Build(parseResult);

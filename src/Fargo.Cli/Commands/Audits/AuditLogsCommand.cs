@@ -1,4 +1,4 @@
-using Fargo.ClientHttp;
+using Fargo.Client;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Audits;

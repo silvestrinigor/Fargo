@@ -1,4 +1,4 @@
-using Fargo.ClientHttp.ErrorHandling;
+using Fargo.Client.ErrorHandling;
 using System.Net.Sockets;
 
 namespace Fargo.Cli.ErrorHandling;

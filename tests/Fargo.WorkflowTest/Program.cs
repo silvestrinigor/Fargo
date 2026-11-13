@@ -1,4 +1,4 @@
-using Fargo.ClientHttp.Extensions;
+using Fargo.Client.Extensions;
 using Fargo.WorkflowTest;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

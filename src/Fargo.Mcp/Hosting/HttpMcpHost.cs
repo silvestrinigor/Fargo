@@ -1,4 +1,4 @@
-using Fargo.ClientHttp.Extensions;
+using Fargo.Client.Extensions;
 using Fargo.Mcp.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

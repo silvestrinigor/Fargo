@@ -11,11 +11,11 @@
 
 set -e
 
-OPENAPI_JSON="src/Fargo.ServiceHttp/Fargo.ServiceHttp.json"
+OPENAPI_JSON="src/Fargo.Api/Fargo.Api.json"
 SWAGGER_JSON="docs/web-api/reference/fargo.swagger.json"
 
 echo "Generating OpenAPI document from the HTTP API project..."
-dotnet build src/Fargo.ServiceHttp/Fargo.ServiceHttp.csproj \
+dotnet build src/Fargo.Api/Fargo.Api.csproj \
     -c Release \
     --nologo
 

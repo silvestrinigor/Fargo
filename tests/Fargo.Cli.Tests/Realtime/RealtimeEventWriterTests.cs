@@ -1,6 +1,6 @@
 using Fargo.Cli.Commands.Config;
 using Fargo.Cli.Commands.Realtime;
-using Fargo.RealtimeContracts;
+using Fargo.Realtime.Contracts;
 using System.Text.Json;
 
 namespace Fargo.Cli.Tests.Realtime;

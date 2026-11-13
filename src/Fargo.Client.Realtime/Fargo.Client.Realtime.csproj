@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+
+    <!--
+      Client for the Fargo real-time hub. Depends only on SignalR and the hub
+      contract (Fargo.Realtime.Contracts): it makes no API requests, and the
+      application supplies the access token (IFargoRealtimeAccessTokenProvider).
+    -->
+    <Version>0.1.0-alpha.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fargo.Realtime.Contracts\Fargo.Realtime.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Fargo.Client.Realtime.Tests" />
+  </ItemGroup>
+
+</Project>

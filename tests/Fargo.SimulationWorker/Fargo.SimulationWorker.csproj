@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fargo.ClientHttp\Fargo.ClientHttp.csproj" />
+    <ProjectReference Include="..\..\src\Fargo.Client\Fargo.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

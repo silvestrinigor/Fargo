@@ -1,7 +1,7 @@
-using Fargo.ClientHttp;
-using Fargo.ClientHttp.Authentication;
-using Fargo.ClientHttp.Extensions;
-using Fargo.ClientHttp.Models;
+using Fargo.Client;
+using Fargo.Client.Authentication;
+using Fargo.Client.Extensions;
+using Fargo.Client.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.WorkflowTest;

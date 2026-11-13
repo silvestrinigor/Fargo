@@ -1,4 +1,4 @@
-using Fargo.ClientHttp.Models;
+using Fargo.Client.Models;
 using Microsoft.Kiota.Abstractions.Serialization;
 
 namespace Fargo.Mcp.Tools;

@@ -16,7 +16,7 @@ layers above. The domain at the center has no dependencies at all.
 | Domain | `Fargo.Core` | Entities, value objects, enums, and the rules that are always true regardless of how data is stored or exposed. Defines ports such as the repository interfaces and `IActorAuthorizationProvider`. | nothing |
 | Application | `Fargo.Application` | Use cases as CQRS commands and queries with handlers, DTOs, query repository interfaces, and integration event contracts. | Core |
 | Infrastructure | `Fargo.Infrastructure` | Concrete implementations: EF Core persistence, repositories, security, the outbox, RabbitMQ messaging, and the authorization cache. | Application, Core |
-| Hosts | `Fargo.ServiceHttp`, `Fargo.ServiceRealtime`, `Fargo.ServiceEventPublisher`, `Fargo.ServiceMaintenance`, `Fargo.ServiceMigration`, `Fargo.ServiceInitializer` | Each host is a composition root that wires the layers together for one job. | Application, Infrastructure, ServiceDefaults |
+| Hosts | `Fargo.Api`, `Fargo.Realtime`, `Fargo.OutboxRelay`, `Fargo.Maintenance`, `Fargo.Migrator`, `Fargo.Initializer` | Each host is a composition root that wires the layers together for one job. | Application, Infrastructure, ServiceDefaults |
 
 Because the inner layers define the interfaces and the infrastructure layer
 implements them, the domain and use cases never depend on Entity Framework,
@@ -31,11 +31,11 @@ lazily, so a host only pays for the services it actually resolves.
 
 | Host | Adds on top of the layers |
 | --- | --- |
-| `Fargo.ServiceHttp` | API versioning, JSON converters, JWT authentication, exception handlers, rate limiting, forwarded headers, the endpoints and the database health check. |
-| `Fargo.ServiceRealtime` | JWT authentication (with the token accepted in the query string under `/hubs`), SignalR, the RabbitMQ consumer and the connection registry. See [Real-time Updates](realtime.md). |
-| `Fargo.ServiceEventPublisher` | The RabbitMQ client and the loop that publishes the outbox. See [Integration Events](integration-events.md). |
-| `Fargo.ServiceMaintenance` | Timers that delete expired idempotency keys and published outbox messages. See [Idempotency](idempotency.md) and [Integration Events](integration-events.md). |
-| `Fargo.ServiceMigration`, `Fargo.ServiceInitializer` | Their one-time startup job. See [Persistence](persistence.md). |
+| `Fargo.Api` | API versioning, JSON converters, JWT authentication, exception handlers, rate limiting, forwarded headers, the endpoints and the database health check. |
+| `Fargo.Realtime` | JWT authentication (with the token accepted in the query string under `/hubs`), SignalR, the RabbitMQ consumer and the connection registry. See [Real-time Updates](realtime.md). |
+| `Fargo.OutboxRelay` | The RabbitMQ client and the loop that publishes the outbox. See [Integration Events](integration-events.md). |
+| `Fargo.Maintenance` | Timers that delete expired idempotency keys and published outbox messages. See [Idempotency](idempotency.md) and [Integration Events](integration-events.md). |
+| `Fargo.Migrator`, `Fargo.Initializer` | Their one-time startup job. See [Persistence](persistence.md). |
 
 ## CQRS
 

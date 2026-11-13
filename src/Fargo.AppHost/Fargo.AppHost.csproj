@@ -22,12 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.ServiceHttp\Fargo.ServiceHttp.csproj" />
-    <ProjectReference Include="..\Fargo.ServiceMaintenance\Fargo.ServiceMaintenance.csproj" />
-    <ProjectReference Include="..\Fargo.ServiceMigration\Fargo.ServiceMigration.csproj" />
-    <ProjectReference Include="..\Fargo.ServiceEventPublisher\Fargo.ServiceEventPublisher.csproj" />
-    <ProjectReference Include="..\Fargo.ServiceRealtime\Fargo.ServiceRealtime.csproj" />
-    <ProjectReference Include="..\Fargo.ServiceInitializer\Fargo.ServiceInitializer.csproj" />
+    <ProjectReference Include="..\Fargo.Api\Fargo.Api.csproj" />
+    <ProjectReference Include="..\Fargo.Maintenance\Fargo.Maintenance.csproj" />
+    <ProjectReference Include="..\Fargo.Migrator\Fargo.Migrator.csproj" />
+    <ProjectReference Include="..\Fargo.OutboxRelay\Fargo.OutboxRelay.csproj" />
+    <ProjectReference Include="..\Fargo.Realtime\Fargo.Realtime.csproj" />
+    <ProjectReference Include="..\Fargo.Initializer\Fargo.Initializer.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,345 @@
+using Fargo.Api.Versioning;
+using Fargo.Application.Abstractions;
+using Fargo.Application.Commands.Items;
+using Fargo.Application.Common.Paging;
+using Fargo.Application.Dtos;
+using Fargo.Application.Dtos.Items;
+using Fargo.Application.Idempotency;
+using Fargo.Application.Queries.Items;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Fargo.Api.Endpoints;
+
+public static class ItemEndpointRouteBuilderExtension
+{
+    public static void MapFargoItem(this IEndpointRouteBuilder builder)
+    {
+        var group = builder.MapItemGroup();
+
+        group.MapGetItemByGuid();
+
+        group.MapGetItemLocationByGuid();
+
+        group.MapGetItemMovimentsByGuid();
+
+        group.MapGetItemContainerInventoryByGuid();
+
+        group.MapGetItems();
+
+        group.MapCreateItem();
+
+        group.MapSetItemPartitions();
+
+        group.MapSetItemLocation();
+
+        group.MapRemoveItemFromContainer();
+
+        group.MapDeleteItem();
+    }
+
+    private static RouteGroupBuilder MapItemGroup(this IEndpointRouteBuilder builder)
+    {
+        var group = builder
+        .MapVersionedGroup("Items", "/items")
+        .RequireAuthorization()
+        .WithTags("Items")
+        .RequireRateLimiting("general-authenticated");
+
+        return group;
+    }
+
+    #region Get Single
+
+    private static IEndpointRouteBuilder MapGetItemByGuid(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{itemGuid:guid}", GetSingleItem)
+            .WithName("GetItem")
+            .WithSummary("Gets a single item")
+            .WithDescription("Retrieves a single item by its unique identifier.")
+            .Produces<ItemDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<ItemDto>, NotFound>> GetSingleItem(
+        Guid itemGuid,
+        IQueryHandler<ItemSingleQuery, ItemDto?> handler,
+        CancellationToken cancellationToken
+    )
+    {
+        var query = new ItemSingleQuery(itemGuid);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion
+
+    #region Get location
+
+    private static IEndpointRouteBuilder MapGetItemLocationByGuid(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{itemGuid:guid}/location", GetItemLocationByGuid)
+            .WithName("GetItemLocation")
+            .WithSummary("Gets the item location")
+            .WithDescription("Retrieves the containment chain of an item: the item followed by each of its parent containers. The list is ordered from the item itself (first element) outward to its root container (last element). When 'at' is supplied, the chain is reconstructed from the containment history as it was at that instant.")
+            .Produces<IReadOnlyCollection<ItemDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<ItemDto>>, NotFound>> GetItemLocationByGuid(
+        Guid itemGuid,
+        DateTimeOffset? at,
+        IQueryHandler<ItemLocationQuery, IReadOnlyCollection<ItemDto>> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new ItemLocationQuery(itemGuid, at);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return response.Count == 0 ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion
+
+    #region Get moviments history
+
+    private static IEndpointRouteBuilder MapGetItemMovimentsByGuid(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{itemGuid:guid}/moviments", GetItemMovimentsByGuid)
+            .WithName("GetItemMoviments")
+            .WithSummary("Gets the item moviments")
+            .WithDescription("Retrieves a list of moviments that represents the moviment history of item.")
+            .Produces<IReadOnlyCollection<ItemMovimentDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<ItemMovimentDto>>, NotFound>> GetItemMovimentsByGuid(
+        Guid itemGuid,
+        IQueryHandler<ItemMovimentsQuery, IReadOnlyCollection<ItemMovimentDto>?> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new ItemMovimentsQuery(itemGuid);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion
+
+    #region Get inventory
+
+    private static IEndpointRouteBuilder MapGetItemContainerInventoryByGuid(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/{itemGuid:guid}/inventory", GetItemContainerInventoryByGuid)
+            .WithName("GetItemContainerInventory")
+            .WithSummary("Gets the item container inventory")
+            .WithDescription("Retrieves the per-article inventory contained in the item container. When 'at' is supplied, the inventory is reconstructed from the containment history as it was at that instant.")
+            .Produces<IReadOnlyCollection<ItemContainerInventoryDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<Results<Ok<IReadOnlyCollection<ItemContainerInventoryDto>>, NotFound>> GetItemContainerInventoryByGuid(
+        Guid itemGuid,
+        DateTimeOffset? at,
+        IQueryHandler<ItemContainerInventoryByGuidQuery, IReadOnlyCollection<ItemContainerInventoryDto>?> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new ItemContainerInventoryByGuidQuery(itemGuid, At: at);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+    }
+
+    #endregion
+
+    #region Get Many
+
+    private static IEndpointRouteBuilder MapGetItems(this IEndpointRouteBuilder builder)
+    {
+        builder.MapGet("/", GetManyItem)
+            .WithName("GetItems")
+            .WithSummary("Gets multiple items")
+            .WithDescription("Retrieves a paginated list of items, including the total number of matching entries.")
+            .Produces<PagedResult<ItemDto>>(StatusCodes.Status200OK);
+
+        return builder;
+    }
+
+    private static async Task<Ok<PagedResult<ItemDto>>> GetManyItem(
+        int? page,
+        int? limit,
+        Guid[]? childOfAnyOfThesePartitions,
+        Sort? sort,
+        string? search,
+        IQueryHandler<ItemsQuery, PagedResult<ItemDto>> handler,
+        CancellationToken cancellationToken
+    )
+    {
+        var withPagination = new Pagination(
+            new Page(page ?? Page.FirstPage.Value),
+            new Limit(limit ?? Limit.MaxLimit.Value));
+
+        var query = new ItemsQuery(
+            withPagination,
+            childOfAnyOfThesePartitions,
+            sort,
+            search);
+
+        var response = await handler.HandleAsync(query, cancellationToken);
+
+        return TypedResults.Ok(response);
+    }
+
+    #endregion Get Many
+
+    #region Create
+
+    private static IEndpointRouteBuilder MapCreateItem(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPost("/", CreateItem)
+            .WithName("CreateItem")
+            .WithSummary("Creates a new item")
+            .WithDescription("Creates a new item with optional partitions. Returns the generated identifier. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of creating another item. Use a new key for a different request.")
+            .Produces<Guid>(StatusCodes.Status200OK)
+            .ProducesIdempotencyErrors();
+
+        return builder;
+    }
+
+    private static async Task<Ok<Guid>> CreateItem(
+        ItemCreateDto request,
+        [FromHeader(Name = IdempotencyEndpointExtensions.KeyHeaderName)] Guid? idempotencyKey,
+        IdempotencyOutcome outcome,
+        HttpContext httpContext,
+        ICommandHandler<ItemCreateCommand, Guid> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ItemCreateCommand(request, idempotencyKey);
+
+        var response = await handler.HandleAsync(command, cancellationToken);
+
+        httpContext.Response.MarkIfReplayed(outcome);
+
+        return TypedResults.Ok(response);
+    }
+
+    #endregion Create
+
+    #region Set partitions
+
+    private static IEndpointRouteBuilder MapSetItemPartitions(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{itemGuid:guid}/partitions", SetPartitions)
+            .WithName("SetItemPartitions")
+            .WithSummary("Changes the partitions of an item")
+            .WithDescription("Adds and removes the partitions the an item belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Moving the item to another container is a separate operation. Requires the ChangeItemPartitions permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetPartitions(
+        Guid itemGuid,
+        PartitionMembershipsChangeDto request,
+        ICommandHandler<ItemSetPartitionsCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new ItemSetPartitionsCommand(itemGuid, request), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set partitions
+
+    #region Set location
+
+    private static IEndpointRouteBuilder MapSetItemLocation(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{itemGuid:guid}/location", SetItemLocation)
+            .WithName("SetItemLocation")
+            .WithSummary("Places an item inside a container")
+            .WithDescription("Sets the parent container of the item, recording a movement. Placing an item in the container it is already in does nothing. Requires the MoveItem permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetItemLocation(
+        Guid itemGuid,
+        ItemSetLocationDto request,
+        ICommandHandler<ItemSetLocationCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ItemSetLocationCommand(itemGuid, request.ParentItemContainerGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    private static IEndpointRouteBuilder MapRemoveItemFromContainer(this IEndpointRouteBuilder builder)
+    {
+        builder.MapDelete("/{itemGuid:guid}/location", RemoveItemFromContainer)
+            .WithName("RemoveItemFromContainer")
+            .WithSummary("Removes an item from its container")
+            .WithDescription("Clears the parent container of the item, recording a movement with no destination. An item that is not in a container is left as it is. Requires the MoveItem permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> RemoveItemFromContainer(
+        Guid itemGuid,
+        ICommandHandler<ItemRemoveFromContainerCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ItemRemoveFromContainerCommand(itemGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set location
+    #region Delete
+
+    private static IEndpointRouteBuilder MapDeleteItem(this IEndpointRouteBuilder builder)
+    {
+        builder.MapDelete("/{itemGuid:guid}", DeleteItem)
+            .WithName("DeleteItem")
+            .WithSummary("Deletes an item")
+            .WithDescription("Deletes the specified item from the system.")
+            .Produces(StatusCodes.Status204NoContent);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> DeleteItem(
+        Guid itemGuid,
+        ICommandHandler<ItemDeleteCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ItemDeleteCommand(itemGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Delete
+}

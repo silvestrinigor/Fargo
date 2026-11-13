@@ -1,5 +1,5 @@
 using Fargo.Cli.Output;
-using Fargo.ClientHttp;
+using Fargo.Client;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Articles;

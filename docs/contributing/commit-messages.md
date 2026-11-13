@@ -47,15 +47,15 @@ The scope is optional. When used, it names the area changed.
 | `core` | `Fargo.Core` |
 | `application` | `Fargo.Application` |
 | `infrastructure` | `Fargo.Infrastructure` |
-| `http` | `Fargo.ServiceHttp` and `Fargo.ClientHttp` |
-| `realtime` | `Fargo.ServiceRealtime`, `Fargo.ClientRealtime`, and `Fargo.RealtimeContracts` |
+| `http` | `Fargo.Api` and `Fargo.Client` |
+| `realtime` | `Fargo.Realtime`, `Fargo.Client.Realtime`, and `Fargo.Realtime.Contracts` |
 | `cli` | `Fargo.Cli` |
 | `mcp` | `Fargo.Mcp` |
-| `migration` | `Fargo.ServiceMigration` |
+| `migration` | `Fargo.Migrator` |
 | `docs` | The `docs/` site |
 
-Services without their own scope (`Fargo.ServiceInitializer`,
-`Fargo.ServiceMaintenance`, `Fargo.ServiceEventPublisher`, `Fargo.AppHost`,
+Services without their own scope (`Fargo.Initializer`,
+`Fargo.Maintenance`, `Fargo.OutboxRelay`, `Fargo.AppHost`,
 `Fargo.ServiceDefaults`) use the name without the `Fargo.` prefix, in
 lowercase, for example `initializer`. Omit the scope when a change spans
 several areas.

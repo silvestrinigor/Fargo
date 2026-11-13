@@ -25,11 +25,11 @@ Everything lives under `src/`, with tests under `tests/`.
 
 | Project | Role |
 | --- | --- |
-| `Fargo.ServiceHttp` | The HTTP API: minimal-API endpoints, authentication, rate limiting, OpenAPI, and error handling. |
-| `Fargo.ServiceRealtime` | The real-time service: a SignalR hub that pushes changes to connected clients. |
-| `Fargo.ServiceEventPublisher` | A background worker that publishes stored integration events to RabbitMQ. |
-| `Fargo.ServiceMigration` | A startup worker that applies pending database migrations, then exits. |
-| `Fargo.ServiceInitializer` | A startup worker that initializes the system state (global partition, administrators group, default admin), then exits. |
+| `Fargo.Api` | The HTTP API: minimal-API endpoints, authentication, rate limiting, OpenAPI, and error handling. |
+| `Fargo.Realtime` | The real-time service: a SignalR hub that pushes changes to connected clients. |
+| `Fargo.OutboxRelay` | A background worker that publishes stored integration events to RabbitMQ. |
+| `Fargo.Migrator` | A startup worker that applies pending database migrations, then exits. |
+| `Fargo.Initializer` | A startup worker that initializes the system state (global partition, administrators group, default admin), then exits. |
 | `Fargo.ServiceDefaults` | Shared host defaults: OpenTelemetry, health checks, resilience, and service discovery. |
 | `Fargo.AppHost` | The .NET Aspire orchestrator that runs PostgreSQL, RabbitMQ, and the hosts together for local development. |
 
@@ -37,9 +37,9 @@ Everything lives under `src/`, with tests under `tests/`.
 
 | Project | Role |
 | --- | --- |
-| `Fargo.ClientHttp` | The HTTP client, generated with Kiota from the OpenAPI document, with token storage and refresh. |
-| `Fargo.ClientRealtime` | The client for the real-time hub; it makes no API requests. |
-| `Fargo.RealtimeContracts` | The wire contract of the real-time hub, shared by the server and the client. |
+| `Fargo.Client` | The HTTP client, generated with Kiota from the OpenAPI document, with token storage and refresh. |
+| `Fargo.Client.Realtime` | The client for the real-time hub; it makes no API requests. |
+| `Fargo.Realtime.Contracts` | The wire contract of the real-time hub, shared by the server and the client. |
 | `Fargo.Cli` | The `fargo` command-line client. |
 | `Fargo.Mcp` | The Model Context Protocol server for AI agents. |
 

@@ -1,5 +1,5 @@
 using Fargo.Cli.Output;
-using Fargo.ClientHttp;
+using Fargo.Client;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Articles;
@@ -33,7 +33,7 @@ public sealed class UpdateArticleByBarcodeCommand : Command
         {
             var barcode = parseResult.GetValue(barcodeArgument)!;
 
-            ClientHttp.Models.ArticleUpdateDto dto;
+            Client.Models.ArticleUpdateDto dto;
             try
             {
                 dto = options.Build(parseResult);

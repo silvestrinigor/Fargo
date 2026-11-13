@@ -7,7 +7,7 @@ client — list, read, and manage Fargo articles, items, item events, partitions
 users, user groups, and audit logs through natural-language-driven tool calls.
 
 Under the hood it is a thin layer over the same strongly-typed
-[`Fargo.ClientHttp`](~/api/Fargo.ClientHttp.FargoApiClient.yml) Kiota client that
+[`Fargo.Client`](~/api/Fargo.Client.FargoApiClient.yml) Kiota client that
 the `fargo` CLI uses, so the MCP tools behave consistently with the CLI and the
 Web API.
 
