@@ -1,6 +1,6 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Decorators;
 using Fargo.Application.Commands.Articles;
+using Fargo.Application.Decorators;
 using Fargo.Application.Dtos.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors;

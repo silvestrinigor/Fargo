@@ -1,6 +1,6 @@
+using Fargo.Application.Commands.Items;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Commands.Items;
 using Fargo.Application.Dtos.Items;
 using Fargo.Application.Persistence;
 using Fargo.Application.Tests.Common;

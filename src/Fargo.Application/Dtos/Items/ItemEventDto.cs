@@ -1,6 +1,5 @@
 using Fargo.Core.Events;
 using UnitsNet;
-using Fargo.Application.Dtos.Audits;
 
 namespace Fargo.Application.Dtos.Items;
 

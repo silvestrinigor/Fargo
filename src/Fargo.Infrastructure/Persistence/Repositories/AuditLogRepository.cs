@@ -1,8 +1,8 @@
 using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.Audits;
 using Fargo.Application.Dtos.Items;
-using Fargo.Application.Queries.Audits;
 using Fargo.Application.Persistence.Repositories;
+using Fargo.Application.Queries.Audits;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors;
 using Microsoft.EntityFrameworkCore;

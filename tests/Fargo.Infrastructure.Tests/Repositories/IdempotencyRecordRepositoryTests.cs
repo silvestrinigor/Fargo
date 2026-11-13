@@ -3,7 +3,6 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
-using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;
 using Fargo.Infrastructure.Tests.Common;
 using Microsoft.EntityFrameworkCore;
@@ -82,7 +81,7 @@ public class IdempotencyRecordRepositoryTests(PostgresFixture postgres) : IClass
 
         Assert.NotNull(found);
         Assert.Equal("ItemCreateCommand", found!.CommandName);
-                Assert.Equal($"\"{guid}\"", found.Response);
+        Assert.Equal($"\"{guid}\"", found.Response);
         Assert.Equal(Now + TimeSpan.FromHours(24), found.ExpiresAt);
     }
 

@@ -1,6 +1,6 @@
+using Fargo.Application.Commands.Partitions;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Commands.Partitions;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;

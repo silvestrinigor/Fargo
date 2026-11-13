@@ -1,7 +1,7 @@
 using Fargo.Application.Abstractions;
+using Fargo.Application.Commands.Partitions;
 using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos;
-using Fargo.Application.Commands.Partitions;
 using Fargo.Application.Dtos.Partitions;
 using Fargo.Application.Queries.Partitions;
 using Fargo.ServiceHttp.Versioning;

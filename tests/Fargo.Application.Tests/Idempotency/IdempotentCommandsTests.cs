@@ -1,7 +1,6 @@
 using Fargo.Application.Abstractions;
 using Fargo.Application.Commands.Items;
 using Fargo.Application.Commands.SupplyOrders;
-using Fargo.Application.Idempotency;
 
 namespace Fargo.Application.Tests.Idempotency;
 

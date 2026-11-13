@@ -1,6 +1,6 @@
+using Fargo.Application.Commands.Articles;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Commands.Articles;
 using Fargo.Application.Dtos.Articles;
 using Fargo.Application.Persistence;
 using Fargo.Application.Tests.Common;
@@ -9,7 +9,6 @@ using Fargo.Core.Common;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Articles;
-using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 using NSubstitute;
 

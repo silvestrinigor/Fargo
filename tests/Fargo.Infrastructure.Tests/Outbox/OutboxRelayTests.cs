@@ -1,8 +1,8 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Decorators;
-using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Commands.Outbox;
+using Fargo.Application.Decorators;
 using Fargo.Application.Dtos.Outbox;
+using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Persistence;
 using Fargo.Infrastructure.Persistence;
 using Fargo.Infrastructure.Persistence.Repositories;

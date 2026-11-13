@@ -1,6 +1,6 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Common.Paging;
 using Fargo.Application.Commands.Articles;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos;
 using Fargo.Application.Dtos.Articles;
 using Fargo.Application.Queries.Articles;

@@ -1,6 +1,5 @@
-using Fargo.Application.Common.Paging;
-using Fargo.Application.DependencyInjection;
 using Fargo.Application.Commands.Partitions;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.Partitions;
 using Fargo.Application.Queries.Partitions;
 using Microsoft.Extensions.DependencyInjection;
