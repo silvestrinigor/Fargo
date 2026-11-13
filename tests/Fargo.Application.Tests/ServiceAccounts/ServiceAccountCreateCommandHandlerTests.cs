@@ -148,7 +148,7 @@ public class ServiceAccountCreateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         serviceAccountRepository.Received(1).Add(
-            Arg.Is<ServiceAccount>(a => a.Actor.Permissions.Contains(ActionType.CreateItem)));
+            Arg.Is<ServiceAccount>(a => a!.Actor.Permissions.Contains(ActionType.CreateItem)));
     }
 
     [Fact]

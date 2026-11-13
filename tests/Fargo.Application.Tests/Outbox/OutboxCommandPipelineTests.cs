@@ -40,7 +40,7 @@ public class OutboxCommandPipelineTests
             .ExecuteInTransactionAsync(
                 Arg.Any<Func<CancellationToken, Task<OutboxBatchResultDto>>>(),
                 Arg.Any<CancellationToken>())
-            .Returns(call => call.Arg<Func<CancellationToken, Task<OutboxBatchResultDto>>>()(CancellationToken.None));
+            .Returns(call => call.Arg<Func<CancellationToken, Task<OutboxBatchResultDto>>>()!(CancellationToken.None));
 
         var repository = Substitute.For<IOutboxRepository>();
         repository

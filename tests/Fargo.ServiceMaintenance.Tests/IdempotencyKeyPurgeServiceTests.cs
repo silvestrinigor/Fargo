@@ -47,7 +47,7 @@ public class IdempotencyKeyPurgeServiceTests
             NullLogger<IdempotencyKeyPurgeService>.Instance);
     }
 
-    private Task WaitForCallAsync() => calls.WaitAsync(Timeout);
+    private Task<bool> WaitForCallAsync() => calls.WaitAsync(Timeout);
 
     [Fact]
     public async Task PurgeOnceAsync_ShouldPurgeWithTheCurrentTimeAndTheBatchSize()
@@ -56,7 +56,7 @@ public class IdempotencyKeyPurgeServiceTests
 
         await handler.Received(1).HandleAsync(
             Arg.Is<PurgeExpiredIdempotencyKeysCommand>(c =>
-                c.Now == timeProvider.GetUtcNow() && c.BatchSize == 250),
+                c!.Now == timeProvider.GetUtcNow() && c.BatchSize == 250),
             Arg.Any<CancellationToken>());
     }
 
@@ -98,7 +98,7 @@ public class IdempotencyKeyPurgeServiceTests
         try
         {
             await WaitForCallAsync();
-            Assert.Equal(1, handler.ReceivedCalls().Count());
+            Assert.Single(handler.ReceivedCalls());
 
             timeProvider.Advance(settings.PurgeInterval);
             await WaitForCallAsync();

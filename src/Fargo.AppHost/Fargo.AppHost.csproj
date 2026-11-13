@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Sdk Name="Aspire.AppHost.Sdk" Version="13.4.6" />
+  <Sdk Name="Aspire.AppHost.Sdk" Version="13.6.5" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,14 +9,16 @@
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <UserSecretsId>1ba760b8-f1e2-4d6e-a14a-57deb25e42cb</UserSecretsId>
+    <!-- The AppHost runs without the Aspire CLI bundle, as it did before the 13.6.5 upgrade. -->
+    <NoWarn>$(NoWarn);ASPIRE010</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.4.6" />
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.4.6" />
-    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.4.6" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.6.5" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.6.5" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.6.5" />
     <!-- Pin patched version to resolve transitive vulnerability GHSA-qhrr-8q5h-9q3h (CVE-2026-92707). -->
-    <PackageReference Include="MessagePack" Version="2.5.303" />
+    <PackageReference Include="MessagePack" Version="2.5.307" />
   </ItemGroup>
 
   <ItemGroup>

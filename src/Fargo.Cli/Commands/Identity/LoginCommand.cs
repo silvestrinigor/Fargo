@@ -66,7 +66,7 @@ public sealed class LoginCommand : Command
                 return 1;
             }
 
-            await tokenStore.SetAsync(new AuthTokens(result.AccessToken!, result.RefreshToken!, result.ExpiresAt!.Value));
+            await tokenStore.SetAsync(new AuthTokens(result.AccessToken!, result.RefreshToken!, result.ExpiresAt!.Value), cancellationToken);
 
             StatusWriter.Success(
                 "Login successful.",

@@ -291,7 +291,7 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
 
     // ----- Read-only auditor flow ----------------------------------------------
 
-    public async Task<string> AuditAsync(OperatorContext ctx, CancellationToken ct)
+    public static async Task<string> AuditAsync(OperatorContext ctx, CancellationToken ct)
     {
         switch (ctx.Random.Next(4))
         {

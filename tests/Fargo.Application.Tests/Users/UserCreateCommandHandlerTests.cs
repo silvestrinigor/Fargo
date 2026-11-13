@@ -151,7 +151,7 @@ public class UserCreateCommandHandlerTests
 
         await CreateHandler().HandleAsync(command);
 
-        userRepository.Received(1).Add(Arg.Is<User>(u => u.Actor.Permissions.Contains(ActionType.CreateItem)));
+        userRepository.Received(1).Add(Arg.Is<User>(u => u!.Actor.Permissions.Contains(ActionType.CreateItem)));
     }
 
     [Fact]
@@ -228,6 +228,6 @@ public class UserCreateCommandHandlerTests
         await CreateHandler().HandleAsync(command);
 
         userRepository.Received(1).Add(
-            Arg.Is<User>(u => u.UserGroupMemberships.Any(m => m.UserGroupGuid == group.Guid)));
+            Arg.Is<User>(u => u!.UserGroupMemberships.Any(m => m.UserGroupGuid == group.Guid)));
     }
 }

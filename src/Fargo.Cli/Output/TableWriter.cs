@@ -76,14 +76,14 @@ public sealed class TableWriter<T>
         return string.IsNullOrEmpty(value) ? "-" : value;
     }
 
-    private static string FormatRow(IReadOnlyList<string> cells, IReadOnlyList<int> widths)
+    private static string FormatRow(string[] cells, int[] widths)
     {
-        var parts = new string[cells.Count];
+        var parts = new string[cells.Length];
 
-        for (var i = 0; i < cells.Count; i++)
+        for (var i = 0; i < cells.Length; i++)
         {
             // Do not pad the last column to avoid trailing whitespace.
-            parts[i] = i == cells.Count - 1
+            parts[i] = i == cells.Length - 1
                 ? cells[i]
                 : cells[i].PadRight(widths[i]);
         }

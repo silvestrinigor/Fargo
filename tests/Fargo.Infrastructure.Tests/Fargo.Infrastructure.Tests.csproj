@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <!-- The repository tests that InMemory cannot run are skipped on purpose, with the reason in the Skip text. -->
+    <NoWarn>$(NoWarn);xUnit1004</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

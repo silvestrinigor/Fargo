@@ -37,8 +37,8 @@ public sealed record CatalogQuery(MetadataCatalog Catalog) : IQuery<IReadOnlyLis
 /// </remarks>
 public sealed class CatalogQueryHandler : IQueryHandler<CatalogQuery, IReadOnlyList<CatalogEntryDto>>
 {
-    private static readonly IReadOnlyDictionary<MetadataCatalog, IReadOnlyList<CatalogEntryDto>> catalogs =
-        new Dictionary<MetadataCatalog, IReadOnlyList<CatalogEntryDto>>
+    private static readonly Dictionary<MetadataCatalog, IReadOnlyList<CatalogEntryDto>> catalogs =
+        new()
         {
             [MetadataCatalog.EntityTypes] = Describe<EntityType>(),
             [MetadataCatalog.AuditLogTypes] = Describe<AuditLogType>(),
@@ -57,11 +57,10 @@ public sealed class CatalogQueryHandler : IQueryHandler<CatalogQuery, IReadOnlyL
         return Task.FromResult(catalogs[query.Catalog]);
     }
 
-    private static IReadOnlyList<CatalogEntryDto> Describe<TEnum>() where TEnum : struct, Enum
+    private static CatalogEntryDto[] Describe<TEnum>() where TEnum : struct, Enum
     {
-        return Enum.GetValues<TEnum>()
+        return [.. Enum.GetValues<TEnum>()
             .Select(value => new CatalogEntryDto(Convert.ToInt32(value), value.ToString()))
-            .OrderBy(entry => entry.Id)
-            .ToArray();
+            .OrderBy(entry => entry.Id)];
     }
 }

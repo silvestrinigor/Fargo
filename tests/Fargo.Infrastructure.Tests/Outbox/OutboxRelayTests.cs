@@ -31,7 +31,7 @@ public class OutboxRelayTests(PostgresFixture postgres) : IClassFixture<Postgres
 
     // As registered in the outbox host: the transactional decorator owns the transaction that holds
     // the claim locks, and commits what the handler marked.
-    private static ICommandHandler<PublishOutboxBatchCommand, OutboxBatchResultDto> CreatePublisher(
+    private static TransactionalCommandHandlerDecorator<PublishOutboxBatchCommand, OutboxBatchResultDto> CreatePublisher(
         FargoDbContext context,
         IEventPublisher publisher)
         => new TransactionalCommandHandlerDecorator<PublishOutboxBatchCommand, OutboxBatchResultDto>(

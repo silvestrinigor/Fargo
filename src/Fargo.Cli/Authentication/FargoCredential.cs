@@ -1,5 +1,7 @@
 using ktsu.CredentialCache;
 
+namespace Fargo.Cli.Authentication;
+
 public sealed class FargoCredential : Credential
 {
     public string AccessToken { get; init; } = string.Empty;

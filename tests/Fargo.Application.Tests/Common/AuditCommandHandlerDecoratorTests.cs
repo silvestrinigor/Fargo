@@ -28,7 +28,7 @@ public class AuditCommandHandlerDecoratorTests
         await decorator.HandleAsync(Command());
 
         auditLogRepository.Received(1).Add(Arg.Is<AuditLog>(a =>
-            a.ActorGuid == actorGuid
+            a!.ActorGuid == actorGuid
             && a.ActorType == ActorType.User
             && a.AuditLogType == AuditLogType.EntityCreated
             && a.CommandName == nameof(ArticleCreateCommand)));

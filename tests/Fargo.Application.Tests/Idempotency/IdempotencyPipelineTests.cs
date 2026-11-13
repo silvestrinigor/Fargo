@@ -45,7 +45,7 @@ public class IdempotencyPipelineTests
     {
         unitOfWork
             .ExecuteInTransactionAsync(Arg.Any<Func<CancellationToken, Task>>(), Arg.Any<CancellationToken>())
-            .Returns(call => call.Arg<Func<CancellationToken, Task>>()(CancellationToken.None));
+            .Returns(call => call.Arg<Func<CancellationToken, Task>>()!(CancellationToken.None));
 
         var services = new ServiceCollection();
         services.AddSingleton(unitOfWork);
@@ -344,7 +344,7 @@ public class IdempotencyPipelineTests
     {
         private readonly Dictionary<(Guid, Guid), IdempotencyRecord> store = [];
 
-        public IReadOnlyCollection<IdempotencyRecord> All => store.Values;
+        public Dictionary<(Guid, Guid), IdempotencyRecord>.ValueCollection All => store.Values;
 
         public Task<IdempotencyRecord?> FindAsync(Guid actorGuid, Guid key, CancellationToken cancellationToken = default)
             => Task.FromResult(store.GetValueOrDefault((actorGuid, key)));

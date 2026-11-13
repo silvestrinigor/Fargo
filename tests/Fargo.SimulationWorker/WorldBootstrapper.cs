@@ -122,7 +122,7 @@ internal sealed class WorldBootstrapper(
 
     private async Task<List<OperatorAccount>> CreateOperatorsAsync(
         IReadOnlyList<Guid> partitions,
-        IReadOnlyDictionary<OperatorRole, Guid> groupByRole,
+        Dictionary<OperatorRole, Guid> groupByRole,
         CancellationToken cancellationToken)
     {
         var roles = BuildRoleRoster();
@@ -147,7 +147,7 @@ internal sealed class WorldBootstrapper(
                 new UserCreateDto
                 {
                     Nameid = nameid,
-                    FirstName = _names.FirstName(i),
+                    FirstName = Names.FirstName(i),
                     LastName = "Operator",
                     Description = $"Simulation {role} operator #{i}.",
                     IsActive = true,
