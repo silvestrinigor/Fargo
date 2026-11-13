@@ -13,10 +13,10 @@ Today only **articles** produce events (`created`, `edited`, `deleted`).
 command commits ──► outbox row (same transaction)
                       │
                       ▼
-          Fargo.ServiceEventPublisher ──► RabbitMQ topic exchange "fargo.events"
+          Fargo.OutboxRelay ──► RabbitMQ topic exchange "fargo.events"
                                           │  routing key article.*
                                           ▼
-                              Fargo.ServiceRealtime (one queue per instance)
+                              Fargo.Realtime (one queue per instance)
                                           │  partition check per connection
                                           ▼
                                    SignalR clients
@@ -25,8 +25,8 @@ command commits ──► outbox row (same transaction)
 - **Only committed changes are pushed.** The outbox row is written by the
   save-changes interceptor in the same transaction as the change, so a change
   that rolls back produces no event.
-- **A separate host.** `Fargo.ServiceRealtime` holds the long-lived WebSocket
-  connections, so the REST API (`Fargo.ServiceHttp`) stays stateless and has no
+- **A separate host.** `Fargo.Realtime` holds the long-lived WebSocket
+  connections, so the REST API (`Fargo.Api`) stays stateless and has no
   broker dependency. Restarting or scaling the API does not drop connections, and
   if the real-time service is down, REST keeps working.
 - **One queue per instance.** Each instance declares its own exclusive,
@@ -85,10 +85,10 @@ Access is kept current in three ways:
 
 `changeType` is `created`, `edited` or `deleted`.
 
-### .NET client (`Fargo.ClientRealtime`)
+### .NET client (`Fargo.Client.Realtime`)
 
-`Fargo.ClientRealtime` wraps the SignalR connection. It depends only on SignalR
-and `Fargo.RealtimeContracts` (the payload above, shared with the server). It
+`Fargo.Client.Realtime` wraps the SignalR connection. It depends only on SignalR
+and `Fargo.Realtime.Contracts` (the payload above, shared with the server). It
 makes no API requests: the application supplies the access token through an
 `IFargoRealtimeAccessTokenProvider`.
 
@@ -139,7 +139,7 @@ whether to retry.
 
 The real-time client never refreshes tokens. The server closes a connection
 when its token expires, so a provider used for a long-lived connection must
-return a fresh one. With `Fargo.ClientHttp`, the token source decides:
+return a fresh one. With `Fargo.Client`, the token source decides:
 
 - **Default (`StoredAccessTokenSource`).** Sends the stored token as is, so
   refresh it yourself (`FargoTokenRefresher.EnsureValidAsync`) before it
@@ -205,10 +205,10 @@ connection strings.
 | Handler abstraction | `Fargo.Application/IntegrationEvents/IArticleEventHandler.cs` |
 | Partitions in the message | `Fargo.Infrastructure/Outbox/OutboxSaveChangesInterceptor.cs` |
 | Broker consumer | `Fargo.Infrastructure/Messaging/RabbitMqArticleEventConsumer.cs` |
-| Hub, routing, access refresh | `Fargo.ServiceRealtime` (`Hubs/`, `Notifications/`, `Connections/`, `Services/`) |
-| Hub wire contract | `Fargo.RealtimeContracts` |
-| .NET client | `Fargo.ClientRealtime` |
-| Token store, refresh, token sources | `Fargo.ClientHttp` (`Fargo.ClientHttp.Authentication`) |
+| Hub, routing, access refresh | `Fargo.Realtime` (`Hubs/`, `Notifications/`, `Connections/`, `Services/`) |
+| Hub wire contract | `Fargo.Realtime.Contracts` |
+| .NET client | `Fargo.Client.Realtime` |
+| Token store, refresh, token sources | `Fargo.Client` (`Fargo.Client.Authentication`) |
 | End-to-end check | `tests/Fargo.WorkflowTest/RealtimeScenario.cs` (needs the full stack and `Workflow:RealtimeServer`) |
 
 ## Not done yet

@@ -101,3 +101,5 @@
       href: ../contributing/writing-documentation.md
     - name: Commit Messages
       href: ../contributing/commit-messages.md
+    - name: Branches and Pull Requests
+      href: ../contributing/branches-and-pull-requests.md

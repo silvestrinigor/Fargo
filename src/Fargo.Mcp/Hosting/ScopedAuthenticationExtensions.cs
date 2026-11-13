@@ -1,4 +1,4 @@
-using Fargo.ClientHttp.Authentication;
+using Fargo.Client.Authentication;
 using Fargo.Mcp.Authentication;
 using Fargo.Mcp.Configuration;
 using Microsoft.AspNetCore.Http;

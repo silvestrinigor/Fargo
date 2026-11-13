@@ -17,7 +17,7 @@ or editing C# code.
 - Why something is done, in `<remarks>`, when it is not obvious (a security
   reason, a race, a workaround).
 - Short summaries on the public surface of the client libraries
-  (`Fargo.ClientHttp`, `Fargo.ClientRealtime`, `Fargo.RealtimeContracts`), which
+  (`Fargo.Client`, `Fargo.Client.Realtime`, `Fargo.Realtime.Contracts`), which
   other developers see in IntelliSense.
 - `<exception>` only for domain exceptions a caller is expected to catch, and
   never on command or query handlers (errors are mapped to HTTP centrally).

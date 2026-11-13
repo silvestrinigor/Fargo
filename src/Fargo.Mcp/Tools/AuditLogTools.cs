@@ -1,4 +1,4 @@
-using Fargo.ClientHttp;
+using Fargo.Client;
 using Fargo.Mcp.Authentication;
 using ModelContextProtocol.Server;
 using System.ComponentModel;

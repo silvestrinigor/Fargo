@@ -10,8 +10,8 @@ using Fargo.Cli.Commands.ServiceAccounts;
 using Fargo.Cli.Commands.UserGroups;
 using Fargo.Cli.Commands.Users;
 using Fargo.Cli.Configurations;
-using Fargo.ClientHttp;
-using Fargo.ClientHttp.Authentication;
+using Fargo.Client;
+using Fargo.Client.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using System.CommandLine;
 

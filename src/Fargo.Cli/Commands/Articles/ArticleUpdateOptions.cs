@@ -1,4 +1,4 @@
-using Fargo.ClientHttp.Models;
+using Fargo.Client.Models;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Articles;

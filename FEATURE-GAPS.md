@@ -4,7 +4,7 @@
 > (strong "what is where / what was where" engine, two tracking modes, point-in-time history, audit
 > log, clean CQRS/Aspire platform). It is **not yet a commercial WMS**. Each item below is written as a
 > standalone issue so it can be picked up independently. Assessment grounded in server code
-> (Fargo.Core, Fargo.Application, Fargo.Infrastructure, Fargo.ServiceHttp).
+> (Fargo.Core, Fargo.Application, Fargo.Infrastructure, Fargo.Api).
 
 ---
 

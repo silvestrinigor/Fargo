@@ -37,12 +37,12 @@ defaults to `https://localhost:7563` and the real-time service to
 
 | Service | Project | Responsibility |
 | --- | --- | --- |
-| API | `Fargo.ServiceHttp` | Serves the HTTP API. |
-| Real-time | `Fargo.ServiceRealtime` | Pushes changes to connected clients. See [Real-time Updates](realtime.md). |
-| Event publisher | `Fargo.ServiceEventPublisher` | Publishes integration events to RabbitMQ. See [Integration Events](integration-events.md). |
-| Maintenance | `Fargo.ServiceMaintenance` | Deletes expired idempotency keys and published outbox messages on a timer. See [Idempotency](idempotency.md) and [Integration Events](integration-events.md#configuration). |
-| Migration | `Fargo.ServiceMigration` | Applies EF Core migrations at startup, then exits. |
-| Initializer | `Fargo.ServiceInitializer` | Initializes the system state at startup, then exits. |
+| API | `Fargo.Api` | Serves the HTTP API. |
+| Real-time | `Fargo.Realtime` | Pushes changes to connected clients. See [Real-time Updates](realtime.md). |
+| Event publisher | `Fargo.OutboxRelay` | Publishes integration events to RabbitMQ. See [Integration Events](integration-events.md). |
+| Maintenance | `Fargo.Maintenance` | Deletes expired idempotency keys and published outbox messages on a timer. See [Idempotency](idempotency.md) and [Integration Events](integration-events.md#configuration). |
+| Migration | `Fargo.Migrator` | Applies EF Core migrations at startup, then exits. |
+| Initializer | `Fargo.Initializer` | Initializes the system state at startup, then exits. |
 
 The migration and initializer services are run-to-completion workers: they do their job
 and stop, which is why the other services wait for their completion before

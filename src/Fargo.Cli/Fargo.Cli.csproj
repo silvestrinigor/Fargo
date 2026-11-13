@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -48,8 +48,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fargo.ClientHttp\Fargo.ClientHttp.csproj" />
-    <ProjectReference Include="..\Fargo.ClientRealtime\Fargo.ClientRealtime.csproj" />
+    <ProjectReference Include="..\Fargo.Client\Fargo.Client.csproj" />
+    <ProjectReference Include="..\Fargo.Client.Realtime\Fargo.Client.Realtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>

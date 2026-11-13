@@ -1,4 +1,4 @@
-using Fargo.ClientHttp.ErrorHandling;
+using Fargo.Client.ErrorHandling;
 
 namespace Fargo.SimulationWorker;
 

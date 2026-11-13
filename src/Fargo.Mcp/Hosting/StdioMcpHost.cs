@@ -1,4 +1,4 @@
-using Fargo.ClientHttp.Extensions;
+using Fargo.Client.Extensions;
 using Fargo.Mcp.Authentication;
 using Fargo.Mcp.Configuration;
 using Microsoft.Extensions.DependencyInjection;

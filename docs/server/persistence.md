@@ -134,14 +134,14 @@ did with the jsonb permissions), edit the migration to copy the data in `Up` and
 ### Applying migrations
 
 Migrations are applied automatically at startup by the **migration service**
-(`Fargo.ServiceMigration`), which calls `Database.MigrateAsync()` through an EF
+(`Fargo.Migrator`), which calls `Database.MigrateAsync()` through an EF
 execution strategy (so transient failures are retried). In the Aspire
 orchestration the migration service runs before the API, and the API waits for
 it to complete. See [Operations](operations.md).
 
 ## System initialization
 
-After migrations, the **initializer service** (`Fargo.ServiceInitializer`) initializes the
+After migrations, the **initializer service** (`Fargo.Initializer`) initializes the
 system on first run by executing `InitializeSystemCommand`, which creates:
 
 1. the **global partition** (the root of the partition hierarchy),

@@ -6,7 +6,7 @@ namespace Fargo.Application.IntegrationEvents;
 /// </summary>
 /// <remarks>
 /// Rows are written by the outbox save-changes interceptor (Fargo.Infrastructure) and read only
-/// by the outbox relay (Fargo.ServiceEventPublisher), which publishes them in <see cref="Sequence"/>
+/// by the outbox relay (Fargo.OutboxRelay), which publishes them in <see cref="Sequence"/>
 /// order and marks them processed. Processed rows are purged after a retention
 /// period.
 /// </remarks>

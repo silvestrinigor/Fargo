@@ -1,5 +1,5 @@
 using Fargo.Cli.Output;
-using Fargo.ClientHttp;
+using Fargo.Client;
 using System.CommandLine;
 
 namespace Fargo.Cli.Commands.Items;
@@ -27,7 +27,7 @@ public sealed class ItemMovimentsCommand : Command
 
             var result = await client.V1.Items[guid].Moviments.GetAsync(cancellationToken: cancellationToken);
 
-            new TableWriter<ClientHttp.Models.ItemMovimentDto>()
+            new TableWriter<Client.Models.ItemMovimentDto>()
                 .Column("OCCURRED AT", m => m.OccurredAt?.ToString("u"))
                 .Column("MOVED TO CONTAINER", m => m.MovedToItemContainerGuid?.ToString())
                 .EmptyMessage("No movement history found.")

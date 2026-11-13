@@ -1,5 +1,5 @@
 using Fargo.Cli.Output;
-using Fargo.ClientHttp.Models;
+using Fargo.Client.Models;
 using System.Globalization;
 
 namespace Fargo.Cli.Commands.Articles;

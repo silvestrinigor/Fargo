@@ -1,7 +1,7 @@
 # Fargo.WorkflowTest
 
 An end-to-end **workflow driver** for the Fargo system. It talks to a running
-Fargo HTTP API through the real `Fargo.ClientHttp` client and runs two scenarios.
+Fargo HTTP API through the real `Fargo.Client` client and runs two scenarios.
 
 ## Inventory scenario
 
@@ -133,7 +133,7 @@ API:
 dotnet run --project src/server/Fargo.AppHost
 ```
 
-Note the API URL from the Aspire dashboard (or run `Fargo.ServiceHttp`
+Note the API URL from the Aspire dashboard (or run `Fargo.Api`
 standalone against your own PostgreSQL and point `Workflow:Server` at it).
 
 ## Run

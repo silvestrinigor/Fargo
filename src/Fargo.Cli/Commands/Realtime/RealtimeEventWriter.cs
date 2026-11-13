@@ -1,4 +1,4 @@
-using Fargo.RealtimeContracts;
+using Fargo.Realtime.Contracts;
 using System.Globalization;
 using System.Text.Json;
 

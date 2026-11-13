@@ -1,8 +1,8 @@
 using Fargo.Cli.Commands.Config;
 using Fargo.Cli.Configurations;
 using Fargo.Cli.ErrorHandling;
-using Fargo.ClientHttp.Authentication;
-using Fargo.ClientRealtime;
+using Fargo.Client.Authentication;
+using Fargo.Client.Realtime;
 using System.CommandLine;
 using System.Net;
 

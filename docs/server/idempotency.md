@@ -61,7 +61,7 @@ cannot both succeed, because the row carries the `xmin` concurrency token.
 
 ## Cleanup
 
-`Fargo.ServiceMaintenance` deletes expired records. It runs once at startup and
+`Fargo.Maintenance` deletes expired records. It runs once at startup and
 then every `PurgeInterval`, deleting in batches so that no statement holds locks
 for long. A failed run is logged and tried again at the next interval, because
 expired records only waste space. Several instances can run at once, since

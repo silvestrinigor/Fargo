@@ -1,6 +1,6 @@
-using Fargo.ClientHttp;
-using Fargo.ClientHttp.ErrorHandling;
-using Fargo.ClientHttp.Models;
+using Fargo.Client;
+using Fargo.Client.ErrorHandling;
+using Fargo.Client.Models;
 using System.Collections.Concurrent;
 
 namespace Fargo.WorkflowTest;

@@ -15,7 +15,7 @@ Today only **articles** produce events: `article.created`, `article.edited` and
 flowchart LR
     Save["Command saves<br/>(SaveChanges)"]
     Outbox[("outbox_messages")]
-    Relay["Fargo.ServiceEventPublisher<br/>(relay)"]
+    Relay["Fargo.OutboxRelay<br/>(relay)"]
     Exchange["RabbitMQ topic exchange<br/>fargo.events"]
     Consumers["Consumers<br/>(e.g. real-time service)"]
 
@@ -29,7 +29,7 @@ flowchart LR
    adds a row to `outbox_messages` for every article event of the save, in the
    same transaction as the change. A change that rolls back produces no event,
    and a committed change can't lose its event.
-2. **The relay.** `Fargo.ServiceEventPublisher` claims the oldest unpublished rows with
+2. **The relay.** `Fargo.OutboxRelay` claims the oldest unpublished rows with
    `FOR UPDATE SKIP LOCKED`, so several relays never publish the same row. It
    publishes them in order and marks them processed. Publishing stops at the
    first failure, and that row and the ones after it are retried later, so
@@ -119,8 +119,8 @@ can reuse it by registering its own handler with `AddFargoArticleEventConsumer`.
 | `Outbox` | `PollInterval` | `00:00:01` | The relay's wait when there is nothing to publish. |
 | `Outbox` | `BatchSize` | `100` | Rows claimed per batch. A full batch is followed by the next one at once. |
 | `Outbox` | `MaxRetryDelay` | `00:01:00` | The longest wait after failures; the wait doubles from `PollInterval`. |
-| `Maintenance:Outbox` | `Retention` | `7.00:00:00` | How long published rows are kept before `Fargo.ServiceMaintenance` purges them. |
-| `Maintenance:Outbox` | `PurgeInterval` | `01:00:00` | How often `Fargo.ServiceMaintenance` runs the purge. |
+| `Maintenance:Outbox` | `Retention` | `7.00:00:00` | How long published rows are kept before `Fargo.Maintenance` purges them. |
+| `Maintenance:Outbox` | `PurgeInterval` | `01:00:00` | How often `Fargo.Maintenance` runs the purge. |
 
 The broker connection string is named `fargo-rabbitmq`. Under Aspire it is
 supplied automatically.
