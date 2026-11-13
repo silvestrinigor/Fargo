@@ -31,7 +31,7 @@ public sealed class PermissionsMigrationTests : IAsyncLifetime
 
         await migrator.MigrateAsync(BeforeMigration);
 
-        await context.Database.ExecuteSqlRawAsync(
+        await context.Database.ExecuteSqlAsync(
             $"""
             INSERT INTO entities (guid, entity_type) VALUES ('{ActorGuid}', 2), ('{UserGroupGuid}', 3);
 

@@ -38,6 +38,7 @@ public sealed class ArticleSetPartitionsCommandHandler(
             partitionRepository,
             article.AddPartition,
             article.RemovePartition,
-            cancellationToken);
+            cancellationToken
+        );
     }
 }

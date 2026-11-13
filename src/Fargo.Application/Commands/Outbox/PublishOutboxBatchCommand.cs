@@ -1,6 +1,6 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Dtos.Outbox;
+using Fargo.Application.IntegrationEvents;
 using Fargo.Application.Persistence.Repositories;
 using Microsoft.Extensions.Logging;
 

@@ -1,10 +1,10 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Common.Paging;
 using Fargo.Application.Commands.SupplyOrders;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.SupplyOrders;
+using Fargo.Application.Idempotency;
 using Fargo.Application.Queries.SupplyOrders;
 using Fargo.Core.Entities.SupplyOrders;
-using Fargo.Application.Idempotency;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

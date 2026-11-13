@@ -1,5 +1,4 @@
 using Fargo.Core.Entities.Items;
-using Fargo.Application.Dtos.Audits;
 
 namespace Fargo.Application.Dtos.Items;
 

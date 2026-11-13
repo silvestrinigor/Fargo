@@ -1,6 +1,5 @@
-using Fargo.Application.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 using Fargo.Application.Commands.Initialization;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Fargo.Application.DependencyInjection;
 

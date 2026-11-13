@@ -11,12 +11,10 @@ using Fargo.Application.Persistence;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Audits;
-using Fargo.Core.Entities.Actors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using UnitsNet;
 using UnitsNet.NumberExtensions.NumberToScalar;
 
 namespace Fargo.Application.Tests.Idempotency;

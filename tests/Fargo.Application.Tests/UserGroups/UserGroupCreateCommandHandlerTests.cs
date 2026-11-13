@@ -1,6 +1,6 @@
+using Fargo.Application.Commands.UserGroups;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Commands.UserGroups;
 using Fargo.Application.Dtos.UserGroups;
 using Fargo.Application.Persistence;
 using Fargo.Application.Tests.Common;

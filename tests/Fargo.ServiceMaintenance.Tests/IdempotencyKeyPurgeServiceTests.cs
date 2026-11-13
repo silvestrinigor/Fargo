@@ -98,7 +98,7 @@ public class IdempotencyKeyPurgeServiceTests
         try
         {
             await WaitForCallAsync();
-            Assert.Equal(1, handler.ReceivedCalls().Count());
+            Assert.Single(handler.ReceivedCalls());
 
             timeProvider.Advance(settings.PurgeInterval);
             await WaitForCallAsync();

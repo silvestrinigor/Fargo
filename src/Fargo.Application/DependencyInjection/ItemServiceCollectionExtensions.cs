@@ -1,6 +1,5 @@
-using Fargo.Application.Common.Paging;
-using Fargo.Application.DependencyInjection;
 using Fargo.Application.Commands.Items;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.Items;
 using Fargo.Application.Queries.Items;
 using Microsoft.Extensions.DependencyInjection;

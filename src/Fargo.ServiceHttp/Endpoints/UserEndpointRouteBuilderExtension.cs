@@ -1,7 +1,7 @@
 using Fargo.Application.Abstractions;
+using Fargo.Application.Commands.Users;
 using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos;
-using Fargo.Application.Commands.Users;
 using Fargo.Application.Dtos.Users;
 using Fargo.Application.Queries.Users;
 using Fargo.ServiceHttp.Versioning;

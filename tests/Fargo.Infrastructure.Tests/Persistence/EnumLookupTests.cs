@@ -42,7 +42,7 @@ public class EnumLookupTests(PostgresFixture postgres) : IClassFixture<PostgresF
         await using var context = postgres.CreateContext();
 
         var actual = await context.Database
-            .SqlQueryRaw<string>($"SELECT id::text || ':' || name AS \"Value\" FROM {table}")
+            .SqlQuery<string>($"SELECT id::text || ':' || name AS \"Value\" FROM {table}")
             .ToListAsync();
 
         Assert.Equal(expected, actual.Order(StringComparer.Ordinal).ToList());

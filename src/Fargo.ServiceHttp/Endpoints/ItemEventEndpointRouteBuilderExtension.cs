@@ -1,10 +1,10 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Common.Paging;
 using Fargo.Application.Commands.Items;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.Items;
+using Fargo.Application.Idempotency;
 using Fargo.Application.Queries.Items;
 using Fargo.Core.Events;
-using Fargo.Application.Idempotency;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
