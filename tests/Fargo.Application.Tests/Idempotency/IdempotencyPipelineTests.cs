@@ -176,13 +176,13 @@ public class IdempotencyPipelineTests
     [Fact]
     public async Task TheSameKeyFromAnotherActor_ShouldBeIndependent()
     {
-        var (Result, Replayed) = await SendCreateAsync(CreateItem(Key1));
+        var (firstResult, _) = await SendCreateAsync(CreateItem(Key1));
 
         currentActor = new TestCurrentActor { IsAuthenticated = true };
-        var second = await SendCreateAsync(CreateItem(Key1));
+        var (secondResult, secondReplayed) = await SendCreateAsync(CreateItem(Key1));
 
-        Assert.False(second.Replayed);
-        Assert.NotEqual(Result, second.Result);
+        Assert.False(secondReplayed);
+        Assert.NotEqual(firstResult, secondResult);
         Assert.Equal(2, itemCreateHandler.Calls);
         Assert.Equal(2, records.All.Count);
     }

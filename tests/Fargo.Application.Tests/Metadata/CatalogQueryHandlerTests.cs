@@ -46,5 +46,5 @@ public class CatalogQueryHandlerTests
         Assert.Contains(result, e => e.Id == (int)ActionType.EditItem);
     }
 
-    public static TheoryData<MetadataCatalog> AllCatalogs() => new(Enum.GetValues<MetadataCatalog>());
+    public static TheoryData<MetadataCatalog> AllCatalogs() => [.. Enum.GetValues<MetadataCatalog>()];
 }
