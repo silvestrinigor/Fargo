@@ -56,8 +56,8 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
             var parent = ctx.Containers[ctx.Random.Next(ctx.Containers.Count - 1)];
             if (parent != itemGuid)
             {
-                await ctx.Client.V1.Items[itemGuid].PatchAsync(
-                    new ItemUpdateDto { ParentItemContainerGuid = parent },
+                await ctx.Client.V1.Items[itemGuid].Location.PutAsync(
+                    new ItemSetLocationDto { ParentItemContainerGuid = parent },
                     cancellationToken: ct);
             }
         }
@@ -134,8 +134,8 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
         }
         while (ctx.Containers.Count > 1 && destination == item.ContainerGuid);
 
-        await ctx.Client.V1.Items[item.Guid].PatchAsync(
-            new ItemUpdateDto { ParentItemContainerGuid = destination },
+        await ctx.Client.V1.Items[item.Guid].Location.PutAsync(
+            new ItemSetLocationDto { ParentItemContainerGuid = destination },
             cancellationToken: ct);
 
         item.ContainerGuid = destination;
@@ -158,9 +158,7 @@ internal sealed class OperatorActions(SimulationOptions options, Names names, Ch
             return await MoveItemAsync(ctx, ct);
         }
 
-        await ctx.Client.V1.Items[item.Guid].PatchAsync(
-            new ItemUpdateDto { RemoveFromParentItemContainer = true },
-            cancellationToken: ct);
+        await ctx.Client.V1.Items[item.Guid].Location.DeleteAsync(cancellationToken: ct);
 
         item.ContainerGuid = null;
         return "remove-item";

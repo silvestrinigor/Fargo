@@ -18,5 +18,6 @@ public sealed class ArticlesCommand : Command
         Add(new DeleteArticleByBarcodeCommand(client));
         Add(new UpdateArticleCommand(client));
         Add(new UpdateArticleByBarcodeCommand(client));
+        Add(new SetArticlePartitionsCommand(client));
     }
 }

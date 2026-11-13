@@ -9,16 +9,13 @@ public sealed class UpdateServiceAccountCommand : Command
 {
     public UpdateServiceAccountCommand(FargoApiClient client)
         : base("update", """
-            Update an existing service account. Only the options you pass are changed.
+            Update the description of an existing service account.
 
-            Partition membership (the partitions the account belongs to) and
-            partition access (the partitions the account may reach) are managed
-            independently.
+            Activation, permissions and partitions have their own commands: set-active,
+            set-permissions and set-partitions.
 
             Examples:
-              fargo service-account update 00000000-0000-0000-0000-000000000010 --active false
-              fargo service-account update 00000000-0000-0000-0000-000000000010 --add-permissions 4 6 --remove-permissions 2
-              fargo service-account update 00000000-0000-0000-0000-000000000010 --add-partition-memberships 00000000-0000-0000-0000-000000000002
+              fargo service-account update 00000000-0000-0000-0000-000000000010 --description "CI runner"
             """)
     {
         var guidArgument = new Argument<Guid>("guid")
@@ -31,56 +28,8 @@ public sealed class UpdateServiceAccountCommand : Command
             Description = "New description."
         };
 
-        var isActiveOption = new Option<bool?>("--active")
-        {
-            Description = "Set the active state (true or false)."
-        };
-
-        var addPermissionsOption = new Option<int[]?>("--add-permissions")
-        {
-            Description = "ActionType permission codes to grant (space-separated).",
-            AllowMultipleArgumentsPerToken = true
-        };
-
-        var removePermissionsOption = new Option<int[]?>("--remove-permissions")
-        {
-            Description = "ActionType permission codes to revoke (space-separated).",
-            AllowMultipleArgumentsPerToken = true
-        };
-
-        var addPartitionMembershipsOption = new Option<Guid[]?>("--add-partition-memberships")
-        {
-            Description = "Partition GUIDs to add to the account's membership (space-separated).",
-            AllowMultipleArgumentsPerToken = true
-        };
-
-        var removePartitionMembershipsOption = new Option<Guid[]?>("--remove-partition-memberships")
-        {
-            Description = "Partition GUIDs to remove from the account's membership (space-separated).",
-            AllowMultipleArgumentsPerToken = true
-        };
-
-        var addPartitionAccessesOption = new Option<Guid[]?>("--add-partition-accesses", "--add-partitions")
-        {
-            Description = "Partition GUIDs to grant access to (space-separated). Alias: --add-partitions.",
-            AllowMultipleArgumentsPerToken = true
-        };
-
-        var removePartitionAccessesOption = new Option<Guid[]?>("--remove-partition-accesses", "--remove-partitions")
-        {
-            Description = "Partition GUIDs to revoke access from (space-separated). Alias: --remove-partitions.",
-            AllowMultipleArgumentsPerToken = true
-        };
-
         Add(guidArgument);
         Add(descriptionOption);
-        Add(isActiveOption);
-        Add(addPermissionsOption);
-        Add(removePermissionsOption);
-        Add(addPartitionMembershipsOption);
-        Add(removePartitionMembershipsOption);
-        Add(addPartitionAccessesOption);
-        Add(removePartitionAccessesOption);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
@@ -88,14 +37,7 @@ public sealed class UpdateServiceAccountCommand : Command
 
             var dto = new ServiceAccountUpdateDto
             {
-                Description = parseResult.GetValue(descriptionOption),
-                IsActive = parseResult.GetValue(isActiveOption),
-                PermissionsToAdd = ToIntList(parseResult.GetValue(addPermissionsOption)),
-                PermissionsToRemove = ToIntList(parseResult.GetValue(removePermissionsOption)),
-                PartitionsToAdd = ToGuidList(parseResult.GetValue(addPartitionMembershipsOption)),
-                PartitionsToRemove = ToGuidList(parseResult.GetValue(removePartitionMembershipsOption)),
-                PartitionAccessesToAdd = ToGuidList(parseResult.GetValue(addPartitionAccessesOption)),
-                PartitionAccessesToRemove = ToGuidList(parseResult.GetValue(removePartitionAccessesOption))
+                Description = parseResult.GetValue(descriptionOption)
             };
 
             await client.V1.ServiceAccounts[guid].PutAsync(dto, cancellationToken: cancellationToken);
@@ -105,10 +47,4 @@ public sealed class UpdateServiceAccountCommand : Command
             return 0;
         });
     }
-
-    private static List<int?>? ToIntList(int[]? values)
-        => values is { Length: > 0 } ? values.Select(v => (int?)v).ToList() : null;
-
-    private static List<Guid?>? ToGuidList(Guid[]? values)
-        => values is { Length: > 0 } ? values.Select(v => (Guid?)v).ToList() : null;
 }

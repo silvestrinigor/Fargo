@@ -77,6 +77,11 @@ Commands:
                                '10cm'. Units are standard abbreviations (mass: g, kg, mg, lb, oz;
                                length: mm, cm, m, in, ft). Kit components are written as
                                '<article-guid>' or '<article-guid>:<quantity>' and may be repeated.
+                               Container allowed articles are written as
+                               '<article-guid>' or '<article-guid>:<max-quantity>' and may be
+                               repeated; when any are given, only those articles may be placed in
+                               the container. A max quantity is optional and only valid for an
+                               entity-tracked article.
   
                                Examples:
                                  fargo article create --name "Widget"
@@ -85,6 +90,9 @@ Commands:
                                    --kit-component 11111111-1111-1111-1111-111111111111:2 \
                                    --kit-component 22222222-2222-2222-2222-222222222222
                                  fargo article create --name "Case" --is-container --container-max-mass 25kg
+                                 fargo article create --name "Crate" --is-container \
+                                   --allowed-article 11111111-1111-1111-1111-111111111111:10 \
+                                   --allowed-article 22222222-2222-2222-2222-222222222222:5
                                  fargo article create --name "6-pack" \
                                    --pack-from 11111111-1111-1111-1111-111111111111 --pack-quantity 6
                                  fargo article create --name "Blue Widget" \
@@ -111,7 +119,7 @@ Commands:
                                  fargo article update 11111111-1111-1111-1111-111111111111 --mass 3kg --length-x 12cm
                                  fargo article update 11111111-1111-1111-1111-111111111111 --remove-mass --remove-barcode
                                  fargo article update 11111111-1111-1111-1111-111111111111 --barcode-ean13 1234567890128
-                                 fargo article update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
+                                 fargo article update 11111111-1111-1111-1111-111111111111 --description "Steel widget"
   update-by-barcode <barcode>  Update an existing article addressed by one of its barcodes. Only the
                                options you pass are changed.
   
@@ -121,6 +129,14 @@ Commands:
                                Examples:
                                  fargo article update-by-barcode 1234567890128:ean13 --name "New name"
                                  fargo article update-by-barcode 1234567890128:ean13 --mass 3kg --remove-shelf-life
+  set-partitions <guid>        Change the partitions of an article.
+  
+                               This is a separate operation from update and requires the ChangeArticlePartitions
+                               permission. You need access to every partition you touch.
+  
+                               Examples:
+                                 fargo article set-partitions 11111111-1111-1111-1111-111111111111 --add 00000000-0000-0000-0000-000000000002
+                                 fargo article set-partitions 11111111-1111-1111-1111-111111111111 --add 00000000-0000-0000-0000-000000000002 --remove 00000000-0000-0000-0000-000000000005
 
 ```
 
@@ -288,6 +304,11 @@ Description:
   '10cm'. Units are standard abbreviations (mass: g, kg, mg, lb, oz;
   length: mm, cm, m, in, ft). Kit components are written as
   '<article-guid>' or '<article-guid>:<quantity>' and may be repeated.
+  Container allowed articles are written as
+  '<article-guid>' or '<article-guid>:<max-quantity>' and may be
+  repeated; when any are given, only those articles may be placed in
+  the container. A max quantity is optional and only valid for an
+  entity-tracked article.
   
   Examples:
     fargo article create --name "Widget"
@@ -296,6 +317,9 @@ Description:
       --kit-component 11111111-1111-1111-1111-111111111111:2 \
       --kit-component 22222222-2222-2222-2222-222222222222
     fargo article create --name "Case" --is-container --container-max-mass 25kg
+    fargo article create --name "Crate" --is-container \
+      --allowed-article 11111111-1111-1111-1111-111111111111:10 \
+      --allowed-article 22222222-2222-2222-2222-222222222222:5
     fargo article create --name "6-pack" \
       --pack-from 11111111-1111-1111-1111-111111111111 --pack-quantity 6
     fargo article create --name "Blue Widget" \
@@ -320,6 +344,7 @@ Options:
   --pack-quantity <pack-quantity>            Quantity of the source article contained in the pack. Implies the article is a pack.
   --is-container                             Create the article as a container.
   --container-max-mass <container-max-mass>  Maximum mass the container can hold, as value+unit, e.g. '25kg'. Implies the article is a container.
+  --allowed-article <allowed-article>        Article allowed inside the container as '<article-guid>' or '<article-guid>:<max-quantity>'. Repeat the option for multiple allowed articles. When one or more are given, only those articles may be inserted into the container. The maximum quantity is optional and may only be set for an entity-tracked article. Implies the article is a container.
   --barcode-ean13 <barcode-ean13>            Optional EAN-13 barcode to assign to the article.
   --tracking-mode <tracking-mode>            How the article's stock is tracked: 'entity' (each unit is an individual item; the default) or 'event' (aggregate quantities recorded as movement events). Container articles are always entity-tracked.
   --kit-component <kit-component>            Kit component as '<article-guid>' or '<article-guid>:<quantity>'. Repeat the option for multiple components. Implies the article is a kit.
@@ -346,7 +371,7 @@ Description:
     fargo article update 11111111-1111-1111-1111-111111111111 --mass 3kg --length-x 12cm
     fargo article update 11111111-1111-1111-1111-111111111111 --remove-mass --remove-barcode
     fargo article update 11111111-1111-1111-1111-111111111111 --barcode-ean13 1234567890128
-    fargo article update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
+    fargo article update 11111111-1111-1111-1111-111111111111 --description "Steel widget"
 
 Usage:
   fargo article update <guid> [options]
@@ -355,27 +380,25 @@ Arguments:
   <guid>  The article GUID.
 
 Options:
-  --name <name>                            New name for the article.
-  --description <description>              New description. Leaves the existing value unchanged when omitted.
-  --shelf-life <shelf-life>                New shelf life (e.g. 'P30D'). Leaves the existing value unchanged when omitted.
-  --remove-shelf-life                      Clear the existing shelf life. Takes precedence over --shelf-life.
-  --mass <mass>                            New mass as value+unit, e.g. '2.5kg'. Leaves the existing value unchanged when omitted.
-  --remove-mass                            Clear the existing mass. Takes precedence over --mass.
-  --length-x <length-x>                    New dimension along X as value+unit, e.g. '10cm'.
-  --length-y <length-y>                    New dimension along Y as value+unit, e.g. '5cm'.
-  --length-z <length-z>                    New dimension along Z as value+unit, e.g. '2cm'.
-  --remove-length-x                        Clear the existing X dimension. Takes precedence over --length-x.
-  --remove-length-y                        Clear the existing Y dimension. Takes precedence over --length-y.
-  --remove-length-z                        Clear the existing Z dimension. Takes precedence over --length-z.
-  --barcode-ean13 <barcode-ean13>          New EAN-13 barcode. Leaves the existing barcode unchanged when omitted.
-  --remove-barcode                         Clear the existing EAN-13 barcode. Takes precedence over --barcode-ean13.
-  --add-partitions <add-partitions>        Partition GUIDs to add (space-separated).
-  --remove-partitions <remove-partitions>  Partition GUIDs to remove (space-separated).
-  --username <username>                    Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
-  --password <password>                    Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
-  -?, -h, --help                           Show help and usage information
-  --server <server>                        The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose                            Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+  --name <name>                    New name for the article.
+  --description <description>      New description. Leaves the existing value unchanged when omitted.
+  --shelf-life <shelf-life>        New shelf life (e.g. 'P30D'). Leaves the existing value unchanged when omitted.
+  --remove-shelf-life              Clear the existing shelf life. Takes precedence over --shelf-life.
+  --mass <mass>                    New mass as value+unit, e.g. '2.5kg'. Leaves the existing value unchanged when omitted.
+  --remove-mass                    Clear the existing mass. Takes precedence over --mass.
+  --length-x <length-x>            New dimension along X as value+unit, e.g. '10cm'.
+  --length-y <length-y>            New dimension along Y as value+unit, e.g. '5cm'.
+  --length-z <length-z>            New dimension along Z as value+unit, e.g. '2cm'.
+  --remove-length-x                Clear the existing X dimension. Takes precedence over --length-x.
+  --remove-length-y                Clear the existing Y dimension. Takes precedence over --length-y.
+  --remove-length-z                Clear the existing Z dimension. Takes precedence over --length-z.
+  --barcode-ean13 <barcode-ean13>  New EAN-13 barcode. Leaves the existing barcode unchanged when omitted.
+  --remove-barcode                 Clear the existing EAN-13 barcode. Takes precedence over --barcode-ean13.
+  --username <username>            Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>            Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                   Show help and usage information
+  --server <server>                The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                    Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
@@ -400,27 +423,55 @@ Arguments:
   <barcode>  The barcode in {value}:{type} format (e.g. 1234567890128:ean13).
 
 Options:
-  --name <name>                            New name for the article.
-  --description <description>              New description. Leaves the existing value unchanged when omitted.
-  --shelf-life <shelf-life>                New shelf life (e.g. 'P30D'). Leaves the existing value unchanged when omitted.
-  --remove-shelf-life                      Clear the existing shelf life. Takes precedence over --shelf-life.
-  --mass <mass>                            New mass as value+unit, e.g. '2.5kg'. Leaves the existing value unchanged when omitted.
-  --remove-mass                            Clear the existing mass. Takes precedence over --mass.
-  --length-x <length-x>                    New dimension along X as value+unit, e.g. '10cm'.
-  --length-y <length-y>                    New dimension along Y as value+unit, e.g. '5cm'.
-  --length-z <length-z>                    New dimension along Z as value+unit, e.g. '2cm'.
-  --remove-length-x                        Clear the existing X dimension. Takes precedence over --length-x.
-  --remove-length-y                        Clear the existing Y dimension. Takes precedence over --length-y.
-  --remove-length-z                        Clear the existing Z dimension. Takes precedence over --length-z.
-  --barcode-ean13 <barcode-ean13>          New EAN-13 barcode. Leaves the existing barcode unchanged when omitted.
-  --remove-barcode                         Clear the existing EAN-13 barcode. Takes precedence over --barcode-ean13.
-  --add-partitions <add-partitions>        Partition GUIDs to add (space-separated).
-  --remove-partitions <remove-partitions>  Partition GUIDs to remove (space-separated).
-  --username <username>                    Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
-  --password <password>                    Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
-  -?, -h, --help                           Show help and usage information
-  --server <server>                        The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose                            Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+  --name <name>                    New name for the article.
+  --description <description>      New description. Leaves the existing value unchanged when omitted.
+  --shelf-life <shelf-life>        New shelf life (e.g. 'P30D'). Leaves the existing value unchanged when omitted.
+  --remove-shelf-life              Clear the existing shelf life. Takes precedence over --shelf-life.
+  --mass <mass>                    New mass as value+unit, e.g. '2.5kg'. Leaves the existing value unchanged when omitted.
+  --remove-mass                    Clear the existing mass. Takes precedence over --mass.
+  --length-x <length-x>            New dimension along X as value+unit, e.g. '10cm'.
+  --length-y <length-y>            New dimension along Y as value+unit, e.g. '5cm'.
+  --length-z <length-z>            New dimension along Z as value+unit, e.g. '2cm'.
+  --remove-length-x                Clear the existing X dimension. Takes precedence over --length-x.
+  --remove-length-y                Clear the existing Y dimension. Takes precedence over --length-y.
+  --remove-length-z                Clear the existing Z dimension. Takes precedence over --length-z.
+  --barcode-ean13 <barcode-ean13>  New EAN-13 barcode. Leaves the existing barcode unchanged when omitted.
+  --remove-barcode                 Clear the existing EAN-13 barcode. Takes precedence over --barcode-ean13.
+  --username <username>            Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>            Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                   Show help and usage information
+  --server <server>                The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                    Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo article set-partitions`
+
+```text
+Description:
+  Change the partitions of an article.
+  
+  This is a separate operation from update and requires the ChangeArticlePartitions
+  permission. You need access to every partition you touch.
+  
+  Examples:
+    fargo article set-partitions 11111111-1111-1111-1111-111111111111 --add 00000000-0000-0000-0000-000000000002
+    fargo article set-partitions 11111111-1111-1111-1111-111111111111 --add 00000000-0000-0000-0000-000000000002 --remove 00000000-0000-0000-0000-000000000005
+
+Usage:
+  fargo article set-partitions <guid> [options]
+
+Arguments:
+  <guid>  The an article GUID.
+
+Options:
+  --add <add>            Partition GUIDs to add (space-separated).
+  --remove <remove>      Partition GUIDs to remove (space-separated).
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 

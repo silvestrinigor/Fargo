@@ -8,7 +8,7 @@ public sealed class RotateServiceAccountSecretCommand : Command
 {
     public RotateServiceAccountSecretCommand(FargoApiClient client)
         : base("rotate-secret", """
-            Rotate a service account's secret. The new secret is printed EXACTLY
+            Rotate a service account's secret. Requires the RotateServiceAccountSecret permission. The new secret is printed EXACTLY
             ONCE and all tokens previously issued to the account stop validating.
 
             Examples:

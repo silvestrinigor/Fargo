@@ -5,10 +5,11 @@
     <Project Path="src/Fargo.Infrastructure/Fargo.Infrastructure.csproj" />
     <Project Path="src/Fargo.ServiceDefaults/Fargo.ServiceDefaults.csproj" />
     <Project Path="src/Fargo.ServiceHttp/Fargo.ServiceHttp.csproj" />
+    <Project Path="src/Fargo.ServiceMaintenance/Fargo.ServiceMaintenance.csproj" />
     <Project Path="src/Fargo.ServiceMigration/Fargo.ServiceMigration.csproj" />
-    <Project Path="src/Fargo.ServiceOutbox/Fargo.ServiceOutbox.csproj" />
+    <Project Path="src/Fargo.ServiceEventPublisher/Fargo.ServiceEventPublisher.csproj" />
     <Project Path="src/Fargo.ServiceRealtime/Fargo.ServiceRealtime.csproj" />
-    <Project Path="src/Fargo.ServiceSeed/Fargo.ServiceSeed.csproj" />
+    <Project Path="src/Fargo.ServiceInitializer/Fargo.ServiceInitializer.csproj" />
     <Project Path="src/Fargo.Cli/Fargo.Cli.csproj" />
     <Project Path="src/Fargo.ClientAuthentication/Fargo.ClientAuthentication.csproj" />
     <Project Path="src/Fargo.ClientHttp/Fargo.ClientHttp.csproj" />
@@ -22,7 +23,8 @@
     <Project Path="tests/Fargo.Core.Tests/Fargo.Core.Tests.csproj" />
     <Project Path="tests/Fargo.Infrastructure.Tests/Fargo.Infrastructure.Tests.csproj" />
     <Project Path="tests/Fargo.Mcp.Tests/Fargo.Mcp.Tests.csproj" />
-    <Project Path="tests/Fargo.ServiceOutbox.Tests/Fargo.ServiceOutbox.Tests.csproj" />
+    <Project Path="tests/Fargo.ServiceMaintenance.Tests/Fargo.ServiceMaintenance.Tests.csproj" />
+    <Project Path="tests/Fargo.ServiceEventPublisher.Tests/Fargo.ServiceEventPublisher.Tests.csproj" />
     <Project Path="tests/Fargo.ServiceRealtime.Tests/Fargo.ServiceRealtime.Tests.csproj" />
     <Project Path="tests/Fargo.WorkflowTest/Fargo.WorkflowTest.csproj" />
     <Project Path="tests/Fargo.SimulationWorker/Fargo.SimulationWorker.csproj" />

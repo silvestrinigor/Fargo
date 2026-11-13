@@ -34,9 +34,9 @@ namespace Fargo.ClientHttp.V1.SupplyOrders.Item.Receive
         {
         }
         /// <summary>
-        /// Receives the given quantities, effecting the stock change into the order&apos;s receiving container (or at the root when it has none) and advancing the order&apos;s received quantities and status. Over-receipt is permitted.
+        /// Receives the given quantities, effecting the stock change into the order&apos;s receiving container (or at the root when it has none) and advancing the order&apos;s received quantities and status. Over-receipt is permitted, and a received order accepts further receipts, so a retried request would be counted again. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key does nothing and returns the first result. Use a new key for a different receipt.
         /// </summary>
-        /// <param name="body">The data for receiving goods against a supply order. Goods are placed intothe order&apos;s receiving container (or at the root when the order has none).</param>
+        /// <param name="body">Goods are placed into the order&apos;s receiving container, or at the root when it has none.</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -53,10 +53,10 @@ namespace Fargo.ClientHttp.V1.SupplyOrders.Item.Receive
             await RequestAdapter.SendNoContentAsync(requestInfo, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Receives the given quantities, effecting the stock change into the order&apos;s receiving container (or at the root when it has none) and advancing the order&apos;s received quantities and status. Over-receipt is permitted.
+        /// Receives the given quantities, effecting the stock change into the order&apos;s receiving container (or at the root when it has none) and advancing the order&apos;s received quantities and status. Over-receipt is permitted, and a received order accepts further receipts, so a retried request would be counted again. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key does nothing and returns the first result. Use a new key for a different receipt.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
-        /// <param name="body">The data for receiving goods against a supply order. Goods are placed intothe order&apos;s receiving container (or at the root when the order has none).</param>
+        /// <param name="body">Goods are placed into the order&apos;s receiving container, or at the root when it has none.</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable

@@ -1,6 +1,7 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Common.Paging;
 using Fargo.Application.Commands.Partitions;
+using Fargo.Application.Common.Paging;
+using Fargo.Application.Dtos;
 using Fargo.Application.Dtos.Partitions;
 using Fargo.Application.Queries.Partitions;
 using Fargo.ServiceHttp.Versioning;
@@ -21,6 +22,8 @@ public static class PartitionEndpointRouteBuilderExtension
         group.MapCreatePartition();
 
         group.MapUpdatePartition();
+
+        group.MapSetPartitionParent();
 
         group.MapDeletePartition();
     }
@@ -138,7 +141,7 @@ public static class PartitionEndpointRouteBuilderExtension
         builder.MapPatch("/{partitionGuid:guid}", UpdatePartition)
             .WithName("UpdatePartition")
             .WithSummary("Updates an existing partition")
-            .WithDescription("Updates partition properties.")
+            .WithDescription("Updates the name and description of a partition. Use the parent endpoint to move it.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -158,6 +161,32 @@ public static class PartitionEndpointRouteBuilderExtension
     }
 
     #endregion Update
+
+    #region Set parent
+
+    private static IEndpointRouteBuilder MapSetPartitionParent(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{partitionGuid:guid}/parent", SetPartitionParent)
+            .WithName("SetPartitionParent")
+            .WithSummary("Moves a partition under another parent")
+            .WithDescription("Sets the parent of the partition, which changes who can access it. Rejects a move that would create a cycle. A partition always has a parent, so there is no way to clear it. Setting the parent the partition already has does nothing. Requires the ChangePartitionParent permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetPartitionParent(
+        Guid partitionGuid,
+        ParentPartitionDto request,
+        ICommandHandler<PartitionSetParentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new PartitionSetParentCommand(partitionGuid, request.ParentPartitionGuid), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+    #endregion Set parent
 
     #region Delete
 

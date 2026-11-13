@@ -1,10 +1,13 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Common.Paging;
 using Fargo.Application.Commands.Items;
+using Fargo.Application.Common.Paging;
+using Fargo.Application.Dtos;
 using Fargo.Application.Dtos.Items;
+using Fargo.Application.Idempotency;
 using Fargo.Application.Queries.Items;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.ServiceHttp.Endpoints;
 
@@ -26,7 +29,11 @@ public static class ItemEndpointRouteBuilderExtension
 
         group.MapCreateItem();
 
-        group.MapUpdateItem();
+        group.MapSetItemPartitions();
+
+        group.MapSetItemLocation();
+
+        group.MapRemoveItemFromContainer();
 
         group.MapDeleteItem();
     }
@@ -204,54 +211,111 @@ public static class ItemEndpointRouteBuilderExtension
         builder.MapPost("/", CreateItem)
             .WithName("CreateItem")
             .WithSummary("Creates a new item")
-            .WithDescription("Creates a new item with optional partitions. Returns the generated identifier.")
-            .Produces<Guid>(StatusCodes.Status200OK);
+            .WithDescription("Creates a new item with optional partitions. Returns the generated identifier. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of creating another item. Use a new key for a different request.")
+            .Produces<Guid>(StatusCodes.Status200OK)
+            .ProducesIdempotencyErrors();
 
         return builder;
     }
 
     private static async Task<Ok<Guid>> CreateItem(
         ItemCreateDto request,
+        [FromHeader(Name = IdempotencyEndpointExtensions.KeyHeaderName)] Guid? idempotencyKey,
+        IdempotencyOutcome outcome,
+        HttpContext httpContext,
         ICommandHandler<ItemCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ItemCreateCommand(request);
+        var command = new ItemCreateCommand(request, idempotencyKey);
 
         var response = await handler.HandleAsync(command, cancellationToken);
+
+        httpContext.Response.MarkIfReplayed(outcome);
 
         return TypedResults.Ok(response);
     }
 
     #endregion Create
 
-    #region Update
+    #region Set partitions
 
-    private static IEndpointRouteBuilder MapUpdateItem(this IEndpointRouteBuilder builder)
+    private static IEndpointRouteBuilder MapSetItemPartitions(this IEndpointRouteBuilder builder)
     {
-        builder.MapPatch("/{itemGuid:guid}", UpdateItem)
-            .WithName("UpdateItem")
-            .WithSummary("Replaces an existing item")
-            .WithDescription("Replaces mutable item state including partitions and parent container.")
-            .Produces(StatusCodes.Status204NoContent);
+        builder.MapPut("/{itemGuid:guid}/partitions", SetPartitions)
+            .WithName("SetItemPartitions")
+            .WithSummary("Changes the partitions of an item")
+            .WithDescription("Adds and removes the partitions the an item belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Moving the item to another container is a separate operation. Requires the ChangeItemPartitions permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return builder;
     }
 
-    private static async Task<NoContent> UpdateItem(
+    private static async Task<NoContent> SetPartitions(
         Guid itemGuid,
-        ItemUpdateDto request,
-        ICommandHandler<ItemUpdateCommand> handler,
+        PartitionMembershipsChangeDto request,
+        ICommandHandler<ItemSetPartitionsCommand> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ItemUpdateCommand(itemGuid, request);
+        await handler.HandleAsync(new ItemSetPartitionsCommand(itemGuid, request), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set partitions
+
+    #region Set location
+
+    private static IEndpointRouteBuilder MapSetItemLocation(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{itemGuid:guid}/location", SetItemLocation)
+            .WithName("SetItemLocation")
+            .WithSummary("Places an item inside a container")
+            .WithDescription("Sets the parent container of the item, recording a movement. Placing an item in the container it is already in does nothing. Requires the MoveItem permission, which is separate from the edit permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetItemLocation(
+        Guid itemGuid,
+        ItemSetLocationDto request,
+        ICommandHandler<ItemSetLocationCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ItemSetLocationCommand(itemGuid, request.ParentItemContainerGuid);
 
         await handler.HandleAsync(command, cancellationToken);
 
         return TypedResults.NoContent();
     }
 
-    #endregion Update
+    private static IEndpointRouteBuilder MapRemoveItemFromContainer(this IEndpointRouteBuilder builder)
+    {
+        builder.MapDelete("/{itemGuid:guid}/location", RemoveItemFromContainer)
+            .WithName("RemoveItemFromContainer")
+            .WithSummary("Removes an item from its container")
+            .WithDescription("Clears the parent container of the item, recording a movement with no destination. An item that is not in a container is left as it is. Requires the MoveItem permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
+        return builder;
+    }
+
+    private static async Task<NoContent> RemoveItemFromContainer(
+        Guid itemGuid,
+        ICommandHandler<ItemRemoveFromContainerCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new ItemRemoveFromContainerCommand(itemGuid);
+
+        await handler.HandleAsync(command, cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set location
     #region Delete
 
     private static IEndpointRouteBuilder MapDeleteItem(this IEndpointRouteBuilder builder)

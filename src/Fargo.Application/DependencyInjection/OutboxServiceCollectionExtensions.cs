@@ -1,4 +1,3 @@
-using Fargo.Application.DependencyInjection;
 using Fargo.Application.Commands.Outbox;
 using Fargo.Application.Dtos.Outbox;
 using Microsoft.Extensions.DependencyInjection;

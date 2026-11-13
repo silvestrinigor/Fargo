@@ -57,7 +57,10 @@ public sealed class MoveItemEventCommand : Command
         Add(quantityOption);
         Add(fromOption);
         Add(toOption);
+        var idempotencyKey = new IdempotencyKeyOption();
+
         Add(atOption);
+        Add(idempotencyKey.Option);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
@@ -77,7 +80,7 @@ public sealed class MoveItemEventCommand : Command
                 OccuredAt = at
             };
 
-            var guid = await client.V1.Item.Events.PostAsync(dto, cancellationToken: cancellationToken);
+            var guid = await client.V1.Item.Events.PostAsync(dto, idempotencyKey.Configure(parseResult), cancellationToken);
 
             StatusWriter.Success(
                 "Item movement event recorded.",

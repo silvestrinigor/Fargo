@@ -19,60 +19,77 @@ Options:
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  list              List items as a table.
+  list                          List items as a table.
   
-                    By default the list is paged interactively: a page of items is shown
-                    and you can press 'n' for the next page, 'p' for the previous page, or
-                    'q' to quit (press Enter after the key). Passing --page or --limit
-                    switches to a single, non-interactive fetch of exactly that page.
+                                By default the list is paged interactively: a page of items is shown
+                                and you can press 'n' for the next page, 'p' for the previous page, or
+                                'q' to quit (press Enter after the key). Passing --page or --limit
+                                switches to a single, non-interactive fetch of exactly that page.
   
-                    Examples:
-                      fargo item list
-                      fargo item list --page 2
-                      fargo item list --page 1 --limit 50
-                      fargo item list --partitions 00000000-0000-0000-0000-000000000001
-  get <guid>        Show the full details of a single item.
+                                Examples:
+                                  fargo item list
+                                  fargo item list --page 2
+                                  fargo item list --page 1 --limit 50
+                                  fargo item list --partitions 00000000-0000-0000-0000-000000000001
+  get <guid>                    Show the full details of a single item.
   
-                    Examples:
-                      fargo item get 22222222-2222-2222-2222-222222222222
-  create            Create a new item (an instance of an article).
+                                Examples:
+                                  fargo item get 22222222-2222-2222-2222-222222222222
+  create                        Create a new item (an instance of an article).
   
-                    Examples:
-                      fargo item create --article 11111111-1111-1111-1111-111111111111
-                      fargo item create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
-  update <guid>     Update an existing item. Only the options you pass are changed.
+                                Examples:
+                                  fargo item create --article 11111111-1111-1111-1111-111111111111
+                                  fargo item create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
+                                  fargo item create --article 11111111-1111-1111-1111-111111111111 --idempotency-key 3f2b8c1e-9d4a-4b7e-8c2f-1a5d6e7f8091
+  set-partitions <guid>         Change the partitions of an item.
   
-                    Examples:
-                      fargo item update 22222222-2222-2222-2222-222222222222 --container 33333333-3333-3333-3333-333333333333
-                      fargo item update 22222222-2222-2222-2222-222222222222 --remove-container
-  delete <guid>     Delete an item by GUID.
+                                This is a separate operation from update and requires the ChangeItemPartitions
+                                permission. You need access to every partition you touch.
   
-                    Examples:
-                      fargo item delete 22222222-2222-2222-2222-222222222222
-  location <guid>   Show where an item is located as a nested container tree, from the
-                    outermost container inward to the item itself.
+                                Examples:
+                                  fargo item set-partitions 22222222-2222-2222-2222-222222222222 --add 00000000-0000-0000-0000-000000000002
+                                  fargo item set-partitions 22222222-2222-2222-2222-222222222222 --add 00000000-0000-0000-0000-000000000002 --remove 00000000-0000-0000-0000-000000000005
+  move <guid>                   Place an item inside a container.
   
-                    Pass --at to reconstruct the location as it was at a specific
-                    instant, using the item's containment history, instead of the
-                    current location.
+                                This is a separate operation from update and requires its own permission.
+                                To move stock of an event-tracked article, use 'item event move' instead.
   
-                    Examples:
-                      fargo item location 22222222-2222-2222-2222-222222222222
-                      fargo item location 22222222-2222-2222-2222-222222222222 --at 2026-03-01T12:00:00Z
-  moviments <guid>  Show the movement history for an item (when it changed containers).
+                                Examples:
+                                  fargo item move 22222222-2222-2222-2222-222222222222 --to 33333333-3333-3333-3333-333333333333
+  remove-from-container <guid>  Remove an item from its current container.
   
-                    Examples:
-                      fargo item moviments 22222222-2222-2222-2222-222222222222
-  inventory <guid>  Show the article inventory contained inside a container item.
+                                This is a separate operation from update and requires its own permission.
   
-                    Pass --at to reconstruct the inventory as it was at a specific
-                    instant, using the item containment history, instead of the current
-                    inventory.
+                                Examples:
+                                  fargo item remove-from-container 22222222-2222-2222-2222-222222222222
+  delete <guid>                 Delete an item by GUID.
   
-                    Examples:
-                      fargo item inventory 22222222-2222-2222-2222-222222222222
-                      fargo item inventory 22222222-2222-2222-2222-222222222222 --at 2026-03-01T12:00:00Z
-  event             Record and query item events - stock changes for event-tracked articles.
+                                Examples:
+                                  fargo item delete 22222222-2222-2222-2222-222222222222
+  location <guid>               Show where an item is located as a nested container tree, from the
+                                outermost container inward to the item itself.
+  
+                                Pass --at to reconstruct the location as it was at a specific
+                                instant, using the item's containment history, instead of the
+                                current location.
+  
+                                Examples:
+                                  fargo item location 22222222-2222-2222-2222-222222222222
+                                  fargo item location 22222222-2222-2222-2222-222222222222 --at 2026-03-01T12:00:00Z
+  moviments <guid>              Show the movement history for an item (when it changed containers).
+  
+                                Examples:
+                                  fargo item moviments 22222222-2222-2222-2222-222222222222
+  inventory <guid>              Show the article inventory contained inside a container item.
+  
+                                Pass --at to reconstruct the inventory as it was at a specific
+                                instant, using the item containment history, instead of the current
+                                inventory.
+  
+                                Examples:
+                                  fargo item inventory 22222222-2222-2222-2222-222222222222
+                                  fargo item inventory 22222222-2222-2222-2222-222222222222 --at 2026-03-01T12:00:00Z
+  event                         Record and query item events - stock changes for event-tracked articles.
 
 ```
 
@@ -143,48 +160,51 @@ Description:
   Examples:
     fargo item create --article 11111111-1111-1111-1111-111111111111
     fargo item create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
+    fargo item create --article 11111111-1111-1111-1111-111111111111 --idempotency-key 3f2b8c1e-9d4a-4b7e-8c2f-1a5d6e7f8091
 
 Usage:
   fargo item create [options]
 
 Options:
-  --article <article>        GUID of the article this item is an instance of.
-  --container <container>    GUID of the parent container item.
-  --partitions <partitions>  Partition GUIDs to associate (space-separated).
-  --username <username>      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
-  --password <password>      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
-  -?, -h, --help             Show help and usage information
-  --server <server>          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+  --article <article>                  GUID of the article this item is an instance of.
+  --container <container>              GUID of the parent container item.
+  --partitions <partitions>            Partition GUIDs to associate (space-separated).
+  --idempotency-key <idempotency-key>  A GUID that makes the request safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.
+  --username <username>                Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>                Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                       Show help and usage information
+  --server <server>                    The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                        Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
-## `fargo item update`
+## `fargo item set-partitions`
 
 ```text
 Description:
-  Update an existing item. Only the options you pass are changed.
+  Change the partitions of an item.
+  
+  This is a separate operation from update and requires the ChangeItemPartitions
+  permission. You need access to every partition you touch.
   
   Examples:
-    fargo item update 22222222-2222-2222-2222-222222222222 --container 33333333-3333-3333-3333-333333333333
-    fargo item update 22222222-2222-2222-2222-222222222222 --remove-container
+    fargo item set-partitions 22222222-2222-2222-2222-222222222222 --add 00000000-0000-0000-0000-000000000002
+    fargo item set-partitions 22222222-2222-2222-2222-222222222222 --add 00000000-0000-0000-0000-000000000002 --remove 00000000-0000-0000-0000-000000000005
 
 Usage:
-  fargo item update <guid> [options]
+  fargo item set-partitions <guid> [options]
 
 Arguments:
-  <guid>  The item GUID.
+  <guid>  The an item GUID.
 
 Options:
-  --container <container>                  New parent container item GUID.
-  --remove-container                       Remove the item from its current container.
-  --add-partitions <add-partitions>        Partition GUIDs to add (space-separated).
-  --remove-partitions <remove-partitions>  Partition GUIDs to remove (space-separated).
-  --username <username>                    Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
-  --password <password>                    Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
-  -?, -h, --help                           Show help and usage information
-  --server <server>                        The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
-  -v, --verbose                            Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+  --add <add>            Partition GUIDs to add (space-separated).
+  --remove <remove>      Partition GUIDs to remove (space-separated).
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 ```
 
@@ -192,10 +212,46 @@ Options:
 
 ```text
 Description:
-  Manage items - physical instances of articles and their locations.
+  Place an item inside a container.
+  
+  This is a separate operation from update and requires its own permission.
+  To move stock of an event-tracked article, use 'item event move' instead.
+  
+  Examples:
+    fargo item move 22222222-2222-2222-2222-222222222222 --to 33333333-3333-3333-3333-333333333333
 
 Usage:
-  fargo item [command] [options]
+  fargo item move <guid> [options]
+
+Arguments:
+  <guid>  The item GUID.
+
+Options:
+  --to <to> (REQUIRED)   GUID of the destination container item.
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo item remove-from-container`
+
+```text
+Description:
+  Remove an item from its current container.
+  
+  This is a separate operation from update and requires its own permission.
+  
+  Examples:
+    fargo item remove-from-container 22222222-2222-2222-2222-222222222222
+
+Usage:
+  fargo item remove-from-container <guid> [options]
+
+Arguments:
+  <guid>  The item GUID.
 
 Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
@@ -203,62 +259,6 @@ Options:
   -?, -h, --help         Show help and usage information
   --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
-
-Commands:
-  list              List items as a table.
-  
-                    By default the list is paged interactively: a page of items is shown
-                    and you can press 'n' for the next page, 'p' for the previous page, or
-                    'q' to quit (press Enter after the key). Passing --page or --limit
-                    switches to a single, non-interactive fetch of exactly that page.
-  
-                    Examples:
-                      fargo item list
-                      fargo item list --page 2
-                      fargo item list --page 1 --limit 50
-                      fargo item list --partitions 00000000-0000-0000-0000-000000000001
-  get <guid>        Show the full details of a single item.
-  
-                    Examples:
-                      fargo item get 22222222-2222-2222-2222-222222222222
-  create            Create a new item (an instance of an article).
-  
-                    Examples:
-                      fargo item create --article 11111111-1111-1111-1111-111111111111
-                      fargo item create --article 11111111-1111-1111-1111-111111111111 --container 22222222-2222-2222-2222-222222222222
-  update <guid>     Update an existing item. Only the options you pass are changed.
-  
-                    Examples:
-                      fargo item update 22222222-2222-2222-2222-222222222222 --container 33333333-3333-3333-3333-333333333333
-                      fargo item update 22222222-2222-2222-2222-222222222222 --remove-container
-  delete <guid>     Delete an item by GUID.
-  
-                    Examples:
-                      fargo item delete 22222222-2222-2222-2222-222222222222
-  location <guid>   Show where an item is located as a nested container tree, from the
-                    outermost container inward to the item itself.
-  
-                    Pass --at to reconstruct the location as it was at a specific
-                    instant, using the item's containment history, instead of the
-                    current location.
-  
-                    Examples:
-                      fargo item location 22222222-2222-2222-2222-222222222222
-                      fargo item location 22222222-2222-2222-2222-222222222222 --at 2026-03-01T12:00:00Z
-  moviments <guid>  Show the movement history for an item (when it changed containers).
-  
-                    Examples:
-                      fargo item moviments 22222222-2222-2222-2222-222222222222
-  inventory <guid>  Show the article inventory contained inside a container item.
-  
-                    Pass --at to reconstruct the inventory as it was at a specific
-                    instant, using the item containment history, instead of the current
-                    inventory.
-  
-                    Examples:
-                      fargo item inventory 22222222-2222-2222-2222-222222222222
-                      fargo item inventory 22222222-2222-2222-2222-222222222222 --at 2026-03-01T12:00:00Z
-  event             Record and query item events - stock changes for event-tracked articles.
 
 ```
 

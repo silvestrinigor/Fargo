@@ -8,7 +8,7 @@ using System;
 namespace Fargo.ClientHttp.Models
 {
     /// <summary>
-    /// Represents the changes to apply to an existing article.
+    /// `null` leaves a value unchanged. The `Remove*` flags clear the value and take        precedence over the matching new value.
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class ArticleUpdateDto : IAdditionalDataHolder, IParsable
@@ -23,7 +23,7 @@ namespace Fargo.ClientHttp.Models
 #else
         public global::Fargo.ClientHttp.Models.ArticleBarcodeUpdateDto Barcode { get; set; }
 #endif
-        /// <summary>The new description of the article. A `null` value leaves the existing description unchanged.</summary>
+        /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public string? Description { get; set; }
@@ -39,7 +39,7 @@ namespace Fargo.ClientHttp.Models
 #else
         public global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto Dimension { get; set; }
 #endif
-        /// <summary>The new mass of the article. A `null` value leaves the existing value unchanged.</summary>
+        /// <summary>The mass property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public global::Fargo.ClientHttp.Models.ArticleUpdateDto_mass? Mass { get; set; }
@@ -47,7 +47,7 @@ namespace Fargo.ClientHttp.Models
 #else
         public global::Fargo.ClientHttp.Models.ArticleUpdateDto_mass Mass { get; set; }
 #endif
-        /// <summary>The new name of the article. A `null` value leaves the existing name unchanged.</summary>
+        /// <summary>The name property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public string? Name { get; set; }
@@ -55,27 +55,11 @@ namespace Fargo.ClientHttp.Models
 #else
         public string Name { get; set; }
 #endif
-        /// <summary>The identifiers of partitions to associate with the article.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionsToAdd { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionsToAdd { get; set; }
-#endif
-        /// <summary>The identifiers of partitions to disassociate from the article.</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<Guid?>? PartitionsToRemove { get; set; }
-#nullable restore
-#else
-        public List<Guid?> PartitionsToRemove { get; set; }
-#endif
-        /// <summary>Indicates whether the existing mass should be removed by setting it to `null`.When `true`, this takes precedence over Mass.</summary>
+        /// <summary>The removeMass property</summary>
         public bool? RemoveMass { get; set; }
-        /// <summary>Indicates whether the existing shelf life should be removed by setting it to `null`.When `true`, this takes precedence over ShelfLife.</summary>
+        /// <summary>The removeShelfLife property</summary>
         public bool? RemoveShelfLife { get; set; }
-        /// <summary>The new shelf life of the article. A `null` value leaves the existing value unchanged.</summary>
+        /// <summary>The shelfLife property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public string? ShelfLife { get; set; }
@@ -115,8 +99,6 @@ namespace Fargo.ClientHttp.Models
                 { "dimension", n => { Dimension = n.GetObjectValue<global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto>(global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto.CreateFromDiscriminatorValue); } },
                 { "mass", n => { Mass = n.GetObjectValue<global::Fargo.ClientHttp.Models.ArticleUpdateDto_mass>(global::Fargo.ClientHttp.Models.ArticleUpdateDto_mass.CreateFromDiscriminatorValue); } },
                 { "name", n => { Name = n.GetStringValue(); } },
-                { "partitionsToAdd", n => { PartitionsToAdd = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
-                { "partitionsToRemove", n => { PartitionsToRemove = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "removeMass", n => { RemoveMass = n.GetBoolValue(); } },
                 { "removeShelfLife", n => { RemoveShelfLife = n.GetBoolValue(); } },
                 { "shelfLife", n => { ShelfLife = n.GetStringValue(); } },
@@ -134,8 +116,6 @@ namespace Fargo.ClientHttp.Models
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.ArticleDimensionUpdateDto>("dimension", Dimension);
             writer.WriteObjectValue<global::Fargo.ClientHttp.Models.ArticleUpdateDto_mass>("mass", Mass);
             writer.WriteStringValue("name", Name);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToAdd", PartitionsToAdd);
-            writer.WriteCollectionOfPrimitiveValues<Guid?>("partitionsToRemove", PartitionsToRemove);
             writer.WriteBoolValue("removeMass", RemoveMass);
             writer.WriteBoolValue("removeShelfLife", RemoveShelfLife);
             writer.WriteStringValue("shelfLife", ShelfLife);

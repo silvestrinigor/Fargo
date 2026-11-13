@@ -1,11 +1,13 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Common.Paging;
 using Fargo.Application.Commands.Items;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.Items;
+using Fargo.Application.Idempotency;
 using Fargo.Application.Queries.Items;
 using Fargo.Core.Events;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fargo.ServiceHttp.Endpoints;
 
@@ -74,20 +76,26 @@ public static class ItemEventEndpointRouteBuilderExtension
         .MapPost("/", CreateItemEvent)
         .WithName("CreateItemEvent")
         .WithSummary("Records an item event")
-        .WithDescription("Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.")
-        .Produces<Guid>(StatusCodes.Status200OK);
+        .WithDescription("Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of recording the event again. Use a new key for a different request.")
+        .Produces<Guid>(StatusCodes.Status200OK)
+        .ProducesIdempotencyErrors();
 
         return builder;
     }
 
     private static async Task<Ok<Guid>> CreateItemEvent(
         ItemEventCreateDto request,
+        [FromHeader(Name = IdempotencyEndpointExtensions.KeyHeaderName)] Guid? idempotencyKey,
+        IdempotencyOutcome outcome,
+        HttpContext httpContext,
         ICommandHandler<ItemEventCreateCommand, Guid> handler,
         CancellationToken cancellationToken)
     {
-        var command = new ItemEventCreateCommand(request);
+        var command = new ItemEventCreateCommand(request, idempotencyKey);
 
         var response = await handler.HandleAsync(command, cancellationToken);
+
+        httpContext.Response.MarkIfReplayed(outcome);
 
         return TypedResults.Ok(response);
     }

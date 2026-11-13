@@ -58,8 +58,10 @@ public sealed class ServiceAccountCreateCommandHandler(
             account.RotateAuthVersion();
         }
 
-        if (command.Create.PermissionsToAdd is { } permissions)
+        if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeServiceAccountPermissions);
+
             foreach (var permission in permissions)
             {
                 actor.ThrowIfPermissionDenied(permission);
@@ -68,8 +70,10 @@ public sealed class ServiceAccountCreateCommandHandler(
             }
         }
 
-        if (command.Create.PartitionsToAdd is { } partitionsToAdd)
+        if (command.Create.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeServiceAccountPartitions);
+
             foreach (var partitionGuid in partitionsToAdd)
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
@@ -82,8 +86,10 @@ public sealed class ServiceAccountCreateCommandHandler(
             }
         }
 
-        if (command.Create.PartitionAccessesToAdd is { } partitionAccesses)
+        if (command.Create.PartitionAccessesToAdd is { Count: > 0 } partitionAccesses)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeServiceAccountPartitions);
+
             foreach (var partitionGuid in partitionAccesses)
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);

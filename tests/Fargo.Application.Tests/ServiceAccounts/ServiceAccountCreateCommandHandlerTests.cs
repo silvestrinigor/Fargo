@@ -1,6 +1,6 @@
+using Fargo.Application.Commands.ServiceAccounts;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Commands.ServiceAccounts;
 using Fargo.Application.Dtos.ServiceAccounts;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Entities.Actors;
@@ -67,7 +67,7 @@ public class ServiceAccountCreateCommandHandlerTests
 
         // Actor has CreateServiceAccount and access to the requested partition.
         ActorTestFactory.ConfigureUserActor(
-            userRepository, currentActor.Guid, [ActionType.CreateServiceAccount], [partition.Guid]);
+            userRepository, currentActor.Guid, [ActionType.CreateServiceAccount, ActionType.ChangeServiceAccountPartitions], [partition.Guid]);
 
         partitionRepository.GetByGuidAsync(partition.Guid, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<Partition?>(partition));
@@ -88,7 +88,7 @@ public class ServiceAccountCreateCommandHandlerTests
     [Fact]
     public async Task HandleAsync_WhenMembershipPartitionNotFound_ShouldThrow()
     {
-        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateServiceAccount]);
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateServiceAccount, ActionType.ChangeServiceAccountPartitions]);
 
         var missing = Guid.NewGuid();
         partitionRepository.GetByGuidAsync(missing, Arg.Any<CancellationToken>())
@@ -106,7 +106,7 @@ public class ServiceAccountCreateCommandHandlerTests
     {
         // Actor has the permission but only global access; the requested
         // membership partition is a restricted one it cannot reach.
-        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateServiceAccount]);
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateServiceAccount, ActionType.ChangeServiceAccountPartitions]);
 
         var global = Partition.CreateGlobalPartition(new Fargo.Core.Informations.Name("global"));
         var restricted = Partition.CreatePartition(new Fargo.Core.Informations.Name("restricted"), global);
@@ -118,5 +118,50 @@ public class ServiceAccountCreateCommandHandlerTests
 
         await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
             () => CreateHandler().HandleAsync(command));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithoutChangeServiceAccountPermissions_ShouldThrowPermissionDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid, [ActionType.CreateServiceAccount, ActionType.CreateItem]);
+
+        var command = new ServiceAccountCreateCommand(
+            new ServiceAccountCreateDto("svc", PermissionsToAdd: [ActionType.CreateItem]));
+
+        await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+
+        serviceAccountRepository.DidNotReceive().Add(Arg.Any<ServiceAccount>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithChangeServiceAccountPermissions_ShouldGrantThem()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid,
+            [ActionType.CreateServiceAccount, ActionType.ChangeServiceAccountPermissions, ActionType.CreateItem]);
+
+        var command = new ServiceAccountCreateCommand(
+            new ServiceAccountCreateDto("svc", PermissionsToAdd: [ActionType.CreateItem]));
+
+        await CreateHandler().HandleAsync(command);
+
+        serviceAccountRepository.Received(1).Add(
+            Arg.Is<ServiceAccount>(a => a.Actor.Permissions.Contains(ActionType.CreateItem)));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenAddingPartitionsWithoutChangeServiceAccountPartitions_ShouldThrowPermissionDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateServiceAccount]);
+
+        var command = new ServiceAccountCreateCommand(
+            new ServiceAccountCreateDto("svc", PartitionAccessesToAdd: [Guid.NewGuid()]));
+
+        await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+
+        serviceAccountRepository.DidNotReceive().Add(Arg.Any<ServiceAccount>());
     }
 }

@@ -12,7 +12,8 @@ public sealed class UserGroupConfiguration : IEntityTypeConfiguration<UserGroup>
 
         builder.HasIndex(x => x.Nameid).IsUnique();
 
-        builder.Property(x => x.Permissions).HasColumnType("jsonb");
+        // Permissions is a read-only view of PermissionGrants (the user_group_permissions rows).
+        builder.Ignore(x => x.Permissions);
 
         builder
         .HasOne(x => x.ParentUserGroup)

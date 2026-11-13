@@ -42,7 +42,7 @@ public sealed class CreateServiceAccountCommand : Command
 
         var permissionsOption = new Option<int[]?>("--permissions")
         {
-            Description = "ActionType permission codes to grant (space-separated).",
+            Description = "ActionType permission codes to grant (space-separated). Requires the ChangeServiceAccountPermissions permission.",
             AllowMultipleArgumentsPerToken = true
         };
 

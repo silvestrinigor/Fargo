@@ -24,6 +24,7 @@ public sealed class ServiceAccountRepository(FargoDbContext context)
 
     private static IQueryable<ServiceAccount> IncludeAggregate(IQueryable<ServiceAccount> query)
         => query
+            .Include(account => account.Actor).ThenInclude(actor => actor.PermissionGrants)
             .Include(account => account.Actor).ThenInclude(actor => actor.Partitions)
             .Include(account => account.Actor).ThenInclude(actor => actor.PartitionAccesses)
             .AsSplitQuery();

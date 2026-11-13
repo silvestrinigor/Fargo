@@ -15,7 +15,5 @@ public sealed record ArticleUpdateDto(
     Mass? Mass = null,
     bool RemoveMass = false,
     ArticleDimensionUpdateDto? Dimension = null,
-    ArticleBarcodeUpdateDto? Barcode = null,
-    IReadOnlyCollection<Guid>? PartitionsToAdd = null,
-    IReadOnlyCollection<Guid>? PartitionsToRemove = null
+    ArticleBarcodeUpdateDto? Barcode = null
 );

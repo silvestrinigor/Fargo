@@ -1,6 +1,7 @@
 using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.UserGroups;
 using Fargo.Application.Persistence.Repositories;
+using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.UserGroups;
 using Fargo.Core.Informations;
 using Microsoft.EntityFrameworkCore;
@@ -37,8 +38,10 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
     public Task<UserGroup?> GetByGuidAsync(Guid entityGuid, CancellationToken cancellationToken = default)
     {
         return userGroups
+        .Include(userGroup => userGroup.PermissionGrants)
         .Include(userGroup => userGroup.Partitions)
         .Include(userGroup => userGroup.PartitionAccesses)
+        .AsSplitQuery()
         .SingleOrDefaultAsync(userGroup => userGroup.Guid == entityGuid, cancellationToken);
     }
 
@@ -120,6 +123,36 @@ public sealed class UserGroupRepository(FargoDbContext context) : IUserGroupRepo
             partitionGuids,
             userGroup => userGroup.Partitions,
             partition => partition.PartitionGuid);
+
+    public async Task<IReadOnlyCollection<ActionType>> GetInheritedPermissionsAsync(
+        Guid userGroupGuid, CancellationToken cancellationToken = default)
+    {
+        // UNION (not UNION ALL) drops repeated rows, so the walk ends even if the data ever held a cycle.
+        FormattableString query = $"""
+        WITH RECURSIVE user_group_chain AS
+        (
+            SELECT guid, parent_user_group_guid
+            FROM user_groups
+            WHERE guid = {userGroupGuid}
+
+            UNION
+
+            SELECT parent.guid, parent.parent_user_group_guid
+            FROM user_groups AS parent
+            INNER JOIN user_group_chain AS child
+                ON child.parent_user_group_guid = parent.guid
+        )
+        SELECT DISTINCT permission.action_type AS permission
+        FROM user_group_chain
+        INNER JOIN user_group_permissions AS permission
+            ON permission.user_group_guid = user_group_chain.guid
+        ORDER BY permission;
+        """;
+
+        return await context.Database
+            .SqlQuery<ActionType>(query)
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<IReadOnlyCollection<Guid>> GetDescendantUserGroupGuidsAsync(Guid userGroupGuid, bool includeRoot = true, CancellationToken cancellationToken = default)
     {

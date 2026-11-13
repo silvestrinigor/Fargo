@@ -7,6 +7,11 @@ public enum ActionType
     EditArticle = 3,
     CreateItem = 4,
     DeleteItem = 5,
+
+    /// <summary>
+    /// No operation requires it any more: moving an item and changing its partitions have their own
+    /// permissions. The value stays because roles already store it.
+    /// </summary>
     EditItem = 6,
     CreateUser = 7,
     DeleteUser = 8,
@@ -41,5 +46,80 @@ public enum ActionType
     ReceiveSupplyOrder = 27,
     CancelSupplyOrder = 28,
     CloseSupplyOrder = 29,
-    ReadSupplyOrders = 30
+    ReadSupplyOrders = 30,
+
+    /// <summary>
+    /// Activates or deactivates a user.
+    /// </summary>
+    ActivateUser = 31,
+
+    /// <summary>
+    /// Activates or deactivates a user group.
+    /// </summary>
+    ActivateUserGroup = 32,
+
+    /// <summary>
+    /// Activates or deactivates a service account.
+    /// </summary>
+    ActivateServiceAccount = 33,
+
+    /// <summary>
+    /// Places an item inside a container or removes it from its container.
+    /// </summary>
+    MoveItem = 34,
+
+    /// <summary>
+    /// Grants and revokes the direct permissions of a user.
+    /// </summary>
+    ChangeUserPermissions = 35,
+
+    /// <summary>
+    /// Grants and revokes the permissions of a user group, which every member inherits.
+    /// </summary>
+    ChangeUserGroupPermissions = 36,
+
+    /// <summary>
+    /// Grants and revokes the permissions of a service account.
+    /// </summary>
+    ChangeServiceAccountPermissions = 37,
+
+    /// <summary>
+    /// Changes the partitions a user belongs to and the partitions it can access.
+    /// </summary>
+    ChangeUserPartitions = 38,
+
+    /// <summary>
+    /// Changes the partitions a user group belongs to and the partitions it can access.
+    /// </summary>
+    ChangeUserGroupPartitions = 39,
+
+    /// <summary>
+    /// Changes the partitions a service account belongs to and the partitions it can access.
+    /// </summary>
+    ChangeServiceAccountPartitions = 40,
+
+    /// <summary>
+    /// Sets or clears the parent of a user group, which passes the parent's permissions down to the group's members.
+    /// </summary>
+    ChangeUserGroupParent = 41,
+
+    /// <summary>
+    /// Moves a partition under another parent, which changes who can access it.
+    /// </summary>
+    ChangePartitionParent = 42,
+
+    /// <summary>
+    /// Replaces a service account's secret. Separate from <see cref="EditServiceAccount"/> so it can be granted on its own.
+    /// </summary>
+    RotateServiceAccountSecret = 43,
+
+    /// <summary>
+    /// Changes the partitions an article belongs to, which decides who can see and use it.
+    /// </summary>
+    ChangeArticlePartitions = 44,
+
+    /// <summary>
+    /// Changes the partitions an item belongs to, which decides who can see and use it.
+    /// </summary>
+    ChangeItemPartitions = 45
 }

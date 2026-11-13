@@ -52,10 +52,10 @@ namespace Fargo.ClientHttp.V1.Item_Escaped.Events
             return await RequestAdapter.SendAsync<global::Fargo.ClientHttp.Models.PagedResultOfItemEventDto>(requestInfo, global::Fargo.ClientHttp.Models.PagedResultOfItemEventDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.
+        /// Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of recording the event again. Use a new key for a different request.
         /// </summary>
         /// <returns>A <see cref="Guid"/></returns>
-        /// <param name="body">Describes a new item event to record against an event-tracked article.</param>
+        /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -91,10 +91,10 @@ namespace Fargo.ClientHttp.V1.Item_Escaped.Events
             return requestInfo;
         }
         /// <summary>
-        /// Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.
+        /// Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of recording the event again. Use a new key for a different request.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
-        /// <param name="body">Describes a new item event to record against an event-tracked article.</param>
+        /// <param name="body">The request body</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable

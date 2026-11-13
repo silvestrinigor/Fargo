@@ -9,7 +9,7 @@ public static class InfrastructureServiceCollectionExtensions
     {
         /// <summary>
         /// Single entry point for the Fargo infrastructure layer, used by every
-        /// host (http, migration, seed, outbox). Everything is registered
+        /// host (http, migration, initializer, outbox). Everything is registered
         /// unconditionally: DI registration is lazy, so a host only pays for the
         /// services it actually resolves. Host-specific pieces (JWT options,
         /// HTTP actor/client context, RabbitMQ publisher) are validated or
@@ -18,7 +18,7 @@ public static class InfrastructureServiceCollectionExtensions
         /// <remarks>
         /// Host-only concerns stay in the host: the Aspire <c>AddRabbitMQClient</c>
         /// call (required for the event publisher to publish), the ASP.NET
-        /// authentication pipeline, and the seed/outbox option sections.
+        /// authentication pipeline, and the initializer/outbox option sections.
         /// </remarks>
         public IServiceCollection AddFargoInfrastructure(IConfiguration configuration) => services
         .AddFargoPersistence(configuration)

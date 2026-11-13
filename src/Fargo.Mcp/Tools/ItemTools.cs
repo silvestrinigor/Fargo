@@ -78,6 +78,7 @@ public static class ItemTools
         [Description("The GUID of the article this item is an instance of.")] Guid articleGuid,
         [Description("The GUID of the parent item container this item is placed in, if any.")] Guid? parentItemContainerGuid = null,
         [Description("The GUIDs of the partitions to add the item to.")] Guid[]? partitionsToAdd = null,
+        [Description("A GUID that makes the call safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.")] Guid? idempotencyKey = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -89,7 +90,7 @@ public static class ItemTools
             PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList()
         };
 
-        return await client.V1.Items.PostAsync(body, cancellationToken: cancellationToken);
+        return await client.V1.Items.PostAsync(body, IdempotencyKeys.Header(idempotencyKey ?? Guid.NewGuid()), cancellationToken);
     }
 
     [McpServerTool(Name = "fargo_items_delete")]
@@ -107,33 +108,60 @@ public static class ItemTools
         return $"Item '{itemGuid}' deleted.";
     }
 
-    [McpServerTool(Name = "fargo_items_update")]
-    [Description("Update an existing item: move it to (or out of) a parent container and adjust its partitions. Only the supplied changes are applied.")]
-    public static async Task<string> UpdateItemAsync(
+    [McpServerTool(Name = "fargo_items_set_partitions")]
+    [Description("Change the partitions an item belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Requires the ChangeItemPartitions permission, which is separate from the permission to update.")]
+    public static async Task<string> SetItemPartitionsAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
-        [Description("The GUID of the item to update.")] Guid itemGuid,
-        [Description("The GUID of the parent item container to move this item into. Leave null to keep the current container.")] Guid? parentItemContainerGuid = null,
-        [Description("When true, removes the item from its current parent container. Takes precedence over parentItemContainerGuid.")] bool? removeFromParentItemContainer = null,
-        [Description("The GUIDs of the partitions to add the item to.")] Guid[]? partitionsToAdd = null,
-        [Description("The GUIDs of the partitions to remove the item from.")] Guid[]? partitionsToRemove = null,
+        [Description("The GUID of the item.")] Guid itemGuid,
+        [Description("GUIDs of partitions to add.")] Guid[]? partitionsToAdd = null,
+        [Description("GUIDs of partitions to remove.")] Guid[]? partitionsToRemove = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
 
-        var body = new ItemUpdateDto
+        var body = new PartitionMembershipsChangeDto
         {
-            ParentItemContainerGuid = parentItemContainerGuid,
-            RemoveFromParentItemContainer = removeFromParentItemContainer,
-            PartitionsToAdd = partitionsToAdd?.Select(g => (Guid?)g).ToList(),
-            PartitionsToRemove = partitionsToRemove?.Select(g => (Guid?)g).ToList()
+            PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
+            PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove)
         };
 
-        await client.V1.Items[itemGuid].PatchAsync(body, cancellationToken: cancellationToken);
+        await client.V1.Items[itemGuid].Partitions.PutAsync(body, cancellationToken: cancellationToken);
 
-        return $"Item '{itemGuid}' updated.";
+        return $"Item '{itemGuid}' partitions updated.";
+    }
+    [McpServerTool(Name = "fargo_items_move")]
+    [Description("Place an item inside a container, recording a movement. Requires the MoveItem permission, which is separate from the permission to update. For event-tracked articles use the item event tools instead.")]
+    public static async Task<string> MoveItemAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item to move.")] Guid itemGuid,
+        [Description("The GUID of the destination container item.")] Guid parentItemContainerGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Items[itemGuid].Location.PutAsync(
+            new ItemSetLocationDto { ParentItemContainerGuid = parentItemContainerGuid },
+            cancellationToken: cancellationToken);
+
+        return $"Item '{itemGuid}' moved into container '{parentItemContainerGuid}'.";
     }
 
+    [McpServerTool(Name = "fargo_items_remove_from_container")]
+    [Description("Remove an item from its current container, recording a movement with no destination. Requires the MoveItem permission. An item that is not in a container is left as it is.")]
+    public static async Task<string> RemoveItemFromContainerAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the item to remove from its container.")] Guid itemGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Items[itemGuid].Location.DeleteAsync(cancellationToken: cancellationToken);
+
+        return $"Item '{itemGuid}' removed from its container.";
+    }
     [McpServerTool(Name = "fargo_items_get_location")]
     [Description("Get the location of an item: the chain of parent container items from the item up to its root container. When 'at' is supplied, the location is reconstructed from the item's containment history as it was at that instant.")]
     public static async Task<IReadOnlyList<ItemSummary>> GetItemLocationAsync(
@@ -181,6 +209,7 @@ public static class ItemTools
         [Description("The GUID of the origin container. Omit for a receipt from outside any container.")] Guid? fromItemContainerGuid = null,
         [Description("The GUID of the destination container. Omit for a dispatch to outside any container.")] Guid? toItemContainerGuid = null,
         [Description("Optional instant (ISO 8601 UTC) at which the movement occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        [Description("A GUID that makes the call safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.")] Guid? idempotencyKey = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -195,7 +224,7 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.V1.Item.Events.PostAsync(body, IdempotencyKeys.Header(idempotencyKey ?? Guid.NewGuid()), cancellationToken);
 
         return $"Movement event '{guid}' recorded for article '{articleGuid}'.";
     }
@@ -209,6 +238,7 @@ public static class ItemTools
         [Description("The strictly positive quantity created.")] double quantity,
         [Description("The GUID of the container the quantity was created in. Omit for outside any container.")] Guid? itemContainerGuid = null,
         [Description("Optional instant (ISO 8601 UTC) at which the creation occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        [Description("A GUID that makes the call safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.")] Guid? idempotencyKey = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -222,7 +252,7 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.V1.Item.Events.PostAsync(body, IdempotencyKeys.Header(idempotencyKey ?? Guid.NewGuid()), cancellationToken);
 
         return $"Creation event '{guid}' recorded for article '{articleGuid}'.";
     }
@@ -236,6 +266,7 @@ public static class ItemTools
         [Description("The strictly positive quantity deleted.")] double quantity,
         [Description("The GUID of the container the quantity was deleted from. Omit for outside any container.")] Guid? itemContainerGuid = null,
         [Description("Optional instant (ISO 8601 UTC) at which the deletion occurred. Defaults to now.")] DateTimeOffset? occuredAt = null,
+        [Description("A GUID that makes the call safe to retry: sending the same key again returns the first result instead of repeating it. Use a new key for a different request. A new key is generated when omitted.")] Guid? idempotencyKey = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -249,7 +280,7 @@ public static class ItemTools
             OccuredAt = occuredAt
         };
 
-        var guid = await client.V1.Item.Events.PostAsync(body, cancellationToken: cancellationToken);
+        var guid = await client.V1.Item.Events.PostAsync(body, IdempotencyKeys.Header(idempotencyKey ?? Guid.NewGuid()), cancellationToken);
 
         return $"Deletion event '{guid}' recorded for article '{articleGuid}'.";
     }

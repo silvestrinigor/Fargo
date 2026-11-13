@@ -108,14 +108,13 @@ public static class PartitionTools
     }
 
     [McpServerTool(Name = "fargo_partitions_update")]
-    [Description("Update an existing partition's name, description, or parent. Only the supplied fields are changed; omitted fields are left as-is.")]
+    [Description("Update an existing partition's name or description. Only the supplied fields are changed; omitted fields are left as-is. To move the partition, use the set-parent tool.")]
     public static async Task<string> UpdatePartitionAsync(
         FargoApiClient client,
         FargoAuthenticator authenticator,
         [Description("The GUID of the partition to update.")] Guid partitionGuid,
         [Description("The new name of the partition. Leave null to keep the existing name.")] string? name = null,
         [Description("The new description of the partition. Leave null to keep the existing description.")] string? description = null,
-        [Description("The GUID of the new parent partition. Leave null to keep the current parent.")] Guid? parentPartitionGuid = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -123,12 +122,29 @@ public static class PartitionTools
         var body = new PartitionUpdateDto
         {
             Name = name,
-            Description = description,
-            ParentPartitionGuid = parentPartitionGuid
+            Description = description
         };
 
         await client.V1.Partitions[partitionGuid].PatchAsync(body, cancellationToken: cancellationToken);
 
         return $"Partition '{partitionGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_partitions_set_parent")]
+    [Description("Move a partition under another parent, which changes who can access it. Rejects a move that would create a cycle. A partition always has a parent, so it can be moved but not detached. Requires the ChangePartitionParent permission, which is separate from the permission to update.")]
+    public static async Task<string> SetPartitionParentAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the partition to move.")] Guid partitionGuid,
+        [Description("The GUID of the new parent partition.")] Guid parentPartitionGuid,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        await client.V1.Partitions[partitionGuid].Parent.PutAsync(
+            new ParentPartitionDto { ParentPartitionGuid = parentPartitionGuid },
+            cancellationToken: cancellationToken);
+
+        return $"Partition '{partitionGuid}' moved under '{parentPartitionGuid}'.";
     }
 }

@@ -34,7 +34,7 @@ public static class UserDtoMappings
         new UserAuthenticationDto(
             user.Authentication.DefaultPasswordExpirationPeriod,
             user.Authentication.RequirePasswordChangeAt),
-        user.Actor.Permissions,
+        user.Actor.PermissionGrants.Select(grant => grant.ActionType).ToArray(),
         user.Actor.Partitions.Select(partition => partition.PartitionGuid).ToArray(),
         user.Actor.PartitionAccesses.Select(access => access.PartitionGuid).ToArray(),
         user.UserGroupMemberships.Select(group => group.UserGroupGuid).ToArray()

@@ -1,6 +1,7 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Common.Paging;
 using Fargo.Application.Commands.Articles;
+using Fargo.Application.Common.Paging;
+using Fargo.Application.Dtos;
 using Fargo.Application.Dtos.Articles;
 using Fargo.Application.Queries.Articles;
 using Fargo.Core.Barcodes;
@@ -26,6 +27,8 @@ public static class ArticleEndpointRouteBuilderExtension
         group.MapCreateArticle();
 
         group.MapUpdateArticle();
+
+        group.MapSetArticlePartitions();
 
         group.MapDeleteArticle();
     }
@@ -199,7 +202,7 @@ public static class ArticleEndpointRouteBuilderExtension
         builder.MapPatch("/{articleGuid:guid}", UpdateArticleAsync)
             .WithName("PatchArticle")
             .WithSummary("Updates part of an existing article")
-            .WithDescription("Updates only article fields included in the request body.")
+            .WithDescription("Updates only article fields included in the request body. Use the partitions endpoint to change the partitions of the article.")
             .Produces(StatusCodes.Status204NoContent);
 
         return builder;
@@ -220,6 +223,32 @@ public static class ArticleEndpointRouteBuilderExtension
 
     #endregion Update
 
+    #region Set partitions
+
+    private static IEndpointRouteBuilder MapSetArticlePartitions(this IEndpointRouteBuilder builder)
+    {
+        builder.MapPut("/{articleGuid:guid}/partitions", SetPartitions)
+            .WithName("SetArticlePartitions")
+            .WithSummary("Changes the partitions of an article")
+            .WithDescription("Adds and removes the partitions the an article belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Requires the ChangeArticlePartitions permission.")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        return builder;
+    }
+
+    private static async Task<NoContent> SetPartitions(
+        Guid articleGuid,
+        PartitionMembershipsChangeDto request,
+        ICommandHandler<ArticleSetPartitionsCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        await handler.HandleAsync(new ArticleSetPartitionsCommand(articleGuid, request), cancellationToken);
+
+        return TypedResults.NoContent();
+    }
+
+    #endregion Set partitions
     #region Delete
 
     private static IEndpointRouteBuilder MapDeleteArticle(this IEndpointRouteBuilder builder)

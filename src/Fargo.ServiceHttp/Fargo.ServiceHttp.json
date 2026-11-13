@@ -46,7 +46,7 @@
           "Articles"
         ],
         "summary": "Updates part of an existing article",
-        "description": "Updates only article fields included in the request body.",
+        "description": "Updates only article fields included in the request body. Use the partitions endpoint to change the partitions of the article.",
         "operationId": "PatchArticle",
         "parameters": [
           {
@@ -298,6 +298,45 @@
         }
       }
     },
+    "/v1/articles/{articleGuid}/partitions": {
+      "put": {
+        "tags": [
+          "Articles"
+        ],
+        "summary": "Changes the partitions of an article",
+        "description": "Adds and removes the partitions the an article belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Requires the ChangeArticlePartitions permission.",
+        "operationId": "SetArticlePartitions",
+        "parameters": [
+          {
+            "name": "articleGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartitionMembershipsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/v1/items/{itemGuid}": {
       "get": {
         "tags": [
@@ -330,40 +369,6 @@
           },
           "404": {
             "description": "Not Found"
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "Items"
-        ],
-        "summary": "Replaces an existing item",
-        "description": "Replaces mutable item state including partitions and parent container.",
-        "operationId": "UpdateItem",
-        "parameters": [
-          {
-            "name": "itemGuid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ItemUpdateDto"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
           }
         }
       },
@@ -432,6 +437,70 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Places an item inside a container",
+        "description": "Sets the parent container of the item, recording a movement. Placing an item in the container it is already in does nothing. Requires the MoveItem permission, which is separate from the edit permission.",
+        "operationId": "SetItemLocation",
+        "parameters": [
+          {
+            "name": "itemGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemSetLocationDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Removes an item from its container",
+        "description": "Clears the parent container of the item, recording a movement with no destination. An item that is not in a container is left as it is. Requires the MoveItem permission.",
+        "operationId": "RemoveItemFromContainer",
+        "parameters": [
+          {
+            "name": "itemGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
           },
           "404": {
             "description": "Not Found"
@@ -602,8 +671,18 @@
           "Items"
         ],
         "summary": "Creates a new item",
-        "description": "Creates a new item with optional partitions. Returns the generated identifier.",
+        "description": "Creates a new item with optional partitions. Returns the generated identifier. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of creating another item. Use a new key for a different request.",
         "operationId": "CreateItem",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -625,6 +704,54 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          }
+        }
+      }
+    },
+    "/v1/items/{itemGuid}/partitions": {
+      "put": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Changes the partitions of an item",
+        "description": "Adds and removes the partitions the an item belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Moving the item to another container is a separate operation. Requires the ChangeItemPartitions permission.",
+        "operationId": "SetItemPartitions",
+        "parameters": [
+          {
+            "name": "itemGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartitionMembershipsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -707,8 +834,18 @@
           "ItemEvents"
         ],
         "summary": "Records an item event",
-        "description": "Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event.",
+        "description": "Records a new item event for an event-tracked article. The eventType selects the kind: a movement of a quantity between containers, or the creation or deletion of a quantity of stock (optionally at a container). Event-based stock is not unit-tracked, so a single creation or deletion can cover many units. Returns the identifier of the recorded event. Only valid for articles whose tracking mode is Event. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key returns the first result instead of recording the event again. Use a new key for a different request.",
         "operationId": "CreateItemEvent",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -730,6 +867,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
           }
         }
       }
@@ -774,7 +920,7 @@
           "Users"
         ],
         "summary": "Replaces an existing user",
-        "description": "Replaces all user state including partitions, user groups, and permissions.",
+        "description": "Updates the username, names and description of a user. Use the is-active, permissions, user-groups, partitions, password and password-expiration endpoints for the rest.",
         "operationId": "UpdateUser",
         "parameters": [
           {
@@ -905,7 +1051,7 @@
           "Users"
         ],
         "summary": "Creates a new user",
-        "description": "Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier.",
+        "description": "Creates a new user with optional partitions, user groups, and permissions. Returns the generated identifier. Granting permissions requires ChangeUserPermissions, adding partitions or partition access requires ChangeUserPartitions, and adding user groups requires ChangeUserGroupMembers.",
         "operationId": "CreateUser",
         "requestBody": {
           "content": {
@@ -928,6 +1074,267 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/is-active": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Activates or deactivates a user",
+        "description": "Sets whether the user is active. Requires the ActivateUser permission, which is separate from the edit permission.",
+        "operationId": "SetUserActive",
+        "parameters": [
+          {
+            "name": "userGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActiveStateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/permissions": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Grants and revokes permissions of a user",
+        "description": "Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. A caller cannot change its own permissions. Requires the ChangeUserPermissions permission, which is separate from the edit permission.",
+        "operationId": "SetUserPermissions",
+        "parameters": [
+          {
+            "name": "userGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/user-groups": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Adds and removes the groups of a user",
+        "description": "Adds the user to and removes it from user groups in one request. At least one group is required and none may be in both lists. Joining a group hands the user the permissions of that group and of its ancestors, so the caller must hold all of them. Requires the ChangeUserGroupMembers permission, which is separate from the edit permission.",
+        "operationId": "SetUserUserGroups",
+        "parameters": [
+          {
+            "name": "userGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserGroupsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/partitions": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Changes the partitions of a user",
+        "description": "Adds and removes the partitions the user belongs to (membership) and the partitions it can access in one request. At least one is required. The caller needs access to every partition it touches. Requires the ChangeUserPartitions permission, which is separate from the edit permission.",
+        "operationId": "SetUserPartitions",
+        "parameters": [
+          {
+            "name": "userGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartitionsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/password": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Resets the password of a user",
+        "description": "Sets a new password and requires the user to change it at the next sign-in. A caller cannot reset its own password here; use the identity password change instead. Requires the ChangeAnotherUserPassword permission.",
+        "operationId": "ResetUserPassword",
+        "parameters": [
+          {
+            "name": "userGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/users/{userGuid}/password-expiration": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Sets how long the passwords of a user last",
+        "description": "Sets the default period after which the password of the user expires. It applies the next time the password is changed; zero means it must be changed immediately. Requires the ChangeAnotherUserPassword permission.",
+        "operationId": "SetUserPasswordExpiration",
+        "parameters": [
+          {
+            "name": "userGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordExpirationDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Removes the password expiration of a user",
+        "description": "Clears the default password expiration period, so the passwords of the user no longer expire by default. Requires the ChangeAnotherUserPassword permission.",
+        "operationId": "RemoveUserPasswordExpiration",
+        "parameters": [
+          {
+            "name": "userGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -972,7 +1379,7 @@
           "UserGroups"
         ],
         "summary": "Replaces an existing user group",
-        "description": "Replaces all user group state including partitions and permissions.",
+        "description": "Updates the name and description of a user group. Use the is-active, permissions, partitions and parent endpoints for the rest.",
         "operationId": "UpdateUserGroup",
         "parameters": [
           {
@@ -1103,7 +1510,7 @@
           "UserGroups"
         ],
         "summary": "Creates a new user group",
-        "description": "Creates a new user group with optional partitions and permissions. Returns the generated identifier.",
+        "description": "Creates a new user group with optional partitions and permissions. Returns the generated identifier. Granting permissions requires ChangeUserGroupPermissions, adding partitions or partition access requires ChangeUserGroupPartitions, and setting a parent requires ChangeUserGroupParent.",
         "operationId": "CreateUserGroup",
         "requestBody": {
           "content": {
@@ -1126,6 +1533,189 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/is-active": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Activates or deactivates a user group",
+        "description": "Sets whether the user group is active. Requires the ActivateUserGroup permission, which is separate from the edit permission.",
+        "operationId": "SetUserGroupActive",
+        "parameters": [
+          {
+            "name": "userGroupGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActiveStateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/permissions": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Grants and revokes permissions of a user group",
+        "description": "Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. Requires the ChangeUserGroupPermissions permission, which is separate from the edit permission.",
+        "operationId": "SetUserGroupPermissions",
+        "parameters": [
+          {
+            "name": "userGroupGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/partitions": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Changes the partitions of a user group",
+        "description": "Adds and removes the partitions the group belongs to (membership) and the partitions it can access in one request. At least one is required. The caller needs access to every partition it touches. Requires the ChangeUserGroupPartitions permission, which is separate from the edit permission.",
+        "operationId": "SetUserGroupPartitions",
+        "parameters": [
+          {
+            "name": "userGroupGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartitionsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/user-groups/{userGroupGuid}/parent": {
+      "put": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Places a user group under a parent",
+        "description": "Sets the parent of the group. Members of the group inherit the permissions of the parent and of its ancestors, so the caller must hold all of them. Rejects an assignment that would create a cycle. Setting the parent the group already has does nothing. Requires the ChangeUserGroupParent permission.",
+        "operationId": "SetUserGroupParent",
+        "parameters": [
+          {
+            "name": "userGroupGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParentUserGroupDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "UserGroups"
+        ],
+        "summary": "Removes the parent of a user group",
+        "description": "Detaches the group from its parent, so its members stop inheriting the permissions of the parent. A group without a parent is left as it is. Requires the ChangeUserGroupParent permission.",
+        "operationId": "RemoveUserGroupParent",
+        "parameters": [
+          {
+            "name": "userGroupGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1170,7 +1760,7 @@
           "Partitions"
         ],
         "summary": "Updates an existing partition",
-        "description": "Updates partition properties.",
+        "description": "Updates the name and description of a partition. Use the parent endpoint to move it.",
         "operationId": "UpdatePartition",
         "parameters": [
           {
@@ -1319,6 +1909,45 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/partitions/{partitionGuid}/parent": {
+      "put": {
+        "tags": [
+          "Partitions"
+        ],
+        "summary": "Moves a partition under another parent",
+        "description": "Sets the parent of the partition, which changes who can access it. Rejects a move that would create a cycle. A partition always has a parent, so there is no way to clear it. Setting the parent the partition already has does nothing. Requires the ChangePartitionParent permission, which is separate from the edit permission.",
+        "operationId": "SetPartitionParent",
+        "parameters": [
+          {
+            "name": "partitionGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParentPartitionDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1640,7 +2269,7 @@
           "ServiceAccounts"
         ],
         "summary": "Updates a service account",
-        "description": "Updates mutable service-account state: description, active flag, permissions and partition accesses.",
+        "description": "Updates the description of a service account. Use the is-active, permissions and partitions endpoints for the rest.",
         "operationId": "UpdateServiceAccount",
         "parameters": [
           {
@@ -1746,7 +2375,7 @@
           "ServiceAccounts"
         ],
         "summary": "Creates a new service account",
-        "description": "Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated).",
+        "description": "Creates a service account and returns its generated client secret EXACTLY ONCE. Store the secret securely; it cannot be retrieved later (only rotated). Granting permissions requires ChangeServiceAccountPermissions, and adding partitions or partition access requires ChangeServiceAccountPartitions.",
         "operationId": "CreateServiceAccount",
         "requestBody": {
           "content": {
@@ -1772,13 +2401,130 @@
         }
       }
     },
+    "/v1/service-accounts/{serviceAccountGuid}/is-active": {
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Activates or deactivates a service account",
+        "description": "Sets whether the service account is active. Requires the ActivateServiceAccount permission, which is separate from the edit permission.",
+        "operationId": "SetServiceAccountActive",
+        "parameters": [
+          {
+            "name": "serviceAccountGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActiveStateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}/permissions": {
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Grants and revokes permissions of a service account",
+        "description": "Adds and removes permissions in one request. At least one permission is required and none may be in both lists. The caller must hold every permission it grants or revokes. A caller cannot change its own permissions. Requires the ChangeServiceAccountPermissions permission, which is separate from the edit permission.",
+        "operationId": "SetServiceAccountPermissions",
+        "parameters": [
+          {
+            "name": "serviceAccountGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/service-accounts/{serviceAccountGuid}/partitions": {
+      "put": {
+        "tags": [
+          "ServiceAccounts"
+        ],
+        "summary": "Changes the partitions of a service account",
+        "description": "Adds and removes the partitions the account belongs to (membership) and the partitions it can access in one request. At least one is required. The caller needs access to every partition it touches. Requires the ChangeServiceAccountPartitions permission, which is separate from the edit permission.",
+        "operationId": "SetServiceAccountPartitions",
+        "parameters": [
+          {
+            "name": "serviceAccountGuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartitionsChangeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/v1/service-accounts/{serviceAccountGuid}/rotate-secret": {
       "post": {
         "tags": [
           "ServiceAccounts"
         ],
         "summary": "Rotates a service account's secret",
-        "description": "Generates a new client secret (returned EXACTLY ONCE) and invalidates all tokens previously issued to the account.",
+        "description": "Generates a new client secret (returned EXACTLY ONCE) and invalidates all tokens previously issued to the account. Requires the RotateServiceAccountSecret permission, which is separate from the edit permission.",
         "operationId": "RotateServiceAccountSecret",
         "parameters": [
           {
@@ -2121,13 +2867,21 @@
           "SupplyOrders"
         ],
         "summary": "Receives goods against a supply order",
-        "description": "Receives the given quantities, effecting the stock change into the order's receiving container (or at the root when it has none) and advancing the order's received quantities and status. Over-receipt is permitted.",
+        "description": "Receives the given quantities, effecting the stock change into the order's receiving container (or at the root when it has none) and advancing the order's received quantities and status. Over-receipt is permitted, and a received order accepts further receipts, so a retried request would be counted again. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key does nothing and returns the first result. Use a new key for a different receipt.",
         "operationId": "ReceiveSupplyOrder",
         "parameters": [
           {
             "name": "supplyOrderGuid",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -2147,6 +2901,15 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
           }
         }
       }
@@ -2208,6 +2971,18 @@
     "schemas": {
       "ActionType": {
         "type": "integer"
+      },
+      "ActiveStateDto": {
+        "required": [
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "description": "Request body of the dedicated activate/deactivate endpoints."
       },
       "ActorType": {
         "type": "integer"
@@ -2774,26 +3549,6 @@
                 "$ref": "#/components/schemas/ArticleBarcodeUpdateDto"
               }
             ]
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         },
         "description": "`null` leaves a value unchanged. The `Remove*` flags clear the value and take\r\n        precedence over the matching new value."
@@ -3217,39 +3972,15 @@
           }
         }
       },
-      "ItemUpdateDto": {
+      "ItemSetLocationDto": {
+        "required": [
+          "parentItemContainerGuid"
+        ],
         "type": "object",
         "properties": {
           "parentItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
+            "type": "string",
             "format": "uuid"
-          },
-          "removeFromParentItemContainer": {
-            "type": "boolean",
-            "default": false
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         }
       },
@@ -3800,6 +4531,30 @@
           }
         }
       },
+      "ParentPartitionDto": {
+        "required": [
+          "parentPartitionGuid"
+        ],
+        "type": "object",
+        "properties": {
+          "parentPartitionGuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ParentUserGroupDto": {
+        "required": [
+          "parentUserGroupGuid"
+        ],
+        "type": "object",
+        "properties": {
+          "parentUserGroupGuid": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "PartitionCreateDto": {
         "required": [
           "name"
@@ -3857,6 +4612,78 @@
           }
         }
       },
+      "PartitionMembershipsChangeDto": {
+        "type": "object",
+        "properties": {
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Request body of the dedicated partition endpoints of articles and items, which belong to partitions\r\nbut have no partition access of their own. At least one partition must be given, and none may be in\r\nboth lists."
+      },
+      "PartitionsChangeDto": {
+        "type": "object",
+        "properties": {
+          "partitionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "partitionAccessesToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Request body of the dedicated partition endpoints. Membership is the partitions the target\r\nbelongs to; access is the partitions it may reach. At least one list must be given, and no\r\npartition may be in both the add and the remove list of the same kind."
+      },
       "PartitionUpdateDto": {
         "type": "object",
         "properties": {
@@ -3868,13 +4695,6 @@
           "description": {
             "maxLength": 500,
             "type": "string"
-          },
-          "parentPartitionGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
           }
         }
       },
@@ -3884,6 +4704,54 @@
         "type": "string",
         "description": "A plaintext password: 9 to 512 characters, no spaces, with at least one letter, one digit and\r\none special (non-letter, non-digit) character.",
         "format": "password"
+      },
+      "PasswordExpirationDto": {
+        "required": [
+          "expirationPeriod"
+        ],
+        "type": "object",
+        "properties": {
+          "expirationPeriod": {
+            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
+            "type": "string"
+          }
+        },
+        "description": "How long a user's password stays valid by default. The period is not named after the password so\r\nthe audit log does not redact it."
+      },
+      "PasswordResetDto": {
+        "required": [
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "password": {
+            "$ref": "#/components/schemas/Password"
+          }
+        }
+      },
+      "PermissionsChangeDto": {
+        "type": "object",
+        "properties": {
+          "permissionsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          },
+          "permissionsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          }
+        },
+        "description": "Request body of the dedicated permission endpoints: the permissions to grant and to revoke in\r\none request. At least one must be given, and no permission may appear in both."
       },
       "Scalar": {
         "oneOf": [
@@ -4024,70 +4892,6 @@
               "null",
               "string"
             ]
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "permissionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         }
       },
@@ -4384,30 +5188,6 @@
           }
         }
       },
-      "UserAuthenticationUpdateDto": {
-        "type": "object",
-        "properties": {
-          "password": {
-            "maxLength": 512,
-            "minLength": 9,
-            "type": "string",
-            "format": "password"
-          },
-          "defaultPasswordExpirationPeriod": {
-            "pattern": "^-?(\\d+\\.)?\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,7})?$",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "removeDefaultPasswordExpirationPeriod": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          }
-        }
-      },
       "UserCreateDto": {
         "required": [
           "nameid"
@@ -4689,6 +5469,32 @@
           }
         }
       },
+      "UserGroupsChangeDto": {
+        "type": "object",
+        "properties": {
+          "userGroupsToAdd": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "userGroupsToRemove": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "description": "Request body of the dedicated user-group membership endpoint. At least one group must be given,\r\nand none may be in both lists."
+      },
       "UserGroupUpdateDto": {
         "type": "object",
         "properties": {
@@ -4701,83 +5507,6 @@
           "description": {
             "maxLength": 500,
             "type": "string"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "parentUserGroup": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "removeParentUserGroup": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "permissionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         }
       },
@@ -4803,100 +5532,6 @@
           "description": {
             "maxLength": 500,
             "type": "string"
-          },
-          "isActive": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "authentication": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/UserAuthenticationUpdateDto"
-              }
-            ]
-          },
-          "permissionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "permissionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ActionType"
-            }
-          },
-          "partitionsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "userGroupsToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "userGroupsToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToAdd": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "partitionAccessesToRemove": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         }
       }

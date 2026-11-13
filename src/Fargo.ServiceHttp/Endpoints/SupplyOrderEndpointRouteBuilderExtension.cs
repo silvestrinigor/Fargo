@@ -1,11 +1,13 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Common.Paging;
 using Fargo.Application.Commands.SupplyOrders;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.SupplyOrders;
+using Fargo.Application.Idempotency;
 using Fargo.Application.Queries.SupplyOrders;
 using Fargo.Core.Entities.SupplyOrders;
 using Fargo.ServiceHttp.Versioning;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using UnitsNet;
 
 namespace Fargo.ServiceHttp.Endpoints;
@@ -257,8 +259,9 @@ public static class SupplyOrderEndpointRouteBuilderExtension
         builder.MapPost("/{supplyOrderGuid:guid}/receive", ReceiveSupplyOrder)
             .WithName("ReceiveSupplyOrder")
             .WithSummary("Receives goods against a supply order")
-            .WithDescription("Receives the given quantities, effecting the stock change into the order's receiving container (or at the root when it has none) and advancing the order's received quantities and status. Over-receipt is permitted.")
-            .Produces(StatusCodes.Status204NoContent);
+            .WithDescription("Receives the given quantities, effecting the stock change into the order's receiving container (or at the root when it has none) and advancing the order's received quantities and status. Over-receipt is permitted, and a received order accepts further receipts, so a retried request would be counted again. Send an Idempotency-Key header (a GUID) to make the request safe to retry: a retry with the same key does nothing and returns the first result. Use a new key for a different receipt.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesIdempotencyErrors();
 
         return builder;
     }
@@ -266,10 +269,15 @@ public static class SupplyOrderEndpointRouteBuilderExtension
     private static async Task<NoContent> ReceiveSupplyOrder(
         Guid supplyOrderGuid,
         SupplyOrderReceiveDto request,
+        [FromHeader(Name = IdempotencyEndpointExtensions.KeyHeaderName)] Guid? idempotencyKey,
+        IdempotencyOutcome outcome,
+        HttpContext httpContext,
         ICommandHandler<SupplyOrderReceiveCommand> handler,
         CancellationToken cancellationToken)
     {
-        await handler.HandleAsync(new SupplyOrderReceiveCommand(supplyOrderGuid, request), cancellationToken);
+        await handler.HandleAsync(new SupplyOrderReceiveCommand(supplyOrderGuid, request, idempotencyKey), cancellationToken);
+
+        httpContext.Response.MarkIfReplayed(outcome);
 
         return TypedResults.NoContent();
     }

@@ -1,6 +1,6 @@
+using Fargo.Application.Commands.UserGroups;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Commands.UserGroups;
 using Fargo.Application.Dtos.UserGroups;
 using Fargo.Application.Persistence;
 using Fargo.Application.Tests.Common;
@@ -85,7 +85,7 @@ public class UserGroupCreateCommandHandlerTests
     [Fact]
     public async Task HandleAsync_WhenParentUserGroupNotFound_ShouldThrow()
     {
-        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateUserGroup]);
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateUserGroup, ActionType.ChangeUserGroupParent]);
         userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(false));
         var missingParent = Guid.NewGuid();
@@ -103,7 +103,7 @@ public class UserGroupCreateCommandHandlerTests
     {
         // Actor has the permission and global access, but the requested partition
         // is a different one the actor cannot access.
-        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateUserGroup]);
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateUserGroup, ActionType.ChangeUserGroupPartitions]);
         userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(false));
         var otherPartition = Partition.CreatePartition(new Name("Other"), GlobalPartition());
@@ -117,5 +117,110 @@ public class UserGroupCreateCommandHandlerTests
 
         userGroupRepository.DidNotReceive().Add(Arg.Any<UserGroup>());
         await unitOfWork.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithoutChangeUserGroupPermissions_ShouldThrowPermissionDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid, [ActionType.CreateUserGroup, ActionType.CreateItem]);
+        userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+
+        var command = new UserGroupCreateCommand(
+            new UserGroupCreateDto(new Nameid("editors"), PermissionsToAdd: [ActionType.CreateItem]));
+
+        await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+
+        userGroupRepository.DidNotReceive().Add(Arg.Any<UserGroup>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenGrantingPermissionsWithChangeUserGroupPermissions_ShouldGrantThem()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid,
+            [ActionType.CreateUserGroup, ActionType.ChangeUserGroupPermissions, ActionType.CreateItem]);
+        userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+
+        var command = new UserGroupCreateCommand(
+            new UserGroupCreateDto(new Nameid("editors"), PermissionsToAdd: [ActionType.CreateItem]));
+
+        await CreateHandler().HandleAsync(command);
+
+        userGroupRepository.Received(1).Add(Arg.Is<UserGroup>(g => g.Permissions.Contains(ActionType.CreateItem)));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenSettingAParentWithoutChangeUserGroupParent_ShouldThrowPermissionDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateUserGroup]);
+        userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+        var parent = UserGroup.CreateUserGroup(new Nameid("parent"));
+        userGroupRepository.GetByGuidAsync(parent.Guid, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<UserGroup?>(parent));
+
+        await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(new UserGroupCreateCommand(
+                new UserGroupCreateDto(new Nameid("editors"), ParentUserGroup: parent.Guid))));
+
+        userGroupRepository.DidNotReceive().Add(Arg.Any<UserGroup>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenTheParentHasAPermissionTheActorLacks_ShouldThrowPermissionDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid, [ActionType.CreateUserGroup, ActionType.ChangeUserGroupParent]);
+        userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+        var parent = UserGroup.CreateUserGroup(new Nameid("parent"));
+        parent.AddPermission(ActionType.DeleteItem);
+        userGroupRepository.GetByGuidAsync(parent.Guid, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<UserGroup?>(parent));
+        userGroupRepository.StubInheritedPermissions(parent, ActionType.DeleteItem);
+
+        await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(new UserGroupCreateCommand(
+                new UserGroupCreateDto(new Nameid("editors"), ParentUserGroup: parent.Guid))));
+
+        userGroupRepository.DidNotReceive().Add(Arg.Any<UserGroup>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenSettingAParentTheActorMayGrant_ShouldSetIt()
+    {
+        ActorTestFactory.ConfigureUserActor(
+            userRepository, currentActor.Guid,
+            [ActionType.CreateUserGroup, ActionType.ChangeUserGroupParent, ActionType.CreateItem]);
+        userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+        var parent = UserGroup.CreateUserGroup(new Nameid("parent"));
+        parent.AddPermission(ActionType.CreateItem);
+        userGroupRepository.GetByGuidAsync(parent.Guid, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<UserGroup?>(parent));
+        userGroupRepository.StubInheritedPermissions(parent, ActionType.CreateItem);
+
+        await CreateHandler().HandleAsync(new UserGroupCreateCommand(
+            new UserGroupCreateDto(new Nameid("editors"), ParentUserGroup: parent.Guid)));
+
+        userGroupRepository.Received(1).Add(Arg.Is<UserGroup>(g => g.ParentUserGroupGuid == parent.Guid));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenAddingPartitionsWithoutChangeUserGroupPartitions_ShouldThrowPermissionDenied()
+    {
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.CreateUserGroup]);
+        userGroupRepository.ExistsByNameidAsync(Arg.Any<Nameid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(false));
+
+        await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(new UserGroupCreateCommand(
+                new UserGroupCreateDto(new Nameid("editors"), PartitionAccessesToAdd: [Guid.NewGuid()]))));
+
+        userGroupRepository.DidNotReceive().Add(Arg.Any<UserGroup>());
     }
 }

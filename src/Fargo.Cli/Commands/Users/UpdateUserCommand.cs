@@ -13,7 +13,6 @@ public sealed class UpdateUserCommand : Command
 
             Examples:
               fargo user update 00000000-0000-0000-0000-000000000004 --first-name Jane
-              fargo user update 00000000-0000-0000-0000-000000000004 --active false
             """)
     {
         var guidArgument = new Argument<Guid>("guid")
@@ -36,16 +35,10 @@ public sealed class UpdateUserCommand : Command
             Description = "New last name."
         };
 
-        var isActiveOption = new Option<bool?>("--active")
-        {
-            Description = "Set the user active state (true or false)."
-        };
-
         Add(guidArgument);
         Add(usernameOption);
         Add(firstNameOption);
         Add(lastNameOption);
-        Add(isActiveOption);
 
         SetAction(async (parseResult, cancellationToken) =>
         {
@@ -53,7 +46,6 @@ public sealed class UpdateUserCommand : Command
             var username = parseResult.GetValue(usernameOption);
             var firstName = parseResult.GetValue(firstNameOption);
             var lastName = parseResult.GetValue(lastNameOption);
-            var isActive = parseResult.GetValue(isActiveOption);
 
             var dto = new UserUpdateDto();
 
@@ -70,11 +62,6 @@ public sealed class UpdateUserCommand : Command
             if (lastName is not null)
             {
                 dto.LastName = lastName;
-            }
-
-            if (isActive.HasValue)
-            {
-                dto.IsActive = isActive;
             }
 
             await client.V1.Users[guid].PutAsync(dto, cancellationToken: cancellationToken);

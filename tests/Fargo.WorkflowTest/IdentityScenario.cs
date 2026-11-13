@@ -191,12 +191,12 @@ internal sealed class IdentityScenario(
     private async Task ExercisePermissionMutationAsync(
         Guid groupGuid, Guid limitedUserGuid, CancellationToken cancellationToken)
     {
-        Log.Step("Adding and removing permissions (group + user) via update endpoints");
+        Log.Step("Adding and removing permissions (group + user) via the permissions endpoints");
 
         // Add DeleteItem to the group, confirm, then remove it again.
         await _check.AllowedAsync("admin grants DeleteItem to group", () =>
-            _admin.V1.UserGroups[groupGuid].PutAsync(
-                new UserGroupUpdateDto { PermissionsToAdd = [ActionTypes.DeleteItem] },
+            _admin.V1.UserGroups[groupGuid].Permissions.PutAsync(
+                new PermissionsChangeDto { PermissionsToAdd = [ActionTypes.DeleteItem] },
                 cancellationToken: cancellationToken));
 
         var afterAdd = await _admin.V1.UserGroups[groupGuid].GetAsync(cancellationToken: cancellationToken);
@@ -205,8 +205,8 @@ internal sealed class IdentityScenario(
             "group has DeleteItem after grant");
 
         await _check.AllowedAsync("admin revokes DeleteItem from group", () =>
-            _admin.V1.UserGroups[groupGuid].PutAsync(
-                new UserGroupUpdateDto { PermissionsToRemove = [ActionTypes.DeleteItem] },
+            _admin.V1.UserGroups[groupGuid].Permissions.PutAsync(
+                new PermissionsChangeDto { PermissionsToRemove = [ActionTypes.DeleteItem] },
                 cancellationToken: cancellationToken));
 
         var afterRemove = await _admin.V1.UserGroups[groupGuid].GetAsync(cancellationToken: cancellationToken);
@@ -216,13 +216,13 @@ internal sealed class IdentityScenario(
 
         // Grant a direct permission to the limited user, then revoke it.
         await _check.AllowedAsync("admin grants direct CreateArticle to limited user", () =>
-            _admin.V1.Users[limitedUserGuid].PutAsync(
-                new UserUpdateDto { PermissionsToAdd = [ActionTypes.CreateArticle] },
+            _admin.V1.Users[limitedUserGuid].Permissions.PutAsync(
+                new PermissionsChangeDto { PermissionsToAdd = [ActionTypes.CreateArticle] },
                 cancellationToken: cancellationToken));
 
         await _check.AllowedAsync("admin revokes direct CreateArticle from limited user", () =>
-            _admin.V1.Users[limitedUserGuid].PutAsync(
-                new UserUpdateDto { PermissionsToRemove = [ActionTypes.CreateArticle] },
+            _admin.V1.Users[limitedUserGuid].Permissions.PutAsync(
+                new PermissionsChangeDto { PermissionsToRemove = [ActionTypes.CreateArticle] },
                 cancellationToken: cancellationToken));
     }
 

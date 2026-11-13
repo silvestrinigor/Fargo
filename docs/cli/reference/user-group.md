@@ -19,46 +19,90 @@ Options:
   -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
 
 Commands:
-  list           List user groups as a table.
+  list                        List user groups as a table.
   
-                 By default the list is paged interactively: a page of user groups is
-                 shown and you can press 'n' for the next page, 'p' for the previous
-                 page, or 'q' to quit (press Enter after the key). Passing --page or
-                 --limit switches to a single, non-interactive fetch of exactly that
-                 page.
+                              By default the list is paged interactively: a page of user groups is
+                              shown and you can press 'n' for the next page, 'p' for the previous
+                              page, or 'q' to quit (press Enter after the key). Passing --page or
+                              --limit switches to a single, non-interactive fetch of exactly that
+                              page.
   
-                 Examples:
-                   fargo user-group list
-                   fargo user-group list --page 2
-                   fargo user-group list --page 1 --limit 50
-                   fargo user-group list --partitions 00000000-0000-0000-0000-000000000001
-  tree           Show user groups as a tree: child groups nested under their parent,
-                 and member users nested under each group.
+                              Examples:
+                                fargo user-group list
+                                fargo user-group list --page 2
+                                fargo user-group list --page 1 --limit 50
+                                fargo user-group list --partitions 00000000-0000-0000-0000-000000000001
+  tree                        Show user groups as a tree: child groups nested under their parent,
+                              and member users nested under each group.
   
-                 Each line is tagged with its type ([group] or [user]). Users that
-                 are not in any group appear at the root level, alongside the
-                 top-level groups.
+                              Each line is tagged with its type ([group] or [user]). Users that
+                              are not in any group appear at the root level, alongside the
+                              top-level groups.
   
-                 Examples:
-                   fargo user-group tree
-  get <guid>     Show the full details of a single user group.
+                              Examples:
+                                fargo user-group tree
+  get <guid>                  Show the full details of a single user group.
   
-                 Examples:
-                   fargo user-group get 00000000-0000-0000-0000-000000000003
-  create         Create a new user group, optionally nested under a parent group.
+                              Examples:
+                                fargo user-group get 00000000-0000-0000-0000-000000000003
+  create                      Create a new user group, optionally nested under a parent group.
   
-                 Examples:
-                   fargo user-group create --name warehouse-ops
-                   fargo user-group create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
-  update <guid>  Update an existing user group. Only the options you pass are changed.
+                              Examples:
+                                fargo user-group create --name warehouse-ops
+                                fargo user-group create --name warehouse-ops --parent 00000000-0000-0000-0000-000000000003
+  update <guid>               Update the name or description of an existing user group. Only the options you pass are changed.
   
-                 Examples:
-                   fargo user-group update 00000000-0000-0000-0000-000000000003 --active false
-                   fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
-  delete <guid>  Delete a user group by GUID.
+                              Activation, permissions, partitions and the parent group have their own
+                              commands: set-active, set-permissions, set-partitions, set-parent and remove-parent.
   
-                 Examples:
-                   fargo user-group delete 00000000-0000-0000-0000-000000000003
+                              Examples:
+                                fargo user-group update 00000000-0000-0000-0000-000000000003 --name editors
+                                fargo user-group update 00000000-0000-0000-0000-000000000003 --description "Content editors"
+  set-active <guid> <active>  Activate or deactivate a user group.
+  
+                              This is a separate operation from update and requires its own permission.
+  
+                              Examples:
+                                fargo user-group set-active 00000000-0000-0000-0000-000000000003 true
+                                fargo user-group set-active 00000000-0000-0000-0000-000000000003 false
+  set-permissions <guid>      Grant and revoke permissions of a user group.
+  
+                              Permissions are numeric ActionType codes (space-separated). This is a
+                              separate operation from update and requires the ChangeUserGroupPermissions
+                              permission. You must hold every permission you grant or revoke.
+  
+                              Examples:
+                                fargo user-group set-permissions 00000000-0000-0000-0000-000000000003 --add 4 6
+                                fargo user-group set-permissions 00000000-0000-0000-0000-000000000003 --add 4 --remove 2
+  set-partitions <guid>       Change the partitions of a user group.
+  
+                              Membership is the partitions it belongs to; access is the partitions it
+                              may reach. This is a separate operation from update and requires the
+                              ChangeUserGroupPartitions permission. You need access to every partition you touch.
+  
+                              Examples:
+                                fargo user-group set-partitions 00000000-0000-0000-0000-000000000003 --add-accesses 00000000-0000-0000-0000-000000000002
+                                fargo user-group set-partitions 00000000-0000-0000-0000-000000000003 --add-memberships 00000000-0000-0000-0000-000000000002 --remove-accesses 00000000-0000-0000-0000-000000000005
+  set-parent <guid>           Place a user group under a parent group.
+  
+                              Members of the group inherit the permissions of the parent and of its
+                              ancestors, so you must hold all of them. This is a separate operation from
+                              update and requires the ChangeUserGroupParent permission. Use 'remove-parent'
+                              to detach the group.
+  
+                              Examples:
+                                fargo user-group set-parent 00000000-0000-0000-0000-000000000003 --parent 00000000-0000-0000-0000-000000000009
+  remove-parent <guid>        Detach a user group from its parent.
+  
+                              Members stop inheriting the permissions of the parent. Requires the
+                              ChangeUserGroupParent permission.
+  
+                              Examples:
+                                fargo user-group remove-parent 00000000-0000-0000-0000-000000000003
+  delete <guid>               Delete a user group by GUID.
+  
+                              Examples:
+                                fargo user-group delete 00000000-0000-0000-0000-000000000003
 
 ```
 
@@ -176,11 +220,14 @@ Options:
 
 ```text
 Description:
-  Update an existing user group. Only the options you pass are changed.
+  Update the name or description of an existing user group. Only the options you pass are changed.
+  
+  Activation, permissions, partitions and the parent group have their own
+  commands: set-active, set-permissions, set-partitions, set-parent and remove-parent.
   
   Examples:
-    fargo user-group update 00000000-0000-0000-0000-000000000003 --active false
-    fargo user-group update 00000000-0000-0000-0000-000000000003 --remove-parent
+    fargo user-group update 00000000-0000-0000-0000-000000000003 --name editors
+    fargo user-group update 00000000-0000-0000-0000-000000000003 --description "Content editors"
 
 Usage:
   fargo user-group update <guid> [options]
@@ -189,9 +236,157 @@ Arguments:
   <guid>  The user group GUID.
 
 Options:
-  --active               Set the user group active state (true or false).
-  --parent <parent>      New parent user group GUID.
-  --remove-parent        Remove the parent user group association.
+  --name <name>                New name identifier (nameid) for the user group.
+  --description <description>  New description.
+  --username <username>        Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>        Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help               Show help and usage information
+  --server <server>            The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user-group set-active`
+
+```text
+Description:
+  Activate or deactivate a user group.
+  
+  This is a separate operation from update and requires its own permission.
+  
+  Examples:
+    fargo user-group set-active 00000000-0000-0000-0000-000000000003 true
+    fargo user-group set-active 00000000-0000-0000-0000-000000000003 false
+
+Usage:
+  fargo user-group set-active <guid> [<active>] [options]
+
+Arguments:
+  <guid>    The user group GUID.
+  <active>  true to activate, false to deactivate.
+
+Options:
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user-group set-permissions`
+
+```text
+Description:
+  Grant and revoke permissions of a user group.
+  
+  Permissions are numeric ActionType codes (space-separated). This is a
+  separate operation from update and requires the ChangeUserGroupPermissions
+  permission. You must hold every permission you grant or revoke.
+  
+  Examples:
+    fargo user-group set-permissions 00000000-0000-0000-0000-000000000003 --add 4 6
+    fargo user-group set-permissions 00000000-0000-0000-0000-000000000003 --add 4 --remove 2
+
+Usage:
+  fargo user-group set-permissions <guid> [options]
+
+Arguments:
+  <guid>  The a user group GUID.
+
+Options:
+  --add <add>            ActionType permission codes to grant (space-separated).
+  --remove <remove>      ActionType permission codes to revoke (space-separated).
+  --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help         Show help and usage information
+  --server <server>      The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose          Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user-group set-partitions`
+
+```text
+Description:
+  Change the partitions of a user group.
+  
+  Membership is the partitions it belongs to; access is the partitions it
+  may reach. This is a separate operation from update and requires the
+  ChangeUserGroupPartitions permission. You need access to every partition you touch.
+  
+  Examples:
+    fargo user-group set-partitions 00000000-0000-0000-0000-000000000003 --add-accesses 00000000-0000-0000-0000-000000000002
+    fargo user-group set-partitions 00000000-0000-0000-0000-000000000003 --add-memberships 00000000-0000-0000-0000-000000000002 --remove-accesses 00000000-0000-0000-0000-000000000005
+
+Usage:
+  fargo user-group set-partitions <guid> [options]
+
+Arguments:
+  <guid>  The a user group GUID.
+
+Options:
+  --add-memberships <add-memberships>        Partition GUIDs to add to the membership (space-separated).
+  --remove-memberships <remove-memberships>  Partition GUIDs to remove from the membership (space-separated).
+  --add-accesses <add-accesses>              Partition GUIDs to grant access to (space-separated).
+  --remove-accesses <remove-accesses>        Partition GUIDs to revoke access from (space-separated).
+  --username <username>                      Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>                      Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                             Show help and usage information
+  --server <server>                          The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                              Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user-group set-parent`
+
+```text
+Description:
+  Place a user group under a parent group.
+  
+  Members of the group inherit the permissions of the parent and of its
+  ancestors, so you must hold all of them. This is a separate operation from
+  update and requires the ChangeUserGroupParent permission. Use 'remove-parent'
+  to detach the group.
+  
+  Examples:
+    fargo user-group set-parent 00000000-0000-0000-0000-000000000003 --parent 00000000-0000-0000-0000-000000000009
+
+Usage:
+  fargo user-group set-parent <guid> [options]
+
+Arguments:
+  <guid>  The user group GUID.
+
+Options:
+  --parent <parent> (REQUIRED)  GUID of the new parent user group.
+  --username <username>         Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
+  --password <password>         Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
+  -?, -h, --help                Show help and usage information
+  --server <server>             The Fargo server URL to connect to (e.g. https://localhost:7563). Overrides the configured server for this invocation.
+  -v, --verbose                 Show detailed diagnostics for errors, including exception types, inner exceptions, and stack traces.
+
+```
+
+## `fargo user-group remove-parent`
+
+```text
+Description:
+  Detach a user group from its parent.
+  
+  Members stop inheriting the permissions of the parent. Requires the
+  ChangeUserGroupParent permission.
+  
+  Examples:
+    fargo user-group remove-parent 00000000-0000-0000-0000-000000000003
+
+Usage:
+  fargo user-group remove-parent <guid> [options]
+
+Arguments:
+  <guid>  The user group GUID.
+
+Options:
   --username <username>  Username to authenticate with for this invocation. Provide together with --password to sign in just for this command.
   --password <password>  Password to authenticate with for this invocation. Provide together with --username to sign in just for this command.
   -?, -h, --help         Show help and usage information

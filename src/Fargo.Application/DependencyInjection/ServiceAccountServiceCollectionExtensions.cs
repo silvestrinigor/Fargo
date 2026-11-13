@@ -1,6 +1,5 @@
-using Fargo.Application.Common.Paging;
-using Fargo.Application.DependencyInjection;
 using Fargo.Application.Commands.ServiceAccounts;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.ServiceAccounts;
 using Fargo.Application.Queries.ServiceAccounts;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +13,9 @@ public static class ServiceAccountServiceCollectionExtensions
         public IServiceCollection AddFargoServiceAccountApplication() => services
         .AddFargoCommandHandler<ServiceAccountCreateCommand, ServiceAccountCreatedDto, ServiceAccountCreateCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountUpdateCommand, ServiceAccountUpdateCommandHandler>()
+        .AddFargoCommandHandler<ServiceAccountSetActiveCommand, ServiceAccountSetActiveCommandHandler>()
+        .AddFargoCommandHandler<ServiceAccountSetPermissionsCommand, ServiceAccountSetPermissionsCommandHandler>()
+        .AddFargoCommandHandler<ServiceAccountSetPartitionsCommand, ServiceAccountSetPartitionsCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountRotateSecretCommand, ServiceAccountCreatedDto, ServiceAccountRotateSecretCommandHandler>()
         .AddFargoCommandHandler<ServiceAccountDeleteCommand, ServiceAccountDeleteCommandHandler>()
         .AddFargoQueryHandler<ServiceAccountSingleQuery, ServiceAccountDto?, ServiceAccountSingleQueryHandler>()

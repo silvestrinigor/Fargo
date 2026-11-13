@@ -453,8 +453,8 @@ internal sealed class LargeTreeScenario(
 
             try
             {
-                await _admin.V1.Items[item.Guid].PatchAsync(
-                    new ItemUpdateDto { ParentItemContainerGuid = otherContainer },
+                await _admin.V1.Items[item.Guid].Location.PutAsync(
+                    new ItemSetLocationDto { ParentItemContainerGuid = otherContainer },
                     cancellationToken: cancellationToken);
                 item.ContainerGuid = otherContainer;
                 moved++;
@@ -611,8 +611,8 @@ internal sealed class LargeTreeScenario(
         // Admin can toggle a user active/inactive and the change is reflected.
         var toggleUser = _users[^1];
         await _check.AllowedAsync($"admin deactivates '{toggleUser.Nameid}'", () =>
-            _admin.V1.Users[toggleUser.Guid].PutAsync(
-                new UserUpdateDto { IsActive = false }, cancellationToken: cancellationToken));
+            _admin.V1.Users[toggleUser.Guid].IsActive.PutAsync(
+                new ActiveStateDto { IsActive = false }, cancellationToken: cancellationToken));
         var afterDeactivate = await _admin.V1.Users[toggleUser.Guid].GetAsync(cancellationToken: cancellationToken);
         _check.Equal(false, afterDeactivate?.IsActive, $"'{toggleUser.Nameid}' is now inactive");
 
@@ -624,8 +624,8 @@ internal sealed class LargeTreeScenario(
 
         // Reactivate so later phases can still use it if needed.
         await _check.AllowedAsync($"admin reactivates '{toggleUser.Nameid}'", () =>
-            _admin.V1.Users[toggleUser.Guid].PutAsync(
-                new UserUpdateDto { IsActive = true }, cancellationToken: cancellationToken));
+            _admin.V1.Users[toggleUser.Guid].IsActive.PutAsync(
+                new ActiveStateDto { IsActive = true }, cancellationToken: cancellationToken));
     }
 
     // -------------------------------------------------------------------------
@@ -716,8 +716,8 @@ internal sealed class LargeTreeScenario(
             var destination = (i % 2 == 0) ? c1 : c2;
             try
             {
-                await _admin.V1.Items[moveItem].PatchAsync(
-                    new ItemUpdateDto { ParentItemContainerGuid = destination },
+                await _admin.V1.Items[moveItem].Location.PutAsync(
+                    new ItemSetLocationDto { ParentItemContainerGuid = destination },
                     cancellationToken: cancellationToken);
             }
             catch (FargoApiException)
@@ -742,9 +742,9 @@ internal sealed class LargeTreeScenario(
             try
             {
                 var dto = (i % 2 == 0)
-                    ? new UserUpdateDto { UserGroupsToAdd = [g.Guid] }
-                    : new UserUpdateDto { UserGroupsToRemove = [g.Guid] };
-                await _admin.V1.Users[churnUser.Guid].PutAsync(dto, cancellationToken: cancellationToken);
+                    ? new UserGroupsChangeDto { UserGroupsToAdd = [g.Guid] }
+                    : new UserGroupsChangeDto { UserGroupsToRemove = [g.Guid] };
+                await _admin.V1.Users[churnUser.Guid].UserGroups.PutAsync(dto, cancellationToken: cancellationToken);
             }
             catch (FargoApiException)
             {
@@ -897,6 +897,25 @@ internal sealed class LargeTreeScenario(
         var itemEventEntries = windowLogs?.Items?
             .Count(l => l.AuditLogType == AuditLogTypes.ItemEventRecorded) ?? 0;
         Log.Info($"ItemEvent audit entries: {itemEventEntries}");
+
+        // 9h. Replaying an item creation with the same Idempotency-Key returns the first result.
+        var idempotencyPartition = _partitions.First(p => p.Level >= 1 || p.ParentGuid is null).Guid;
+        var idempotencyArticle = await _admin.V1.Articles.PostAsync(
+            new ArticleCreateDto
+            {
+                Name = N($"idempotency-{_random.Next(100000)}"),
+                ArticleType = ArticleTypeContainer,
+                PartitionsToAdd = [idempotencyPartition],
+            },
+            cancellationToken: cancellationToken);
+        var idempotencyKey = Guid.NewGuid();
+        var itemDto = new ItemCreateDto { ArticleGuid = idempotencyArticle, PartitionsToAdd = [idempotencyPartition] };
+        var firstItem = await _admin.V1.Items.PostAsync(
+            itemDto, IdempotencyKeys.Header(idempotencyKey), cancellationToken);
+        var replayedItem = await _admin.V1.Items.PostAsync(
+            itemDto, IdempotencyKeys.Header(idempotencyKey), cancellationToken);
+        _check.That(firstItem is not null && firstItem != Guid.Empty && firstItem == replayedItem,
+            "a retried item creation with the same Idempotency-Key returns the first item");
 
         Log.Success("Audit-log inspection completed.");
     }

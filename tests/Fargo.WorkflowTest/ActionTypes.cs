@@ -27,6 +27,32 @@ internal static class ActionTypes
     public const int EditPartition = 17;
     public const int ReadAuditLogs = 18;
     public const int ReadItemEvents = 19;
+    public const int CreateServiceAccount = 20;
+    public const int DeleteServiceAccount = 21;
+    public const int EditServiceAccount = 22;
+    public const int ReadServiceAccount = 23;
+    public const int CreateSupplyOrder = 24;
+    public const int EditSupplyOrder = 25;
+    public const int PlaceSupplyOrder = 26;
+    public const int ReceiveSupplyOrder = 27;
+    public const int CancelSupplyOrder = 28;
+    public const int CloseSupplyOrder = 29;
+    public const int ReadSupplyOrders = 30;
+    public const int ActivateUser = 31;
+    public const int ActivateUserGroup = 32;
+    public const int ActivateServiceAccount = 33;
+    public const int MoveItem = 34;
+    public const int ChangeUserPermissions = 35;
+    public const int ChangeUserGroupPermissions = 36;
+    public const int ChangeServiceAccountPermissions = 37;
+    public const int ChangeUserPartitions = 38;
+    public const int ChangeUserGroupPartitions = 39;
+    public const int ChangeServiceAccountPartitions = 40;
+    public const int ChangeUserGroupParent = 41;
+    public const int ChangePartitionParent = 42;
+    public const int RotateServiceAccountSecret = 43;
+    public const int ChangeArticlePartitions = 44;
+    public const int ChangeItemPartitions = 45;
 
     public static string Name(int code) => code switch
     {
@@ -49,6 +75,32 @@ internal static class ActionTypes
         EditPartition => "EditPartition",
         ReadAuditLogs => "ReadAuditLogs",
         ReadItemEvents => "ReadItemEvents",
+        CreateServiceAccount => "CreateServiceAccount",
+        DeleteServiceAccount => "DeleteServiceAccount",
+        EditServiceAccount => "EditServiceAccount",
+        ReadServiceAccount => "ReadServiceAccount",
+        CreateSupplyOrder => "CreateSupplyOrder",
+        EditSupplyOrder => "EditSupplyOrder",
+        PlaceSupplyOrder => "PlaceSupplyOrder",
+        ReceiveSupplyOrder => "ReceiveSupplyOrder",
+        CancelSupplyOrder => "CancelSupplyOrder",
+        CloseSupplyOrder => "CloseSupplyOrder",
+        ReadSupplyOrders => "ReadSupplyOrders",
+        ActivateUser => "ActivateUser",
+        ActivateUserGroup => "ActivateUserGroup",
+        ActivateServiceAccount => "ActivateServiceAccount",
+        MoveItem => "MoveItem",
+        ChangeUserPermissions => "ChangeUserPermissions",
+        ChangeUserGroupPermissions => "ChangeUserGroupPermissions",
+        ChangeServiceAccountPermissions => "ChangeServiceAccountPermissions",
+        ChangeUserPartitions => "ChangeUserPartitions",
+        ChangeUserGroupPartitions => "ChangeUserGroupPartitions",
+        ChangeServiceAccountPartitions => "ChangeServiceAccountPartitions",
+        ChangeUserGroupParent => "ChangeUserGroupParent",
+        ChangePartitionParent => "ChangePartitionParent",
+        RotateServiceAccountSecret => "RotateServiceAccountSecret",
+        ChangeArticlePartitions => "ChangeArticlePartitions",
+        ChangeItemPartitions => "ChangeItemPartitions",
         _ => $"Action({code})",
     };
 }

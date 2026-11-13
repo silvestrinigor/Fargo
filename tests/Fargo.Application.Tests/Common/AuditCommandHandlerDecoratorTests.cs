@@ -1,6 +1,6 @@
 using Fargo.Application.Abstractions;
-using Fargo.Application.Decorators;
 using Fargo.Application.Commands.Articles;
+using Fargo.Application.Decorators;
 using Fargo.Application.Dtos.Articles;
 using Fargo.Core.Audits;
 using Fargo.Core.Entities.Actors;
@@ -55,7 +55,7 @@ public class AuditCommandHandlerDecoratorTests
     {
         var inner = Substitute.For<ICommandHandler<ArticleCreateCommand>>();
 
-        // No current actor (actor-less host, e.g. seed worker).
+        // No current actor (actor-less host, e.g. initializer worker).
         var decorator = new AuditCommandHandlerDecorator<ArticleCreateCommand>(
             inner, currentActor: null, auditLogRepository);
 

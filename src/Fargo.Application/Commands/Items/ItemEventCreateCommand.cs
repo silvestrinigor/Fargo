@@ -10,7 +10,8 @@ using Fargo.Core.Events;
 
 namespace Fargo.Application.Commands.Items;
 
-public sealed record ItemEventCreateCommand(ItemEventCreateDto Create) : ICommand<Guid>;
+public sealed record ItemEventCreateCommand(ItemEventCreateDto Create, Guid? IdempotencyKey = null)
+    : ICommand<Guid>, IIdempotentCommand;
 
 /// <remarks>
 /// Only valid for an event-tracked article; entity-tracked articles record stock through their

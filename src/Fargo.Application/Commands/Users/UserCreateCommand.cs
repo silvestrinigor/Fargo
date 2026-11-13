@@ -74,6 +74,8 @@ public sealed class UserCreateCommandHandler(
 
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserPermissions);
+
             var requestedActions = permissions.Distinct();
 
             foreach (var action in requestedActions)
@@ -86,6 +88,8 @@ public sealed class UserCreateCommandHandler(
 
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitions)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserPartitions);
+
             foreach (var partitionGuid in partitions.Distinct())
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
@@ -100,6 +104,8 @@ public sealed class UserCreateCommandHandler(
 
         if (command.Create.UserGroupsToAdd is { Count: > 0 } userGroups)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserGroupMembers);
+
             foreach (var userGroupGuid in userGroups.Distinct())
             {
                 var userGroup = await userGroupRepository.GetByGuidAsync(userGroupGuid, cancellationToken);
@@ -108,12 +114,16 @@ public sealed class UserCreateCommandHandler(
 
                 actor.ThrowIfAccessDenied(userGroup);
 
+                await actor.ThrowIfMissingInheritedPermissionsAsync(userGroup, userGroupRepository, cancellationToken);
+
                 user.AddUserGroup(userGroup);
             }
         }
 
         if (command.Create.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserPartitions);
+
             foreach (var partitionGuid in partitionAccessesToAdd.Distinct())
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);

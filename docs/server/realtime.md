@@ -13,7 +13,7 @@ Today only **articles** produce events (`created`, `edited`, `deleted`).
 command commits ──► outbox row (same transaction)
                       │
                       ▼
-          Fargo.ServiceOutbox ──► RabbitMQ topic exchange "fargo.events"
+          Fargo.ServiceEventPublisher ──► RabbitMQ topic exchange "fargo.events"
                                           │  routing key article.*
                                           ▼
                               Fargo.ServiceRealtime (one queue per instance)

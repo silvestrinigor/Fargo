@@ -1,6 +1,5 @@
-using Fargo.Application.Common.Paging;
-using Fargo.Application.DependencyInjection;
 using Fargo.Application.Commands.SupplyOrders;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.SupplyOrders;
 using Fargo.Application.Queries.SupplyOrders;
 using Microsoft.Extensions.DependencyInjection;

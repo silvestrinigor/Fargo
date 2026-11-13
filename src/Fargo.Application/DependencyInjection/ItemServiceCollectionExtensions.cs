@@ -1,6 +1,5 @@
-using Fargo.Application.Common.Paging;
-using Fargo.Application.DependencyInjection;
 using Fargo.Application.Commands.Items;
+using Fargo.Application.Common.Paging;
 using Fargo.Application.Dtos.Items;
 using Fargo.Application.Queries.Items;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +12,9 @@ public static class ItemServiceCollectionExtensions
     {
         public IServiceCollection AddFargoItemApplication() => services
         .AddFargoCommandHandler<ItemCreateCommand, Guid, ItemCreateCommandHandler>()
-        .AddFargoCommandHandler<ItemUpdateCommand, ItemUpdateCommandHandler>()
+        .AddFargoCommandHandler<ItemSetPartitionsCommand, ItemSetPartitionsCommandHandler>()
+        .AddFargoCommandHandler<ItemSetLocationCommand, ItemSetLocationCommandHandler>()
+        .AddFargoCommandHandler<ItemRemoveFromContainerCommand, ItemRemoveFromContainerCommandHandler>()
         .AddFargoCommandHandler<ItemDeleteCommand, ItemDeleteCommandHandler>()
         .AddFargoCommandHandler<ItemEventCreateCommand, Guid, ItemEventCreateCommandHandler>()
         .AddFargoQueryHandler<ItemSingleQuery, ItemDto?, ItemSingleQueryHandler>()

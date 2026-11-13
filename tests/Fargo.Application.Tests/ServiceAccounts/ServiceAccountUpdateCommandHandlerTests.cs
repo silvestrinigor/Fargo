@@ -1,6 +1,6 @@
+using Fargo.Application.Commands.ServiceAccounts;
 using Fargo.Application.Common.Actors;
 using Fargo.Application.Common.Exceptions;
-using Fargo.Application.Commands.ServiceAccounts;
 using Fargo.Application.Dtos.ServiceAccounts;
 using Fargo.Application.Tests.Common;
 using Fargo.Core.Entities.Actors;
@@ -16,7 +16,6 @@ namespace Fargo.Application.Tests.ServiceAccounts;
 public class ServiceAccountUpdateCommandHandlerTests
 {
     private readonly IServiceAccountRepository serviceAccountRepository = Substitute.For<IServiceAccountRepository>();
-    private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly TestCurrentActor currentActor = new();
 
@@ -24,7 +23,6 @@ public class ServiceAccountUpdateCommandHandlerTests
         => new(
             ActorTestFactory.Resolver(userRepository, serviceAccountRepository),
             serviceAccountRepository,
-            partitionRepository,
             currentActor);
 
     private static ServiceAccount ExistingAccount()
@@ -35,72 +33,17 @@ public class ServiceAccountUpdateCommandHandlerTests
             .Returns(Task.FromResult<ServiceAccount?>(account));
 
     [Fact]
-    public async Task HandleAsync_WhenAddingMembership_ShouldAddPartitionMembership()
+    public async Task HandleAsync_WhenUpdatingDescription_ShouldChangeIt()
     {
         var account = ExistingAccount();
         Existing(account);
-
-        var global = Partition.CreateGlobalPartition(new Name("global"));
-        var partition = Partition.CreatePartition(new Name("branch"), global);
-
-        ActorTestFactory.ConfigureUserActor(
-            userRepository, currentActor.Guid, [ActionType.EditServiceAccount], [partition.Guid]);
-
-        partitionRepository.GetByGuidAsync(partition.Guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Partition?>(partition));
-
-        var command = new ServiceAccountUpdateCommand(
-            account.ActorGuid, new ServiceAccountUpdateDto(PartitionsToAdd: [partition.Guid]));
-
-        await CreateHandler().HandleAsync(command);
-
-        Assert.Contains(partition.Guid, account.Actor.PartitionGuids);
-    }
-
-    [Fact]
-    public async Task HandleAsync_WhenRemovingMembership_ShouldRemovePartitionMembership()
-    {
-        var global = Partition.CreateGlobalPartition(new Name("global"));
-        var partition = Partition.CreatePartition(new Name("branch"), global);
-
-        var account = ExistingAccount();
-        account.Actor.AddPartition(partition);
-        Existing(account);
-
-        ActorTestFactory.ConfigureUserActor(
-            userRepository, currentActor.Guid, [ActionType.EditServiceAccount], [partition.Guid]);
-
-        partitionRepository.GetByGuidAsync(partition.Guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Partition?>(partition));
-
-        var command = new ServiceAccountUpdateCommand(
-            account.ActorGuid, new ServiceAccountUpdateDto(PartitionsToRemove: [partition.Guid]));
-
-        await CreateHandler().HandleAsync(command);
-
-        Assert.DoesNotContain(partition.Guid, account.Actor.PartitionGuids);
-    }
-
-    [Fact]
-    public async Task HandleAsync_WhenActorHasNoAccessToMembershipPartition_ShouldThrowAccessDenied()
-    {
-        var account = ExistingAccount();
-        Existing(account);
-
         ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.EditServiceAccount]);
 
-        var global = Partition.CreateGlobalPartition(new Name("global"));
-        var restricted = Partition.CreatePartition(new Name("restricted"), global);
-        partitionRepository.GetByGuidAsync(restricted.Guid, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Partition?>(restricted));
+        await CreateHandler().HandleAsync(new ServiceAccountUpdateCommand(
+            account.ActorGuid, new ServiceAccountUpdateDto(Description: "CI runner")));
 
-        var command = new ServiceAccountUpdateCommand(
-            account.ActorGuid, new ServiceAccountUpdateDto(PartitionsToAdd: [restricted.Guid]));
-
-        await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
-            () => CreateHandler().HandleAsync(command));
+        Assert.Equal("CI runner", account.Actor.Description.Value);
     }
-
     [Fact]
     public async Task HandleAsync_WhenAccountNotFound_ShouldThrow()
     {
@@ -125,6 +68,24 @@ public class ServiceAccountUpdateCommandHandlerTests
             Guid.NewGuid(), new ServiceAccountUpdateDto(Description: "x"));
 
         await Assert.ThrowsAsync<ActorPermissionDeniedFargoApplicationException>(
+            () => CreateHandler().HandleAsync(command));
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenActorHasNoAccessToTheAccountPartition_ShouldThrowAccessDenied()
+    {
+        var global = Partition.CreateGlobalPartition(new Name("global"));
+        var restricted = Partition.CreatePartition(new Name("restricted"), global);
+        var account = ExistingAccount();
+        account.Actor.AddPartition(restricted);
+        Existing(account);
+
+        ActorTestFactory.ConfigureUserActor(userRepository, currentActor.Guid, [ActionType.EditServiceAccount]);
+
+        var command = new ServiceAccountUpdateCommand(
+            account.ActorGuid, new ServiceAccountUpdateDto(Description: "x"));
+
+        await Assert.ThrowsAsync<ActorAccessDeniedFargoApplicationException>(
             () => CreateHandler().HandleAsync(command));
     }
 }

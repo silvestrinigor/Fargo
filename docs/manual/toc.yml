@@ -34,6 +34,8 @@
       href: ../server/cross-cutting.md
     - name: Operations
       href: ../server/operations.md
+    - name: Idempotency
+      href: ../server/idempotency.md
     - name: Integration Events
       href: ../server/integration-events.md
     - name: Real-time Updates (SignalR)
@@ -77,6 +79,8 @@
       href: ../web-api/overview.md
     - name: Getting Started
       href: ../web-api/getting-started.md
+    - name: Idempotency Keys
+      href: ../web-api/idempotency.md
     - name: API Reference
       href: ../web-api/reference/fargo.swagger.json
 - name: MCP Server

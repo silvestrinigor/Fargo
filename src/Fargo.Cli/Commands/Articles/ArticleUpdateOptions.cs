@@ -80,18 +80,6 @@ internal sealed class ArticleUpdateOptions
         Description = "Clear the existing EAN-13 barcode. Takes precedence over --barcode-ean13."
     };
 
-    public Option<Guid[]?> AddPartitions { get; } = new("--add-partitions")
-    {
-        Description = "Partition GUIDs to add (space-separated).",
-        AllowMultipleArgumentsPerToken = true
-    };
-
-    public Option<Guid[]?> RemovePartitions { get; } = new("--remove-partitions")
-    {
-        Description = "Partition GUIDs to remove (space-separated).",
-        AllowMultipleArgumentsPerToken = true
-    };
-
     public void AddTo(Command command)
     {
         command.Add(Name);
@@ -108,8 +96,6 @@ internal sealed class ArticleUpdateOptions
         command.Add(RemoveLengthZ);
         command.Add(BarcodeEan13);
         command.Add(RemoveBarcode);
-        command.Add(AddPartitions);
-        command.Add(RemovePartitions);
     }
 
     /// <summary>
@@ -126,9 +112,7 @@ internal sealed class ArticleUpdateOptions
             Description = parseResult.GetValue(Description),
             ShelfLife = parseResult.GetValue(ShelfLife),
             RemoveShelfLife = removeShelfLife ? true : null,
-            RemoveMass = removeMass ? true : null,
-            PartitionsToAdd = parseResult.GetValue(AddPartitions)?.Select(g => (Guid?)g).ToList(),
-            PartitionsToRemove = parseResult.GetValue(RemovePartitions)?.Select(g => (Guid?)g).ToList()
+            RemoveMass = removeMass ? true : null
         };
 
         var mass = parseResult.GetValue(Mass);

@@ -9,7 +9,8 @@ using Fargo.Core.Entities.Partitions;
 
 namespace Fargo.Application.Commands.Items;
 
-public sealed record ItemCreateCommand(ItemCreateDto Create) : ICommand<Guid>;
+public sealed record ItemCreateCommand(ItemCreateDto Create, Guid? IdempotencyKey = null)
+    : ICommand<Guid>, IIdempotentCommand;
 
 public sealed class ItemCreateCommandHandler(
     ItemService itemService,

@@ -238,8 +238,6 @@ public static class ArticleTools
         [Description("Set true to clear the Z dimension.")] bool? removeLengthZ = null,
         [Description("The new EAN-13 barcode.")] string? barcodeEan13 = null,
         [Description("Set true to clear the EAN-13 barcode.")] bool? removeBarcodeEan13 = null,
-        [Description("The GUIDs of the partitions to associate with the article.")] Guid[]? partitionsToAdd = null,
-        [Description("The GUIDs of the partitions to disassociate from the article.")] Guid[]? partitionsToRemove = null,
         CancellationToken cancellationToken = default)
     {
         await authenticator.EnsureAuthenticatedAsync(cancellationToken);
@@ -250,9 +248,7 @@ public static class ArticleTools
             Description = description,
             ShelfLife = shelfLife,
             RemoveShelfLife = removeShelfLife,
-            RemoveMass = removeMass,
-            PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
-            PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove)
+            RemoveMass = removeMass
         };
 
         if (!string.IsNullOrWhiteSpace(mass))
@@ -279,6 +275,29 @@ public static class ArticleTools
         await client.V1.Articles[articleGuid.ToString()].PatchAsync(body, cancellationToken: cancellationToken);
 
         return $"Article '{articleGuid}' updated.";
+    }
+
+    [McpServerTool(Name = "fargo_articles_set_partitions")]
+    [Description("Change the partitions an article belongs to in one request. At least one partition is required and none may be in both lists. The caller needs access to every partition it touches. Requires the ChangeArticlePartitions permission, which is separate from the permission to update.")]
+    public static async Task<string> SetArticlePartitionsAsync(
+        FargoApiClient client,
+        FargoAuthenticator authenticator,
+        [Description("The GUID of the article.")] Guid articleGuid,
+        [Description("GUIDs of partitions to add.")] Guid[]? partitionsToAdd = null,
+        [Description("GUIDs of partitions to remove.")] Guid[]? partitionsToRemove = null,
+        CancellationToken cancellationToken = default)
+    {
+        await authenticator.EnsureAuthenticatedAsync(cancellationToken);
+
+        var body = new PartitionMembershipsChangeDto
+        {
+            PartitionsToAdd = ToolInput.ToGuidList(partitionsToAdd),
+            PartitionsToRemove = ToolInput.ToGuidList(partitionsToRemove)
+        };
+
+        await client.V1.Articles[articleGuid.ToString()].Partitions.PutAsync(body, cancellationToken: cancellationToken);
+
+        return $"Article '{articleGuid}' partitions updated.";
     }
 
     [McpServerTool(Name = "fargo_articles_get_inventory")]

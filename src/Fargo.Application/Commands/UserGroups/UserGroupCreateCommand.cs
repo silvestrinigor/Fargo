@@ -48,13 +48,19 @@ public sealed class UserGroupCreateCommandHandler(
 
             EntityNotFoundFargoApplicationException.ThrowIfNull(parentUserGroup, parentUserGroupGuid);
 
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserGroupParent);
+
             actor.ThrowIfAccessDenied(parentUserGroup);
+
+            await actor.ThrowIfMissingInheritedPermissionsAsync(parentUserGroup, userGroupRepository, cancellationToken);
 
             userGroup.SetParentUserGroup(parentUserGroup);
         }
 
         if (command.Create.PermissionsToAdd is { Count: > 0 } permissions)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserGroupPermissions);
+
             var requestedActions = permissions.Distinct();
 
             foreach (var action in requestedActions)
@@ -67,6 +73,8 @@ public sealed class UserGroupCreateCommandHandler(
 
         if (command.Create.PartitionsToAdd is { Count: > 0 } partitions)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserGroupPartitions);
+
             foreach (var partitionGuid in partitions.Distinct())
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
@@ -81,6 +89,8 @@ public sealed class UserGroupCreateCommandHandler(
 
         if (command.Create.PartitionAccessesToAdd is { Count: > 0 } partitionAccessesToAdd)
         {
+            actor.ThrowIfPermissionDenied(ActionType.ChangeUserGroupPartitions);
+
             foreach (var partitionGuid in partitionAccessesToAdd.Distinct())
             {
                 var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);

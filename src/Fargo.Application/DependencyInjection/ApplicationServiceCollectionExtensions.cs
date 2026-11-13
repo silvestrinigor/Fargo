@@ -30,7 +30,8 @@ public static class ApplicationServiceCollectionExtensions
         .AddFargoInitializationApplication()
         .AddFargoAuditLogApplication()
         .AddFargoSupplyOrderApplication()
-        .AddFargoOutboxApplication();
+        .AddFargoOutboxApplication()
+        .AddFargoIdempotencyApplication();
 
         private IServiceCollection AddFargoDomainServices()
         {

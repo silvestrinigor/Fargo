@@ -18,7 +18,7 @@ public sealed class UpdateArticleCommand : Command
               fargo article update 11111111-1111-1111-1111-111111111111 --mass 3kg --length-x 12cm
               fargo article update 11111111-1111-1111-1111-111111111111 --remove-mass --remove-barcode
               fargo article update 11111111-1111-1111-1111-111111111111 --barcode-ean13 1234567890128
-              fargo article update 11111111-1111-1111-1111-111111111111 --add-partitions 00000000-0000-0000-0000-000000000001
+              fargo article update 11111111-1111-1111-1111-111111111111 --description "Steel widget"
             """)
     {
         var guidArgument = new Argument<Guid>("guid")

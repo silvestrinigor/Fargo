@@ -1,3 +1,4 @@
+using Fargo.Application.Idempotency;
 using Fargo.Application.IntegrationEvents;
 using Fargo.Core.Audits;
 using Fargo.Core.Barcodes;
@@ -63,6 +64,8 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
     public DbSet<AuthorizationStamp> AuthorizationStamps { get; set; }
+
+    public DbSet<IdempotencyRecord> IdempotencyRecords { get; set; }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -168,7 +171,11 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new SupplyOrderLineConfiguration())
         .ApplyConfiguration(new SupplyOrderPartitionConfiguration())
         .ApplyConfiguration(new OutboxMessageConfiguration())
-        .ApplyConfiguration(new AuthorizationStampConfiguration());
+        .ApplyConfiguration(new AuthorizationStampConfiguration())
+        .ApplyConfiguration(new IdempotencyRecordConfiguration())
+        .ApplyConfiguration(new ActorPermissionConfiguration())
+        .ApplyConfiguration(new UserGroupPermissionConfiguration())
+        .ApplyEnumLookups();
 
         // Optimistic concurrency: map the PostgreSQL xmin system column as a
         // concurrency token (shadow property) on every mutable aggregate root

@@ -26,11 +26,13 @@ public sealed class ServiceAccountRotateSecretCommandHandler(
     {
         var actor = await actorService.ResolveCurrentActorOrThrowAsync(currentActor, cancellationToken);
 
-        actor.ThrowIfPermissionDenied(ActionType.EditServiceAccount);
+        actor.ThrowIfPermissionDenied(ActionType.RotateServiceAccountSecret);
 
         var account = await serviceAccountRepository.GetByGuidAsync(command.ServiceAccountGuid, cancellationToken);
 
         EntityNotFoundFargoApplicationException.ThrowIfNull(account, command.ServiceAccountGuid, EntityType.Actor);
+
+        actor.ThrowIfAccessDenied(account.Actor);
 
         var secret = secretGenerator.Generate();
 

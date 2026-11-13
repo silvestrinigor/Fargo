@@ -4,7 +4,6 @@ using Fargo.Application.Common.Exceptions;
 using Fargo.Application.Dtos.Articles;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
-using Fargo.Core.Entities.Partitions;
 
 namespace Fargo.Application.Commands.Articles;
 
@@ -15,7 +14,7 @@ public sealed record ArticleUpdateCommand(
 
 public sealed class ArticleUpdateCommandHandler(
     ActorResolver actorService, ArticleService articleService,
-    IArticleRepository articleRepository, IPartitionRepository partitionRepository,
+    IArticleRepository articleRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ArticleUpdateCommand>
 {
@@ -85,34 +84,6 @@ public sealed class ArticleUpdateCommandHandler(
             await articleService.ValidateEan13IsAvailableAsync(ean13, cancellationToken);
 
             article.Barcode.Ean13 = ean13;
-        }
-
-        if (articleUpdateDto.PartitionsToAdd is { Count: > 0 } partitionsToAdd)
-        {
-            foreach (var partitionGuid in partitionsToAdd.Distinct())
-            {
-                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
-
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
-
-                actor.ThrowIfAccessDenied(partition);
-
-                article.AddPartition(partition);
-            }
-        }
-
-        if (articleUpdateDto.PartitionsToRemove is { Count: > 0 } partitionsToRemove)
-        {
-            foreach (var partitionGuid in partitionsToRemove.Distinct())
-            {
-                var partition = await partitionRepository.GetByGuidAsync(partitionGuid, cancellationToken);
-
-                EntityNotFoundFargoApplicationException.ThrowIfNull(partition, partitionGuid);
-
-                actor.ThrowIfAccessDenied(partition);
-
-                article.RemovePartition(partition.Guid);
-            }
         }
     }
 }

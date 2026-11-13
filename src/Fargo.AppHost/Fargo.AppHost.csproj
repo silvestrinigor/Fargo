@@ -21,10 +21,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fargo.ServiceHttp\Fargo.ServiceHttp.csproj" />
+    <ProjectReference Include="..\Fargo.ServiceMaintenance\Fargo.ServiceMaintenance.csproj" />
     <ProjectReference Include="..\Fargo.ServiceMigration\Fargo.ServiceMigration.csproj" />
-    <ProjectReference Include="..\Fargo.ServiceOutbox\Fargo.ServiceOutbox.csproj" />
+    <ProjectReference Include="..\Fargo.ServiceEventPublisher\Fargo.ServiceEventPublisher.csproj" />
     <ProjectReference Include="..\Fargo.ServiceRealtime\Fargo.ServiceRealtime.csproj" />
-    <ProjectReference Include="..\Fargo.ServiceSeed\Fargo.ServiceSeed.csproj" />
+    <ProjectReference Include="..\Fargo.ServiceInitializer\Fargo.ServiceInitializer.csproj" />
   </ItemGroup>
 
 </Project>
