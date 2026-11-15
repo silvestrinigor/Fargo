@@ -1,0 +1,4 @@
+AuditLogType should be command based type. One enum value for command.
+CommandName information should be in a separated table audit_log_types like the other enums.
+CommandName column should be removed.
+implement a new endpoint to get the audit-log-types values.

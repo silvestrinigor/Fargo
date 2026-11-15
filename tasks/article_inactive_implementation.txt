@@ -1,0 +1,7 @@
+implement active/inactive properties for the article entity.
+user should be able to activate and deactivate the article by request (POST /articles, PUT /articles/<guid>/is-active).
+shold not be possible to create itens for inactive articles.
+should not be possible to create variations/kit/pack for inactive articles.
+implement unit tests for that.
+audit logs for that operation.
+update documentation.

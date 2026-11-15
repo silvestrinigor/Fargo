@@ -1,0 +1,2 @@
+paged result should have sort information in the respose.
+update cli/mcp/docs.

@@ -1,0 +1,8 @@
+create a defined allowed length unit types.
+should only be possible to create length unit for that types.
+should exist a table for the enum values unit_length_types.
+user should be able to get that unit types by request like the others enums.
+length values should be stored in the database in two columns, one for value and the other for the length type related with the unit_length_types table.
+request and database should not depend on the UnitsNet package, but istill can be used in the code.
+create unit tests.
+update documentation and clients.

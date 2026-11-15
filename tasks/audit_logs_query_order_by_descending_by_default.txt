@@ -1,0 +1,1 @@
+audit logs query should return ordered by occured at descending by default insted of ordered by occured at.

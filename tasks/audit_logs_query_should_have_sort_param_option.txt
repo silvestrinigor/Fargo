@@ -1,0 +1,2 @@
+audit logs query should have the sort parameter option like the other queries.
+update mcp/cli/docs.

@@ -1,0 +1,8 @@
+create a defined allowed mass unit types.
+should only be possible to create mass unit for that types.
+should exist a table for the enum values unit_mass_types.
+user should be able to get that unit types by request like the others enums.
+mass values should be stored in the database in two columns, one for value and the other for the mass type related with the unit_mass_types table.
+request and database should not depend on the UnitsNet package, but istill can be used in the code.
+create unit tests.
+update documentation and clients.
