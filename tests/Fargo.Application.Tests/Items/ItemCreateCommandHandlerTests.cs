@@ -9,6 +9,7 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Actors.Users;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
+using Fargo.Core.Events;
 using Fargo.Core.Entities.Partitions;
 using Fargo.Core.Informations;
 using NSubstitute;
@@ -20,6 +21,7 @@ public class ItemCreateCommandHandlerTests
 {
     private readonly IUserRepository userRepository = Substitute.For<IUserRepository>();
     private readonly IItemRepository itemRepository = Substitute.For<IItemRepository>();
+    private readonly IItemEventRepository itemEventRepository = Substitute.For<IItemEventRepository>();
     private readonly IArticleRepository articleRepository = Substitute.For<IArticleRepository>();
     private readonly IPartitionRepository partitionRepository = Substitute.For<IPartitionRepository>();
     private readonly IUnitOfWork unitOfWork = Substitute.For<IUnitOfWork>();
@@ -30,6 +32,7 @@ public class ItemCreateCommandHandlerTests
             new ItemService(itemRepository),
             ActorTestFactory.Resolver(userRepository),
             itemRepository,
+            itemEventRepository,
             articleRepository,
             partitionRepository,
             currentActor);
@@ -46,6 +49,10 @@ public class ItemCreateCommandHandlerTests
             new ItemCreateCommand(new ItemCreateDto(article.Guid)));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(i => i!.Guid == result && i.ArticleGuid == article.Guid));
+        itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
+            e => e!.ItemGuid == result
+                 && e.ItemEventType == ItemEventType.Creation
+                 && e.ToNoContainer));
     }
 
     [Fact]
@@ -65,6 +72,10 @@ public class ItemCreateCommandHandlerTests
             new ItemCreateCommand(new ItemCreateDto(article.Guid, ParentItemContainerGuid: parentContainer.Guid)));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(i => i!.ParentItemContainerGuid == parentContainer.Guid));
+        itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
+            e => e!.ItemEventType == ItemEventType.Creation
+                 && e.ToItemContainerGuid == parentContainer.Guid
+                 && !e.ToNoContainer));
     }
 
     [Fact]
@@ -227,5 +238,9 @@ public class ItemCreateCommandHandlerTests
             new ItemCreateCommand(new ItemCreateDto(article.Guid, ParentItemContainerGuid: parentContainer.Guid)));
 
         itemRepository.Received(1).Add(Arg.Is<Item>(i => i!.ParentItemContainerGuid == parentContainer.Guid));
+        itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
+            e => e!.ItemEventType == ItemEventType.Creation
+                 && e.ToItemContainerGuid == parentContainer.Guid
+                 && !e.ToNoContainer));
     }
 }

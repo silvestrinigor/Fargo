@@ -17,6 +17,14 @@ public interface IItemRepository
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets every item nested at any depth inside a container, of any article type. The container
+    /// itself is not included.
+    /// </summary>
+    Task<IReadOnlyCollection<ContainedItem>> GetContainedItemsAsync(
+        Guid itemContainerGuid,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Counts the items of an article placed directly inside a container; items nested in
     /// descendant containers are not counted.
     /// </summary>

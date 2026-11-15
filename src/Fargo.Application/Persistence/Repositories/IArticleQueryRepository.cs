@@ -61,7 +61,7 @@ public interface IArticleQueryRepository
 
     /// <summary>
     /// Net quantity of an event-tracked article: received minus dispatched, from the signed movement
-    /// quantities in <c>item_moviment_events</c>.
+    /// quantities of its movement events.
     /// </summary>
     /// <remarks>
     /// With containers, only movements into or out of them (and their descendants when

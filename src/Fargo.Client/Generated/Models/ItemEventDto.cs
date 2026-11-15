@@ -18,26 +18,28 @@ namespace Fargo.Client.Models
         public Guid? ArticleGuid { get; set; }
         /// <summary>The eventType property</summary>
         public int? EventType { get; set; }
+        /// <summary>`null` when there was no origin container or it has since been deleted; see        FromNoContainer.</summary>
+        public Guid? FromItemContainerGuid { get; set; }
+        /// <summary>The fromNoContainer property</summary>
+        public bool? FromNoContainer { get; set; }
         /// <summary>The guid property</summary>
         public Guid? Guid { get; set; }
-        /// <summary>The lifecycle property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::Fargo.Client.Models.ItemLifecycleEventDto? Lifecycle { get; set; }
-#nullable restore
-#else
-        public global::Fargo.Client.Models.ItemLifecycleEventDto Lifecycle { get; set; }
-#endif
-        /// <summary>The moviment property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public global::Fargo.Client.Models.ItemMovimentEventDto? Moviment { get; set; }
-#nullable restore
-#else
-        public global::Fargo.Client.Models.ItemMovimentEventDto Moviment { get; set; }
-#endif
+        /// <summary>`null` for an event-tracked article. For an item, it stays after the item is deleted.</summary>
+        public Guid? ItemGuid { get; set; }
         /// <summary>The occuredAt property</summary>
         public DateTimeOffset? OccuredAt { get; set; }
+        /// <summary>The quantity property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public global::Fargo.Client.Models.Scalar? Quantity { get; set; }
+#nullable restore
+#else
+        public global::Fargo.Client.Models.Scalar Quantity { get; set; }
+#endif
+        /// <summary>`null` when there was no destination container or it has since been deleted; see        ToNoContainer.</summary>
+        public Guid? ToItemContainerGuid { get; set; }
+        /// <summary>The toNoContainer property</summary>
+        public bool? ToNoContainer { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::Fargo.Client.Models.ItemEventDto"/> and sets the default values.
         /// </summary>
@@ -65,10 +67,14 @@ namespace Fargo.Client.Models
             {
                 { "articleGuid", n => { ArticleGuid = n.GetGuidValue(); } },
                 { "eventType", n => { EventType = n.GetIntValue(); } },
+                { "fromItemContainerGuid", n => { FromItemContainerGuid = n.GetGuidValue(); } },
+                { "fromNoContainer", n => { FromNoContainer = n.GetBoolValue(); } },
                 { "guid", n => { Guid = n.GetGuidValue(); } },
-                { "lifecycle", n => { Lifecycle = n.GetObjectValue<global::Fargo.Client.Models.ItemLifecycleEventDto>(global::Fargo.Client.Models.ItemLifecycleEventDto.CreateFromDiscriminatorValue); } },
-                { "moviment", n => { Moviment = n.GetObjectValue<global::Fargo.Client.Models.ItemMovimentEventDto>(global::Fargo.Client.Models.ItemMovimentEventDto.CreateFromDiscriminatorValue); } },
+                { "itemGuid", n => { ItemGuid = n.GetGuidValue(); } },
                 { "occuredAt", n => { OccuredAt = n.GetDateTimeOffsetValue(); } },
+                { "quantity", n => { Quantity = n.GetObjectValue<global::Fargo.Client.Models.Scalar>(global::Fargo.Client.Models.Scalar.CreateFromDiscriminatorValue); } },
+                { "toItemContainerGuid", n => { ToItemContainerGuid = n.GetGuidValue(); } },
+                { "toNoContainer", n => { ToNoContainer = n.GetBoolValue(); } },
             };
         }
         /// <summary>
@@ -80,10 +86,14 @@ namespace Fargo.Client.Models
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteGuidValue("articleGuid", ArticleGuid);
             writer.WriteIntValue("eventType", EventType);
+            writer.WriteGuidValue("fromItemContainerGuid", FromItemContainerGuid);
+            writer.WriteBoolValue("fromNoContainer", FromNoContainer);
             writer.WriteGuidValue("guid", Guid);
-            writer.WriteObjectValue<global::Fargo.Client.Models.ItemLifecycleEventDto>("lifecycle", Lifecycle);
-            writer.WriteObjectValue<global::Fargo.Client.Models.ItemMovimentEventDto>("moviment", Moviment);
+            writer.WriteGuidValue("itemGuid", ItemGuid);
             writer.WriteDateTimeOffsetValue("occuredAt", OccuredAt);
+            writer.WriteObjectValue<global::Fargo.Client.Models.Scalar>("quantity", Quantity);
+            writer.WriteGuidValue("toItemContainerGuid", ToItemContainerGuid);
+            writer.WriteBoolValue("toNoContainer", ToNoContainer);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

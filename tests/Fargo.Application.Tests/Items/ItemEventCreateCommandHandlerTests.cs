@@ -64,13 +64,12 @@ public class ItemEventCreateCommandHandlerTests
         itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
             e => e!.Guid == result
                  && e.ItemEventType == ItemEventType.Moviment
-                 && e.Moviment != null
-                 && e.Moviment.Quantity.Amount == 50
-                 && e.Moviment.ToItemContainerGuid == container.Guid));
+                 && e.Quantity.Amount == 50
+                 && e.ToItemContainerGuid == container.Guid));
     }
 
     [Fact]
-    public async Task HandleAsync_WhenCreation_ShouldRecordLifecycleAndReturnGuid()
+    public async Task HandleAsync_WhenCreation_ShouldRecordEventAndReturnGuid()
     {
         var article = ConfigureEventArticle();
         var container = ConfigureContainer();
@@ -81,14 +80,12 @@ public class ItemEventCreateCommandHandlerTests
         itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
             e => e!.Guid == result
                  && e.ItemEventType == ItemEventType.Creation
-                 && e.Lifecycle != null
-                 && e.Lifecycle.Quantity.Amount == 120
-                 && e.Lifecycle.ItemContainerGuid == container.Guid
-                 && e.Moviment == null));
+                 && e.Quantity.Amount == 120
+                 && e.ToItemContainerGuid == container.Guid));
     }
 
     [Fact]
-    public async Task HandleAsync_WhenDeletion_ShouldRecordLifecycleAndReturnGuid()
+    public async Task HandleAsync_WhenDeletion_ShouldRecordEventAndReturnGuid()
     {
         var article = ConfigureEventArticle();
 
@@ -98,9 +95,9 @@ public class ItemEventCreateCommandHandlerTests
         itemEventRepository.Received(1).Add(Arg.Is<ItemEvent>(
             e => e!.Guid == result
                  && e.ItemEventType == ItemEventType.Deletion
-                 && e.Lifecycle != null
-                 && e.Lifecycle.Quantity.Amount == 7
-                 && e.Lifecycle.NoContainer));
+                 && e.Quantity.Amount == 7
+                 && e.FromNoContainer
+                 && e.ToNoContainer));
     }
 
     [Fact]

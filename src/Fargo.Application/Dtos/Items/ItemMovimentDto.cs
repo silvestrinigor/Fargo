@@ -1,4 +1,4 @@
-using Fargo.Core.Entities.Items;
+using Fargo.Core.Events;
 
 namespace Fargo.Application.Dtos.Items;
 
@@ -9,8 +9,8 @@ public sealed record ItemMovimentDto(
 
 public static class ItemMovimentDtoMapping
 {
-    public static ItemMovimentDto ToDto(this ItemMoviment itemMoviment)
+    public static ItemMovimentDto ToMovimentDto(this ItemEvent itemEvent)
     {
-        return new ItemMovimentDto(itemMoviment.MovedToContainerGuid, itemMoviment.OccurredAt);
+        return new ItemMovimentDto(itemEvent.ToItemContainerGuid, itemEvent.OccuredAt);
     }
 }

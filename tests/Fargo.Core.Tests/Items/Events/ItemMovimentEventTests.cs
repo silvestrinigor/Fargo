@@ -31,14 +31,12 @@ public class ItemMovimentEventTests
         Assert.Equal(article.Guid, itemEvent.ArticleGuid);
         Assert.Equal(ItemEventType.Moviment, itemEvent.ItemEventType);
 
-        var moviment = itemEvent.Moviment;
-        Assert.NotNull(moviment);
-        Assert.Equal(itemEvent.Guid, moviment!.ItemEventGuid);
-        Assert.Equal(50, moviment.Quantity.Amount);
-        Assert.True(moviment.FromNoContainer);
-        Assert.Null(moviment.FromItemContainerGuid);
-        Assert.Equal(to.Guid, moviment.ToItemContainerGuid);
-        Assert.False(moviment.ToNoContainer);
+        Assert.Null(itemEvent.ItemGuid);
+        Assert.Equal(50, itemEvent.Quantity.Amount);
+        Assert.True(itemEvent.FromNoContainer);
+        Assert.Null(itemEvent.FromItemContainerGuid);
+        Assert.Equal(to.Guid, itemEvent.ToItemContainerGuid);
+        Assert.False(itemEvent.ToNoContainer);
     }
 
     [Fact]

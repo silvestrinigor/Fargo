@@ -3,22 +3,9 @@ using UnitsNet;
 
 namespace Fargo.Application.Dtos.Items;
 
-/// <param name="Moviment">
-/// Set only when <paramref name="EventType"/> is <see cref="ItemEventType.Moviment"/>.
+/// <param name="ItemGuid">
+/// <see langword="null"/> for an event-tracked article. For an item, it stays after the item is deleted.
 /// </param>
-/// <param name="Lifecycle">
-/// Set only when <paramref name="EventType"/> is <see cref="ItemEventType.Creation"/> or
-/// <see cref="ItemEventType.Deletion"/>.
-/// </param>
-public sealed record ItemEventDto(
-    Guid Guid,
-    Guid ArticleGuid,
-    ItemEventType EventType,
-    DateTimeOffset OccuredAt,
-    ItemMovimentEventDto? Moviment,
-    ItemLifecycleEventDto? Lifecycle
-);
-
 /// <param name="FromItemContainerGuid">
 /// <see langword="null"/> when there was no origin container or it has since been deleted; see
 /// <paramref name="FromNoContainer"/>.
@@ -27,7 +14,12 @@ public sealed record ItemEventDto(
 /// <see langword="null"/> when there was no destination container or it has since been deleted; see
 /// <paramref name="ToNoContainer"/>.
 /// </param>
-public sealed record ItemMovimentEventDto(
+public sealed record ItemEventDto(
+    Guid Guid,
+    Guid ArticleGuid,
+    ItemEventType EventType,
+    DateTimeOffset OccuredAt,
+    Guid? ItemGuid,
     Scalar Quantity,
     Guid? FromItemContainerGuid,
     bool FromNoContainer,
@@ -35,41 +27,20 @@ public sealed record ItemMovimentEventDto(
     bool ToNoContainer
 );
 
-/// <param name="ItemContainerGuid">
-/// <see langword="null"/> when there was no container or it has since been deleted; see
-/// <paramref name="NoContainer"/>.
-/// </param>
-public sealed record ItemLifecycleEventDto(
-    Scalar Quantity,
-    Guid? ItemContainerGuid,
-    bool NoContainer
-);
-
 public static class ItemEventDtoMapping
 {
     public static ItemEventDto ToDto(this ItemEvent itemEvent)
     {
-        var moviment = itemEvent.Moviment;
-        var lifecycle = itemEvent.Lifecycle;
-
         return new ItemEventDto(
             itemEvent.Guid,
             itemEvent.ArticleGuid,
             itemEvent.ItemEventType,
             itemEvent.OccuredAt,
-            moviment is null
-                ? null
-                : new ItemMovimentEventDto(
-                    moviment.Quantity,
-                    moviment.FromItemContainerGuid,
-                    moviment.FromNoContainer,
-                    moviment.ToItemContainerGuid,
-                    moviment.ToNoContainer),
-            lifecycle is null
-                ? null
-                : new ItemLifecycleEventDto(
-                    lifecycle.Quantity,
-                    lifecycle.ItemContainerGuid,
-                    lifecycle.NoContainer));
+            itemEvent.ItemGuid,
+            itemEvent.Quantity,
+            itemEvent.FromItemContainerGuid,
+            itemEvent.FromNoContainer,
+            itemEvent.ToItemContainerGuid,
+            itemEvent.ToNoContainer);
     }
 }

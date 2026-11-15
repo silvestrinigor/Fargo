@@ -4114,8 +4114,12 @@
           "articleGuid",
           "eventType",
           "occuredAt",
-          "moviment",
-          "lifecycle"
+          "itemGuid",
+          "quantity",
+          "fromItemContainerGuid",
+          "fromNoContainer",
+          "toItemContainerGuid",
+          "toNoContainer"
         ],
         "type": "object",
         "properties": {
@@ -4134,87 +4138,14 @@
             "type": "string",
             "format": "date-time"
           },
-          "moviment": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "Set only when EventType is ItemEventType.Moviment.",
-                "$ref": "#/components/schemas/ItemMovimentEventDto"
-              }
-            ]
-          },
-          "lifecycle": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "Set only when EventType is ItemEventType.Creation or\r\nItemEventType.Deletion.",
-                "$ref": "#/components/schemas/ItemLifecycleEventDto"
-              }
-            ]
-          }
-        }
-      },
-      "ItemEventType": {
-        "type": "integer"
-      },
-      "ItemLifecycleEventDto": {
-        "required": [
-          "quantity",
-          "itemContainerGuid",
-          "noContainer"
-        ],
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "$ref": "#/components/schemas/Scalar"
-          },
-          "itemContainerGuid": {
+          "itemGuid": {
             "type": [
               "null",
               "string"
             ],
-            "description": "`null` when there was no container or it has since been deleted; see\r\n        NoContainer.",
+            "description": "`null` for an event-tracked article. For an item, it stays after the item is deleted.",
             "format": "uuid"
           },
-          "noContainer": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ItemMovimentDto": {
-        "required": [
-          "movedToItemContainerGuid",
-          "occurredAt"
-        ],
-        "type": "object",
-        "properties": {
-          "movedToItemContainerGuid": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ItemMovimentEventDto": {
-        "required": [
-          "quantity",
-          "fromItemContainerGuid",
-          "fromNoContainer",
-          "toItemContainerGuid",
-          "toNoContainer"
-        ],
-        "type": "object",
-        "properties": {
           "quantity": {
             "$ref": "#/components/schemas/Scalar"
           },
@@ -4239,6 +4170,29 @@
           },
           "toNoContainer": {
             "type": "boolean"
+          }
+        }
+      },
+      "ItemEventType": {
+        "type": "integer"
+      },
+      "ItemMovimentDto": {
+        "required": [
+          "movedToItemContainerGuid",
+          "occurredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "movedToItemContainerGuid": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

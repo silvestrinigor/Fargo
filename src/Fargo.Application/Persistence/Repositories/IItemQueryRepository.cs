@@ -71,7 +71,7 @@ public interface IItemQueryRepository
 
     /// <summary>
     /// Net quantity per event-tracked article in the container: quantities moved in minus quantities
-    /// moved out, from <c>item_moviment_events</c>.
+    /// moved out, from its movement events.
     /// </summary>
     /// <remarks>
     /// A null <paramref name="at"/> means now; otherwise only events at or before that instant count.

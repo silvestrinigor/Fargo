@@ -4,6 +4,7 @@ using Fargo.Application.Common.Exceptions;
 using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
+using Fargo.Core.Events;
 
 namespace Fargo.Application.Commands.Items;
 
@@ -21,6 +22,7 @@ public sealed class ItemSetLocationCommandHandler(
     ItemService itemService,
     ActorResolver actorService,
     IItemRepository itemRepository,
+    IItemEventRepository itemEventRepository,
     ICurrentActor currentActor
 ) : ICommandHandler<ItemSetLocationCommand>
 {
@@ -73,6 +75,10 @@ public sealed class ItemSetLocationCommandHandler(
 
         await itemService.ValidateAllowedInContainerAsync(parentItemContainer, item, cancellationToken);
 
+        var previousParentGuid = item.ParentItemContainerGuid;
+
         item.PlaceInsideContainer(parentItemContainer);
+
+        itemEventRepository.Add(ItemEvent.NewItemMovedEvent(item, previousParentGuid));
     }
 }

@@ -6,6 +6,7 @@ using Fargo.Core.Entities.Actors;
 using Fargo.Core.Entities.Articles;
 using Fargo.Core.Entities.Items;
 using Fargo.Core.Entities.Partitions;
+using Fargo.Core.Events;
 
 namespace Fargo.Application.Commands.Items;
 
@@ -16,6 +17,7 @@ public sealed class ItemCreateCommandHandler(
     ItemService itemService,
     ActorResolver actorService,
     IItemRepository itemRepository,
+    IItemEventRepository itemEventRepository,
     IArticleRepository articleRepository,
     IPartitionRepository partitionRepository,
     ICurrentActor currentActor
@@ -65,6 +67,7 @@ public sealed class ItemCreateCommandHandler(
         }
 
         itemRepository.Add(item);
+        itemEventRepository.Add(ItemEvent.NewItemCreatedEvent(item));
 
         return item.Guid;
     }

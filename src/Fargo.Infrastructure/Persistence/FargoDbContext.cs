@@ -36,11 +36,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
     public DbSet<Item> Items { get; set; }
 
     public DbSet<ItemEvent> ItemEvents { get; set; }
-
-    public DbSet<ItemMovimentEvent> ItemMovimentEvents { get; set; }
-
-    public DbSet<ItemLifecycleEvent> ItemLifecycleEvents { get; set; }
-
     public DbSet<User> Users { get; set; }
 
     public DbSet<Actor> Actors { get; set; }
@@ -147,7 +142,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new ArticleContainerAllowedArticleConfiguration())
         .ApplyConfiguration(new ArticlePartitionConfiguration())
         .ApplyConfiguration(new ItemConfiguration())
-        .ApplyConfiguration(new ItemMovimentConfiguration())
         .ApplyConfiguration(new ItemPartitionConfiguration())
         .ApplyConfiguration(new ItemParentContainerHistoryPostgresTemporalConfiguration())
         .ApplyConfiguration(new ActorConfiguration())
@@ -165,8 +159,6 @@ public class FargoDbContext(DbContextOptions<FargoDbContext> options) : DbContex
         .ApplyConfiguration(new AuthenticationAttemptConfiguration())
         .ApplyConfiguration(new ServiceAccountConfiguration())
         .ApplyConfiguration(new ItemEventConfiguration())
-        .ApplyConfiguration(new ItemMovimentEventConfiguration())
-        .ApplyConfiguration(new ItemLifecycleEventConfiguration())
         .ApplyConfiguration(new SupplyOrderConfiguration())
         .ApplyConfiguration(new SupplyOrderLineConfiguration())
         .ApplyConfiguration(new SupplyOrderPartitionConfiguration())

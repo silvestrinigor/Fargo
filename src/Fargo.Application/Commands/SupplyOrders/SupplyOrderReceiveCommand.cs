@@ -106,6 +106,7 @@ public sealed class SupplyOrderReceiveCommandHandler(
             }
 
             itemRepository.Add(item);
+            itemEventRepository.Add(ItemEvent.NewItemCreatedEvent(item));
         }
     }
 }

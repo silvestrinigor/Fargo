@@ -15,9 +15,8 @@ Every domain entity has a `Guid` identity (`IEntity`) and reports its kind
 | Concept | Description |
 | --- | --- |
 | **Article** | A product definition in the catalog. Has a type, a tracking mode (entity or event), optional barcodes, dimensions, mass, color, and shelf life. |
-| **Item** | A physical instance of an **entity-tracked** article. May live inside a container item, and records its movement history. |
-| **ItemEvent** | The base record of a change recorded against an **event-tracked** article: which article, the event kind, and when it occurred. |
-| **ItemMovimentEvent** | A movement event: a positive quantity of an event-tracked article moved between containers (or into/out of no container). The source of event-based inventory. |
+| **Item** | A physical instance of an **entity-tracked** article. May live inside a container item. Its creation, moves and deletion are recorded as item events. |
+| **ItemEvent** | A positive quantity of an article that was created, deleted, or moved between containers (or into/out of no container), and when. For an event-tracked article it is recorded by a client and is the source of event-based inventory. For an entity-tracked article the application records it when an item is created, moved or deleted, and it keeps the item's GUID after the item is gone. |
 | **Partition** | A node in the access hierarchy. Scopes which actors can see which entities. |
 | **Actor** | An identity that authenticates and acts, carrying the authorization state shared by every kind of identity: directly granted **permissions**, partition **membership**, and partition **access**. Its kind (`ActorType`) is either a **User** or a **ServiceAccount**. |
 | **User** | The user-specific data owned by a user actor: its nameid, optional profile fields, authentication details, and user-group memberships. |
@@ -36,7 +35,7 @@ flowchart TD
     Partition["Partition<br/>(hierarchy)"]
     Article["Article"]
     Item["Item"]
-    ItemMovimentEvent["ItemMovimentEvent"]
+    ItemEvent["ItemEvent"]
     Actor["Actor"]
     User["User"]
     ServiceAccount["ServiceAccount"]
@@ -48,8 +47,8 @@ flowchart TD
     Item -->|instance of| Article
     Item -->|belongs to| Partition
     Item -->|contained in| Item
-    ItemMovimentEvent -->|records a move of| Article
-    ItemMovimentEvent -->|from / to| Item
+    ItemEvent -->|records stock of| Article
+    ItemEvent -->|from / to| Item
     Actor -->|is a| User
     Actor -->|is a| ServiceAccount
     Actor -->|has access to| Partition
