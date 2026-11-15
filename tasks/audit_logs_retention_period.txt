@@ -1,0 +1,3 @@
+like the events, audit logs should have retetion period too.
+and the user should be able to set that retentition by request.
+update docs, client, unit tests.

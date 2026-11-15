@@ -1,0 +1,7 @@
+the outbox events should be similar with the entity events.
+so, if exist a event for article created, should exist a outbox message for that.
+in the case of article deleted, wont exist a event for that (because events are entity related) but will exist a outbox message.
+on user inactivated, will exist a event for that so should exist a outbox message for that too.
+on settings, user should be able to set witch events should be sended on outbox messages.
+very detailed settings options, per entity event options, per entity event type options.
+i think that settings should be in json settings, but i dont know. maybe should be in table settings.

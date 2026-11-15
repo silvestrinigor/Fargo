@@ -1,0 +1,6 @@
+implement new events for article.
+article created, article edited, article activated, etc.
+on article delition, that events are lost.
+article events access are article based, so the actor will only have access to that events if he hass access to that article.
+article events query should be in the path /article-events, and implemented like the others queries.
+update documentation and clients.

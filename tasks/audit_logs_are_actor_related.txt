@@ -1,0 +1,4 @@
+audit logs are actors related, so if the actor is deleted, the audit of that actor is lost.
+so update the documentation and client to inform that.
+check if the code respects that rule.
+audit access is actor based too, so the request client will only have access to the audit log if he hass access to that actor.

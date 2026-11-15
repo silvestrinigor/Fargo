@@ -1,0 +1,6 @@
+events are entity related so if that entity is deleted the events of that entity is deleted too.
+so update the documentation and client to inform that.
+check if the code respects that rule.
+in the case of the item events, that should probaly be named article events insted, because if the article is deleted that events is deleted.
+and that article events should probaly be in /article-item-events path instead of /items/events.
+event access is entity based too, so the actor will only have access to that events if he hass access to that entity.

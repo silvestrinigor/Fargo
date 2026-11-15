@@ -1,0 +1,3 @@
+add actor guid information in the events.
+should not have relation with the actor, so if the actor is deleted, the event continues existing.
+update documentation and clients if necessary.

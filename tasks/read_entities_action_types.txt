@@ -1,0 +1,5 @@
+implement new action types to control the read of the entities.
+new action types like: read article, read items, read users, etc.
+update the queries to check that permissions.
+update documentation and clients.
+check unit tests.

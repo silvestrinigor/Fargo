@@ -1,0 +1,6 @@
+implement new events for partition.
+partition created, partition edited, partition activated, etc.
+on partition delition, that events are lost.
+partition events access are partition based, so the actor will only have access to that events if he hass access to that partition.
+partition events query should be in the path /partition-events, and implemented like the others queries.
+update documentation and clients.

@@ -1,0 +1,7 @@
+new shelflife service to check for expired items.
+the service should search for expired items and throw a event when find some item exired.
+should create a outbox message too.
+this service can be in the maintenance project or in a new project if make sense.
+should be created to a new endpoint to get expired itens too.
+skip the shelflife verification for event based items for now.
+update documentation, clients, unit tests.

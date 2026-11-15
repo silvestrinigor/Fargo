@@ -1,0 +1,3 @@
+new property area capacity to define the max area capacity of that article container.
+update endpoints, clients, documentation. check the task tasks/container_usage_information.txt.
+update docs, tests, clients.

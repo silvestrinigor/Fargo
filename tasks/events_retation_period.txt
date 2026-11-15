@@ -1,0 +1,8 @@
+user should be able to define a retention period for the events saved in the fargo database.
+that settings should be edited by request. new endpoint /settings or another better name, idk.
+user should have permission to edit the settings.
+that setting options can be general settings like define a retention period for all events or specificy events settings, like specificy retention for item events.
+i think should exist a new backgroup service in the maintenence server to clean that old events.
+update documentation, client, etc.
+unit tests.
+new table to save that setting on database.

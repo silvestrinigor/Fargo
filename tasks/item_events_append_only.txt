@@ -1,0 +1,4 @@
+item events should be appendy only.
+remove the command/endpoint to delete specificy item event.
+events for now should be append only.
+check clients, documentation and unit tests.

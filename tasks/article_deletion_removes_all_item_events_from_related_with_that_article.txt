@@ -1,0 +1,5 @@
+user should be able to delete a article with item events related, but all events from that item article will be deleted too.
+item entity still restrict, so a article with item entities cannot be deleted.
+for optimization, dont need to check if article has entity itens for deletion whe article is event tracked based.
+that information should be documented.
+create unit tests.

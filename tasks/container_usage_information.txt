@@ -1,0 +1,24 @@
+new query to return the usage information of a container, endpoint /items/<guid>/capacity or another better name.
+the usage mass capacity and the max mass of that container.
+a bollean value to indicate if the container contain articles that dont inform the mass.
+the calculation should consider the items inside, the recursive items inside the items inside the target container, the event based items, etc.
+update documentation, unit tests, clients.
+create a new table and column related with the container item 'estimated child contained mass' (chose a better name) (this column should not be returned in the request ItemDto) in the item container to inform the total contained mass (and volume if implemented in the future) of the child items (not all recursive items).
+create a new column 'HasChildrenWithoutKnownMass' in the same table has the column 'estimated child contained mass', to inform when the container has any directily child item with no mass information.
+create a new table 'container metrics calculation task' (chose a better name) to inform the backgrond service to calculate the 'estimated child contained mass' of a specificy container.
+when a item is inserted or removed from that container, insert if dont already exist a new 'container metrics calculation task' for the specifiy container.
+should exist a maintenance service to calculate the 'estimated child contained mass' value and fix possible concorrency problems periodicly.
+with that new column will be easier and faster to calculat the total usage mass of that container.
+this service should also check the 'container metrics calculation task' to check specify container changed stock more faster than the periodicly general check.
+
+
+possible request response:
+{
+  "containerGuid": "...",
+  "mass": {
+    "used": 1250.5,
+    "maximum": 2000.0,
+    "utilizationPercentage": 62.525
+  },
+  "containsItemsWithoutMass": false
+}
