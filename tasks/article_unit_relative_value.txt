@@ -1,0 +1,12 @@
+Implement Unit Relative Value in Article
+
+Add the UnitValueScore property to Article, allowing users to assign an integer value from 1 to 10 representing the relative individual value of one unit of the article.
+
+Allowed values: 1–10.
+
+Represents an abstract relative value per unit, which may reflect monetary value or other user-defined valuation criteria, but does not represent operational priority.
+
+update the endoints to allow the user to edit that value. null by default.
+update documentation.
+update clients.
+create unit tests.

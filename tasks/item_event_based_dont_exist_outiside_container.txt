@@ -1,0 +1,7 @@
+event based items dont exist outside a container.
+event based items should awais be considered inside a container.
+when a item is moved to a null parent container or delete, that item should be considered out of the system.
+only entity based items can be out of a parent container (null parent container) and be considered still existing.
+check if the system respect this rule.
+create unit tests.
+documentation.

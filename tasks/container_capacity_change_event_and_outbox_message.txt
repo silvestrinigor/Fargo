@@ -1,0 +1,11 @@
+see tasks/container_usage_information.txt.
+on the service to calculate the 'estimated child contained mass', when the mass change, should create a event for the container item informing that.
+and should create a outbox message too.
+update clients, documentation, unit tests, etc.
+
+Threshold	Meaning
+50%	Half capacity
+80%	High utilization
+90%	Critical utilization
+100%	Capacity reached
+Above 100%	Capacity exceeded
