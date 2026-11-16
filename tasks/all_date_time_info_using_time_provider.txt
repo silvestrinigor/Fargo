@@ -1,0 +1,2 @@
+refact all core datetime properties to be set using time provider
+example: Event.OcurredAt and AuditLog.OcurredAt should be set in the constructor using time provider in application layer.

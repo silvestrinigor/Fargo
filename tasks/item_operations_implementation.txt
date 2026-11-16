@@ -1,0 +1,41 @@
+should create a new column/property item status and create the status lost.
+when item is lost, item status should change to lost.
+item status type should work like the other enums in the system, with their own table item_status_types.
+for item entity track based, should create a new endpoint item/<guid>/lost to indicate when a item is lost.
+when a entity based item is lost, the event should have the information that the item was lost (new enum ItemEventOperationType.ItemLost + movimentation indicating removing from parent container)
+when the item is event based, the event should have the information that the item is being removed because was lost like the entity based item event.
+a entity based item lost should not be moved.
+when the item lost is a container, all the items inside that container will be considered lost too but will still be inside the parent container lost.
+all the items inside the container lost will have the status changed to lost.
+the inventory queries should now ignore lost items in the calculcation.
+item status should be returned in items query.
+lost items will be ignored by default but can be informed by param ignoreLostItems = false
+container capacity should ignore lost items.
+update documentation.
+create unit tests.
+update clients.
+should not be possible to insert a item inside a lost container.
+
+item can be found back informing the parent container that their was found.
+use same endpoint item/<guid>/lost to requst.
+the item status change back and the parent container updates if is diferent.
+the event is created indicating the item was found (enum ItemEventOperationType.ItemFound + movimentation indicating ading item in parent container)
+if is container, all items inside the parent should change the status too.
+update documentation.
+create unit tests.
+update clients.
+
+Suggested workflow
+1. API request: POST /items/{guid}/lost
+   - Validate that the item exists and can be marked as lost.
+   - Register a loss operation with status Pending.
+   - Return 202 Accepted with the operation ID.
+2. Background service:
+   - Picks up pending loss operations.
+   - Processes the root item and its descendants.
+   - Updates their statuses to Lost.
+   - Creates the corresponding ItemEvent records.
+   - Updates any relevant inventory aggregates.
+   - Marks the operation as Completed or Failed.
+3. Found request: POST /items/{guid}/found
+   - Follows the same workflow, with a background operation restoring the eligible items.

@@ -1,0 +1,26 @@
+implement inbox message pattern using the rabbit mq like the outbox.
+message should inform the actor that executes the operation.
+the handler of the message should verify the authentication and authorization of the actor.
+for initial implementation, will be available only move, create, delete items event based.
+create the documentation,
+create unit tests.
+the handlers and commands for the inbox operations should be in the application layer.
+
+RabbitMQ headers (just example)
+
+x-source-ip: 192.168.1.100
+x-correlation-id: correlation-guid
+x-user-agent: Mozilla/5.0 ...
+
+Message body (just example)
+
+{
+  "actorGuid": "actor-guid",
+  "messageId": "message-guid",
+  "messageType": "ItemLost",
+  "occurredAt": "2026-11-16T10:00:00Z",
+  "payload": {
+    "itemGuid": "item-guid",
+    "reason": "Inventory discrepancy"
+  }
+}

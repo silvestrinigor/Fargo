@@ -1,0 +1,3 @@
+add actor guid information in outbox messages.
+this information can be useful for message filtering, handle only messages from actor x, read only messages from actor y.
+update clients, documentation, check unit tests.

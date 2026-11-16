@@ -1,0 +1,5 @@
+remove the table item-events relation FromItemContainer with the item container.
+remove the table item-events relation ToItemContainer with the item container.
+the properties will continue existing without the relation, so if the fromcontainer or if the tocontainer were removed, the guid container value wont be set null.
+remove property FromNoContainer and ToNoContainer because wont be more necessary because FromItemContainer and ToItemContainer will not more set null if the item were deleted.
+update documentation, check unit tests.

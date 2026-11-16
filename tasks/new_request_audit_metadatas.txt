@@ -1,0 +1,15 @@
+add new request metadata informations options and save that information in the audit logs.
+add a header option to inform that the request was made by a llm (header is the best option? idk).
+add a new column in the audit log to inform if the operation was made by api request or other type (inbox operation, worker, etc).
+in the future, will be implemented inbox pattern so this may be useful to know.
+api request will aways send that it was by api.
+
+SourceType	Meaning
+Http	HTTP request
+Integration	External integration
+System	Internal background operation
+
+add a new optional ip address column in the audit log.
+that new column will be populated with the ip of the request actor.
+in the rabbitmq inbox message (will be implemented), the header can optinaly inform the ip address of the actor too.
+null if not informed.
