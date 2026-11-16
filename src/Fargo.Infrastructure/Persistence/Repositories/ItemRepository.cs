@@ -1,5 +1,4 @@
 using Fargo.Application.Common.Paging;
-using Fargo.Application.Dtos.Audits;
 using Fargo.Application.Dtos.Items;
 using Fargo.Application.Persistence.Repositories;
 using Fargo.Core.Entities.Articles;
